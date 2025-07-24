@@ -8,7 +8,7 @@ namespace SSMM_UI
 {
     public partial class MainWindow : Window
     {
-        private ObservableCollection<string> destinations = new ObservableCollection<string>();
+        private readonly ObservableCollection<string> destinations = [];
         public MainWindow()
         {
             InitializeComponent();
@@ -24,7 +24,7 @@ namespace SSMM_UI
             }
         }
 
-        private async void StartStream(object? sender, RoutedEventArgs e)
+        private void StartStream(object? sender, RoutedEventArgs e)
         {
             if (destinations.Count == 0) return;
 
@@ -34,7 +34,7 @@ namespace SSMM_UI
             foreach (var dst in destinations)
                 args.Append($"-c:v copy -f flv {dst} ");
 
-            var process = new Process
+            using var process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
