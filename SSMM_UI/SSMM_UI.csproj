@@ -24,7 +24,17 @@
     <PackageReference Include="FFmpeg.AutoGen" Version="7.1.1" />
     <PackageReference Include="LibVLCSharp" Version="3.9.3" />
     <PackageReference Include="LibVLCSharp.Avalonia" Version="3.9.3" />
+    <PackageReference Include="Mpv.NET" Version="1.2.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />
   </ItemGroup>
+
+	<ItemGroup>
+		<None Update="lib\mpv-1.dll">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="win-x64\mpv-1.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 </Project>
