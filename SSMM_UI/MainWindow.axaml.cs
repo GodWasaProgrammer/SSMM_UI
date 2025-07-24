@@ -12,25 +12,36 @@ namespace SSMM_UI
         private readonly ObservableCollection<string> destinations = [];
         private LibVLC _libVLC;
         private MediaPlayer _mediaPlayer;
+        private bool isReceivingStream = false;
+
         public MainWindow()
         {
             InitializeComponent();
-            //Core.Initialize();
-            //_libVLC = new LibVLC();
-            //_mediaPlayer = new MediaPlayer(_libVLC);
-            //VideoView.MediaPlayer = _mediaPlayer;
-            //var media = new Media(_libVLC, "rtmp://localhost/live/stream", FromType.FromLocation);
-            //_mediaPlayer.Play(media);
         }
-        //private void AddDestination(object? sender, RoutedEventArgs e)
-        //{
-        //    var url = NewUrlBox.Text;
-        //    if (!string.IsNullOrWhiteSpace(url))
-        //    {
-        //        destinations.Add(url); // Lägg till i ObservableCollection
-        //        NewUrlBox.Text = string.Empty;
-        //    }
-        //}
+
+        private void ToggleReceivingStream(object? sender, RoutedEventArgs e)
+        {
+            if (!isReceivingStream)
+            {
+                // Starta mottagning av RTMP (byt till din riktiga stream-url)
+                RtmpIncoming.Play("rtmp://localhost/live/stream");
+
+                ReceivingStatus.Text = "Receiving stream...";
+                ToggleStreamButton.Content = "Stop Receiving";
+                isReceivingStream = true;
+            }
+            else
+            {
+                // Stoppa mottagning
+                RtmpIncoming.Stop();
+
+                ReceivingStatus.Text = "Stream stopped";
+                ToggleStreamButton.Content = "Start Receiving";
+                isReceivingStream = false;
+            }
+        }
+
+
 
         private async void StartStream(object? sender, RoutedEventArgs e)
         {
