@@ -11,8 +11,8 @@
 		<ListBox x:Name="DestinationsList" Height="25"/>
 
 		<StackPanel Orientation="Horizontal" Margin="0,10">
-			<TextBox x:Name="NewUrlBox" Width="400" Watermark="rtmp://..."/>
-			<Button Content="Add" Margin="10,0,0,0" Width="100"/>
+			<TextBox x:Name="NewUrlBox" Width="125" Watermark="rtmp://..."/>
+			<Button Content="Add" Margin="10,0,0,0" Width="100" Click="AddDestinations"/>
 		</StackPanel>
 
 		<Button Content="Start Stream" Width="150" Margin="0,10"/>
@@ -21,7 +21,10 @@
 
 		<TextBlock Text="Logs" FontWeight="Bold" Margin="0,10,0,0"/>
 		<TextBox x:Name="LogOutput" AcceptsReturn="True" Height="100" IsReadOnly="True"/>
+		<TextBlock x:Name="StreamStatusText" Text="Stream status: Unknown" FontWeight="Bold" Margin="0,10,0,0" />
+		<TextBlock x:Name="ServerStatusText" Text="RTMP server: Unknown" FontWeight="Bold" />
 	</StackPanel>
+	
 </Window>
 
 
