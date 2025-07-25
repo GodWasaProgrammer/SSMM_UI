@@ -13,20 +13,26 @@ namespace SSMM_UI;
 
 public partial class MainWindow : Window
 {
-    private readonly ObservableCollection<string> destinations = [];
+    public ObservableCollection<string> Destinations { get; } = new ObservableCollection<string>();
+
     private bool isReceivingStream = false;
 
     public MainWindow()
     {
         InitializeComponent();
-
+        DataContext = this;
         StartStreamStatusPolling();
         StartServerStatusPolling();
     }
 
     private void AddDestinations(object? sender, RoutedEventArgs e)
     {
-
+        var newUrl = NewUrlBox.Text?.Trim();
+        if (!string.IsNullOrEmpty(newUrl))
+        {
+            Destinations.Add(newUrl);
+            NewUrlBox.Text = "";
+        }
     }
 
     private async void StartStreamStatusPolling()
@@ -146,12 +152,12 @@ public partial class MainWindow : Window
 
     private async void StartStream(object? sender, RoutedEventArgs e)
     {
-        if (destinations.Count == 0) return;
+        if (Destinations.Count == 0) return;
 
         var input = "rtmp://localhost/live/stream";
         var args = new StringBuilder($"-i {input} ");
 
-        foreach (var dst in destinations)
+        foreach (var dst in Destinations)
             args.Append($"-c:v copy -f flv {dst} ");
 
         using var process = new Process

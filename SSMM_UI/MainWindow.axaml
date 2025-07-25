@@ -3,12 +3,13 @@
         xmlns:vlc="clr-namespace:LibVLCSharp.Avalonia;assembly=LibVLCSharp.Avalonia"
         xmlns:local="clr-namespace:SSMM_UI"
         x:Class="SSMM_UI.MainWindow"
+		x:DataType="local:MainWindow"
         Title="SSMM_UI" Width="1024" Height="768">
 
 	<StackPanel Margin="10">
 	<local:MyVideoView x:Name="RtmpIncoming" Width="200" Height="150" />
 		<TextBlock Text="RTMP Destinations" FontWeight="Bold"/>
-		<ListBox x:Name="DestinationsList" Height="25"/>
+		<ListBox x:Name="DestinationsList" Height="100" ItemsSource="{Binding Destinations}"/>
 
 		<StackPanel Orientation="Horizontal" Margin="0,10">
 			<TextBox x:Name="NewUrlBox" Width="125" Watermark="rtmp://..."/>
@@ -19,10 +20,10 @@
 		<Button x:Name="ToggleStreamButton" Content="Start Receiving" Width="150" Margin="0,10" Click="ToggleReceivingStream">Inspect RTMP</Button>
 		<TextBlock x:Name="ReceivingStatus" Text="Stream stopped" Margin="0,0,0,10"/>
 
-		<TextBlock Text="Logs" FontWeight="Bold" Margin="0,10,0,0"/>
-		<TextBox x:Name="LogOutput" AcceptsReturn="True" Height="100" IsReadOnly="True"/>
 		<TextBlock x:Name="StreamStatusText" Text="Stream status: Unknown" FontWeight="Bold" Margin="0,10,0,0" />
 		<TextBlock x:Name="ServerStatusText" Text="RTMP server: Unknown" FontWeight="Bold" />
+		<TextBlock Text="Logs" FontWeight="Bold" Margin="0,10,0,0"/>
+		<TextBox x:Name="LogOutput" AcceptsReturn="True" Height="100" IsReadOnly="True"/>
 	</StackPanel>
 	
 </Window>
