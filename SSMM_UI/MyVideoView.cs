@@ -16,7 +16,6 @@ public class MyVideoView : NativeControlHost
     {
         _hwnd = parent.Handle;
 
-        // Initiera LibVLC och MediaPlayer om inte redan gjort
         if (_libVLC == null)
             _libVLC = new LibVLC();
 

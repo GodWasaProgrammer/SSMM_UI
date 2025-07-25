@@ -38,8 +38,6 @@ public partial class MainWindow : Window
         }
     }
 
-
-
     private async void StartStream(object? sender, RoutedEventArgs e)
     {
         if (destinations.Count == 0) return;

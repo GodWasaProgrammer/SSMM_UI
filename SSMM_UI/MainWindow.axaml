@@ -19,8 +19,6 @@
 		<Button x:Name="ToggleStreamButton" Content="Start Receiving" Width="150" Margin="0,10" Click="ToggleReceivingStream">Inspect RTMP</Button>
 		<TextBlock x:Name="ReceivingStatus" Text="Stream stopped" Margin="0,0,0,10"/>
 
-
-
 		<TextBlock Text="Logs" FontWeight="Bold" Margin="0,10,0,0"/>
 		<TextBox x:Name="LogOutput" AcceptsReturn="True" Height="100" IsReadOnly="True"/>
 	</StackPanel>
