@@ -7,8 +7,8 @@ namespace SSMM_UI;
 
 public class MyVideoView : NativeControlHost
 {
-    private LibVLC _libVLC;
-    private MediaPlayer _mediaPlayer;
+    private LibVLC? _libVLC;
+    private MediaPlayer? _mediaPlayer;
     private IntPtr _hwnd;
     private Media? _media;
 
