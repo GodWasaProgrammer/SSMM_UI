@@ -2,10 +2,13 @@
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using FFmpeg.AutoGen;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,7 +16,8 @@ namespace SSMM_UI;
 
 public partial class MainWindow : Window
 {
-    public ObservableCollection<string> Destinations { get; } = new ObservableCollection<string>();
+    public ObservableCollection<string> StreamKeys { get; } = new ObservableCollection<string>();
+    public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = new ObservableCollection<RtmpServiceGroup>();
 
     private bool isReceivingStream = false;
 
@@ -21,16 +25,67 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         DataContext = this;
+        LoadRtmpServersFromServicesJson("services.json");
         StartStreamStatusPolling();
         StartServerStatusPolling();
     }
 
-    private void AddDestinations(object? sender, RoutedEventArgs e)
+    private void RTMPServiceList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (RTMPServiceList.SelectedItem is RtmpServiceGroup group)
+        {
+            var detailsWindow = new ServerDetailsWindow(group);
+            detailsWindow.Show(); // .ShowDialog() om du vill blockera tills den stängs
+        }
+    }
+
+    private void LoadRtmpServersFromServicesJson(string jsonPath)
+    {
+        if (!File.Exists(jsonPath))
+            return;
+
+        using var doc = JsonDocument.Parse(File.ReadAllText(jsonPath));
+        var services = doc.RootElement.GetProperty("services");
+
+        foreach (var service in services.EnumerateArray())
+        {
+            if (service.TryGetProperty("protocol", out var proto) && !proto.GetString()!.ToLower().Contains("rtmp"))
+                continue;
+
+            var serviceName = service.GetProperty("name").GetString() ?? "Unknown";
+
+            var rtmpServers = new List<RtmpServerInfo>();
+
+            foreach (var server in service.GetProperty("servers").EnumerateArray())
+            {
+                var url = server.GetProperty("url").GetString() ?? "";
+                if (!url.StartsWith("rtmp")) continue;
+
+                rtmpServers.Add(new RtmpServerInfo
+                {
+                    ServiceName = serviceName,
+                    ServerName = server.GetProperty("name").GetString() ?? "Unnamed",
+                    Url = url
+                });
+            }
+
+            if (rtmpServers.Count > 0)
+            {
+                RtmpServiceGroups.Add(new RtmpServiceGroup
+                {
+                    ServiceName = serviceName,
+                    Servers = rtmpServers
+                });
+            }
+        }
+    }
+
+    private void AddStreamKeys(object? sender, RoutedEventArgs e)
     {
         var newUrl = NewUrlBox.Text?.Trim();
         if (!string.IsNullOrEmpty(newUrl))
         {
-            Destinations.Add(newUrl);
+            StreamKeys.Add(newUrl);
             NewUrlBox.Text = "";
         }
     }
@@ -152,12 +207,12 @@ public partial class MainWindow : Window
 
     private async void StartStream(object? sender, RoutedEventArgs e)
     {
-        if (Destinations.Count == 0) return;
+        if (StreamKeys.Count == 0) return;
 
         var input = "rtmp://localhost/live/stream";
         var args = new StringBuilder($"-i {input} ");
 
-        foreach (var dst in Destinations)
+        foreach (var dst in StreamKeys)
             args.Append($"-c:v copy -f flv {dst} ");
 
         using var process = new Process

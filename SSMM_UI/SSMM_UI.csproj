@@ -33,6 +33,9 @@
 		<None Update="lib\mpv-1.dll">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<None Update="services.json">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<None Update="win-x64\mpv-1.dll">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
