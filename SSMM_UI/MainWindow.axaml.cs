@@ -80,15 +80,15 @@ public partial class MainWindow : Window
         }
     }
 
-    private void AddStreamKeys(object? sender, RoutedEventArgs e)
-    {
-        var newUrl = NewUrlBox.Text?.Trim();
-        if (!string.IsNullOrEmpty(newUrl))
-        {
-            StreamKeys.Add(newUrl);
-            NewUrlBox.Text = "";
-        }
-    }
+    //private void AddStreamKeys(object? sender, RoutedEventArgs e)
+    //{
+    //    var newUrl = NewUrlBox.Text?.Trim();
+    //    if (!string.IsNullOrEmpty(newUrl))
+    //    {
+    //        StreamKeys.Add(newUrl);
+    //        NewUrlBox.Text = "";
+    //    }
+    //}
 
     private async void StartStreamStatusPolling()
     {
