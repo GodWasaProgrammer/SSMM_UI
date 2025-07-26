@@ -189,6 +189,7 @@ public partial class MainWindow : Window
     {
         if (!isReceivingStream)
         {
+            RtmpIncoming.IsVisible = true;
             RtmpIncoming.Play("rtmp://localhost/live/stream");
 
             ReceivingStatus.Text = "Receiving stream...";
@@ -198,6 +199,7 @@ public partial class MainWindow : Window
         else
         {
             RtmpIncoming.Stop();
+            RtmpIncoming.IsVisible = false;
 
             ReceivingStatus.Text = "Stream stopped";
             ToggleStreamButton.Content = "Start Receiving";
