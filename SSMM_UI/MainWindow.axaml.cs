@@ -32,12 +32,18 @@ public partial class MainWindow : Window
         StartServerStatusPolling();
     }
 
-    private void RTMPServiceList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    private async void RTMPServiceList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (RTMPServiceList.SelectedItem is RtmpServiceGroup group)
         {
-            var detailsWindow = new ServerDetailsWindow(group);
-            detailsWindow.Show(); // .ShowDialog() om du vill blockera tills den stängs
+            var detailsWindow = new ServerDetailsWindow(group); // Skicka med MainWindow-instansen
+            var result = await detailsWindow.ShowDialog<bool>(this);
+
+            if (!result)
+            {
+                LogOutput.Text += $"Cancelled adding service: {group.ServiceName}\n";
+            }
+            SelectedServicesToStream.Add(group);
         }
     }
 
