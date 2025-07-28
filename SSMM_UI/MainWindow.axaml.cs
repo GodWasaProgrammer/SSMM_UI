@@ -19,6 +19,8 @@ public partial class MainWindow : Window
     public ObservableCollection<string> StreamKeys { get; } = new ObservableCollection<string>();
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = new ObservableCollection<RtmpServiceGroup>();
 
+    public ObservableCollection<RtmpServiceGroup> SelectedServicesToStream { get; } = new ObservableCollection<RtmpServiceGroup>();
+
     private bool isReceivingStream = false;
 
     public MainWindow()
@@ -79,6 +81,11 @@ public partial class MainWindow : Window
             }
         }
     }
+
+    //private void SelectService(object? sender, SelectionChangedEventArgs e)
+    //{
+    //    SelectedServicesToStream.Add(sender)
+    //}
 
     //private void AddStreamKeys(object? sender, RoutedEventArgs e)
     //{

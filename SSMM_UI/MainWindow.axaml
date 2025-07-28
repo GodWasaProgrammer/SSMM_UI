@@ -3,35 +3,50 @@
         xmlns:vlc="clr-namespace:LibVLCSharp.Avalonia;assembly=LibVLCSharp.Avalonia"
         xmlns:local="clr-namespace:SSMM_UI"
         x:Class="SSMM_UI.MainWindow"
-		x:DataType="local:MainWindow"
-        Title="SSMM_UI" Width="1024" Height="768">
+        x:DataType="local:MainWindow"
+        Title="SSMM_UI" Width="1920" Height="1080">
 
-	<StackPanel Margin="10">
-	<local:MyVideoView x:Name="RtmpIncoming" Width="200" Height="150" IsVisible="False" />
-		<TextBlock Text="Stream Services" FontWeight="Bold"/>
-		<ListBox x:Name="RTMPServiceList"
-         ItemsSource="{Binding RtmpServiceGroups}"
-         SelectionChanged="RTMPServiceList_SelectionChanged"
-         Height="300">
-			<ListBox.ItemTemplate>
-				<DataTemplate>
-					<TextBlock Text="{Binding ServiceName}" />
-				</DataTemplate>
-			</ListBox.ItemTemplate>
-		</ListBox>
-		
-		<Button Content="Start Stream" Width="150" Margin="0,10"/>
-		<Button x:Name="ToggleStreamButton" Content="Start Receiving" Width="150" Margin="0,10" Click="ToggleReceivingStream">Inspect RTMP</Button>
-		<TextBlock x:Name="ReceivingStatus" Text="Stream stopped" Margin="0,0,0,10"/>
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
 
-		<TextBlock x:Name="StreamStatusText" Text="Stream status: Unknown" FontWeight="Bold" Margin="0,10,0,0" />
-		<TextBlock x:Name="ServerStatusText" Text="RTMP server: Unknown" FontWeight="Bold" />
-		<TextBlock Text="Logs" FontWeight="Bold" Margin="0,10,0,0"/>
-		<TextBox x:Name="LogOutput" AcceptsReturn="True" Height="100" IsReadOnly="True"/>
-	</StackPanel>
-	
+		<StackPanel Grid.Column="0" Margin="10" HorizontalAlignment="Left">
+			<local:MyVideoView x:Name="RtmpIncoming" Width="200" Height="150" IsVisible="False" />
+			<TextBlock Text="Stream Services" FontWeight="Bold"/>
+			<ListBox x:Name="RTMPServiceList"
+                     ItemsSource="{Binding RtmpServiceGroups}"
+                     SelectionChanged="RTMPServiceList_SelectionChanged"
+                     Height="300" Width="150">
+				<ListBox.ItemTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding ServiceName}" />
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+			<TextBlock FontWeight="Bold">Selected</TextBlock>
+			<ListBox x:Name="SelectedServices" Height="300" Width="150" ItemsSource="{Binding SelectedServicesToStream}">
+				<ListBox.ItemTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding ServiceName}"/>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+		</StackPanel>
+
+		<StackPanel Grid.Column="1" Margin="10">
+			<Button Content="Start Stream" Width="150" Margin="0,10"/>
+			<Button x:Name="ToggleStreamButton" Content="Start Receiving" Width="150" Margin="0,10" Click="ToggleReceivingStream">Inspect RTMP</Button>
+			<TextBlock x:Name="ReceivingStatus" Text="Stream stopped" Margin="0,0,0,10"/>
+
+			<TextBlock x:Name="StreamStatusText" Text="Stream status: Unknown" FontWeight="Bold" Margin="0,10,0,0" />
+			<TextBlock x:Name="ServerStatusText" Text="RTMP server: Unknown" FontWeight="Bold" />
+			<TextBlock Text="Logs" FontWeight="Bold" Margin="0,10,0,0"/>
+			<TextBox x:Name="LogOutput" AcceptsReturn="True" Height="100" IsReadOnly="True"/>
+		</StackPanel>
+	</Grid>
 </Window>
-
 
 
 
