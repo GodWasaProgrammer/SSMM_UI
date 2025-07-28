@@ -19,7 +19,7 @@ public partial class MainWindow : Window
     public ObservableCollection<string> StreamKeys { get; } = new ObservableCollection<string>();
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = new ObservableCollection<RtmpServiceGroup>();
 
-    public ObservableCollection<RtmpServiceGroup> SelectedServicesToStream { get; } = new ObservableCollection<RtmpServiceGroup>();
+    public ObservableCollection<SelectedService> SelectedServicesToStream { get; } = new ObservableCollection<SelectedService>();
 
     private bool isReceivingStream = false;
 
@@ -43,7 +43,6 @@ public partial class MainWindow : Window
             {
                 LogOutput.Text += $"Cancelled adding service: {group.ServiceName}\n";
             }
-            SelectedServicesToStream.Add(group);
         }
     }
 

@@ -26,10 +26,16 @@
 				</ListBox.ItemTemplate>
 			</ListBox>
 			<TextBlock FontWeight="Bold">Selected</TextBlock>
-			<ListBox x:Name="SelectedServices" Height="300" Width="150" ItemsSource="{Binding SelectedServicesToStream}">
+			<ListBox x:Name="SelectedServices"
+         Height="300"
+         Width="150"
+         ItemsSource="{Binding SelectedServicesToStream}">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
-						<TextBlock Text="{Binding ServiceName}"/>
+						<StackPanel>
+							<TextBlock Text="{Binding DisplayName}" FontWeight="Bold"/>
+							<TextBlock Text="{Binding FullUrl}" FontSize="10"/>
+						</StackPanel>
 					</DataTemplate>
 				</ListBox.ItemTemplate>
 			</ListBox>

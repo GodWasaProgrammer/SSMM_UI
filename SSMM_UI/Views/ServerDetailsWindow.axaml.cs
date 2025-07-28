@@ -34,7 +34,15 @@ namespace SSMM_UI
 
             if (!string.IsNullOrWhiteSpace(streamKey))
             {
-                // Hantera tillägg av streamkey här
+                if (Owner is MainWindow mainWindow)
+                {
+                    mainWindow.SelectedServicesToStream.Add(new SelectedService
+                    {
+                        ServiceGroup = ServiceGroup,
+                        SelectedServer = SelectedServer,
+                        StreamKey = streamKey
+                    });
+                }
                 Close(true);
             }
             else
