@@ -12,9 +12,13 @@
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 
+		<!-- Left Column -->
 		<StackPanel Grid.Column="0" Margin="10" HorizontalAlignment="Left">
+			<!-- Video Preview -->
 			<local:MyVideoView x:Name="RtmpIncoming" Width="200" Height="150" IsVisible="False" />
-			<TextBlock Text="Stream Services" FontWeight="Bold"/>
+
+			<!-- Available Services -->
+			<TextBlock Text="Stream Services" FontWeight="Bold" Margin="0,0,0,5"/>
 			<ListBox x:Name="RTMPServiceList"
                      ItemsSource="{Binding RtmpServiceGroups}"
                      SelectionChanged="RTMPServiceList_SelectionChanged"
@@ -25,31 +29,68 @@
 					</DataTemplate>
 				</ListBox.ItemTemplate>
 			</ListBox>
-			<TextBlock FontWeight="Bold">Selected</TextBlock>
-			<ListBox x:Name="SelectedServices"
-         Height="300"
-         Width="150"
-         ItemsSource="{Binding SelectedServicesToStream}">
-				<ListBox.ItemTemplate>
-					<DataTemplate>
-						<StackPanel>
-							<TextBlock Text="{Binding DisplayName}" FontWeight="Bold"/>
-							<TextBlock Text="{Binding FullUrl}" FontSize="10"/>
-						</StackPanel>
-					</DataTemplate>
-				</ListBox.ItemTemplate>
-			</ListBox>
+
+			<!-- Selected Services Section -->
+			<StackPanel Margin="0,10,0,0">
+				<TextBlock Text="Selected Services" FontWeight="Bold" Margin="0,0,0,5"/>
+				<ListBox x:Name="SelectedServices"
+                         Height="250"
+                         Width="150"
+                         ItemsSource="{Binding SelectedServicesToStream}">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<StackPanel>
+								<TextBlock Text="{Binding DisplayName}" FontWeight="Bold"/>
+								<TextBlock Text="{Binding FullUrl}" FontSize="10" TextWrapping="Wrap"/>
+							</StackPanel>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+				<Button Content="Remove Selected"
+                        Width="150"
+                        Margin="0,5,0,0"
+                        Click="RemoveSelectedService"/>
+			</StackPanel>
 		</StackPanel>
 
+		<!-- Right Column -->
 		<StackPanel Grid.Column="1" Margin="10">
-			<Button Content="Start Stream" Width="150" Margin="0,10"/>
-			<Button x:Name="ToggleStreamButton" Content="Start Receiving" Width="150" Margin="0,10" Click="ToggleReceivingStream">Inspect RTMP</Button>
-			<TextBlock x:Name="ReceivingStatus" Text="Stream stopped" Margin="0,0,0,10"/>
+			<!-- Stream Controls -->
+			<Button Content="Start Stream"
+                    Width="150"
+                    Margin="0,10"
+                    Click="StartStream"/>
 
-			<TextBlock x:Name="StreamStatusText" Text="Stream status: Unknown" FontWeight="Bold" Margin="0,10,0,0" />
-			<TextBlock x:Name="ServerStatusText" Text="RTMP server: Unknown" FontWeight="Bold" />
-			<TextBlock Text="Logs" FontWeight="Bold" Margin="0,10,0,0"/>
-			<TextBox x:Name="LogOutput" AcceptsReturn="True" Height="100" IsReadOnly="True"/>
+			<Button x:Name="ToggleStreamButton"
+                    Content="Start Receiving"
+                    Width="150"
+                    Margin="0,10"
+                    Click="ToggleReceivingStream"/>
+
+			<TextBlock x:Name="ReceivingStatus"
+                       Text="Stream stopped"
+                       Margin="0,0,0,10"/>
+
+			<!-- Status Indicators -->
+			<TextBlock x:Name="StreamStatusText"
+                       Text="Stream status: Unknown"
+                       FontWeight="Bold"
+                       Margin="0,10,0,0" />
+
+			<TextBlock x:Name="ServerStatusText"
+                       Text="RTMP server: Unknown"
+                       FontWeight="Bold" />
+
+			<!-- Logs -->
+			<TextBlock Text="Logs"
+                       FontWeight="Bold"
+                       Margin="0,10,0,0"/>
+
+			<TextBox x:Name="LogOutput"
+                     AcceptsReturn="True"
+                     Height="100"
+                     IsReadOnly="True"
+                     TextWrapping="Wrap"/>
 		</StackPanel>
 	</Grid>
 </Window>

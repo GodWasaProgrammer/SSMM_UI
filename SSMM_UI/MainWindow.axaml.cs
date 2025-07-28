@@ -46,6 +46,14 @@ public partial class MainWindow : Window
         }
     }
 
+    private void RemoveSelectedService(object? sender, RoutedEventArgs e)
+    {
+        if (SelectedServices.SelectedItem is SelectedService service)
+        {
+            SelectedServicesToStream.Remove(service);
+        }
+    }
+
     private void LoadRtmpServersFromServicesJson(string jsonPath)
     {
         if (!File.Exists(jsonPath))
