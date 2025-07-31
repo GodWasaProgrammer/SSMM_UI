@@ -20,9 +20,9 @@
 			<!-- Available Services -->
 			<TextBlock Text="Stream Services" FontWeight="Bold" Margin="0,0,0,5"/>
 			<ListBox x:Name="RTMPServiceList"
-                     ItemsSource="{Binding RtmpServiceGroups}"
-                     SelectionChanged="RTMPServiceList_SelectionChanged"
-                     Height="300" Width="150">
+					 ItemsSource="{Binding RtmpServiceGroups}"
+					 SelectionChanged="RTMPServiceList_SelectionChanged"
+					 Height="300" Width="150">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding ServiceName}" />
@@ -34,9 +34,9 @@
 			<StackPanel Margin="0,10,0,0">
 				<TextBlock Text="Selected Services" FontWeight="Bold" Margin="0,0,0,5"/>
 				<ListBox x:Name="SelectedServices"
-                         Height="250"
-                         Width="150"
-                         ItemsSource="{Binding SelectedServicesToStream}">
+						 Height="250"
+						 Width="150"
+						 ItemsSource="{Binding SelectedServicesToStream}">
 					<ListBox.ItemTemplate>
 						<DataTemplate>
 							<StackPanel>
@@ -47,53 +47,43 @@
 					</ListBox.ItemTemplate>
 				</ListBox>
 				<Button Content="Remove Selected"
-                        Width="150"
-                        Margin="0,5,0,0"
-                        Click="RemoveSelectedService"/>
+						Width="150"
+						Margin="0,5,0,0"
+						Click="RemoveSelectedService"/>
 			</StackPanel>
 		</StackPanel>
 
-		<!-- Right Column -->
-		<StackPanel Grid.Column="1" Margin="10">
-			<!-- Stream Controls -->
-			<Button Content="Start Stream"
-                    Width="150"
-                    Margin="0,10"
-                    Click="StartStream"/>
-			<Button Width="150" Margin="0,10" Click="StopStreams">Stop Streams</Button>
-			<Button x:Name="ToggleStreamButton"
-                    Content="Start Receiving"
-                    Width="150"
-                    Margin="0,10"
-                    Click="ToggleReceivingStream"/>
+		<!-- Right Column with Tabs -->
+		<TabControl Grid.Column="1" Margin="10">
+			<!-- Tab 1: Stream Controls + Logs -->
+			<TabItem Header="Stream">
+				<StackPanel>
+					<Button Content="Start Stream" Width="150" Margin="0,10" Click="StartStream"/>
+					<Button Content="Stop Streams" Width="150" Margin="0,10" Click="StopStreams"/>
+					<Button x:Name="ToggleStreamButton" Content="Start Receiving" Width="150" Margin="0,10" Click="ToggleReceivingStream"/>
+					<TextBlock x:Name="ReceivingStatus" Text="Stream stopped" Margin="0,0,0,10"/>
+					<TextBlock x:Name="StreamStatusText" Text="Stream status: Unknown" FontWeight="Bold" Margin="0,10,0,0" />
+					<TextBlock x:Name="ServerStatusText" Text="RTMP server: Unknown" FontWeight="Bold" />
+					<TextBlock Text="Logs" FontWeight="Bold" Margin="0,10,0,0"/>
+					<TextBox x:Name="LogOutput" AcceptsReturn="True" Height="100" IsReadOnly="True" TextWrapping="Wrap"/>
+				</StackPanel>
+			</TabItem>
 
-			<TextBlock x:Name="ReceivingStatus"
-                       Text="Stream stopped"
-                       Margin="0,0,0,10"/>
+			<!-- Tab 2: YouTube Metadata -->
+			<TabItem Header="Stream Metadata">
+				<StackPanel Margin="10" Spacing="10">
+					<TextBlock Text="Stream Title:"/>
+					<TextBox x:Name="TitleTextBox" Width="350"/>
+					<Button Content="Upload Thumbnail" Width="150" Click="OnUploadThumbnailClicked"/>
+					<Button Content="Update Metadata" Width="150" Click="OnUpdateMetadataClicked"/>
+					<TextBlock x:Name="StatusTextBlock" Foreground="Red"/>
+				</StackPanel>
+			</TabItem>
+		</TabControl>
 
-			<!-- Status Indicators -->
-			<TextBlock x:Name="StreamStatusText"
-                       Text="Stream status: Unknown"
-                       FontWeight="Bold"
-                       Margin="0,10,0,0" />
-
-			<TextBlock x:Name="ServerStatusText"
-                       Text="RTMP server: Unknown"
-                       FontWeight="Bold" />
-
-			<!-- Logs -->
-			<TextBlock Text="Logs"
-                       FontWeight="Bold"
-                       Margin="0,10,0,0"/>
-
-			<TextBox x:Name="LogOutput"
-                     AcceptsReturn="True"
-                     Height="100"
-                     IsReadOnly="True"
-                     TextWrapping="Wrap"/>
-		</StackPanel>
 	</Grid>
 </Window>
+
 
 
 

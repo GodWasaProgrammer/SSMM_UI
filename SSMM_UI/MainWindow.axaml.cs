@@ -276,4 +276,36 @@ public partial class MainWindow : Window
             }
         }
     }
+
+    private async void OnUploadThumbnailClicked(object? sender, RoutedEventArgs e)
+    {
+        var window = (Window)this.VisualRoot;
+
+        var options = new Avalonia.Platform.Storage.FilePickerOpenOptions
+        {
+            Title = "Select Thumbnail Image",
+            AllowMultiple = false,
+            FileTypeFilter = new List<Avalonia.Platform.Storage.FilePickerFileType>
+        {
+            new Avalonia.Platform.Storage.FilePickerFileType("Image Files")
+            {
+                Patterns = new[] { "*.jpg", "*.jpeg", "*.png", "*.bmp" }
+            }
+        }
+        };
+
+        var files = await window.StorageProvider.OpenFilePickerAsync(options);
+        if (files != null && files.Count > 0)
+        {
+            var file = files[0];
+            var path = file.Path.LocalPath;
+            // Använd filvägen, t.ex. visa eller spara
+            Console.WriteLine($"Selected thumbnail: {path}");
+        }
+    }
+
+    private void OnUpdateMetadataClicked(object? sender, RoutedEventArgs e)
+    {
+
+    }
 }
