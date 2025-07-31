@@ -2,6 +2,11 @@
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using FFmpeg.AutoGen;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Oauth2.v2;
+using Google.Apis.Oauth2.v2.Data;
+using Google.Apis.Services;
+using SSMM_UI.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -307,5 +312,58 @@ public partial class MainWindow : Window
     private void OnUpdateMetadataClicked(object? sender, RoutedEventArgs e)
     {
 
+    }
+
+    private async void OnLoginWithGoogleClicked(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        LoginStatusText.Text = "Loggar in...";
+
+        var userInfo = await AuthenticateWithGoogleAsync(this);
+        if (userInfo != null)
+        {
+            LoginStatusText.Text = $"Inloggad som {userInfo.Name} ({userInfo.Email})";
+        }
+        else
+        {
+            LoginStatusText.Text = "Inloggning misslyckades";
+        }
+    }
+
+    public async Task<Userinfo?> AuthenticateWithGoogleAsync(Window parentWindow)
+    {
+        var clientSecrets = new ClientSecrets
+        {
+            ClientId = Environment.GetEnvironmentVariable("SSMM_ClientID"),
+            ClientSecret = Environment.GetEnvironmentVariable("SMM_ClientSecret")
+        };
+
+        // Scopes du behöver, t.ex. för profilinfo
+        string[] scopes = { Oauth2Service.Scope.UserinfoProfile, Oauth2Service.Scope.UserinfoEmail };
+
+        try
+        {
+            // Kör OAuth-flödet, med lokal webbläsare och redirect
+            var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                clientSecrets,
+                scopes,
+                "user", // användar-ID för att spara token lokalt
+                CancellationToken.None);
+
+            // Skapa tjänst för att hämta info om användaren
+            var oauth2Service = new Oauth2Service(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = "SSMM_UI"
+            });
+
+            // Hämta användarprofil
+            var userInfo = await oauth2Service.Userinfo.Get().ExecuteAsync();
+            return userInfo;
+        }
+        catch (Exception ex)
+        {
+            await MessageBox.Show(parentWindow, $"OAuth failed: {ex.Message}");
+            return null;
+        }
     }
 }

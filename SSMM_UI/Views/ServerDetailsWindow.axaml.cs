@@ -9,6 +9,11 @@ namespace SSMM_UI
         public RtmpServiceGroup ServiceGroup { get; }
         public RtmpServerInfo SelectedServer { get; set; }
 
+        public ServerDetailsWindow()
+        {
+            InitializeComponent();
+        }
+
         public ServerDetailsWindow(RtmpServiceGroup serviceGroup)
         {
             InitializeComponent();
