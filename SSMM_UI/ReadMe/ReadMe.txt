@@ -19,7 +19,8 @@ Select which services you wish to stream to, and add the relevant streamkey when
 
 3.
 Go to OBS(or other RTMP-viable streaming software)
-Go into Settings -> Stream -> "Custom" set server to : rtmp://localhost/live/stream
+Go into Settings -> Stream -> "Custom" set server to : rtmp://localhost/live
+Set streamkey to -> stream
 
 4. 
 Click "Start Receiving in SSMM"
