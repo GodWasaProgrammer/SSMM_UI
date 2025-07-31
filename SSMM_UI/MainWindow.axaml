@@ -79,10 +79,11 @@
 			<!-- Tab 2: YouTube Metadata -->
 			<TabItem Header="Stream Metadata">
 				<StackPanel Margin="10" Spacing="10">
-					<TextBlock Text="Stream Title:"/>
+					<TextBlock x:Name="TitleOfStream" Text="Stream Title:"/>
 					<TextBox x:Name="TitleTextBox" Width="350"/>
 					<Button Content="Upload Thumbnail" Width="150" Click="OnUploadThumbnailClicked"/>
 					<Button Content="Update Metadata" Width="150" Click="OnUpdateMetadataClicked"/>
+					<Image x:Name="ThumbnailImage" Width="150" Height="84" Stretch="Uniform" Margin="0,10,0,0" />
 					<TextBlock x:Name="StatusTextBlock" Foreground="Red"/>
 				</StackPanel>
 			</TabItem>

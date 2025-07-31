@@ -26,6 +26,8 @@ public partial class MainWindow : Window
 
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; } = new ObservableCollection<SelectedService>();
 
+    public StreamMetadata CurrentMetadata { get; set; } = new StreamMetadata();
+
     private bool isReceivingStream = false;
 
     public MainWindow()
@@ -300,18 +302,52 @@ public partial class MainWindow : Window
         };
 
         var files = await window.StorageProvider.OpenFilePickerAsync(options);
-        if (files != null && files.Count > 0)
+
+        if (files is not null && files.Count > 0)
         {
             var file = files[0];
-            var path = file.Path.LocalPath;
-            // Använd filvägen, t.ex. visa eller spara
+
+            using var stream = await file.OpenReadAsync();
+            var bitmap = new Avalonia.Media.Imaging.Bitmap(stream);
+
+            // show image in UI
+            ThumbnailImage.Source = bitmap;
+            CurrentMetadata.Thumbnail = bitmap;
+            var path = file.Path?.LocalPath ?? "(no local path)";
             Console.WriteLine($"Selected thumbnail: {path}");
+
+            StatusTextBlock.Foreground = Avalonia.Media.Brushes.Green;
+            StatusTextBlock.Text = "Thumbnail loaded successfully.";
+            // set path to metadataobjekt
+            CurrentMetadata.ThumbnailPath = path;
+        }
+        else
+        {
+            StatusTextBlock.Foreground = Avalonia.Media.Brushes.Red;
+            StatusTextBlock.Text = "No file selected.";
         }
     }
 
+
     private void OnUpdateMetadataClicked(object? sender, RoutedEventArgs e)
     {
+        var title = TitleTextBox.Text?.Trim();
 
+        if (string.IsNullOrEmpty(title))
+        {
+            StatusTextBlock.Foreground = Avalonia.Media.Brushes.Red;
+            StatusTextBlock.Text = "Please enter a stream title.";
+            return;
+        }
+
+        TitleOfStream.Text = $"Stream Title: {title}";
+
+        // set title of MetaData 
+        CurrentMetadata.Title = title;
+
+        // UI indicator
+        StatusTextBlock.Foreground = Avalonia.Media.Brushes.Green;
+        StatusTextBlock.Text = "Metadata updated successfully!";
     }
 
     private async void OnLoginWithGoogleClicked(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -337,7 +373,6 @@ public partial class MainWindow : Window
             ClientSecret = Environment.GetEnvironmentVariable("SMM_ClientSecret")
         };
 
-        // Scopes du behöver, t.ex. för profilinfo
         string[] scopes = { Oauth2Service.Scope.UserinfoProfile, Oauth2Service.Scope.UserinfoEmail };
 
         try
