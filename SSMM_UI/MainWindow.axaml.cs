@@ -2,6 +2,7 @@
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using FFmpeg.AutoGen;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -16,7 +17,6 @@ namespace SSMM_UI;
 
 public partial class MainWindow : Window
 {
-    public ObservableCollection<string> StreamKeys { get; } = new ObservableCollection<string>();
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = new ObservableCollection<RtmpServiceGroup>();
 
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; } = new ObservableCollection<SelectedService>();
@@ -227,26 +227,55 @@ public partial class MainWindow : Window
         }
     }
 
+    private Process? ffmpegProcess;
+
     private async void StartStream(object? sender, RoutedEventArgs e)
     {
-        if (StreamKeys.Count == 0) return;
+        if (SelectedServicesToStream.Count == 0)
+            return;
 
         var input = "rtmp://localhost/live/stream";
-        var args = new StringBuilder($"-i {input} ");
+        var args = new StringBuilder($"-i \"{input}\" ");
 
-        foreach (var dst in StreamKeys)
-            args.Append($"-c:v copy -f flv {dst} ");
-
-        using var process = new Process
+        foreach (var service in SelectedServicesToStream)
         {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "ffmpeg",
-                Arguments = args.ToString(),
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
+            var url = service.SelectedServer.Url.TrimEnd('/');
+            var streamKey = service.StreamKey;
+            var fullUrl = $"{url}/{streamKey}";
+
+            args.Append($"-c:v copy -c:a aac -f flv \"{fullUrl}\" ");
+        }
+
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "ffmpeg",
+            Arguments = args.ToString(),
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
         };
+
+        try
+        {
+            using var process = new Process { StartInfo = startInfo };
+            process.Start();
+
+            // Läs FFmpeg:s standardfelutgång asynkront
+            string? line;
+            while ((line = await process.StandardError.ReadLineAsync()) != null)
+            {
+                // Logga till din UI eller debug
+                Console.WriteLine(line);
+                LogOutput.Text += (line + Environment.NewLine);
+            }
+
+            await process.WaitForExitAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"FFmpeg start failed: {ex.Message}");
+            LogOutput.Text += ($"FFmpeg start failed: {ex.Message}\n");
+        }
     }
+
 }
