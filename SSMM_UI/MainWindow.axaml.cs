@@ -95,21 +95,6 @@ public partial class MainWindow : Window
         }
     }
 
-    //private void SelectService(object? sender, SelectionChangedEventArgs e)
-    //{
-    //    SelectedServicesToStream.Add(sender)
-    //}
-
-    //private void AddStreamKeys(object? sender, RoutedEventArgs e)
-    //{
-    //    var newUrl = NewUrlBox.Text?.Trim();
-    //    if (!string.IsNullOrEmpty(newUrl))
-    //    {
-    //        StreamKeys.Add(newUrl);
-    //        NewUrlBox.Text = "";
-    //    }
-    //}
-
     private async void StartStreamStatusPolling()
     {
         while (true)
@@ -227,7 +212,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private Process? ffmpegProcess;
+    private List<Process>? ffmpegProcess = new();
 
     private async void StartStream(object? sender, RoutedEventArgs e)
     {
@@ -258,6 +243,9 @@ public partial class MainWindow : Window
         try
         {
             using var process = new Process { StartInfo = startInfo };
+
+            if (ffmpegProcess is not null)
+                ffmpegProcess.Add(process);
             process.Start();
 
             // Läs FFmpeg:s standardfelutgång asynkront
@@ -278,4 +266,14 @@ public partial class MainWindow : Window
         }
     }
 
+    private void StopStreams(object? sender, RoutedEventArgs e)
+    {
+        if (ffmpegProcess != null)
+        {
+            foreach (var process in ffmpegProcess)
+            {
+                process.Kill();
+            }
+        }
+    }
 }
