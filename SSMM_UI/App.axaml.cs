@@ -7,7 +7,7 @@ namespace SSMM_UI
 {
     public partial class App : Application
     {
-        public static LibVLC SharedLibVLC { get; private set; }
+        public static LibVLC? SharedLibVLC { get; private set; }
 
         public override void Initialize()
         {

@@ -25,20 +25,21 @@ namespace SSMM_UI;
 
 public partial class MainWindow : Window
 {
-    public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = new ObservableCollection<RtmpServiceGroup>();
+    public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
 
-    public ObservableCollection<SelectedService> SelectedServicesToStream { get; } = new ObservableCollection<SelectedService>();
+    public ObservableCollection<SelectedService> SelectedServicesToStream { get; } = [];
 
     public StreamMetadata CurrentMetadata { get; set; } = new StreamMetadata();
 
-    public StreamInfo streamInfo { get; set; } = new();
+    public StreamInfo StreamInfo { get; set; } = new();
 
     const string RtmpAdress = "rtmp://localhost/live/stream";
 
-    public YouTubeService? _youtubeService = new();
+    public YouTubeService _youtubeService = new();
 
     private bool isReceivingStream = false;
 
+    private readonly List<Process>? ffmpegProcess = [];
     public MainWindow()
     {
         InitializeComponent();
@@ -84,7 +85,7 @@ public partial class MainWindow : Window
 
         foreach (var service in services.EnumerateArray())
         {
-            if (service.TryGetProperty("protocol", out var proto) && !proto.GetString()!.ToLower().Contains("rtmp"))
+            if (service.TryGetProperty("protocol", out var proto) && !proto.GetString()!.Contains("rtmp", StringComparison.CurrentCultureIgnoreCase))
                 continue;
 
             var serviceName = service.GetProperty("name").GetString() ?? "Unknown";
@@ -229,7 +230,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private List<Process>? ffmpegProcess = new();
 
     private async void StartStream(object? sender, RoutedEventArgs e)
     {
@@ -292,8 +292,7 @@ public partial class MainWindow : Window
             {
                 var process = new Process { StartInfo = startInfo };
 
-                if (ffmpegProcess is not null)
-                    ffmpegProcess.Add(process);
+                ffmpegProcess?.Add(process);
                 process.Start();
 
                 // Läs FFmpeg:s standardfelutgång asynkront
@@ -308,36 +307,12 @@ public partial class MainWindow : Window
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"FFmpeg start failed: {ex.Message}");
                 LogOutput.Text += ($"FFmpeg start failed: {ex.Message}\n");
                 LogOutput.CaretIndex = LogOutput.Text.Length;
             }
         }
         StopStreamButton.IsEnabled = true;
     }
-
-    public async void ProbeStream_Click(object sender, RoutedEventArgs e)
-    {
-        var Info = await Task.Run(() => ProbeStream(RtmpAdress));
-
-        if (Info is not null)
-            streamInfo = Info;
-
-        if (streamInfo != null)
-        {
-            LogOutput.Text += ($"Resolution: {streamInfo.Resolution}, Framerate: {streamInfo.FrameRate}");
-            LogOutput.CaretIndex = LogOutput.Text.Length;
-        }
-        else
-        {
-            LogOutput.Text += ("Failed to probe stream.");
-            LogOutput.CaretIndex = LogOutput.Text.Length;
-        }
-
-
-        // Enable knapp igen eller ta bort "loading"
-    }
-
     public static StreamInfo? ProbeStream(string rtmpUrl)
     {
         try
@@ -366,7 +341,7 @@ public partial class MainWindow : Window
                 return null;
             }
 
-            var lines = output.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            var lines = output.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
             if (lines.Length < 3) return null;
 
             int width = int.Parse(lines[0]);
@@ -408,20 +383,21 @@ public partial class MainWindow : Window
 
     private async void OnUploadThumbnailClicked(object? sender, RoutedEventArgs e)
     {
-        var window = (Window)this.VisualRoot;
+        var window = this.VisualRoot as Window;
 
         var options = new Avalonia.Platform.Storage.FilePickerOpenOptions
         {
             Title = "Select Thumbnail Image",
             AllowMultiple = false,
-            FileTypeFilter = new List<Avalonia.Platform.Storage.FilePickerFileType>
-        {
+            FileTypeFilter =
+        [
             new Avalonia.Platform.Storage.FilePickerFileType("Image Files")
             {
-                Patterns = new[] { "*.jpg", "*.jpeg", "*.png", "*.bmp" }
+                Patterns = ["*.jpg", "*.jpeg", "*.png", "*.bmp"]
             }
-        }
+        ]
         };
+
 
         var files = await window.StorageProvider.OpenFilePickerAsync(options);
 
@@ -454,11 +430,11 @@ public partial class MainWindow : Window
     private async Task<(string rtmpUrl, string streamKey)> CreateYouTubeBroadcastAsync(StreamMetadata metadata)
     {
         var youtubeService = _youtubeService;
-        if (streamInfo == null)
+        if (StreamInfo == null)
         {
             var info = await Task.Run(() => ProbeStream(RtmpAdress));
             if (info is not null)
-                streamInfo = info;
+                StreamInfo = info;
             else
             {
                 LogOutput.Text += "stream failed to start, there was missing info from ffprobe";
@@ -471,7 +447,7 @@ public partial class MainWindow : Window
             var broadcastSnippet = new LiveBroadcastSnippet
             {
                 Title = metadata.Title,
-                ScheduledStartTime = DateTime.UtcNow.AddMinutes(1)
+                ScheduledStartTimeDateTimeOffset = DateTime.UtcNow.AddMinutes(1)
             };
 
             var broadcastStatus = new LiveBroadcastStatus
@@ -495,13 +471,17 @@ public partial class MainWindow : Window
                 Title = metadata.Title + " Stream"
             };
 
-            var cdn = new CdnSettings
+            CdnSettings cdn = new();
+            if (StreamInfo != null)
             {
-                //Format = "1080p", // Testa med 1080p, fungerar på de flesta konton
-                IngestionType = "rtmp",
-                FrameRate = streamInfo.FrameRate,
-                Resolution = streamInfo.Resolution
-            };
+                cdn = new CdnSettings
+                {
+                    //Format = "1080p", // Testa med 1080p, fungerar på de flesta konton
+                    IngestionType = "rtmp",
+                    FrameRate = StreamInfo.FrameRate,
+                    Resolution = StreamInfo.Resolution
+                };
+            }
 
             var liveStream = new LiveStream
             {
@@ -589,12 +569,12 @@ public partial class MainWindow : Window
             ClientSecret = Environment.GetEnvironmentVariable("SSMM_ClientSecret")
         };
 
-        string[] scopes = {
+        string[] scopes = [
         Oauth2Service.Scope.UserinfoProfile,
         Oauth2Service.Scope.UserinfoEmail,
         YouTubeService.Scope.Youtube,
         YouTubeService.Scope.YoutubeForceSsl
-    };
+    ];
 
         try
         {
@@ -633,11 +613,11 @@ public partial class MainWindow : Window
 
     public void ClearGoogleOAuthTokens(object? sender, RoutedEventArgs e)
     {
-        string[] possiblePaths = new[]
-        {
+        string[] possiblePaths =
+        [
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".credentials"),
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Google.Apis.Auth")
-    };
+    ];
 
         bool foundAndDeleted = false;
 

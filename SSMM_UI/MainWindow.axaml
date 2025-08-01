@@ -91,7 +91,6 @@
 			<TabItem Header="#DEBUG">
 				<StackPanel>
 					<Button Click="ClearGoogleOAuthTokens">Clear Tokens</Button>
-					<Button Content="Probe stream" Width="150" Margin="0,10" Click="ProbeStream_Click"></Button>
 				</StackPanel>
 			</TabItem>
 

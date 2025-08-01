@@ -14,11 +14,16 @@ namespace SSMM_UI
 
         public MyVideoView()
         {
-            // Hämta delad LibVLC-instans från App (bör redan vara initierad)
-            _libVLC = App.SharedLibVLC;
+            if (App.SharedLibVLC != null)
+            {
+                _libVLC = App.SharedLibVLC;
+                _mediaPlayer = new MediaPlayer(_libVLC);
+            }
+            else
+            {
+                throw new Exception("we done fucked up");
+            }
 
-            // Skapa MediaPlayer direkt, utan hwnd än
-            _mediaPlayer = new MediaPlayer(_libVLC);
         }
 
         protected override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent)
