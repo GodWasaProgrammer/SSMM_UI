@@ -47,7 +47,8 @@ public partial class MainWindow : Window
         StartStreamStatusPolling();
         StartServerStatusPolling();
         //streamInfo = ProbeStream(RtmpAdress);
-        RtmpIncoming.Play(RtmpAdress);
+        if (!Design.IsDesignMode)
+            RtmpIncoming.Play(RtmpAdress);
     }
 
     private async void RTMPServiceList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
