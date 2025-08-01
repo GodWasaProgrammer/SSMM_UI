@@ -47,6 +47,7 @@ public partial class MainWindow : Window
         StartStreamStatusPolling();
         StartServerStatusPolling();
         //streamInfo = ProbeStream(RtmpAdress);
+        RtmpIncoming.Play(RtmpAdress);
     }
 
     private async void RTMPServiceList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -124,7 +125,6 @@ public partial class MainWindow : Window
                     ? "Stream status: ✅ Live"
                     : "Stream status: ❌ Not Receiving";
             });
-            await Task.Delay(3000);
         }
     }
 
@@ -213,15 +213,13 @@ public partial class MainWindow : Window
         if (!isReceivingStream)
         {
             RtmpIncoming.IsVisible = true;
-            RtmpIncoming.Play("rtmp://localhost/live/stream");
-
             ReceivingStatus.Text = "Receiving stream...";
             ToggleStreamButton.Content = "Stop Receiving";
             isReceivingStream = true;
         }
         else
         {
-            RtmpIncoming.Stop();
+            //RtmpIncoming.Stop();
             RtmpIncoming.IsVisible = false;
 
             ReceivingStatus.Text = "Stream stopped";
