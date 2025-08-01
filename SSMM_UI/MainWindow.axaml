@@ -65,14 +65,14 @@
 			<!-- Tab 1: Stream Controls + Logs -->
 			<TabItem Header="Stream">
 				<StackPanel>
-					<Button Content="Start Stream" Width="150" Margin="0,10" Click="StartStream"/>
-					<Button Content="Stop Streams" Width="150" Margin="0,10" Click="StopStreams"/>
+					<Button x:Name="StartStreamButton" Content="Start Stream" Width="150" Margin="0,10" Click="StartStream"/>
+					<Button x:Name="StopStreamButton" Content="Stop Streams" Width="150" Margin="0,10" Click="StopStreams" IsEnabled="False"/>
 					<Button x:Name="ToggleStreamButton" Content="Start Receiving" Width="150" Margin="0,10" Click="ToggleReceivingStream"/>
 					<TextBlock x:Name="ReceivingStatus" Text="Stream stopped" Margin="0,0,0,10"/>
 					<TextBlock x:Name="StreamStatusText" Text="Stream status: Unknown" FontWeight="Bold" Margin="0,10,0,0" />
 					<TextBlock x:Name="ServerStatusText" Text="RTMP server: Unknown" FontWeight="Bold" />
 					<TextBlock Text="Logs" FontWeight="Bold" Margin="0,10,0,0"/>
-					<TextBox x:Name="LogOutput" AcceptsReturn="True" Height="100" IsReadOnly="True" TextWrapping="Wrap"/>
+					<TextBox x:Name="LogOutput" AcceptsReturn="True" Height="500" IsReadOnly="True" TextWrapping="Wrap"/>
 				</StackPanel>
 			</TabItem>
 
@@ -89,9 +89,12 @@
 			</TabItem>
 
 			<TabItem Header="#DEBUG">
-				<Button Click="ClearGoogleOAuthTokens">Clear Tokens</Button>
+				<StackPanel>
+					<Button Click="ClearGoogleOAuthTokens">Clear Tokens</Button>
+					<Button Content="Probe stream" Width="150" Margin="0,10" Click="ProbeStream_Click"></Button>
+				</StackPanel>
 			</TabItem>
-			
+
 		</TabControl>
 
 	</Grid>

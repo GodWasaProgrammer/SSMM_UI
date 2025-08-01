@@ -31,7 +31,11 @@ public partial class MainWindow : Window
 
     public StreamMetadata CurrentMetadata { get; set; } = new StreamMetadata();
 
-    private YouTubeService? _youtubeService;
+    public StreamInfo streamInfo { get; set; } = new();
+
+    const string RtmpAdress = "rtmp://localhost/live/stream";
+
+    public YouTubeService? _youtubeService = new();
 
     private bool isReceivingStream = false;
 
@@ -42,6 +46,7 @@ public partial class MainWindow : Window
         LoadRtmpServersFromServicesJson("services.json");
         StartStreamStatusPolling();
         StartServerStatusPolling();
+        //streamInfo = ProbeStream(RtmpAdress);
     }
 
     private async void RTMPServiceList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -54,6 +59,7 @@ public partial class MainWindow : Window
             if (!result)
             {
                 LogOutput.Text += $"Cancelled adding service: {group.ServiceName}\n";
+                LogOutput.CaretIndex = LogOutput.Text.Length;
             }
         }
     }
@@ -228,6 +234,7 @@ public partial class MainWindow : Window
 
     private async void StartStream(object? sender, RoutedEventArgs e)
     {
+        StartStreamButton.IsEnabled = false;
         if (SelectedServicesToStream.Count == 0)
             return;
 
@@ -255,6 +262,7 @@ public partial class MainWindow : Window
                 catch (Exception ex)
                 {
                     LogOutput.Text += $"Failed to create YouTube broadcast: {ex.Message}\n";
+                    LogOutput.CaretIndex = LogOutput.Text.Length;
                     return;
                 }
             }
@@ -267,7 +275,7 @@ public partial class MainWindow : Window
 
             // Bygg ffmpeg argument
             var fullUrl = $"{url}/{streamKey}";
-            var input = "rtmp://localhost/live/stream"; // exempel, justera efter behov
+            var input = RtmpAdress; // exempel, justera efter behov
 
             var args = new StringBuilder($"-i \"{input}\" ");
             args.Append($"-c:v copy -c:a aac -f flv \"{fullUrl}\" ");
@@ -293,8 +301,8 @@ public partial class MainWindow : Window
                 string? line;
                 while ((line = await process.StandardError.ReadLineAsync()) != null)
                 {
-                    Console.WriteLine(line);
                     LogOutput.Text += (line + Environment.NewLine);
+                    LogOutput.CaretIndex = LogOutput.Text.Length;
                 }
 
                 await process.WaitForExitAsync();
@@ -303,10 +311,88 @@ public partial class MainWindow : Window
             {
                 Console.WriteLine($"FFmpeg start failed: {ex.Message}");
                 LogOutput.Text += ($"FFmpeg start failed: {ex.Message}\n");
+                LogOutput.CaretIndex = LogOutput.Text.Length;
             }
         }
+        StopStreamButton.IsEnabled = true;
     }
 
+    public async void ProbeStream_Click(object sender, RoutedEventArgs e)
+    {
+        var Info = await Task.Run(() => ProbeStream(RtmpAdress));
+
+        if (Info is not null)
+            streamInfo = Info;
+
+        if (streamInfo != null)
+        {
+            LogOutput.Text += ($"Resolution: {streamInfo.Resolution}, Framerate: {streamInfo.FrameRate}");
+            LogOutput.CaretIndex = LogOutput.Text.Length;
+        }
+        else
+        {
+            LogOutput.Text += ("Failed to probe stream.");
+            LogOutput.CaretIndex = LogOutput.Text.Length;
+        }
+
+
+        // Enable knapp igen eller ta bort "loading"
+    }
+
+    public static StreamInfo? ProbeStream(string rtmpUrl)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "ffprobe",
+                Arguments = $"-v error -select_streams v:0 -read_intervals %+#5 -show_entries stream=width,height,r_frame_rate " +
+                            $"-of default=noprint_wrappers=1:nokey=1 \"{rtmpUrl}\"",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = new Process { StartInfo = startInfo };
+            process.Start();
+
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit(5000); // max 5 sekunder
+
+            if (!process.HasExited)
+            {
+                process.Kill();
+                Console.WriteLine("ffprobe process killed due to timeout.");
+                return null;
+            }
+
+            var lines = output.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            if (lines.Length < 3) return null;
+
+            int width = int.Parse(lines[0]);
+            int height = int.Parse(lines[1]);
+            string rawFramerate = lines[2]; // ex: "60/1"
+
+            var parts = rawFramerate.Split('/');
+            double fps = parts.Length == 2 && double.TryParse(parts[0], out var num) && double.TryParse(parts[1], out var den) && den != 0
+                ? num / den
+                : 30.0;
+
+            string frameRateLabel = fps >= 59 ? "60fps" : (fps >= 29 ? "30fps" : "24fps");
+            return new StreamInfo
+            {
+                Width = width,
+                Height = height,
+                FrameRate = frameRateLabel
+            };
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to probe RTMP stream: {ex.Message}");
+            return null;
+        }
+    }
 
     private void StopStreams(object? sender, RoutedEventArgs e)
     {
@@ -317,6 +403,8 @@ public partial class MainWindow : Window
                 process.Kill();
             }
         }
+        StartStreamButton.IsEnabled = true;
+        StopStreamButton.IsEnabled = false;
     }
 
     private async void OnUploadThumbnailClicked(object? sender, RoutedEventArgs e)
@@ -350,6 +438,7 @@ public partial class MainWindow : Window
             CurrentMetadata.Thumbnail = bitmap;
             var path = file.Path?.LocalPath ?? "(no local path)";
             LogOutput.Text += ($"Selected thumbnail: {path}");
+            LogOutput.CaretIndex = LogOutput.Text.Length;
 
             StatusTextBlock.Foreground = Avalonia.Media.Brushes.Green;
             StatusTextBlock.Text = "Thumbnail loaded successfully.";
@@ -366,7 +455,17 @@ public partial class MainWindow : Window
     private async Task<(string rtmpUrl, string streamKey)> CreateYouTubeBroadcastAsync(StreamMetadata metadata)
     {
         var youtubeService = _youtubeService;
-
+        if (streamInfo == null)
+        {
+            var info = await Task.Run(() => ProbeStream(RtmpAdress));
+            if (info is not null)
+                streamInfo = info;
+            else
+            {
+                LogOutput.Text += "stream failed to start, there was missing info from ffprobe";
+                LogOutput.CaretIndex = LogOutput.Text.Length;
+            }
+        }
         try
         {
             // 1. Skapa LiveBroadcast
@@ -401,9 +500,8 @@ public partial class MainWindow : Window
             {
                 //Format = "1080p", // Testa med 1080p, fungerar på de flesta konton
                 IngestionType = "rtmp",
-                FrameRate = "30fps",
-                Resolution = "1080p"
-
+                FrameRate = streamInfo.FrameRate,
+                Resolution = streamInfo.Resolution
             };
 
             var liveStream = new LiveStream
@@ -443,7 +541,6 @@ public partial class MainWindow : Window
             throw;
         }
     }
-
 
     private void OnUpdateMetadataClicked(object? sender, RoutedEventArgs e)
     {
