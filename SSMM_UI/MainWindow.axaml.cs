@@ -6,12 +6,15 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Oauth2.v2;
 using Google.Apis.Oauth2.v2.Data;
 using Google.Apis.Services;
+using Google.Apis.YouTube.v3;
+using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
@@ -27,6 +30,8 @@ public partial class MainWindow : Window
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; } = new ObservableCollection<SelectedService>();
 
     public StreamMetadata CurrentMetadata { get; set; } = new StreamMetadata();
+
+    private YouTubeService? _youtubeService;
 
     private bool isReceivingStream = false;
 
@@ -226,52 +231,82 @@ public partial class MainWindow : Window
         if (SelectedServicesToStream.Count == 0)
             return;
 
-        var input = "rtmp://localhost/live/stream";
-        var args = new StringBuilder($"-i \"{input}\" ");
-
+        // Anta vi bara hanterar Youtube här (kan byggas ut senare)
         foreach (var service in SelectedServicesToStream)
         {
-            var url = service.SelectedServer.Url.TrimEnd('/');
-            var streamKey = service.StreamKey;
-            var fullUrl = $"{url}/{streamKey}";
+            string url;
+            string streamKey;
 
-            args.Append($"-c:v copy -c:a aac -f flv \"{fullUrl}\" ");
-        }
-
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = "ffmpeg",
-            Arguments = args.ToString(),
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        try
-        {
-            using var process = new Process { StartInfo = startInfo };
-
-            if (ffmpegProcess is not null)
-                ffmpegProcess.Add(process);
-            process.Start();
-
-            // Läs FFmpeg:s standardfelutgång asynkront
-            string? line;
-            while ((line = await process.StandardError.ReadLineAsync()) != null)
+            // Kolla om metadata finns satt (titel eller thumbnail-path)
+            if (!string.IsNullOrWhiteSpace(CurrentMetadata?.Title) ||
+                !string.IsNullOrWhiteSpace(CurrentMetadata?.ThumbnailPath))
             {
-                // Logga till din UI eller debug
-                Console.WriteLine(line);
-                LogOutput.Text += (line + Environment.NewLine);
+                try
+                {
+                    // Skapa ny Youtube broadcast med metadata
+                    var (newUrl, newKey) = await CreateYouTubeBroadcastAsync(CurrentMetadata);
+                    url = newUrl;
+                    streamKey = newKey;
+
+                    // Uppdatera service med nya värden så vi kör rätt stream
+                    service.SelectedServer.Url = url;
+                    service.StreamKey = streamKey;
+                }
+                catch (Exception ex)
+                {
+                    LogOutput.Text += $"Failed to create YouTube broadcast: {ex.Message}\n";
+                    return;
+                }
+            }
+            else
+            {
+                // Använd befintliga url/key som redan finns
+                url = service.SelectedServer.Url.TrimEnd('/');
+                streamKey = service.StreamKey;
             }
 
-            await process.WaitForExitAsync();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"FFmpeg start failed: {ex.Message}");
-            LogOutput.Text += ($"FFmpeg start failed: {ex.Message}\n");
+            // Bygg ffmpeg argument
+            var fullUrl = $"{url}/{streamKey}";
+            var input = "rtmp://localhost/live/stream"; // exempel, justera efter behov
+
+            var args = new StringBuilder($"-i \"{input}\" ");
+            args.Append($"-c:v copy -c:a aac -f flv \"{fullUrl}\" ");
+
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "ffmpeg",
+                Arguments = args.ToString(),
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            try
+            {
+                var process = new Process { StartInfo = startInfo };
+
+                if (ffmpegProcess is not null)
+                    ffmpegProcess.Add(process);
+                process.Start();
+
+                // Läs FFmpeg:s standardfelutgång asynkront
+                string? line;
+                while ((line = await process.StandardError.ReadLineAsync()) != null)
+                {
+                    Console.WriteLine(line);
+                    LogOutput.Text += (line + Environment.NewLine);
+                }
+
+                await process.WaitForExitAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"FFmpeg start failed: {ex.Message}");
+                LogOutput.Text += ($"FFmpeg start failed: {ex.Message}\n");
+            }
         }
     }
+
 
     private void StopStreams(object? sender, RoutedEventArgs e)
     {
@@ -314,7 +349,7 @@ public partial class MainWindow : Window
             ThumbnailImage.Source = bitmap;
             CurrentMetadata.Thumbnail = bitmap;
             var path = file.Path?.LocalPath ?? "(no local path)";
-            Console.WriteLine($"Selected thumbnail: {path}");
+            LogOutput.Text += ($"Selected thumbnail: {path}");
 
             StatusTextBlock.Foreground = Avalonia.Media.Brushes.Green;
             StatusTextBlock.Text = "Thumbnail loaded successfully.";
@@ -325,6 +360,87 @@ public partial class MainWindow : Window
         {
             StatusTextBlock.Foreground = Avalonia.Media.Brushes.Red;
             StatusTextBlock.Text = "No file selected.";
+        }
+    }
+
+    private async Task<(string rtmpUrl, string streamKey)> CreateYouTubeBroadcastAsync(StreamMetadata metadata)
+    {
+        var youtubeService = _youtubeService;
+
+        try
+        {
+            // 1. Skapa LiveBroadcast
+            var broadcastSnippet = new LiveBroadcastSnippet
+            {
+                Title = metadata.Title,
+                ScheduledStartTime = DateTime.UtcNow.AddMinutes(1)
+            };
+
+            var broadcastStatus = new LiveBroadcastStatus
+            {
+                PrivacyStatus = "private"
+            };
+
+            var liveBroadcast = new LiveBroadcast
+            {
+                Kind = "youtube#liveBroadcast",
+                Snippet = broadcastSnippet,
+                Status = broadcastStatus
+            };
+
+            var broadcastInsert = youtubeService.LiveBroadcasts.Insert(liveBroadcast, "snippet,status");
+            var insertedBroadcast = await broadcastInsert.ExecuteAsync();
+
+            // 2. Skapa LiveStream
+            var streamSnippet = new LiveStreamSnippet
+            {
+                Title = metadata.Title + " Stream"
+            };
+
+            var cdn = new CdnSettings
+            {
+                //Format = "1080p", // Testa med 1080p, fungerar på de flesta konton
+                IngestionType = "rtmp",
+                FrameRate = "30fps",
+                Resolution = "1080p"
+
+            };
+
+            var liveStream = new LiveStream
+            {
+                Kind = "youtube#liveStream",
+                Snippet = streamSnippet,
+                Cdn = cdn
+            };
+
+            var streamInsert = youtubeService.LiveStreams.Insert(liveStream, "snippet,cdn");
+            var insertedStream = await streamInsert.ExecuteAsync();
+
+            // 3. Koppla stream till broadcast
+            var bindRequest = youtubeService.LiveBroadcasts.Bind(insertedBroadcast.Id, "id,contentDetails");
+            bindRequest.StreamId = insertedStream.Id;
+            await bindRequest.ExecuteAsync();
+
+            // 4. Upload thumbnail om vald
+            if (!string.IsNullOrWhiteSpace(metadata.ThumbnailPath))
+            {
+                using var fs = new FileStream(metadata.ThumbnailPath, FileMode.Open, FileAccess.Read);
+                var thumbnailRequest = youtubeService.Thumbnails.Set(insertedBroadcast.Id, fs, "image/jpeg");
+                await thumbnailRequest.UploadAsync();
+            }
+
+            // 5. Returnera RTMP-url + streamkey
+            var ingestionInfo = insertedStream.Cdn.IngestionInfo;
+            return (ingestionInfo.IngestionAddress, ingestionInfo.StreamName);
+        }
+        catch (Google.GoogleApiException ex)
+        {
+            Console.WriteLine("YouTube API error:");
+            Console.WriteLine($"Message: {ex.Message}");
+            Console.WriteLine($"Details: {ex.Error?.Errors?.FirstOrDefault()?.Message}");
+            Console.WriteLine($"Reason: {ex.Error?.Errors?.FirstOrDefault()?.Reason}");
+            Console.WriteLine($"Domain: {ex.Error?.Errors?.FirstOrDefault()?.Domain}");
+            throw;
         }
     }
 
@@ -367,13 +483,22 @@ public partial class MainWindow : Window
 
     public async Task<Userinfo?> AuthenticateWithGoogleAsync(Window parentWindow)
     {
+#if DEBUG
+        var clID = Environment.GetEnvironmentVariable("SSMM_ClientID");
+        var clSecret = Environment.GetEnvironmentVariable("SSMM_ClientSecret");
+#endif
         var clientSecrets = new ClientSecrets
         {
             ClientId = Environment.GetEnvironmentVariable("SSMM_ClientID"),
-            ClientSecret = Environment.GetEnvironmentVariable("SMM_ClientSecret")
+            ClientSecret = Environment.GetEnvironmentVariable("SSMM_ClientSecret")
         };
 
-        string[] scopes = { Oauth2Service.Scope.UserinfoProfile, Oauth2Service.Scope.UserinfoEmail };
+        string[] scopes = {
+        Oauth2Service.Scope.UserinfoProfile,
+        Oauth2Service.Scope.UserinfoEmail,
+        YouTubeService.Scope.Youtube,
+        YouTubeService.Scope.YoutubeForceSsl
+    };
 
         try
         {
@@ -391,6 +516,14 @@ public partial class MainWindow : Window
                 ApplicationName = "SSMM_UI"
             });
 
+            var youtubeService = new YouTubeService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = "SSMM"
+            });
+
+            _youtubeService = youtubeService;
+
             // Hämta användarprofil
             var userInfo = await oauth2Service.Userinfo.Get().ExecuteAsync();
             return userInfo;
@@ -401,4 +534,42 @@ public partial class MainWindow : Window
             return null;
         }
     }
+
+    public void ClearGoogleOAuthTokens(object? sender, RoutedEventArgs e)
+    {
+        string[] possiblePaths = new[]
+        {
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".credentials"),
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Google.Apis.Auth")
+    };
+
+        bool foundAndDeleted = false;
+
+        foreach (var path in possiblePaths)
+        {
+            if (Directory.Exists(path))
+            {
+                try
+                {
+                    Directory.Delete(path, true);
+                    Console.WriteLine($"OAuth tokens cleared from: {path}");
+                    foundAndDeleted = true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to clear OAuth tokens at {path}: {ex.Message}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"No OAuth tokens found at: {path}");
+            }
+        }
+
+        if (!foundAndDeleted)
+        {
+            Console.WriteLine("No OAuth token directories found to clear.");
+        }
+    }
+
 }
