@@ -4,101 +4,277 @@
         xmlns:local="clr-namespace:SSMM_UI"
         x:Class="SSMM_UI.MainWindow"
         x:DataType="local:MainWindow"
-        Title="SSMM_UI" Width="1920" Height="1080">
+        Title="SSMM_UI" Width="1920" Height="1080"
+        Background="{DynamicResource BackgroundColor}">
+	<Window.Styles>
+		<!-- Text Styles -->
+		<Style Selector="TextBlock">
+			<Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+		</Style>
 
+		<Style Selector="TextBlock.secondary">
+			<Setter Property="Foreground" Value="{DynamicResource SecondaryTextColor}"/>
+			<Setter Property="FontSize" Value="12"/>
+		</Style>
+
+		<!-- Card Style -->
+		<Style Selector="Border.card">
+			<Setter Property="Background" Value="{DynamicResource CardColor}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="CornerRadius" Value="6"/>
+			<Setter Property="Padding" Value="15"/>
+			<Setter Property="Margin" Value="0 0 0 15"/>
+		</Style>
+
+		<!-- Button Styles -->
+		<Style Selector="Button.primary">
+			<Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
+			<Setter Property="Foreground" Value="White"/>
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="CornerRadius" Value="4"/>
+			<Setter Property="Width" Value="180"/>
+			<Setter Property="Height" Value="40"/>
+		</Style>
+
+		<Style Selector="Button.success">
+			<Setter Property="Background" Value="{DynamicResource SuccessColor}"/>
+			<Setter Property="Foreground" Value="White"/>
+		</Style>
+
+		<Style Selector="Button.danger">
+			<Setter Property="Background" Value="{DynamicResource DangerColor}"/>
+			<Setter Property="Foreground" Value="White"/>
+		</Style>
+		<!-- ListBoxItem hover style -->
+		<Style Selector="ListBoxItem:pointerover">
+			<Setter Property="Background">
+				<Setter.Value>
+					<SolidColorBrush Color="{DynamicResource BorderColor}" Opacity="0.3"/>
+				</Setter.Value>
+			</Setter>
+		</Style>
+	</Window.Styles>
 	<Grid>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition Width="250"/>
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 
-		<!-- Left Column -->
-		<StackPanel Grid.Column="0" Margin="10" HorizontalAlignment="Left">
-			<!-- Video Preview -->
-			<local:MyVideoView x:Name="RtmpIncoming" Width="200" Height="150" IsVisible="False" />
+		<!-- Left Sidebar -->
+		<Border Grid.Column="0" Background="{DynamicResource CardColor}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0 0 1 0">
+			<ScrollViewer>
+				<StackPanel Margin="15">
+					<!-- Video Preview -->
+					<Border Classes="card">
+						<local:MyVideoView x:Name="RtmpIncoming" Width="220" Height="124" IsVisible="False"/>
+					</Border>
 
-			<!-- Available Services -->
-			<TextBlock Text="Stream Services" FontWeight="Bold" Margin="0,0,0,5"/>
-			<ListBox x:Name="RTMPServiceList"
-					 ItemsSource="{Binding RtmpServiceGroups}"
-					 SelectionChanged="RTMPServiceList_SelectionChanged"
-					 Height="300" Width="150">
-				<ListBox.ItemTemplate>
-					<DataTemplate>
-						<TextBlock Text="{Binding ServiceName}" />
-					</DataTemplate>
-				</ListBox.ItemTemplate>
-			</ListBox>
-			<StackPanel Margin="0,20,0,0">
-				<Button Content="Login With Google"
-						Width="150"
-						Click="OnLoginWithGoogleClicked"/>
-				<TextBlock x:Name="LoginStatusText"
-						   Margin="0,10,0,0"
-						   Text="Ej inloggad"
-						   FontWeight="Bold"/>
-			</StackPanel>
-			<!-- Selected Services Section -->
-			<StackPanel Margin="0,10,0,0">
-				<TextBlock Text="Selected Services" FontWeight="Bold" Margin="0,0,0,5"/>
-				<ListBox x:Name="SelectedServices"
-						 Height="250"
-						 Width="150"
-						 ItemsSource="{Binding SelectedServicesToStream}">
-					<ListBox.ItemTemplate>
-						<DataTemplate>
-							<StackPanel>
-								<TextBlock Text="{Binding DisplayName}" FontWeight="Bold"/>
-								<TextBlock Text="{Binding FullUrl}" FontSize="10" TextWrapping="Wrap"/>
-							</StackPanel>
-						</DataTemplate>
-					</ListBox.ItemTemplate>
-				</ListBox>
-				<Button Content="Remove Selected"
-						Width="150"
-						Margin="0,5,0,0"
-						Click="RemoveSelectedService"/>
-			</StackPanel>
-		</StackPanel>
-		<!-- Right Column with Tabs -->
-		<TabControl Grid.Column="1" Margin="10">
+					<!-- Services Section -->
+					<Border Classes="card">
+						<StackPanel>
+							<TextBlock Text="STREAM SERVICES" Classes="secondary" Margin="0 0 0 5"/>
+							<ListBox x:Name="RTMPServiceList"
+                                     ItemsSource="{Binding RtmpServiceGroups}"
+                                     SelectionChanged="RTMPServiceList_SelectionChanged"
+                                     Height="250" Width="220"
+                                     Background="Transparent"
+                                     BorderBrush="{DynamicResource BorderColor}">
+								<ListBox.ItemTemplate>
+									<DataTemplate>
+										<TextBlock Text="{Binding ServiceName}" Padding="5 3" FontSize="14"/>
+									</DataTemplate>
+								</ListBox.ItemTemplate>
+							</ListBox>
+						</StackPanel>
+					</Border>
+
+					<!-- Login Section -->
+					<Border Classes="card">
+						<StackPanel>
+							<Button Content="Login With Google" Classes="primary"
+									HorizontalAlignment="Center"
+                                    Click="OnLoginWithGoogleClicked"/>
+							<TextBlock x:Name="LoginStatusText" Classes="secondary" Margin="0 10 0 0"/>
+						</StackPanel>
+					</Border>
+
+					<!-- Selected Services Section -->
+					<Border Classes="card">
+						<StackPanel>
+							<TextBlock Text="SELECTED SERVICES" Classes="secondary" Margin="0 0 0 5"/>
+							<Border BorderBrush="{DynamicResource BorderColor}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Margin="0 0 0 5"
+                Padding="1">
+								<ListBox x:Name="SelectedServices"
+										 Height="250"
+										 ItemsSource="{Binding SelectedServicesToStream}"
+										 Background="Transparent"
+										 BorderThickness="0"
+										 Padding="5"
+										 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+									<ListBox.Styles>
+										<Style Selector="ListBoxItem">
+											<Setter Property="Margin" Value="0 0 5 0"/>
+											<Setter Property="Padding" Value="5 3"/>
+										</Style>
+										<Style Selector="ListBoxItem:selected">
+											<Setter Property="Background">
+												<Setter.Value>
+													<SolidColorBrush Color="{DynamicResource BorderColor}" Opacity="0.3"/>
+												</Setter.Value>
+											</Setter>
+										</Style>
+									</ListBox.Styles>
+									<ListBox.ItemTemplate>
+										<DataTemplate>
+											<StackPanel Margin="0 5">
+												<TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="14"/>
+												<TextBlock Text="{Binding FullUrl}" FontSize="11" Classes="secondary" TextWrapping="Wrap"/>
+											</StackPanel>
+										</DataTemplate>
+									</ListBox.ItemTemplate>
+								</ListBox>
+							</Border>
+						</StackPanel>
+					</Border>
+					<Button Content="Remove Selected"
+                Width="180"
+                HorizontalAlignment="Center"
+                Classes="danger"
+                Margin="0 5 0 0"
+                Click="RemoveSelectedService"/>
+				</StackPanel>
+			</ScrollViewer>
+		</Border>
+
+		<!-- Main Content Area -->
+		<TabControl Grid.Column="1" Background="Transparent" BorderThickness="0">
+			<TabControl.Styles>
+				<Style Selector="TabItem">
+					<Setter Property="Padding" Value="15 10"/>
+					<Setter Property="FontSize" Value="14"/>
+					<Setter Property="FontWeight" Value="SemiBold"/>
+					<Setter Property="Background" Value="Transparent"/>
+					<Setter Property="BorderBrush" Value="Transparent"/>
+				</Style>
+				<Style Selector="TabItem:selected">
+					<Setter Property="Background" Value="{DynamicResource CardColor}"/>
+					<Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+				</Style>
+			</TabControl.Styles>
+
 			<!-- Tab 1: Stream Controls + Logs -->
 			<TabItem Header="Stream">
-				<StackPanel>
-					<Button x:Name="StartStreamButton" Content="Start Stream" Width="150" Margin="0,10" Click="StartStream"/>
-					<Button x:Name="StopStreamButton" Content="Stop Streams" Width="150" Margin="0,10" Click="StopStreams" IsEnabled="False"/>
-					<Button x:Name="ToggleStreamButton" Content="Start Receiving" Width="150" Margin="0,10" Click="ToggleReceivingStream"/>
-					<TextBlock x:Name="ReceivingStatus" Text="Stream stopped" Margin="0,0,0,10"/>
-					<TextBlock x:Name="StreamStatusText" Text="Stream status: Unknown" FontWeight="Bold" Margin="0,10,0,0" />
-					<TextBlock x:Name="ServerStatusText" Text="RTMP server: Unknown" FontWeight="Bold" />
-					<TextBlock Text="Logs" FontWeight="Bold" Margin="0,10,0,0"/>
-					<TextBox x:Name="LogOutput" AcceptsReturn="True" Height="500" IsReadOnly="True" TextWrapping="Wrap"/>
-				</StackPanel>
+				<ScrollViewer>
+					<StackPanel Margin="15">
+						<Border Classes="card">
+							<StackPanel>
+								<TextBlock Text="STREAM CONTROLS" Classes="secondary"/>
+								<WrapPanel>
+									<Button x:Name="StartStreamButton"
+                                            Content="Start Stream"
+                                            Classes="success"
+                                            Margin="0 0 15 0"
+                                            Click="StartStream"/>
+									<Button x:Name="StopStreamButton"
+                                            Content="Stop Streams"
+                                            Classes="danger"
+                                            Margin="0 0 15 0"
+                                            Click="StopStreams"
+                                            IsEnabled="False"/>
+									<Button x:Name="ToggleStreamButton"
+                                            Content="Start Receiving"
+                                            Classes="primary"
+                                            Click="ToggleReceivingStream"/>
+								</WrapPanel>
+
+								<StackPanel Margin="0 10 0 0">
+									<TextBlock x:Name="ReceivingStatus" Classes="secondary"/>
+									<TextBlock x:Name="StreamStatusText" FontWeight="SemiBold"/>
+									<TextBlock x:Name="ServerStatusText" FontWeight="SemiBold"/>
+								</StackPanel>
+							</StackPanel>
+						</Border>
+
+						<Border Classes="card">
+							<StackPanel>
+								<TextBlock Text="LOGS" Classes="secondary"/>
+								<TextBox x:Name="LogOutput"
+                                         AcceptsReturn="True"
+                                         Height="400"
+                                         IsReadOnly="True"
+                                         TextWrapping="Wrap"
+                                         FontFamily="Consolas, Courier New"
+                                         BorderThickness="0"
+                                         Background="{DynamicResource BorderColor}" Opacity="0.2"
+                                         Foreground="{DynamicResource PrimaryTextColor}"
+                                         Padding="10"/>
+							</StackPanel>
+						</Border>
+					</StackPanel>
+				</ScrollViewer>
 			</TabItem>
 
 			<!-- Tab 2: YouTube Metadata -->
 			<TabItem Header="Stream Metadata">
-				<StackPanel Margin="10" Spacing="10" HorizontalAlignment="Left">
-					<TextBlock x:Name="TitleOfStream" Text="Stream Title:"/>
-					<Image x:Name="ThumbnailImage" Width="150" Height="84" Stretch="Uniform" Margin="0,10,0,0" />
-					<TextBox x:Name="TitleTextBox" Width="350"/>
-					<Button Content="Upload Thumbnail" Width="150" Click="OnUploadThumbnailClicked"/>
-					<Button Content="Update Metadata" Width="150" Click="OnUpdateMetadataClicked"/>
-					<TextBlock x:Name="StatusTextBlock" Foreground="Red"/>
-				</StackPanel>
-			</TabItem>
+				<ScrollViewer>
+					<StackPanel Margin="15" Width="600">
+						<Border Classes="card">
+							<StackPanel>
+								<TextBlock Text="STREAM METADATA" Classes="secondary"/>
 
-			<TabItem Header="#DEBUG">
-				<StackPanel>
-					<Button Click="ClearGoogleOAuthTokens">Clear Tokens</Button>
-				</StackPanel>
-			</TabItem>
+								<StackPanel Margin="0 10 0 0">
+									<TextBlock Text="Title" FontWeight="SemiBold"/>
+									<TextBox x:Name="TitleTextBox"
+                                             FontSize="14"
+                                             Padding="10"
+                                             BorderBrush="{DynamicResource BorderColor}"
+                                             BorderThickness="1"
+                                             CornerRadius="4"
+                                             Background="{DynamicResource CardColor}"
+                                             Foreground="{DynamicResource PrimaryTextColor}"/>
+								</StackPanel>
 
+								<StackPanel Margin="0 10 0 0">
+									<TextBlock Text="Thumbnail" FontWeight="SemiBold"/>
+									<Border Width="300" Height="168"
+                                            BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
+                                            CornerRadius="4" Background="{DynamicResource BorderColor}" Opacity="0.1">
+										<Image x:Name="ThumbnailImage"
+                                               Stretch="Uniform"
+                                               Margin="5"/>
+									</Border>
+									<Button Content="Upload Thumbnail"
+                                            Classes="primary"
+                                            Margin="0 10 0 0"
+                                            Click="OnUploadThumbnailClicked"/>
+								</StackPanel>
+
+								<Button Content="Update Metadata"
+                                        Classes="primary"
+                                        Margin="0 10 0 0"
+                                        Click="OnUpdateMetadataClicked"/>
+
+								<TextBlock x:Name="StatusTextBlock"
+                                           Foreground="{DynamicResource DangerColor}"
+                                           Margin="0 10 0 0"
+                                           TextWrapping="Wrap"/>
+							</StackPanel>
+						</Border>
+					</StackPanel>
+				</ScrollViewer>
+			</TabItem>
 		</TabControl>
-
 	</Grid>
 </Window>
 
-
+<!--<TabItem Header="#DEBUG">
+				<StackPanel>
+					<Button Click="ClearGoogleOAuthTokens">Clear Tokens</Button>
+				</StackPanel>
+			</TabItem>-->
 
 

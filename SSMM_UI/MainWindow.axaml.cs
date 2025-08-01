@@ -1,5 +1,8 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Markup.Xaml.Styling;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using FFmpeg.AutoGen;
 using Google.Apis.Auth.OAuth2;
@@ -20,6 +23,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+
 
 namespace SSMM_UI;
 
@@ -47,7 +51,6 @@ public partial class MainWindow : Window
         LoadRtmpServersFromServicesJson("services.json");
         StartStreamStatusPolling();
         StartServerStatusPolling();
-        //streamInfo = ProbeStream(RtmpAdress);
         if (!Design.IsDesignMode)
             RtmpIncoming.Play(RtmpAdress);
     }
@@ -521,6 +524,25 @@ public partial class MainWindow : Window
         }
     }
 
+    private void DetectSystemTheme()
+    {
+        var isDark = Application.Current.ActualThemeVariant == ThemeVariant.Dark;
+
+        // Ladda rätt tema
+        var theme = isDark ? "Dark" : "Light";
+        Application.Current.RequestedThemeVariant = isDark ? ThemeVariant.Dark : ThemeVariant.Light;
+
+        // Rensa befintliga resurser
+        Application.Current.Resources.MergedDictionaries.Clear();
+
+        // Lägg till det nya temat
+        var themeResource = new ResourceInclude(new Uri($"avares://SSMM_UI/Resources/{theme}Theme.axaml"))
+        {
+            Source = new Uri($"avares://SSMM_UI/Resources/{theme}Theme.axaml")
+        };
+        Application.Current.Resources.MergedDictionaries.Add(themeResource);
+    }
+
     private void OnUpdateMetadataClicked(object? sender, RoutedEventArgs e)
     {
         var title = TitleTextBox.Text?.Trim();
@@ -532,7 +554,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        TitleOfStream.Text = $"Stream Title: {title}";
+        //TitleOfStream.Text = $"Stream Title: {title}";
 
         // set title of MetaData 
         CurrentMetadata.Title = title;
