@@ -92,6 +92,60 @@ public class KickOAuthService
         }
     }
 
+    private async Task<KickAuthResult> RefreshTokenAsync(string refreshToken)
+    {
+        string clientId = Environment.GetEnvironmentVariable("KickClientID")!;
+        string clientSecret = Environment.GetEnvironmentVariable("KickClientSecret")!;
+
+        using var httpClient = new HttpClient();
+        var content = new FormUrlEncodedContent(new[]
+        {
+        new KeyValuePair<string, string>("grant_type", "refresh_token"),
+        new KeyValuePair<string, string>("refresh_token", refreshToken),
+        new KeyValuePair<string, string>("client_id", clientId),
+        new KeyValuePair<string, string>("client_secret", clientSecret),
+    });
+
+        var response = await httpClient.PostAsync($"{OAuthBaseUrl}/oauth/token", content);
+        var responseData = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            throw new Exception($"Refresh-token misslyckades: {response.StatusCode}\n{responseData}");
+
+        var tokenData = JsonDocument.Parse(responseData).RootElement;
+        var newToken = new KickAuthResult
+        {
+            AccessToken = tokenData.GetProperty("access_token").GetString()!,
+            RefreshToken = tokenData.GetProperty("refresh_token").GetString()!,
+            TokenType = tokenData.GetProperty("token_type").GetString() ?? "Bearer",
+            ExpiresAt = DateTime.UtcNow.AddSeconds(tokenData.GetProperty("expires_in").GetInt32()),
+            Scope = tokenData.GetProperty("scope").GetString() ?? ""
+        };
+
+        SaveToken(newToken);
+        return newToken;
+    }
+
+    public async Task<KickAuthResult> AuthenticateOrRefreshAsync(string[] scopes)
+    {
+        if (File.Exists(TokenFilePath))
+        {
+            var json = File.ReadAllText(TokenFilePath);
+            var token = JsonSerializer.Deserialize<KickAuthResult>(json);
+
+            if (token != null && token.ExpiresAt > DateTime.UtcNow)
+            {
+                return token; // Token fortfarande giltig
+            }
+            else if (token?.RefreshToken != null)
+            {
+                return await RefreshTokenAsync(token.RefreshToken); // Förnya token
+            }
+        }
+
+        return await AuthenticateUserAsync(scopes); // Full login om inget funkar
+    }
+
     private async Task<string> ListenForAuthCodeAsync()
     {
         using var listener = new HttpListener();

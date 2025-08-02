@@ -684,8 +684,8 @@ public partial class MainWindow : Window
                 KickOAuthService.Scopes.ChannelRead,
                 KickOAuthService.Scopes.UserRead
             };
-        var result = await authManager.AuthenticateUserAsync(requestedScopes);
-
+        //var result = await authManager.AuthenticateUserAsync(requestedScopes);
+        var result = await authManager.AuthenticateOrRefreshAsync(requestedScopes);
         KickLogin.Text = "Logging in...";
 
         if (result != null)
