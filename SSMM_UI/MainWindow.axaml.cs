@@ -579,6 +579,27 @@ public partial class MainWindow : Window
         }
     }
 
+    private async void LoginWithTwitch(object? sender, RoutedEventArgs e)
+    {
+        var twitchAuth = new TwitchOAuthService();
+        string[] scopes = new[]
+        {
+            "user:read:email",
+        };
+
+        try
+        {
+            //TwitchPKCEDemo twitchPKCEDemo = new TwitchPKCEDemo();
+            //await twitchPKCEDemo.RunAsync(Environment.GetEnvironmentVariable("TwitchClientID"));
+            var result = await twitchAuth.AuthenticateUserAsync(scopes);
+            TwitchLogin.Text = ($"✅ Inloggad som: {result.Username}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Fel vid Twitch-login: " + ex.Message);
+        }
+    }
+
     public async Task<Userinfo?> AuthenticateWithGoogleAsync(Window parentWindow)
     {
 #if DEBUG

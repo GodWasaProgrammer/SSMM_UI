@@ -135,6 +135,9 @@ public class KickOAuthService
 
             if (token != null && token.ExpiresAt > DateTime.UtcNow)
             {
+                var res = await GetUsernameAsync(token.AccessToken);
+                token.Username = res;
+
                 return token; // Token fortfarande giltig
             }
             else if (token?.RefreshToken != null)
