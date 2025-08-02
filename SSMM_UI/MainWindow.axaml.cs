@@ -633,6 +633,11 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>
+    /// Debug only
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     public void ClearGoogleOAuthTokens(object? sender, RoutedEventArgs e)
     {
         string[] possiblePaths =
@@ -670,4 +675,26 @@ public partial class MainWindow : Window
         }
     }
 
+    private async void LoginWithKick(object? sender, RoutedEventArgs e)
+    {
+        var authManager = new KickOAuthService();
+        // Ange vilka scopes du behöver
+        var requestedScopes = new[] {
+                KickOAuthService.Scopes.ChannelWrite,
+                KickOAuthService.Scopes.ChannelRead,
+                KickOAuthService.Scopes.UserRead
+            };
+        var result = await authManager.AuthenticateUserAsync(requestedScopes);
+
+        KickLogin.Text = "Logging in...";
+
+        if (result != null)
+        {
+            KickLogin.Text = ($"✅ Inloggad som {result.Username}");
+        }
+        else
+        {
+            KickLogin.Text = ("❌ Inloggning misslyckades.");
+        }
+    }
 }

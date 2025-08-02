@@ -92,10 +92,15 @@
 					<!-- Login Section -->
 					<Border Classes="card">
 						<StackPanel>
-							<Button Content="Login With Google" Classes="primary"
+							<TextBlock Text="Logins" HorizontalAlignment="Center" Classes="secondary" Margin="0 0 0 5"/>
+							<Button Content="Youtube" Classes="primary"
 									HorizontalAlignment="Center"
                                     Click="OnLoginWithGoogleClicked"/>
 							<TextBlock x:Name="LoginStatusText" Classes="secondary" Margin="0 10 0 0"/>
+							<Button Content="Kick" Classes="primary"
+									HorizontalAlignment="Center"
+                                    Click="LoginWithKick"/>
+							<TextBlock x:Name="KickLogin" Classes="secondary" Margin="0 10 0 0"/>
 						</StackPanel>
 					</Border>
 
