@@ -571,7 +571,7 @@ public partial class MainWindow : Window
         var userInfo = await AuthenticateWithGoogleAsync(this);
         if (userInfo != null)
         {
-            LoginStatusText.Text = $"Inloggad som {userInfo.Name} ({userInfo.Email})";
+            LoginStatusText.Text = $"✅ Inloggad som {userInfo.Name}";
         }
         else
         {

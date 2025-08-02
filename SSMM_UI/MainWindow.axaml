@@ -192,7 +192,8 @@
                                             IsEnabled="False"/>
 									<Button x:Name="ToggleStreamButton"
                                             Content="Start Receiving"
-                                            Classes="primary"
+                                            Classes="danger"
+											Margin="0 0 15 0"
                                             Click="ToggleReceivingStream"/>
 								</WrapPanel>
 
