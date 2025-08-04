@@ -36,7 +36,7 @@ public partial class MainWindow : Window
 
     public StreamMetadata CurrentMetadata { get; set; } = new StreamMetadata();
 
-    public StreamInfo StreamInfo { get; set; } = new();
+    public StreamInfo? StreamInfo { get; set; } = new();
 
     const string RtmpAdress = "rtmp://localhost/live/stream";
 
@@ -387,47 +387,53 @@ public partial class MainWindow : Window
 
     private async void OnUploadThumbnailClicked(object? sender, RoutedEventArgs e)
     {
-        var window = this.VisualRoot as Window;
-
-        var options = new Avalonia.Platform.Storage.FilePickerOpenOptions
+        if (this.VisualRoot is Window window)
         {
-            Title = "Select Thumbnail Image",
-            AllowMultiple = false,
-            FileTypeFilter =
-        [
-            new Avalonia.Platform.Storage.FilePickerFileType("Image Files")
+
+            var options = new Avalonia.Platform.Storage.FilePickerOpenOptions
+            {
+                Title = "Select Thumbnail Image",
+                AllowMultiple = false,
+                FileTypeFilter =
+            [
+                new Avalonia.Platform.Storage.FilePickerFileType("Image Files")
             {
                 Patterns = ["*.jpg", "*.jpeg", "*.png", "*.bmp"]
             }
-        ]
-        };
+            ]
+            };
 
 
-        var files = await window.StorageProvider.OpenFilePickerAsync(options);
+            var files = await window.StorageProvider.OpenFilePickerAsync(options);
 
-        if (files is not null && files.Count > 0)
-        {
-            var file = files[0];
+            if (files is not null && files.Count > 0)
+            {
+                var file = files[0];
 
-            using var stream = await file.OpenReadAsync();
-            var bitmap = new Avalonia.Media.Imaging.Bitmap(stream);
+                using var stream = await file.OpenReadAsync();
+                var bitmap = new Avalonia.Media.Imaging.Bitmap(stream);
 
-            // show image in UI
-            ThumbnailImage.Source = bitmap;
-            CurrentMetadata.Thumbnail = bitmap;
-            var path = file.Path?.LocalPath ?? "(no local path)";
-            LogOutput.Text += ($"Selected thumbnail: {path}");
-            LogOutput.CaretIndex = LogOutput.Text.Length;
+                // show image in UI
+                ThumbnailImage.Source = bitmap;
+                CurrentMetadata.Thumbnail = bitmap;
+                var path = file.Path?.LocalPath ?? "(no local path)";
+                LogOutput.Text += ($"Selected thumbnail: {path}");
+                LogOutput.CaretIndex = LogOutput.Text.Length;
 
-            StatusTextBlock.Foreground = Avalonia.Media.Brushes.Green;
-            StatusTextBlock.Text = "Thumbnail loaded successfully.";
-            // set path to metadataobjekt
-            CurrentMetadata.ThumbnailPath = path;
+                StatusTextBlock.Foreground = Avalonia.Media.Brushes.Green;
+                StatusTextBlock.Text = "Thumbnail loaded successfully.";
+                // set path to metadataobjekt
+                CurrentMetadata.ThumbnailPath = path;
+            }
+            else
+            {
+                StatusTextBlock.Foreground = Avalonia.Media.Brushes.Red;
+                StatusTextBlock.Text = "No file selected.";
+            }
         }
         else
         {
-            StatusTextBlock.Foreground = Avalonia.Media.Brushes.Red;
-            StatusTextBlock.Text = "No file selected.";
+            throw new Exception("Our parameter window was null");
         }
     }
 
@@ -525,23 +531,34 @@ public partial class MainWindow : Window
         }
     }
 
-    private void DetectSystemTheme()
+    private static void DetectSystemTheme()
     {
-        var isDark = Application.Current.ActualThemeVariant == ThemeVariant.Dark;
-
-        // Ladda rätt tema
-        var theme = isDark ? "Dark" : "Light";
-        Application.Current.RequestedThemeVariant = isDark ? ThemeVariant.Dark : ThemeVariant.Light;
-
-        // Rensa befintliga resurser
-        Application.Current.Resources.MergedDictionaries.Clear();
-
-        // Lägg till det nya temat
-        var themeResource = new ResourceInclude(new Uri($"avares://SSMM_UI/Resources/{theme}Theme.axaml"))
+        if (Application.Current != null)
         {
-            Source = new Uri($"avares://SSMM_UI/Resources/{theme}Theme.axaml")
-        };
-        Application.Current.Resources.MergedDictionaries.Add(themeResource);
+            if (Application.Current.ActualThemeVariant != null)
+            {
+
+                var isDark = Application.Current.ActualThemeVariant == ThemeVariant.Dark;
+
+                // Ladda rätt tema
+                var theme = isDark ? "Dark" : "Light";
+                Application.Current.RequestedThemeVariant = isDark ? ThemeVariant.Dark : ThemeVariant.Light;
+
+                // Rensa befintliga resurser
+                Application.Current.Resources.MergedDictionaries.Clear();
+
+                // Lägg till det nya temat
+                var themeResource = new ResourceInclude(new Uri($"avares://SSMM_UI/Resources/{theme}Theme.axaml"))
+                {
+                    Source = new Uri($"avares://SSMM_UI/Resources/{theme}Theme.axaml")
+                };
+                Application.Current.Resources.MergedDictionaries.Add(themeResource);
+            }
+        }
+        else
+        {
+            throw new Exception("Our Application.Current was null. Major error");
+        }
     }
 
     private void OnUpdateMetadataClicked(object? sender, RoutedEventArgs e)
@@ -583,10 +600,10 @@ public partial class MainWindow : Window
     private async void LoginWithTwitch(object? sender, RoutedEventArgs e)
     {
         var twitchAuth = new TwitchOAuthService();
-        string[] scopes = new[]
-        {
+        string[] scopes =
+        [
             "user:read:email",
-        };
+        ];
 
         try
         {

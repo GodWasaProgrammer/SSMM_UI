@@ -71,11 +71,7 @@ public class KickOAuthService
             }
 
             // 5. Utför tokenutbyte
-            var tokenResult = await ExchangeCodeForTokenAsync(authCode);
-            if (tokenResult == null)
-            {
-                throw new Exception("Tokenutbyte misslyckades");
-            }
+            var tokenResult = await ExchangeCodeForTokenAsync(authCode) ?? throw new Exception("Tokenutbyte misslyckades");
 
             // 6. Hämta användarinformation
             tokenResult.Username = await GetUsernameAsync(tokenResult.AccessToken);
@@ -93,19 +89,19 @@ public class KickOAuthService
         }
     }
 
-    private async Task<KickAuthResult> RefreshTokenAsync(string refreshToken)
+    private static async Task<KickAuthResult> RefreshTokenAsync(string refreshToken)
     {
         string clientId = Environment.GetEnvironmentVariable("KickClientID")!;
         string clientSecret = Environment.GetEnvironmentVariable("KickClientSecret")!;
 
         using var httpClient = new HttpClient();
-        var content = new FormUrlEncodedContent(new[]
-        {
+        var content = new FormUrlEncodedContent(
+        [
         new KeyValuePair<string, string>("grant_type", "refresh_token"),
         new KeyValuePair<string, string>("refresh_token", refreshToken),
         new KeyValuePair<string, string>("client_id", clientId),
         new KeyValuePair<string, string>("client_secret", clientSecret),
-    });
+    ]);
 
         var response = await httpClient.PostAsync($"{OAuthBaseUrl}/oauth/token", content);
         var responseData = await response.Content.ReadAsStringAsync();
@@ -171,6 +167,7 @@ public class KickOAuthService
 
             // Validera state
             var receivedState = context.Request.QueryString["state"];
+
             if (receivedState != _currentState)
             {
                 await SendBrowserResponse(context.Response,
@@ -181,8 +178,14 @@ public class KickOAuthService
             string authCode = context.Request.QueryString["code"];
             await SendBrowserResponse(context.Response,
                 "<html><body>✅ Inloggning lyckades. Stäng detta fönster.</body></html>");
-
-            return authCode;
+            if (authCode != null)
+            {
+                return authCode;
+            }
+            else
+            {
+                throw new Exception("we did not receive an auth code");
+            }
         }
         catch (OperationCanceledException)
         {
@@ -196,51 +199,59 @@ public class KickOAuthService
 
     private async Task<KickAuthResult> ExchangeCodeForTokenAsync(string authCode)
     {
-        string clientId = Environment.GetEnvironmentVariable("KickClientID") ??
-                        throw new Exception("ClientID not set");
-        string clientSecret = Environment.GetEnvironmentVariable("KickClientSecret") ??
-                           throw new Exception("ClientSecret not set");
-
-        using var httpClient = new HttpClient();
-        var tokenRequest = new FormUrlEncodedContent(new[]
+        if (_currentCodeVerifier != null)
         {
-            new KeyValuePair<string, string>("grant_type", "authorization_code"),
+
+            string clientId = Environment.GetEnvironmentVariable("KickClientID") ??
+                            throw new Exception("ClientID not set");
+            string clientSecret = Environment.GetEnvironmentVariable("KickClientSecret") ??
+                               throw new Exception("ClientSecret not set");
+
+            using var httpClient = new HttpClient();
+            FormUrlEncodedContent tokenRequest = new(
+            [
+                new KeyValuePair<string, string>("grant_type", "authorization_code"),
             new KeyValuePair<string, string>("code", authCode),
             new KeyValuePair<string, string>("redirect_uri", RedirectUri),
             new KeyValuePair<string, string>("client_id", clientId),
             new KeyValuePair<string, string>("client_secret", clientSecret),
             new KeyValuePair<string, string>("code_verifier", _currentCodeVerifier)
-        });
+            ]);
 
-        try
-        {
-            var response = await httpClient.PostAsync($"{OAuthBaseUrl}/oauth/token", tokenRequest);
-            var responseData = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                throw new Exception($"Tokenförfrågan misslyckades: {response.StatusCode}\n{responseData}");
+                var response = await httpClient.PostAsync($"{OAuthBaseUrl}/oauth/token", tokenRequest);
+                var responseData = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Tokenförfrågan misslyckades: {response.StatusCode}\n{responseData}");
+                }
+
+                var tokenData = JsonDocument.Parse(responseData).RootElement;
+                return new KickAuthResult
+                {
+                    AccessToken = tokenData.GetProperty("access_token").GetString() ??
+                                throw new Exception("Saknar access_token i svar"),
+                    RefreshToken = tokenData.GetProperty("refresh_token").GetString() ??
+                                 throw new Exception("Saknar refresh_token i svar"),
+                    TokenType = tokenData.GetProperty("token_type").GetString() ?? "Bearer",
+                    ExpiresAt = DateTime.UtcNow.AddSeconds(tokenData.GetProperty("expires_in").GetInt32()),
+                    Scope = tokenData.GetProperty("scope").GetString() ?? string.Empty
+                };
             }
-
-            var tokenData = JsonDocument.Parse(responseData).RootElement;
-            return new KickAuthResult
+            catch (Exception ex)
             {
-                AccessToken = tokenData.GetProperty("access_token").GetString() ??
-                            throw new Exception("Saknar access_token i svar"),
-                RefreshToken = tokenData.GetProperty("refresh_token").GetString() ??
-                             throw new Exception("Saknar refresh_token i svar"),
-                TokenType = tokenData.GetProperty("token_type").GetString() ?? "Bearer",
-                ExpiresAt = DateTime.UtcNow.AddSeconds(tokenData.GetProperty("expires_in").GetInt32()),
-                Scope = tokenData.GetProperty("scope").GetString() ?? string.Empty
-            };
+                throw new Exception($"Fel vid tokenutbyte: {ex.Message}");
+            }
         }
-        catch (Exception ex)
+        else
         {
-            throw new Exception($"Fel vid tokenutbyte: {ex.Message}");
+            throw new InvalidOperationException("Codeverifier was null");
         }
     }
 
-    private async Task<string> GetUsernameAsync(string accessToken)
+    private static async Task<string> GetUsernameAsync(string accessToken)
     {
         using var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
@@ -269,11 +280,10 @@ public class KickOAuthService
     }
 
 
-    private (string codeVerifier, string codeChallenge) GeneratePkceParameters()
+    private static (string codeVerifier, string codeChallenge) GeneratePkceParameters()
     {
         var codeVerifier = GenerateRandomString(128);
-        using var sha256 = SHA256.Create();
-        var challengeBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(codeVerifier));
+        var challengeBytes = SHA256.HashData(Encoding.UTF8.GetBytes(codeVerifier));
         var codeChallenge = Base64UrlEncode(challengeBytes);
         return (codeVerifier, codeChallenge);
     }
@@ -282,8 +292,7 @@ public class KickOAuthService
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
         var random = new Random();
-        return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[random.Next(s.Length)]).ToArray());
+        return new string([.. Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)])]);
     }
 
     private static string Base64UrlEncode(byte[] input)
@@ -294,7 +303,7 @@ public class KickOAuthService
             .Replace('/', '_');
     }
 
-    private void OpenBrowser(string url)
+    private static void OpenBrowser(string url)
     {
         try
         {
@@ -310,7 +319,7 @@ public class KickOAuthService
         }
     }
 
-    private async Task SendBrowserResponse(HttpListenerResponse response, string content)
+    private static async Task SendBrowserResponse(HttpListenerResponse response, string content)
     {
         var buffer = Encoding.UTF8.GetBytes(content);
         response.ContentLength64 = buffer.Length;
@@ -318,7 +327,7 @@ public class KickOAuthService
         response.Close();
     }
 
-    private void SaveToken(KickAuthResult token)
+    private static void SaveToken(KickAuthResult token)
     {
         var json = JsonSerializer.Serialize(token, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(TokenFilePath, json);
