@@ -1,5 +1,4 @@
-﻿using SSMM_UI.Oauth;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -13,6 +12,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
+
+namespace SSMM_UI.Oauth;
 public class KickOAuthService
 {
     private const string OAuthBaseUrl = "https://id.kick.com";
@@ -34,8 +35,8 @@ public class KickOAuthService
         }
     }
 
-    private string _currentCodeVerifier;
-    private string _currentState;
+    private string? _currentCodeVerifier;
+    private string? _currentState;
 
     public async Task<KickAuthResult> AuthenticateUserAsync(string[] requestedScopes)
     {
@@ -133,10 +134,18 @@ public class KickOAuthService
             var json = File.ReadAllText(TokenFilePath);
             var token = JsonSerializer.Deserialize<KickAuthResult>(json);
 
-            if (token != null && token.ExpiresAt > DateTime.UtcNow)
+            if (token != null)
             {
+                if (DateTime.UtcNow > token.ExpiresAt)
+                {
+                    return await AuthenticateUserAsync(scopes);
+                }
                 var res = await GetUsernameAsync(token.AccessToken);
                 token.Username = res;
+            }
+
+            if (token != null && token.ExpiresAt > DateTime.UtcNow)
+            {
 
                 return token; // Token fortfarande giltig
             }

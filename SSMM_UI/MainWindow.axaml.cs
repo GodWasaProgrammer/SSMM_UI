@@ -12,6 +12,7 @@ using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.Dialogs;
+using SSMM_UI.Oauth;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
