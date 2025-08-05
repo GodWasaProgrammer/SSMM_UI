@@ -21,7 +21,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -38,14 +37,16 @@ public partial class MainWindow : Window
 
     public StreamMetadata CurrentMetadata { get; set; } = new StreamMetadata();
 
-    public StreamInfo? StreamInfo { get; set; } = new();
+    public StreamInfo? StreamInfo { get; set; }
 
-    const string RtmpAdress = "rtmp://localhost/live/stream";
+    public RTMPServer Server { get; set; } = new();
+
+    const string RtmpAdress = "rtmp://localhost:1935/live/demo";
 
     public YouTubeService _youtubeService = new();
 
     private bool isReceivingStream = false;
-
+    private Task _serverTask;
     private readonly List<Process>? ffmpegProcess = [];
     public MainWindow()
     {
@@ -56,6 +57,7 @@ public partial class MainWindow : Window
         StartServerStatusPolling();
         if (!Design.IsDesignMode)
             RtmpIncoming.Play(RtmpAdress);
+        RunRTMPServer();
     }
 
     private async void RTMPServiceList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -126,7 +128,7 @@ public partial class MainWindow : Window
     {
         while (true)
         {
-            var isAlive = await Task.Run(() => CheckStreamIsAlive("rtmp://localhost/live/stream"));
+            var isAlive = await Task.Run(() => CheckStreamIsAlive(RtmpAdress));
             Dispatcher.UIThread.Post(() =>
             {
                 StreamStatusText.Text = isAlive
@@ -136,29 +138,32 @@ public partial class MainWindow : Window
         }
     }
 
+    private void RunRTMPServer()
+    {
+        Server.SetupServerAsync();
+    }
     private async void StartServerStatusPolling()
     {
         while (true)
         {
-            var serverOnline = await Task.Run(() => IsRtmpServerReachable("localhost"));
-            Dispatcher.UIThread.Post(() =>
-            {
-                ServerStatusText.Text = serverOnline
-                    ? "RTMP server: ✅ Online"
-                    : "RTMP server: ❌ Offline";
-            });
-            await Task.Delay(10000);
+            bool isResponding = await IsRtmpApiResponding(); // Använd await istället för .Result
+
+            ServerStatusText.Text = isResponding
+                ? "RTMP-server: ✅ Running"
+                : "RTMP-server: ❌ Inte startad";
+
+            await Task.Delay(5000); // 5 sekunders delay
         }
     }
 
-    private static bool IsRtmpServerReachable(string host, int port = 1935, int timeoutMs = 1000)
+    private async Task<bool> IsRtmpApiResponding()
     {
         try
         {
-            using var client = new TcpClient();
-            var task = client.ConnectAsync(host, port);
-            bool connected = task.Wait(timeoutMs);
-            return connected && client.Connected;
+            using var client = new HttpClient();
+            client.Timeout = TimeSpan.FromSeconds(25); // Sänk timeout till 2 sekunder
+            var response = await client.GetAsync("https://localhost:7000/ui/");
+            return response.IsSuccessStatusCode;
         }
         catch
         {
