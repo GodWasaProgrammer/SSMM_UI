@@ -13,7 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 
-namespace SSMM_UI.Oauth;
+namespace SSMM_UI.Oauth.Kick;
 public class KickOAuthService
 {
     private const string OAuthBaseUrl = "https://id.kick.com";

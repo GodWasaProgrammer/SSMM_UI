@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SSMM_UI.Oauth;
+namespace SSMM_UI.Oauth.Twitch;
 
 public class TwitchAuthResult
 {

@@ -12,13 +12,15 @@ using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.Dialogs;
-using SSMM_UI.Oauth;
+using SSMM_UI.Oauth.Kick;
+using SSMM_UI.Oauth.Twitch;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
@@ -582,7 +584,7 @@ public partial class MainWindow : Window
         StatusTextBlock.Text = "Metadata updated successfully!";
     }
 
-    private async void OnLoginWithGoogleClicked(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private async void OnLoginWithGoogleClicked(object? sender, RoutedEventArgs e)
     {
         LoginStatusText.Text = "Loggar in...";
 
@@ -599,22 +601,47 @@ public partial class MainWindow : Window
 
     private async void LoginWithTwitch(object? sender, RoutedEventArgs e)
     {
-        var twitchAuth = new TwitchOAuthService();
-        string[] scopes =
-        [
-            "user:read:email",
-        ];
-
-        try
+        var clId = Environment.GetEnvironmentVariable("TwitchDCFClient");
+        if (string.IsNullOrEmpty(clId))
         {
-            //TwitchPKCEDemo twitchPKCEDemo = new TwitchPKCEDemo();
-            //await twitchPKCEDemo.RunAsync(Environment.GetEnvironmentVariable("TwitchClientID"));
-            var result = await twitchAuth.AuthenticateUserAsync(scopes);
-            TwitchLogin.Text = ($"✅ Inloggad som: {result.Username}");
+            throw new Exception("ClId was missing");
         }
-        catch (Exception ex)
+        var scopes = new[]
         {
-            Console.WriteLine("Fel vid Twitch-login: " + ex.Message);
+            TwitchScopes.UserReadEmail,
+            TwitchScopes.ChannelManageBroadcast,
+        };
+        var twitch = new TwitchDeviceCodeAuthService(new HttpClient(), clId, scopes);
+
+        var IsTokenValid = twitch.TryLoadValidOrRefreshTokenAsync();
+
+        if (IsTokenValid.Result != null)
+        {
+            if (IsTokenValid.Result != null)
+            {
+                TwitchLogin.Text = ($"✅ Inloggad som: {IsTokenValid.Result.UserName}");
+            }
+        }
+        else
+        {
+            var device = await twitch.StartDeviceCodeFlowAsync();
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = device.VerificationUri,
+                UseShellExecute = true
+            });
+            // Visa UI eller vänta medan användaren godkänner
+            var token = await twitch.PollForTokenAsync(device.DeviceCode, device.Interval);
+
+            if (token != null)
+            {
+                TwitchLogin.Text = ($"✅ Inloggad som: {token.UserName}");
+            }
+            else
+            {
+                Console.WriteLine("Timeout - användaren loggade inte in.");
+            }
         }
     }
 

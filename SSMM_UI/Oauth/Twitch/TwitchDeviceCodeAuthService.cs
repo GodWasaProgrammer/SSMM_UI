@@ -1,0 +1,212 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Threading.Tasks;
+
+namespace SSMM_UI.Oauth.Twitch;
+
+public class TwitchDeviceCodeAuthService
+{
+    private readonly HttpClient _httpClient;
+    private const string DcfApiAdress = "https://id.twitch.tv/oauth2/device";
+    private const string TokenAdress = "https://id.twitch.tv/oauth2/token";
+    private readonly string _clientId;
+    private readonly string[] _scopes;
+    private const string TokenFilePath = "twitch_tokenDCF.json";
+    private const string ApiBaseUrl = "https://api.twitch.tv/helix";
+
+    public TwitchDeviceCodeAuthService(HttpClient httpClient, string clientId, string[] scopes)
+    {
+        _httpClient = httpClient;
+        _clientId = clientId;
+        _scopes = scopes;
+    }
+
+    public async Task<TwitchDCResponse> StartDeviceCodeFlowAsync()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, DcfApiAdress);
+
+        var bla = string.Join(" ", _scopes);
+        var content = new FormUrlEncodedContent(new[]
+        {
+            new KeyValuePair<string, string>("client_id", _clientId),
+            new KeyValuePair<string, string>("scope", string.Join(" ", _scopes))
+        });
+
+        request.Content = content;
+
+        var response = await _httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<TwitchDCResponse>();
+        return result!;
+    }
+
+    public async Task<TwitchTokenTokenResponse?> RefreshAccessTokenAsync(string refreshToken)
+    {
+        var content = new FormUrlEncodedContent(new[]
+        {
+        new KeyValuePair<string, string>("grant_type", "refresh_token"),
+        new KeyValuePair<string, string>("refresh_token", refreshToken),
+        new KeyValuePair<string, string>("client_id", _clientId)
+    });
+
+        var response = await _httpClient.PostAsync("https://id.twitch.tv/oauth2/token", content);
+        var responseBody = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"⚠️ Refresh failed: {response.StatusCode}\n{responseBody}");
+            return null;
+        }
+
+        var token = JsonSerializer.Deserialize<TwitchTokenTokenResponse>(responseBody);
+        if (token is not null)
+        {
+            token.ExpiresAt = DateTime.UtcNow.AddSeconds(token.ExpiresIn);
+            token.UserName = await GetUsernameAsync(token.AccessToken);
+            SaveToken(token);
+        }
+
+        return token!;
+    }
+
+    public async Task<TwitchTokenTokenResponse?> TryLoadValidOrRefreshTokenAsync()
+    {
+        var token = LoadSavedToken();
+        if (token == null) return null;
+
+        if (token.IsValid)
+            return token;
+
+        if (!string.IsNullOrWhiteSpace(token.RefreshToken))
+        {
+            Console.WriteLine("🔁 Försöker förnya åtkomsttoken med refresh_token...");
+            return await RefreshAccessTokenAsync(token.RefreshToken);
+        }
+
+        return null;
+    }
+
+
+    public async Task<TwitchTokenTokenResponse?> PollForTokenAsync(string deviceCode, int intervalSeconds, int maxWaitSeconds = 300)
+    {
+        int elapsed = 0;
+
+        while (elapsed < maxWaitSeconds)
+        {
+            // Vänta enligt det rekommenderade intervallet (sekunder -> millisekunder)
+            await Task.Delay(intervalSeconds * 1000);
+            elapsed += intervalSeconds;
+
+            var content = new FormUrlEncodedContent(new[]
+            {
+            new KeyValuePair<string, string>("client_id", _clientId),
+            new KeyValuePair<string, string>("device_code", deviceCode),
+            new KeyValuePair<string, string>("grant_type", "urn:ietf:params:oauth:grant-type:device_code")
+        });
+
+            var response = await _httpClient.PostAsync(TokenAdress, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var token = await response.Content.ReadFromJsonAsync<TwitchTokenTokenResponse>();
+                if (token != null)
+                {
+                    token.ExpiresAt = DateTime.UtcNow.AddSeconds(token.ExpiresIn);
+                    token.UserName = await GetUsernameAsync(token.AccessToken);
+                    SaveToken(token);
+                    return token;
+                }
+            }
+
+            // Läser felmeddelandet som sträng (för debug/logg)
+            var errorBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Polling error ({response.StatusCode}): {errorBody}");
+
+            try
+            {
+                var error = JsonSerializer.Deserialize<TwitchOAuthErrorResponse>(errorBody);
+
+                switch (error?.Error)
+                {
+                    case "authorization_pending":
+                        // Användaren har inte godkänt ännu – fortsätt vänta
+                        continue;
+
+                    case "slow_down":
+                        // Twitch säger att vi pollar för snabbt – öka intervallet
+                        intervalSeconds += 5;
+                        Console.WriteLine("Twitch säger att vi pollar för snabbt, ökar väntetiden...");
+                        continue;
+
+                    case "access_denied":
+                        Console.WriteLine("Användaren nekade åtkomst.");
+                        return null;
+
+                    case "expired_token":
+                        Console.WriteLine("Device code har gått ut. Timeout.");
+                        return null;
+
+                    case "":
+                        return null;
+                    default:
+                        throw new Exception($"Okänt OAuth-fel: {error?.Error}");
+                }
+            }
+            catch (JsonException)
+            {
+                throw new Exception($"Misslyckades tolka felmeddelande från Twitch: {errorBody}");
+            }
+        }
+
+        Console.WriteLine("Polling avbröts efter max väntetid utan godkännande.");
+        return null;
+    }
+
+
+    private async Task<string> GetUsernameAsync(string accessToken)
+    {
+        using var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        httpClient.DefaultRequestHeaders.Add("Client-Id", _clientId);
+
+        var response = await httpClient.GetAsync($"{ApiBaseUrl}/users");
+        var responseData = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            throw new Exception($"User info failed: {response.StatusCode}\n{responseData}");
+
+        var json = JsonDocument.Parse(responseData).RootElement;
+        var user = json.GetProperty("data")[0];
+
+        return user.TryGetProperty("login", out var login)
+            ? login.GetString()
+            : user.GetProperty("display_name").GetString();
+    }
+
+    public static void SaveToken(TwitchTokenTokenResponse token)
+    {
+        var json = JsonSerializer.Serialize(token, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(TokenFilePath, json);
+    }
+
+    public static TwitchTokenTokenResponse LoadSavedToken()
+    {
+        if (!File.Exists(TokenFilePath)) return null;
+
+        try
+        {
+            var json = File.ReadAllText(TokenFilePath);
+            return JsonSerializer.Deserialize<TwitchTokenTokenResponse>(json);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+}
