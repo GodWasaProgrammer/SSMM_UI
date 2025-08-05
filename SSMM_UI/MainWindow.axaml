@@ -203,7 +203,7 @@
 
 								<StackPanel Margin="0 10 0 0">
 									<TextBlock x:Name="ReceivingStatus" Classes="secondary"/>
-									<TextBlock x:Name="StreamStatusText" Text="Polling..." FontWeight="SemiBold"/>
+									<TextBlock x:Name="StreamStatusText" Text="Stream status: ❌ Not Receiving" FontWeight="SemiBold"/>
 									<TextBlock x:Name="ServerStatusText" Text="Polling..." FontWeight="SemiBold"/>
 								</StackPanel>
 							</StackPanel>
