@@ -9,17 +9,18 @@ using System.Threading.Tasks;
 
 namespace SSMM_UI.Oauth.Twitch;
 
-public class TwitchDeviceCodeAuthService
+public class TwitchDCAuthService
 {
     private readonly HttpClient _httpClient;
     private const string DcfApiAdress = "https://id.twitch.tv/oauth2/device";
     private const string TokenAdress = "https://id.twitch.tv/oauth2/token";
-    private readonly string _clientId;
+    public readonly string _clientId;
     private readonly string[] _scopes;
     private const string TokenFilePath = "twitch_tokenDCF.json";
     private const string ApiBaseUrl = "https://api.twitch.tv/helix";
+    public TwitchTokenTokenResponse AuthResult;
 
-    public TwitchDeviceCodeAuthService(HttpClient httpClient, string clientId, string[] scopes)
+    public TwitchDCAuthService(HttpClient httpClient, string clientId, string[] scopes)
     {
         _httpClient = httpClient;
         _clientId = clientId;
@@ -78,6 +79,10 @@ public class TwitchDeviceCodeAuthService
     public async Task<TwitchTokenTokenResponse?> TryLoadValidOrRefreshTokenAsync()
     {
         var token = LoadSavedToken();
+        if (token is not null)
+        {
+            AuthResult = token;
+        }
         if (token == null) return null;
 
         if (token.IsValid)
@@ -115,10 +120,13 @@ public class TwitchDeviceCodeAuthService
             if (response.IsSuccessStatusCode)
             {
                 var token = await response.Content.ReadFromJsonAsync<TwitchTokenTokenResponse>();
+
                 if (token != null)
                 {
                     token.ExpiresAt = DateTime.UtcNow.AddSeconds(token.ExpiresIn);
                     token.UserName = await GetUsernameAsync(token.AccessToken);
+                    token.UserId = await GetUserIdAsync(token.AccessToken);
+                    AuthResult = token;
                     SaveToken(token);
                     return token;
                 }
@@ -187,6 +195,29 @@ public class TwitchDeviceCodeAuthService
         return user.TryGetProperty("login", out var login)
             ? login.GetString()
             : user.GetProperty("display_name").GetString();
+    }
+
+    private async Task<string> GetUserIdAsync(string accessToken)
+    {
+        using var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        httpClient.DefaultRequestHeaders.Add("Client-Id", _clientId);
+
+        var response = await httpClient.GetAsync($"{ApiBaseUrl}/users");
+        var responseData = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"Failed to get UserId. Status: {response.StatusCode}\n{responseData}");
+        }
+
+        var json = JsonDocument.Parse(responseData).RootElement;
+        var user = json.GetProperty("data")[0];
+
+        // Rätt propertynamn: "id"
+        return user.TryGetProperty("id", out var userIdElement)
+            ? userIdElement.GetString()
+            : throw new Exception("Could not find 'id' in user response.");
     }
 
     public static void SaveToken(TwitchTokenTokenResponse token)

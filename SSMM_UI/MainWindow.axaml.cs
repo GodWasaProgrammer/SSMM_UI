@@ -21,6 +21,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -43,8 +44,8 @@ public partial class MainWindow : Window
 
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
 
-    public YouTubeService _youtubeService = new();
-
+    private YouTubeService _youtubeService = new();
+    private TwitchDCAuthService _twitchService;
     private bool isReceivingStream = false;
     private Task _serverTask;
     private readonly List<Process>? ffmpegProcess = [];
@@ -142,6 +143,7 @@ public partial class MainWindow : Window
     {
         Server.SetupServerAsync();
     }
+
     private async void StartServerStatusPolling()
     {
         while (true)
@@ -241,6 +243,35 @@ public partial class MainWindow : Window
         }
     }
 
+    private const string TwitchAdress = "rtmp://live.twitch.tv/app";
+    public async Task<(string rtmpUrl, string streamKey)> CreateTwitchBroadcastAsync(StreamMetadata metadata)
+    {
+        var accessToken = _twitchService.AuthResult.AccessToken;
+        var ClientId = _twitchService._clientId;
+        var userId = _twitchService.AuthResult.UserId;
+        using var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        httpClient.DefaultRequestHeaders.Add("Client-Id", ClientId);
+
+        var content = new StringContent(JsonSerializer.Serialize(new
+        {
+            title = metadata.Title,
+            //game_id = metadata.GameId // Valfritt: kräver att du hämtat game_id först
+        }), Encoding.UTF8, "application/json");
+
+        var response = await httpClient.PatchAsync($"https://api.twitch.tv/helix/channels?broadcaster_id={userId}", content);
+        response.EnsureSuccessStatusCode();
+
+        // Twitch RTMP-info är statisk (RTMP URL och stream key)
+        var streamKeyResponse = await httpClient.GetAsync($"https://api.twitch.tv/helix/streams/key?broadcaster_id={userId}");
+        streamKeyResponse.EnsureSuccessStatusCode();
+
+        var json = await streamKeyResponse.Content.ReadAsStringAsync();
+        var doc = JsonDocument.Parse(json);
+        var key = doc.RootElement.GetProperty("data")[0].GetProperty("stream_key").GetString();
+
+        return (TwitchAdress, key);
+    }
 
     private async void StartStream(object? sender, RoutedEventArgs e)
     {
@@ -260,14 +291,25 @@ public partial class MainWindow : Window
             {
                 try
                 {
-                    // Skapa ny Youtube broadcast med metadata
-                    var (newUrl, newKey) = await CreateYouTubeBroadcastAsync(CurrentMetadata);
-                    url = newUrl;
-                    streamKey = newKey;
+                    if (service.DisplayName.Contains("Youtube", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var (newUrl, newKey) = await CreateYouTubeBroadcastAsync(CurrentMetadata);
+                        // Skapa ny Youtube broadcast med metadata
+                        url = newUrl;
+                        streamKey = newKey;
+                        // Uppdatera service med nya värden så vi kör rätt stream
+                        service.SelectedServer.Url = url;
+                        service.StreamKey = streamKey;
 
-                    // Uppdatera service med nya värden så vi kör rätt stream
-                    service.SelectedServer.Url = url;
-                    service.StreamKey = streamKey;
+                    }
+                    if (service.DisplayName.Contains("Twitch", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var (newUrl, newKey) = await CreateTwitchBroadcastAsync(CurrentMetadata);
+                        url = newUrl;
+                        streamKey = newKey;
+                        service.SelectedServer.Url = url;
+                        service.StreamKey = streamKey;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -284,7 +326,7 @@ public partial class MainWindow : Window
             }
 
             // Bygg ffmpeg argument
-            var fullUrl = $"{url}/{streamKey}";
+            var fullUrl = $"{service.SelectedServer.Url}/{service.StreamKey}";
             var input = RtmpAdress; // exempel, justera efter behov
 
             var args = new StringBuilder($"-i \"{input}\" ");
@@ -307,6 +349,7 @@ public partial class MainWindow : Window
                 process.Start();
 
                 // Läs FFmpeg:s standardfelutgång asynkront
+                StopStreamButton.IsEnabled = true;
                 string? line;
                 while ((line = await process.StandardError.ReadLineAsync()) != null)
                 {
@@ -322,7 +365,6 @@ public partial class MainWindow : Window
                 LogOutput.CaretIndex = LogOutput.Text.Length;
             }
         }
-        StopStreamButton.IsEnabled = true;
     }
     public static StreamInfo? ProbeStream(string rtmpUrl)
     {
@@ -615,10 +657,11 @@ public partial class MainWindow : Window
         {
             TwitchScopes.UserReadEmail,
             TwitchScopes.ChannelManageBroadcast,
+            TwitchScopes.StreamKey
         };
-        var twitch = new TwitchDeviceCodeAuthService(new HttpClient(), clId, scopes);
+        _twitchService = new TwitchDCAuthService(new HttpClient(), clId, scopes);
 
-        var IsTokenValid = twitch.TryLoadValidOrRefreshTokenAsync();
+        var IsTokenValid = _twitchService.TryLoadValidOrRefreshTokenAsync();
 
         if (IsTokenValid.Result != null)
         {
@@ -629,7 +672,7 @@ public partial class MainWindow : Window
         }
         else
         {
-            var device = await twitch.StartDeviceCodeFlowAsync();
+            var device = await _twitchService.StartDeviceCodeFlowAsync();
 
             Process.Start(new ProcessStartInfo
             {
@@ -637,7 +680,7 @@ public partial class MainWindow : Window
                 UseShellExecute = true
             });
             // Visa UI eller vänta medan användaren godkänner
-            var token = await twitch.PollForTokenAsync(device.DeviceCode, device.Interval);
+            var token = await _twitchService.PollForTokenAsync(device.DeviceCode, device.Interval);
 
             if (token != null)
             {
