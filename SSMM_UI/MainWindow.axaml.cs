@@ -12,6 +12,7 @@ using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.Dialogs;
+using SSMM_UI.MetaData;
 using SSMM_UI.Oauth.Kick;
 using SSMM_UI.Oauth.Twitch;
 using System;
@@ -44,10 +45,11 @@ public partial class MainWindow : Window
 
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
 
-    private YouTubeService _youtubeService = new();
-    private TwitchDCAuthService _twitchService;
+    private YouTubeService? _youtubeService = new();
+    private TwitchDCAuthService? _twitchService;
+    private MetaDataService? _metaDataService { get; set; }
     private bool isReceivingStream = false;
-    private Task _serverTask;
+    private Task? _serverTask;
     private readonly List<Process>? ffmpegProcess = [];
     public MainWindow()
     {
@@ -272,7 +274,7 @@ public partial class MainWindow : Window
 
         return (TwitchAdress, key);
     }
-
+    // TODO: Figure out a better way to deduct which stream is which...
     private async void StartStream(object? sender, RoutedEventArgs e)
     {
         StartStreamButton.IsEnabled = false;
@@ -609,7 +611,6 @@ public partial class MainWindow : Window
             throw new Exception("Our Application.Current was null. Major error");
         }
     }
-
     private void OnUpdateMetadataClicked(object? sender, RoutedEventArgs e)
     {
         var title = TitleTextBox.Text?.Trim();
