@@ -5,62 +5,60 @@ using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using FFmpeg.AutoGen;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Oauth2.v2;
-using Google.Apis.Oauth2.v2.Data;
-using Google.Apis.Services;
-using Google.Apis.YouTube.v3;
-using Google.Apis.YouTube.v3.Data;
-using SSMM_UI.Dialogs;
 using SSMM_UI.MetaData;
-using SSMM_UI.Oauth.Kick;
-using SSMM_UI.Oauth.Twitch;
+using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-
-
 namespace SSMM_UI;
 
 public partial class MainWindow : Window
 {
-    public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
-
-    public ObservableCollection<SelectedService> SelectedServicesToStream { get; } = [];
-
+    public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; private set; }
+    public ObservableCollection<SelectedService> SelectedServicesToStream { get; private set; }
+    private CentralAuthService _centralAuthService;
     public StreamMetadata CurrentMetadata { get; set; } = new StreamMetadata();
 
-    public StreamInfo? StreamInfo { get; set; }
-
+    private readonly StateService _stateService = new();
+    private readonly StreamService _streamService;
     public RTMPServer Server { get; set; } = new();
-
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
-
-    private YouTubeService? _youtubeService = new();
-    private TwitchDCAuthService? _twitchService;
     private MetaDataService? _metaDataService { get; set; }
     private bool isReceivingStream = false;
-    private Task? _serverTask;
     private readonly List<Process>? ffmpegProcess = [];
+
     public MainWindow()
     {
         InitializeComponent();
+        RtmpServiceGroups = _stateService.RtmpServiceGroups;
+        SelectedServicesToStream = _stateService.SelectedServicesToStream;
         DataContext = this;
-        LoadRtmpServersFromServicesJson("services.json");
+        _centralAuthService = new CentralAuthService();
+        _streamService = new(_centralAuthService);
+
         StartStreamStatusPolling();
         StartServerStatusPolling();
         if (!Design.IsDesignMode)
             RtmpIncoming.Play(RtmpAdress);
         RunRTMPServer();
+    }
+
+    protected override async void OnOpened(EventArgs e)
+    {
+        base.OnOpened(e);
+        await AutoLoginIfTokenized();
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+        _stateService.SerializeServices();
     }
 
     private async void RTMPServiceList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -83,47 +81,6 @@ public partial class MainWindow : Window
         if (SelectedServices.SelectedItem is SelectedService service)
         {
             SelectedServicesToStream.Remove(service);
-        }
-    }
-
-    private void LoadRtmpServersFromServicesJson(string jsonPath)
-    {
-        if (!File.Exists(jsonPath))
-            return;
-
-        using var doc = JsonDocument.Parse(File.ReadAllText(jsonPath));
-        var services = doc.RootElement.GetProperty("services");
-
-        foreach (var service in services.EnumerateArray())
-        {
-            if (service.TryGetProperty("protocol", out var proto) && !proto.GetString()!.Contains("rtmp", StringComparison.CurrentCultureIgnoreCase))
-                continue;
-
-            var serviceName = service.GetProperty("name").GetString() ?? "Unknown";
-
-            var rtmpServers = new List<RtmpServerInfo>();
-
-            foreach (var server in service.GetProperty("servers").EnumerateArray())
-            {
-                var url = server.GetProperty("url").GetString() ?? "";
-                if (!url.StartsWith("rtmp")) continue;
-
-                rtmpServers.Add(new RtmpServerInfo
-                {
-                    ServiceName = serviceName,
-                    ServerName = server.GetProperty("name").GetString() ?? "Unnamed",
-                    Url = url
-                });
-            }
-
-            if (rtmpServers.Count > 0)
-            {
-                RtmpServiceGroups.Add(new RtmpServiceGroup
-                {
-                    ServiceName = serviceName,
-                    Servers = rtmpServers
-                });
-            }
         }
     }
 
@@ -172,6 +129,32 @@ public partial class MainWindow : Window
         catch
         {
             return false;
+        }
+    }
+
+    private async Task AutoLoginIfTokenized()
+    {
+        var authService = new CentralAuthService();
+        var results = await authService.TryAutoLoginAllAsync();
+
+        foreach (var result in results)
+        {
+            var message = result.Success
+                ? $"✅ Logged in as: {result.Username}"
+                : $"❌ {result.ErrorMessage}";
+
+            switch (result.Provider)
+            {
+                case AuthProvider.Twitch:
+                    TwitchLogin.Text = message;
+                    break;
+                case AuthProvider.YouTube:
+                    LoginStatusText.Text = message;
+                    break;
+                case AuthProvider.Kick:
+                    KickLogin.Text = message;
+                    break;
+            }
         }
     }
 
@@ -245,35 +228,61 @@ public partial class MainWindow : Window
         }
     }
 
-    private const string TwitchAdress = "rtmp://live.twitch.tv/app";
-    public async Task<(string rtmpUrl, string streamKey)> CreateTwitchBroadcastAsync(StreamMetadata metadata)
-    {
-        var accessToken = _twitchService.AuthResult.AccessToken;
-        var ClientId = _twitchService._clientId;
-        var userId = _twitchService.AuthResult.UserId;
-        using var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        httpClient.DefaultRequestHeaders.Add("Client-Id", ClientId);
+    //private async Task SetYouTubeCategoryAndGameAsync(string videoId, string wikipediaUrl, string accessToken)
+    //{
+    //    // 1. Uppdatera kategorin till "Gaming" via klient-API
+    //    var videosList = _youtubeService.Videos.List("snippet,topicDetails"); // ändrat här
+    //    videosList.Id = videoId;
 
-        var content = new StringContent(JsonSerializer.Serialize(new
-        {
-            title = metadata.Title,
-            //game_id = metadata.GameId // Valfritt: kräver att du hämtat game_id först
-        }), Encoding.UTF8, "application/json");
+    //    var video = (await videosList.ExecuteAsync()).Items.FirstOrDefault();
 
-        var response = await httpClient.PatchAsync($"https://api.twitch.tv/helix/channels?broadcaster_id={userId}", content);
-        response.EnsureSuccessStatusCode();
+    //    if (video == null)
+    //    {
+    //        Console.WriteLine("Kunde inte hitta videon med angivet ID.");
+    //        return;
+    //    }
 
-        // Twitch RTMP-info är statisk (RTMP URL och stream key)
-        var streamKeyResponse = await httpClient.GetAsync($"https://api.twitch.tv/helix/streams/key?broadcaster_id={userId}");
-        streamKeyResponse.EnsureSuccessStatusCode();
+    //    video.Snippet.CategoryId = "20"; // Gaming
 
-        var json = await streamKeyResponse.Content.ReadAsStringAsync();
-        var doc = JsonDocument.Parse(json);
-        var key = doc.RootElement.GetProperty("data")[0].GetProperty("stream_key").GetString();
+    //    var updateRequest = _youtubeService.Videos.Update(video, "snippet");
+    //    await updateRequest.ExecuteAsync();
 
-        return (TwitchAdress, key);
-    }
+    //    // 2. Gör PATCH-anrop för att sätta spel/topicDetails
+    //    var patchPayload = new
+    //    {
+    //        id = videoId,
+    //        topicDetails = new
+    //        {
+    //            topicCategories = new[] { wikipediaUrl }
+    //        }
+    //    };
+
+    //    using var httpClient = new HttpClient();
+    //    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+    //    var json = JsonSerializer.Serialize(patchPayload);
+    //    var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+    //    var patchRequest = new HttpRequestMessage(new HttpMethod("PATCH"),
+    //        $"https://www.googleapis.com/youtube/v3/videos?part=topicDetails")
+    //    {
+    //        Content = content
+    //    };
+
+    //    var response = await httpClient.SendAsync(patchRequest);
+    //    var body = await response.Content.ReadAsStringAsync();
+
+    //    if (!response.IsSuccessStatusCode)
+    //    {
+    //        Console.WriteLine($"PATCH failed: {response.StatusCode}\n{body}");
+    //    }
+    //    else
+    //    {
+    //        Console.WriteLine("Gaming-topic satt korrekt.");
+    //    }
+    //}
+
+
     // TODO: Figure out a better way to deduct which stream is which...
     private async void StartStream(object? sender, RoutedEventArgs e)
     {
@@ -295,8 +304,10 @@ public partial class MainWindow : Window
                 {
                     if (service.DisplayName.Contains("Youtube", StringComparison.OrdinalIgnoreCase))
                     {
-                        var (newUrl, newKey) = await CreateYouTubeBroadcastAsync(CurrentMetadata);
                         // Skapa ny Youtube broadcast med metadata
+                        var (newUrl, newKey) = await _streamService.CreateYouTubeBroadcastAsync(CurrentMetadata, this);
+                        //SetYouTubeCategoryAndGameAsync(newKey, newUrl, );
+
                         url = newUrl;
                         streamKey = newKey;
                         // Uppdatera service med nya värden så vi kör rätt stream
@@ -306,7 +317,7 @@ public partial class MainWindow : Window
                     }
                     if (service.DisplayName.Contains("Twitch", StringComparison.OrdinalIgnoreCase))
                     {
-                        var (newUrl, newKey) = await CreateTwitchBroadcastAsync(CurrentMetadata);
+                        var (newUrl, newKey) = await _streamService.CreateTwitchBroadcastAsync(CurrentMetadata);
                         url = newUrl;
                         streamKey = newKey;
                         service.SelectedServer.Url = url;
@@ -366,60 +377,6 @@ public partial class MainWindow : Window
                 LogOutput.Text += ($"FFmpeg start failed: {ex.Message}\n");
                 LogOutput.CaretIndex = LogOutput.Text.Length;
             }
-        }
-    }
-    public static StreamInfo? ProbeStream(string rtmpUrl)
-    {
-        try
-        {
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = "ffprobe",
-                Arguments = $"-v error -select_streams v:0 -read_intervals %+#5 -show_entries stream=width,height,r_frame_rate " +
-                            $"-of default=noprint_wrappers=1:nokey=1 \"{rtmpUrl}\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            using var process = new Process { StartInfo = startInfo };
-            process.Start();
-
-            var output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit(5000); // max 5 sekunder
-
-            if (!process.HasExited)
-            {
-                process.Kill();
-                Console.WriteLine("ffprobe process killed due to timeout.");
-                return null;
-            }
-
-            var lines = output.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
-            if (lines.Length < 3) return null;
-
-            int width = int.Parse(lines[0]);
-            int height = int.Parse(lines[1]);
-            string rawFramerate = lines[2]; // ex: "60/1"
-
-            var parts = rawFramerate.Split('/');
-            double fps = parts.Length == 2 && double.TryParse(parts[0], out var num) && double.TryParse(parts[1], out var den) && den != 0
-                ? num / den
-                : 30.0;
-
-            string frameRateLabel = fps >= 59 ? "60fps" : (fps >= 29 ? "30fps" : "24fps");
-            return new StreamInfo
-            {
-                Width = width,
-                Height = height,
-                FrameRate = frameRateLabel
-            };
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to probe RTMP stream: {ex.Message}");
-            return null;
         }
     }
 
@@ -488,100 +445,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task<(string rtmpUrl, string streamKey)> CreateYouTubeBroadcastAsync(StreamMetadata metadata)
-    {
-        var youtubeService = _youtubeService;
-        if (StreamInfo == null)
-        {
-            var info = await Task.Run(() => ProbeStream(RtmpAdress));
-            if (info is not null)
-                StreamInfo = info;
-            else
-            {
-                LogOutput.Text += "stream failed to start, there was missing info from ffprobe";
-                LogOutput.CaretIndex = LogOutput.Text.Length;
-            }
-        }
-        try
-        {
-            // 1. Skapa LiveBroadcast
-            var broadcastSnippet = new LiveBroadcastSnippet
-            {
-                Title = metadata.Title,
-                ScheduledStartTimeDateTimeOffset = DateTime.UtcNow.AddMinutes(1)
-            };
-
-            var broadcastStatus = new LiveBroadcastStatus
-            {
-                PrivacyStatus = "private"
-            };
-
-            var liveBroadcast = new LiveBroadcast
-            {
-                Kind = "youtube#liveBroadcast",
-                Snippet = broadcastSnippet,
-                Status = broadcastStatus
-            };
-
-            var broadcastInsert = youtubeService.LiveBroadcasts.Insert(liveBroadcast, "snippet,status");
-            var insertedBroadcast = await broadcastInsert.ExecuteAsync();
-
-            // 2. Skapa LiveStream
-            var streamSnippet = new LiveStreamSnippet
-            {
-                Title = metadata.Title + " Stream"
-            };
-
-            CdnSettings cdn = new();
-            if (StreamInfo != null)
-            {
-                cdn = new CdnSettings
-                {
-                    //Format = "1080p", // Testa med 1080p, fungerar på de flesta konton
-                    IngestionType = "rtmp",
-                    FrameRate = StreamInfo.FrameRate,
-                    Resolution = StreamInfo.Resolution
-                };
-            }
-
-            var liveStream = new LiveStream
-            {
-                Kind = "youtube#liveStream",
-                Snippet = streamSnippet,
-                Cdn = cdn
-            };
-
-            var streamInsert = youtubeService.LiveStreams.Insert(liveStream, "snippet,cdn");
-            var insertedStream = await streamInsert.ExecuteAsync();
-
-            // 3. Koppla stream till broadcast
-            var bindRequest = youtubeService.LiveBroadcasts.Bind(insertedBroadcast.Id, "id,contentDetails");
-            bindRequest.StreamId = insertedStream.Id;
-            await bindRequest.ExecuteAsync();
-
-            // 4. Upload thumbnail om vald
-            if (!string.IsNullOrWhiteSpace(metadata.ThumbnailPath))
-            {
-                using var fs = new FileStream(metadata.ThumbnailPath, FileMode.Open, FileAccess.Read);
-                var thumbnailRequest = youtubeService.Thumbnails.Set(insertedBroadcast.Id, fs, "image/jpeg");
-                await thumbnailRequest.UploadAsync();
-            }
-
-            // 5. Returnera RTMP-url + streamkey
-            var ingestionInfo = insertedStream.Cdn.IngestionInfo;
-            return (ingestionInfo.IngestionAddress, ingestionInfo.StreamName);
-        }
-        catch (Google.GoogleApiException ex)
-        {
-            Console.WriteLine("YouTube API error:");
-            Console.WriteLine($"Message: {ex.Message}");
-            Console.WriteLine($"Details: {ex.Error?.Errors?.FirstOrDefault()?.Message}");
-            Console.WriteLine($"Reason: {ex.Error?.Errors?.FirstOrDefault()?.Reason}");
-            Console.WriteLine($"Domain: {ex.Error?.Errors?.FirstOrDefault()?.Domain}");
-            throw;
-        }
-    }
-
     private static void DetectSystemTheme()
     {
         if (Application.Current != null)
@@ -636,10 +499,10 @@ public partial class MainWindow : Window
     {
         LoginStatusText.Text = "Loggar in...";
 
-        var userInfo = await AuthenticateWithGoogleAsync(this);
-        if (userInfo != null)
+        var userName = await _centralAuthService.LoginWithYoutube(this);
+        if (userName != null)
         {
-            LoginStatusText.Text = $"✅ Inloggad som {userInfo.Name}";
+            LoginStatusText.Text = $"✅ Inloggad som {userName}";
         }
         else
         {
@@ -649,103 +512,7 @@ public partial class MainWindow : Window
 
     private async void LoginWithTwitch(object? sender, RoutedEventArgs e)
     {
-        var clId = Environment.GetEnvironmentVariable("TwitchDCFClient");
-        if (string.IsNullOrEmpty(clId))
-        {
-            throw new Exception("ClId was missing");
-        }
-        var scopes = new[]
-        {
-            TwitchScopes.UserReadEmail,
-            TwitchScopes.ChannelManageBroadcast,
-            TwitchScopes.StreamKey
-        };
-        _twitchService = new TwitchDCAuthService(new HttpClient(), clId, scopes);
-
-        var IsTokenValid = _twitchService.TryLoadValidOrRefreshTokenAsync();
-
-        if (IsTokenValid.Result != null)
-        {
-            if (IsTokenValid.Result != null)
-            {
-                TwitchLogin.Text = ($"✅ Inloggad som: {IsTokenValid.Result.UserName}");
-            }
-        }
-        else
-        {
-            var device = await _twitchService.StartDeviceCodeFlowAsync();
-
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = device.VerificationUri,
-                UseShellExecute = true
-            });
-            // Visa UI eller vänta medan användaren godkänner
-            var token = await _twitchService.PollForTokenAsync(device.DeviceCode, device.Interval);
-
-            if (token != null)
-            {
-                TwitchLogin.Text = ($"✅ Inloggad som: {token.UserName}");
-            }
-            else
-            {
-                Console.WriteLine("Timeout - användaren loggade inte in.");
-            }
-        }
-    }
-
-    public async Task<Userinfo?> AuthenticateWithGoogleAsync(Window parentWindow)
-    {
-#if DEBUG
-        var clID = Environment.GetEnvironmentVariable("SSMM_ClientID");
-        var clSecret = Environment.GetEnvironmentVariable("SSMM_ClientSecret");
-#endif
-        var clientSecrets = new ClientSecrets
-        {
-            ClientId = Environment.GetEnvironmentVariable("SSMM_ClientID"),
-            ClientSecret = Environment.GetEnvironmentVariable("SSMM_ClientSecret")
-        };
-
-        string[] scopes = [
-        Oauth2Service.Scope.UserinfoProfile,
-        Oauth2Service.Scope.UserinfoEmail,
-        YouTubeService.Scope.Youtube,
-        YouTubeService.Scope.YoutubeForceSsl
-    ];
-
-        try
-        {
-            // Kör OAuth-flödet, med lokal webbläsare och redirect
-            var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-                clientSecrets,
-                scopes,
-                "user", // användar-ID för att spara token lokalt
-                CancellationToken.None);
-
-            // Skapa tjänst för att hämta info om användaren
-            var oauth2Service = new Oauth2Service(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = "SSMM_UI"
-            });
-
-            var youtubeService = new YouTubeService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = "SSMM"
-            });
-
-            _youtubeService = youtubeService;
-
-            // Hämta användarprofil
-            var userInfo = await oauth2Service.Userinfo.Get().ExecuteAsync();
-            return userInfo;
-        }
-        catch (Exception ex)
-        {
-            await MessageBox.Show(parentWindow, $"OAuth failed: {ex.Message}");
-            return null;
-        }
+        TwitchLogin.Text = await _centralAuthService.LoginWithTwitch();
     }
 
     /// <summary>
@@ -792,24 +559,7 @@ public partial class MainWindow : Window
 
     private async void LoginWithKick(object? sender, RoutedEventArgs e)
     {
-        var authManager = new KickOAuthService();
-        // Ange vilka scopes du behöver
-        var requestedScopes = new[] {
-                KickOAuthService.Scopes.ChannelWrite,
-                KickOAuthService.Scopes.ChannelRead,
-                KickOAuthService.Scopes.UserRead
-            };
-        //var result = await authManager.AuthenticateUserAsync(requestedScopes);
-        var result = await authManager.AuthenticateOrRefreshAsync(requestedScopes);
-        KickLogin.Text = "Logging in...";
-
-        if (result != null)
-        {
-            KickLogin.Text = ($"✅ Inloggad som {result.Username}");
-        }
-        else
-        {
-            KickLogin.Text = ("❌ Inloggning misslyckades.");
-        }
+        var Result = await _centralAuthService.LoginWithKick();
+        KickLogin.Text = Result;
     }
 }

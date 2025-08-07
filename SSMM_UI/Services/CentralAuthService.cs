@@ -1,0 +1,224 @@
+﻿using Avalonia.Controls;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Oauth2.v2;
+using Google.Apis.Services;
+using Google.Apis.YouTube.v3;
+using SSMM_UI.Dialogs;
+using SSMM_UI.Oauth.Kick;
+using SSMM_UI.Oauth.Twitch;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace SSMM_UI.Services;
+
+public class CentralAuthService
+{
+    private YouTubeService? _youtubeService = new();
+    public YouTubeService? YTService { get; set; }
+    public TwitchDCAuthService TwitchService;
+    private readonly KickOAuthService? _kickOauthService;
+    private readonly string _TwitchDCFClientId;
+
+    public CentralAuthService()
+    {
+        YTService = _youtubeService;
+        _kickOauthService = new KickOAuthService();
+        var TwitchDcfClientId = Environment.GetEnvironmentVariable("TwitchDCFClient");
+        if (TwitchDcfClientId is not null)
+        {
+            _TwitchDCFClientId = TwitchDcfClientId;
+        }
+        else
+        {
+            throw new Exception("ClientID for Twitch was missing");
+        }
+        var scopes = new[]
+        {
+            TwitchScopes.UserReadEmail,
+            TwitchScopes.ChannelManageBroadcast,
+            TwitchScopes.StreamKey
+        };
+        TwitchService = new TwitchDCAuthService(new HttpClient(), _TwitchDCFClientId, scopes);
+    }
+    public async Task<string> LoginWithTwitch()
+    {
+        if (TwitchService == null)
+        {
+            throw new Exception("TwitchService was null!");
+        }
+        var IsTokenValid = TwitchService.TryLoadValidOrRefreshTokenAsync();
+
+        string LoginResult = "";
+        if (IsTokenValid.Result != null)
+        {
+            if (IsTokenValid.Result != null)
+            {
+                LoginResult = ($"✅ Inloggad som: {IsTokenValid.Result.UserName}");
+            }
+        }
+        else
+        {
+            var device = await TwitchService.StartDeviceCodeFlowAsync();
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = device.VerificationUri,
+                UseShellExecute = true
+            });
+            // Visa UI eller vänta medan användaren godkänner
+            var token = await TwitchService.PollForTokenAsync(device.DeviceCode, device.Interval);
+
+            if (token != null)
+            {
+                LoginResult = ($"✅ Inloggad som: {token.UserName}");
+            }
+            else
+            {
+                Console.WriteLine("Timeout - användaren loggade inte in.");
+            }
+        }
+        return LoginResult;
+    }
+    public async Task<string> LoginWithYoutube(Window parentWindow)
+    {
+
+        var clID = Environment.GetEnvironmentVariable("SSMM_ClientID");
+        var clSecret = Environment.GetEnvironmentVariable("SSMM_ClientSecret");
+        var clientSecrets = new ClientSecrets
+        {
+            ClientId = Environment.GetEnvironmentVariable("SSMM_ClientID"),
+            ClientSecret = Environment.GetEnvironmentVariable("SSMM_ClientSecret")
+        };
+
+        string[] scopes = [
+        Oauth2Service.Scope.UserinfoProfile,
+        Oauth2Service.Scope.UserinfoEmail,
+        YouTubeService.Scope.Youtube,
+        YouTubeService.Scope.YoutubeForceSsl
+    ];
+
+        try
+        {
+            // Kör OAuth-flödet, med lokal webbläsare och redirect
+            var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                clientSecrets,
+                scopes,
+                "user", // användar-ID för att spara token lokalt
+                CancellationToken.None);
+
+            // Skapa tjänst för att hämta info om användaren
+            var oauth2Service = new Oauth2Service(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = "SSMM_UI"
+            });
+
+            var youtubeService = new YouTubeService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = "SSMM"
+            });
+
+            _youtubeService = youtubeService;
+            await credential.RefreshTokenAsync(CancellationToken.None); // Se till att token är fräsch
+            string accessToken = await credential.GetAccessTokenForRequestAsync();
+
+            // Hämta användarprofil
+            var userInfo = await oauth2Service.Userinfo.Get().ExecuteAsync();
+            return userInfo.Name;
+        }
+        catch (Exception ex)
+        {
+            await MessageBox.Show(parentWindow, $"OAuth failed: {ex.Message}");
+            return "Login Failed";
+        }
+    }
+    public async Task<string> LoginWithKick()
+    {
+
+        // Ange vilka scopes du behöver
+        var requestedScopes = new[] {
+                KickOAuthService.Scopes.ChannelWrite,
+                KickOAuthService.Scopes.ChannelRead,
+                KickOAuthService.Scopes.UserRead
+            };
+
+        var result = await _kickOauthService.AuthenticateOrRefreshAsync(requestedScopes);
+
+        if (result != null)
+        {
+            return ($"✅ Inloggad som {result.Username}");
+        }
+        else
+        {
+            return ("❌ Inloggning misslyckades.");
+        }
+    }
+
+    public async Task<List<AuthResult>> TryAutoLoginAllAsync()
+    {
+        var results = new List<AuthResult>();
+
+        // Twitch
+        var twitchToken = await TwitchService.TryLoadValidOrRefreshTokenAsync();
+        results.Add(twitchToken is not null
+            ? new AuthResult(AuthProvider.Twitch, true, twitchToken.UserName, null)
+            : new AuthResult(AuthProvider.Twitch, false, null, "Token saknas eller ogiltig"));
+
+        // Google/YouTube
+        try
+        {
+            var clientSecrets = new ClientSecrets
+            {
+                ClientId = Environment.GetEnvironmentVariable("SSMM_ClientID"),
+                ClientSecret = Environment.GetEnvironmentVariable("SSMM_ClientSecret")
+            };
+
+            var scopes = new[] {
+                Oauth2Service.Scope.UserinfoProfile,
+                Oauth2Service.Scope.UserinfoEmail,
+                YouTubeService.Scope.Youtube,
+                YouTubeService.Scope.YoutubeForceSsl
+            };
+
+            var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                clientSecrets, scopes, "user", CancellationToken.None);
+
+            await credential.RefreshTokenAsync(CancellationToken.None);
+
+            var oauth2 = new Oauth2Service(new BaseClientService.Initializer
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = "SSMM_UI"
+            });
+
+            var user = await oauth2.Userinfo.Get().ExecuteAsync();
+            results.Add(new AuthResult(AuthProvider.YouTube, true, user.Name, null));
+        }
+        catch (Exception ex)
+        {
+            results.Add(new AuthResult(AuthProvider.YouTube, false, null, ex.Message));
+        }
+
+        // Kick
+        var kickToken = await _kickOauthService.IfTokenIsValidLoginAuto();
+        results.Add(kickToken is not null
+            ? new AuthResult(AuthProvider.Kick, true, kickToken.Username, null)
+            : new AuthResult(AuthProvider.Kick, false, null, "Token saknas eller ogiltig"));
+
+        return results;
+    }
+}
+
+public enum AuthProvider
+{
+    Twitch,
+    YouTube,
+    Kick
+}
+
+public record AuthResult(AuthProvider Provider, bool Success, string? Username, string? ErrorMessage);

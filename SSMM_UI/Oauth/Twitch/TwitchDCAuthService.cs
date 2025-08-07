@@ -91,7 +91,9 @@ public class TwitchDCAuthService
         if (!string.IsNullOrWhiteSpace(token.RefreshToken))
         {
             Console.WriteLine("🔁 Försöker förnya åtkomsttoken med refresh_token...");
-            return await RefreshAccessTokenAsync(token.RefreshToken);
+            await RefreshAccessTokenAsync(token.RefreshToken);
+            token.UserName = await GetUsernameAsync(token.AccessToken);
+            return token;
         }
 
         return null;

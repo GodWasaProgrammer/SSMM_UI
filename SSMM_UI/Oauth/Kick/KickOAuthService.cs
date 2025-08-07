@@ -123,6 +123,42 @@ public class KickOAuthService
         return newToken;
     }
 
+    public async Task<KickAuthResult?> IfTokenIsValidLoginAuto()
+    {
+        if (!File.Exists(TokenFilePath))
+        {
+            return null;
+        }
+
+        try
+        {
+            var json = await File.ReadAllTextAsync(TokenFilePath);
+            var token = JsonSerializer.Deserialize<KickAuthResult>(json);
+
+            if (token == null)
+            {
+                return null;
+            }
+
+            if (DateTime.UtcNow > token.ExpiresAt)
+            {
+                // Token har gått ut, försök förnya
+                await RefreshTokenAsync(token.RefreshToken);
+                token.Username = await GetUsernameAsync(token.AccessToken);
+                return token;
+            }
+
+            // Token är fortfarande giltig
+            return token;
+        }
+        catch (Exception ex)
+        {
+            // Logga eller hantera fel (t.ex. korrupt fil)
+            Console.WriteLine($"❌ Fel vid autologin: {ex.Message}");
+            return null;
+        }
+    }
+
     public async Task<KickAuthResult> AuthenticateOrRefreshAsync(string[] scopes)
     {
         if (File.Exists(TokenFilePath))

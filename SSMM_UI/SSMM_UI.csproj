@@ -34,6 +34,7 @@
     <PackageReference Include="LiveStreamingServerNet.StreamProcessor.AspNetCore" Version="0.31.1" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Playwright" Version="1.54.0" />
     <PackageReference Include="Mpv.NET" Version="1.2.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />
