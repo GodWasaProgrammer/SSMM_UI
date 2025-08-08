@@ -17,7 +17,6 @@ namespace SSMM_UI.Services;
 
 public class CentralAuthService
 {
-    private YouTubeService? _youtubeService = new();
     public YouTubeService? YTService { get; set; }
     public TwitchDCAuthService TwitchService;
     private readonly KickOAuthService? _kickOauthService;
@@ -25,7 +24,6 @@ public class CentralAuthService
 
     public CentralAuthService()
     {
-        YTService = _youtubeService;
         _kickOauthService = new KickOAuthService();
         var TwitchDcfClientId = Environment.GetEnvironmentVariable("TwitchDCFClient");
         if (TwitchDcfClientId is not null)
@@ -117,13 +115,12 @@ public class CentralAuthService
                 ApplicationName = "SSMM_UI"
             });
 
-            var youtubeService = new YouTubeService(new BaseClientService.Initializer()
+            YTService = new YouTubeService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential,
                 ApplicationName = "SSMM"
             });
 
-            _youtubeService = youtubeService;
             await credential.RefreshTokenAsync(CancellationToken.None); // Se till att token är fräsch
             string accessToken = await credential.GetAccessTokenForRequestAsync();
 
@@ -189,6 +186,12 @@ public class CentralAuthService
                 clientSecrets, scopes, "user", CancellationToken.None);
 
             await credential.RefreshTokenAsync(CancellationToken.None);
+
+            YTService = new YouTubeService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = "SSMM"
+            });
 
             var oauth2 = new Oauth2Service(new BaseClientService.Initializer
             {

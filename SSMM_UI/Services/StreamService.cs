@@ -1,6 +1,9 @@
-﻿using Google.Apis.YouTube.v3.Data;
+﻿using Avalonia.Threading;
+using FFmpeg.AutoGen;
+using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,6 +11,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SSMM_UI.Services;
@@ -17,16 +21,18 @@ public class StreamService
     private CentralAuthService _centralAuthService;
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
     private const string TwitchAdress = "rtmp://live.twitch.tv/app";
+    private RTMPServer _server { get; set; } = new();
+    private readonly List<Process>? ffmpegProcess = [];
     public StreamService(CentralAuthService _AuthService)
     {
         _centralAuthService = _AuthService;
+        _server.StartSrv();
     }
     public StreamInfo? StreamInfo { get; set; }
     public async Task<(string rtmpUrl, string streamKey)> CreateYouTubeBroadcastAsync(StreamMetadata metadata, MainWindow window)
     {
         if (_centralAuthService.YTService is not null)
         {
-
             if (StreamInfo == null)
             {
                 var info = await Task.Run(() => ProbeStream(RtmpAdress));
@@ -127,7 +133,6 @@ public class StreamService
             throw new Exception("CentralAuthService.YTService Was null");
         }
     }
-
     public async Task<(string rtmpUrl, string streamKey)> CreateTwitchBroadcastAsync(StreamMetadata metadata)
     {
         var accessToken = _centralAuthService.TwitchService.AuthResult.AccessToken;
@@ -210,4 +215,201 @@ public class StreamService
             return null;
         }
     }
+    public async void StartStreamStatusPolling(MainWindow window)
+    {
+        while (true)
+        {
+            var isAlive = await Task.Run(() => CheckStreamIsAlive(RtmpAdress));
+            Dispatcher.UIThread.Post(() =>
+            {
+                window.StreamStatusText.Text = isAlive
+                    ? "Stream status: ✅ Live"
+                    : "Stream status: ❌ Not Receiving";
+            });
+        }
+    }
+    private async Task<bool> IsRtmpApiResponding()
+    {
+        try
+        {
+            using var client = new HttpClient();
+            client.Timeout = TimeSpan.FromSeconds(25); // Sänk timeout till 2 sekunder
+            var response = await client.GetAsync("https://localhost:7000/ui/");
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+    private unsafe bool CheckStreamIsAlive(string url, int timeoutSeconds = 5)
+    {
+        AVFormatContext* pFormatContext = ffmpeg.avformat_alloc_context();
+        AVDictionary* options = null;
+
+        int ret = ffmpeg.avformat_open_input(&pFormatContext, url, null, &options);
+        if (ret < 0)
+            return false;
+
+        ret = ffmpeg.avformat_find_stream_info(pFormatContext, null);
+        if (ret < 0)
+        {
+            ffmpeg.avformat_close_input(&pFormatContext);
+            return false;
+        }
+
+        int videoStreamIndex = ffmpeg.av_find_best_stream(pFormatContext, AVMediaType.AVMEDIA_TYPE_VIDEO, -1, -1, null, 0);
+        if (videoStreamIndex < 0)
+        {
+            ffmpeg.avformat_close_input(&pFormatContext);
+            return false;
+        }
+
+        AVPacket* packet = ffmpeg.av_packet_alloc();
+        bool foundFrame = false;
+
+        var stopwatch = Stopwatch.StartNew();
+        while (stopwatch.Elapsed.TotalSeconds < timeoutSeconds)
+        {
+            ret = ffmpeg.av_read_frame(pFormatContext, packet);
+            if (ret >= 0)
+            {
+                if (packet->stream_index == videoStreamIndex)
+                {
+                    foundFrame = true;
+                    break;
+                }
+                ffmpeg.av_packet_unref(packet);
+            }
+            else
+            {
+                Thread.Sleep(100); // Undvik tight loop
+            }
+        }
+
+        ffmpeg.av_packet_free(&packet);
+        ffmpeg.avformat_close_input(&pFormatContext);
+        return foundFrame;
+    }
+    public async void StartServerStatusPolling(MainWindow window)
+    {
+        while (true)
+        {
+            bool isResponding = await IsRtmpApiResponding(); // Använd await istället för .Result
+
+            window.ServerStatusText.Text = isResponding
+                ? "RTMP-server: ✅ Running"
+                : "RTMP-server: ❌ Inte startad";
+
+            await Task.Delay(5000); // 5 sekunders delay
+        }
+    }
+    public async void StartStream(MainWindow window)
+    {
+        window.StartStreamButton.IsEnabled = false;
+        if (window.SelectedServicesToStream.Count == 0)
+            return;
+
+        // Anta vi bara hanterar Youtube här (kan byggas ut senare)
+        foreach (var service in window.SelectedServicesToStream)
+        {
+            string url;
+            string streamKey;
+
+            // Kolla om metadata finns satt (titel eller thumbnail-path)
+            if (!string.IsNullOrWhiteSpace(window.CurrentMetadata?.Title) ||
+                !string.IsNullOrWhiteSpace(window.CurrentMetadata?.ThumbnailPath))
+            {
+                try
+                {
+                    if (service.DisplayName.Contains("Youtube", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Skapa ny Youtube broadcast med metadata
+                        var (newUrl, newKey) = await CreateYouTubeBroadcastAsync(window.CurrentMetadata, window);
+                        //SetYouTubeCategoryAndGameAsync(newKey, newUrl, );
+
+                        url = newUrl;
+                        streamKey = newKey;
+                        // Uppdatera service med nya värden så vi kör rätt stream
+                        service.SelectedServer.Url = url;
+                        service.StreamKey = streamKey;
+
+                    }
+                    if (service.DisplayName.Contains("Twitch", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var (newUrl, newKey) = await CreateTwitchBroadcastAsync(window.CurrentMetadata);
+                        url = newUrl;
+                        streamKey = newKey;
+                        service.SelectedServer.Url = url;
+                        service.StreamKey = streamKey;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    window.LogOutput.Text += $"Failed to create YouTube broadcast: {ex.Message}\n";
+                    window.LogOutput.CaretIndex = window.LogOutput.Text.Length;
+                    return;
+                }
+            }
+            else
+            {
+                // Använd befintliga url/key som redan finns
+                url = service.SelectedServer.Url.TrimEnd('/');
+                streamKey = service.StreamKey;
+            }
+
+            // Bygg ffmpeg argument
+            var fullUrl = $"{service.SelectedServer.Url}/{service.StreamKey}";
+            var input = RtmpAdress; // exempel, justera efter behov
+
+            var args = new StringBuilder($"-i \"{input}\" ");
+            args.Append($"-c:v copy -c:a aac -f flv \"{fullUrl}\" ");
+
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "ffmpeg",
+                Arguments = args.ToString(),
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            try
+            {
+                var process = new Process { StartInfo = startInfo };
+
+                ffmpegProcess?.Add(process);
+                process.Start();
+
+                // Läs FFmpeg:s standardfelutgång asynkront
+                window.StopStreamButton.IsEnabled = true;
+                string? line;
+                while ((line = await process.StandardError.ReadLineAsync()) != null)
+                {
+                    window.LogOutput.Text += (line + Environment.NewLine);
+                    window.LogOutput.CaretIndex = window.LogOutput.Text.Length;
+                }
+
+                await process.WaitForExitAsync();
+            }
+            catch (Exception ex)
+            {
+                window.LogOutput.Text += ($"FFmpeg start failed: {ex.Message}\n");
+                window.LogOutput.CaretIndex = window.LogOutput.Text.Length;
+            }
+        }
+    }
+    public void StopStreams(MainWindow window)
+    {
+        if (ffmpegProcess != null)
+        {
+            foreach (var process in ffmpegProcess)
+            {
+                process.Kill();
+            }
+        }
+        window.StartStreamButton.IsEnabled = true;
+        window.StopStreamButton.IsEnabled = false;
+    }
+
 }
