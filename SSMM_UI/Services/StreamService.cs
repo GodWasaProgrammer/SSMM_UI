@@ -21,12 +21,12 @@ public class StreamService
     private CentralAuthService _centralAuthService;
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
     private const string TwitchAdress = "rtmp://live.twitch.tv/app";
-    private RTMPServer _server { get; set; } = new();
+    private RTMPServer Server { get; set; } = new();
     private readonly List<Process>? ffmpegProcess = [];
     public StreamService(CentralAuthService _AuthService)
     {
         _centralAuthService = _AuthService;
-        _server.StartSrv();
+        Server.StartSrv();
     }
     public StreamInfo? StreamInfo { get; set; }
     public async Task<(string rtmpUrl, string streamKey)> CreateYouTubeBroadcastAsync(StreamMetadata metadata, MainWindow window)
@@ -133,7 +133,7 @@ public class StreamService
             throw new Exception("CentralAuthService.YTService Was null");
         }
     }
-    public async Task<(string rtmpUrl, string streamKey)> CreateTwitchBroadcastAsync(StreamMetadata metadata)
+    public async Task<(string rtmpUrl, string? streamKey)> CreateTwitchBroadcastAsync(StreamMetadata metadata)
     {
         var accessToken = _centralAuthService.TwitchService.AuthResult.AccessToken;
         var ClientId = _centralAuthService.TwitchService._clientId;
@@ -228,7 +228,7 @@ public class StreamService
             });
         }
     }
-    private async Task<bool> IsRtmpApiResponding()
+    private static async Task<bool> IsRtmpApiResponding()
     {
         try
         {
@@ -291,7 +291,7 @@ public class StreamService
         ffmpeg.avformat_close_input(&pFormatContext);
         return foundFrame;
     }
-    public async void StartServerStatusPolling(MainWindow window)
+    public static async void StartServerStatusPolling(MainWindow window)
     {
         while (true)
         {
@@ -310,12 +310,8 @@ public class StreamService
         if (window.SelectedServicesToStream.Count == 0)
             return;
 
-        // Anta vi bara hanterar Youtube här (kan byggas ut senare)
         foreach (var service in window.SelectedServicesToStream)
         {
-            string url;
-            string streamKey;
-
             // Kolla om metadata finns satt (titel eller thumbnail-path)
             if (!string.IsNullOrWhiteSpace(window.CurrentMetadata?.Title) ||
                 !string.IsNullOrWhiteSpace(window.CurrentMetadata?.ThumbnailPath))
@@ -328,20 +324,25 @@ public class StreamService
                         var (newUrl, newKey) = await CreateYouTubeBroadcastAsync(window.CurrentMetadata, window);
                         //SetYouTubeCategoryAndGameAsync(newKey, newUrl, );
 
-                        url = newUrl;
-                        streamKey = newKey;
+
                         // Uppdatera service med nya värden så vi kör rätt stream
-                        service.SelectedServer.Url = url;
-                        service.StreamKey = streamKey;
+                        service.SelectedServer.Url = newUrl;
+                        service.StreamKey = newKey;
 
                     }
                     if (service.DisplayName.Contains("Twitch", StringComparison.OrdinalIgnoreCase))
                     {
                         var (newUrl, newKey) = await CreateTwitchBroadcastAsync(window.CurrentMetadata);
-                        url = newUrl;
-                        streamKey = newKey;
-                        service.SelectedServer.Url = url;
-                        service.StreamKey = streamKey;
+
+                        if (newUrl != null && newKey != null)
+                        {
+                            service.SelectedServer.Url = newUrl;
+                            service.StreamKey = newKey;
+                        }
+                        else
+                        {
+                            throw new Exception($"CreateTwitchBroadcast returned a null value in either{newUrl} or {newKey}");
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -350,12 +351,6 @@ public class StreamService
                     window.LogOutput.CaretIndex = window.LogOutput.Text.Length;
                     return;
                 }
-            }
-            else
-            {
-                // Använd befintliga url/key som redan finns
-                url = service.SelectedServer.Url.TrimEnd('/');
-                streamKey = service.StreamKey;
             }
 
             // Bygg ffmpeg argument

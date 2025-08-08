@@ -123,7 +123,7 @@ public class KickOAuthService
         return newToken;
     }
 
-    public async Task<KickAuthResult?> IfTokenIsValidLoginAuto()
+    public static async Task<KickAuthResult?> IfTokenIsValidLoginAuto()
     {
         if (!File.Exists(TokenFilePath))
         {
@@ -314,7 +314,6 @@ public class KickOAuthService
 
         throw new Exception("No user data returned or malformed response");
     }
-
 
     private static (string codeVerifier, string codeChallenge) GeneratePkceParameters()
     {

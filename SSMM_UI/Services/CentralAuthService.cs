@@ -83,9 +83,6 @@ public class CentralAuthService
     }
     public async Task<string> LoginWithYoutube(Window parentWindow)
     {
-
-        var clID = Environment.GetEnvironmentVariable("SSMM_ClientID");
-        var clSecret = Environment.GetEnvironmentVariable("SSMM_ClientSecret");
         var clientSecrets = new ClientSecrets
         {
             ClientId = Environment.GetEnvironmentVariable("SSMM_ClientID"),
@@ -136,23 +133,35 @@ public class CentralAuthService
     }
     public async Task<string> LoginWithKick()
     {
-
         // Ange vilka scopes du behöver
-        var requestedScopes = new[] {
-                KickOAuthService.Scopes.ChannelWrite,
-                KickOAuthService.Scopes.ChannelRead,
-                KickOAuthService.Scopes.UserRead
-            };
-
-        var result = await _kickOauthService.AuthenticateOrRefreshAsync(requestedScopes);
-
-        if (result != null)
+        var requestedScopes = new[]
         {
-            return ($"✅ Inloggad som {result.Username}");
+        KickOAuthService.Scopes.ChannelWrite,
+        KickOAuthService.Scopes.ChannelRead,
+        KickOAuthService.Scopes.UserRead
+    };
+
+        if (_kickOauthService == null)
+            return "❌ KickAuthService är inte initialiserad.";
+
+        try
+        {
+            var result = await _kickOauthService.AuthenticateOrRefreshAsync(requestedScopes);
+
+            if (result != null)
+            {
+                return $"✅ Inloggad som {result.Username}";
+            }
+            else
+            {
+                return "❌ Inloggning misslyckades – token saknas eller ogiltig.";
+            }
         }
-        else
+        catch (Exception ex)
         {
-            return ("❌ Inloggning misslyckades.");
+            // Logga för felsökning
+            Console.WriteLine($"❌ Kick-login error: {ex.Message}");
+            return $"❌ Fel vid inloggning: {ex.Message}";
         }
     }
 
@@ -208,7 +217,7 @@ public class CentralAuthService
         }
 
         // Kick
-        var kickToken = await _kickOauthService.IfTokenIsValidLoginAuto();
+        var kickToken = await KickOAuthService.IfTokenIsValidLoginAuto();
         results.Add(kickToken is not null
             ? new AuthResult(AuthProvider.Kick, true, kickToken.Username, null)
             : new AuthResult(AuthProvider.Kick, false, null, "Token saknas eller ogiltig"));

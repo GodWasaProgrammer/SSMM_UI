@@ -21,7 +21,6 @@ public partial class MainWindow : Window
     private readonly StateService _stateService = new();
     private StreamService? _streamService;
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
-    private MetaDataService? _metaDataService { get; set; }
     private bool isReceivingStream = false;
 
     public MainWindow()
@@ -41,7 +40,7 @@ public partial class MainWindow : Window
         await AutoLoginIfTokenized();
         _streamService = new(_centralAuthService);
         _streamService.StartStreamStatusPolling(this);
-        _streamService.StartServerStatusPolling(this);
+        StreamService.StartServerStatusPolling(this);
     }
 
     protected override void OnClosed(EventArgs e)
@@ -178,12 +177,34 @@ public partial class MainWindow : Window
     private void StartStream(object? sender, RoutedEventArgs e)
     {
         StartStreamButton.IsEnabled = false;
-        _streamService.StartStream(this);
+        if (_streamService != null)
+        {
+            try
+            {
+                _streamService.StartStream(this);
+            }
+            catch (Exception ex)
+            {
+                LogOutput.Text += ex.ToString();
+                LogOutput.CaretIndex = LogOutput.Text.Length;
+            }
+        }
     }
 
     private void StopStreams(object? sender, RoutedEventArgs e)
     {
-        _streamService.StopStreams(this);
+        if (_streamService != null)
+        {
+            try
+            {
+                _streamService.StopStreams(this);
+            }
+            catch (Exception ex)
+            {
+                LogOutput.Text += ex.ToString();
+                LogOutput.CaretIndex = LogOutput.Text.Length;
+            }
+        }
         StartStreamButton.IsEnabled = true;
         StopStreamButton.IsEnabled = false;
     }
