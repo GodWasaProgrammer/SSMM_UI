@@ -38,6 +38,7 @@ public class KickOAuthService
     private string? _currentCodeVerifier;
     private string? _currentState;
 
+
     public async Task<KickAuthResult> AuthenticateUserAsync(string[] requestedScopes)
     {
         try

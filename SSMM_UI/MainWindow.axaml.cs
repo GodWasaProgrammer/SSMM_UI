@@ -6,6 +6,7 @@ using Avalonia.Styling;
 using Newtonsoft.Json;
 using SSMM_UI.hacks;
 using SSMM_UI.MetaData;
+using SSMM_UI.Oauth.Google;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
@@ -43,7 +44,7 @@ public partial class MainWindow : Window
         base.OnOpened(e);
         await AutoLoginIfTokenized();
         _streamService = new(_centralAuthService);
-        _streamService.StartStreamStatusPolling(this);
+        //_streamService.StartStreamStatusPolling(this);
         //StreamService.StartServerStatusPolling(this);
     }
 
@@ -52,7 +53,7 @@ public partial class MainWindow : Window
     {
         var client = new YouTubeStudioClient();
         // Skicka metadata update (du förbereder JSON själv)
-        var jsonBody = "{\"title\":\"Ny Titel från C#\"}";
+        //var jsonBody = "{\"title\":\"Ny Titel från C#\"}";
         //var response = await client.SendMetadataUpdateAsync("6v-gXvoTLAU", jsonBody, "HackerGod");
 
         try
@@ -366,11 +367,14 @@ public partial class MainWindow : Window
         StatusTextBlock.Text = "Metadata updated successfully!";
     }
 
+    private GoogleOAuthService _GoogleAuthService { get; set; }
     private async void OnLoginWithGoogleClicked(object? sender, RoutedEventArgs e)
     {
+        _GoogleAuthService = new GoogleOAuthService();
+
         LoginStatusText.Text = "Loggar in...";
 
-        var userName = await _centralAuthService.LoginWithYoutube(this);
+        var userName = await _GoogleAuthService.LoginWithYoutube();
         if (userName != null)
         {
             LoginStatusText.Text = $"✅ Inloggad som {userName}";

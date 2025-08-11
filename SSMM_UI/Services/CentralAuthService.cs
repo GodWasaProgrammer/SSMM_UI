@@ -4,6 +4,7 @@ using Google.Apis.Oauth2.v2;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using SSMM_UI.Dialogs;
+using SSMM_UI.Oauth.Google;
 using SSMM_UI.Oauth.Kick;
 using SSMM_UI.Oauth.Twitch;
 using System;
@@ -18,6 +19,7 @@ namespace SSMM_UI.Services;
 public class CentralAuthService
 {
     public YouTubeService? YTService { get; set; }
+    public GoogleOAuthService? GoogleAuthService { get; set; }
     public TwitchDCAuthService TwitchService;
     private readonly KickOAuthService? _kickOauthService;
     private readonly string _TwitchDCFClientId;
@@ -81,55 +83,10 @@ public class CentralAuthService
         }
         return LoginResult;
     }
-    public async Task<string> LoginWithYoutube(Window parentWindow)
+    public async Task<string> LoginWithYoutube()
     {
-        var clientSecrets = new ClientSecrets
-        {
-            ClientId = Environment.GetEnvironmentVariable("SSMM_ClientID"),
-            ClientSecret = Environment.GetEnvironmentVariable("SSMM_ClientSecret")
-        };
-
-        string[] scopes = [
-        Oauth2Service.Scope.UserinfoProfile,
-        Oauth2Service.Scope.UserinfoEmail,
-        YouTubeService.Scope.Youtube,
-        YouTubeService.Scope.YoutubeForceSsl
-    ];
-
-        try
-        {
-            // Kör OAuth-flödet, med lokal webbläsare och redirect
-            var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-                clientSecrets,
-                scopes,
-                "user", // användar-ID för att spara token lokalt
-                CancellationToken.None);
-
-            // Skapa tjänst för att hämta info om användaren
-            var oauth2Service = new Oauth2Service(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = "SSMM_UI"
-            });
-
-            YTService = new YouTubeService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = "SSMM"
-            });
-
-            await credential.RefreshTokenAsync(CancellationToken.None); // Se till att token är fräsch
-            string accessToken = await credential.GetAccessTokenForRequestAsync();
-
-            // Hämta användarprofil
-            var userInfo = await oauth2Service.Userinfo.Get().ExecuteAsync();
-            return userInfo.Name;
-        }
-        catch (Exception ex)
-        {
-            await MessageBox.Show(parentWindow, $"OAuth failed: {ex.Message}");
-            return "Login Failed";
-        }
+        GoogleAuthService = new();
+        return await GoogleAuthService.LoginWithYoutube();
     }
     public async Task<string> LoginWithKick()
     {
@@ -178,38 +135,46 @@ public class CentralAuthService
         // Google/YouTube
         try
         {
-            var clientSecrets = new ClientSecrets
+            //var clientSecrets = new ClientSecrets
+            //{
+            //    ClientId = Environment.GetEnvironmentVariable("SSMM_ClientID"),
+            //    ClientSecret = Environment.GetEnvironmentVariable("SSMM_ClientSecret")
+            //};
+
+            //var scopes = new[] {
+            //    Oauth2Service.Scope.UserinfoProfile,
+            //    Oauth2Service.Scope.UserinfoEmail,
+            //    YouTubeService.Scope.Youtube,
+            //    YouTubeService.Scope.YoutubeForceSsl
+            //};
+
+            //var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+            //    clientSecrets, scopes, "user", CancellationToken.None);
+
+            //await credential.RefreshTokenAsync(CancellationToken.None);
+
+            //YTService = new YouTubeService(new BaseClientService.Initializer()
+            //{
+            //    HttpClientInitializer = credential,
+            //    ApplicationName = "SSMM"
+            //});
+
+            //var oauth2 = new Oauth2Service(new BaseClientService.Initializer
+            //{
+            //    HttpClientInitializer = credential,
+            //    ApplicationName = "SSMM_UI"
+            //});
+
+            //var user = await oauth2.Userinfo.Get().ExecuteAsync();
+
+
+            // TODO: make sure that we instantiate YTService also or shit will break down the pipe
+            if(GoogleAuthService == null)
             {
-                ClientId = Environment.GetEnvironmentVariable("SSMM_ClientID"),
-                ClientSecret = Environment.GetEnvironmentVariable("SSMM_ClientSecret")
-            };
-
-            var scopes = new[] {
-                Oauth2Service.Scope.UserinfoProfile,
-                Oauth2Service.Scope.UserinfoEmail,
-                YouTubeService.Scope.Youtube,
-                YouTubeService.Scope.YoutubeForceSsl
-            };
-
-            var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-                clientSecrets, scopes, "user", CancellationToken.None);
-
-            await credential.RefreshTokenAsync(CancellationToken.None);
-
-            YTService = new YouTubeService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = "SSMM"
-            });
-
-            var oauth2 = new Oauth2Service(new BaseClientService.Initializer
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = "SSMM_UI"
-            });
-
-            var user = await oauth2.Userinfo.Get().ExecuteAsync();
-            results.Add(new AuthResult(AuthProvider.YouTube, true, user.Name, null));
+                GoogleAuthService = new();
+            }
+            var user = await GoogleAuthService.LoginWithYoutube();
+            results.Add(new AuthResult(AuthProvider.YouTube, true, user, null));
         }
         catch (Exception ex)
         {
