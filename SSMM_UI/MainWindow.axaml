@@ -199,6 +199,11 @@
                                             Classes="danger"
 											Margin="0 0 15 0"
                                             Click="ToggleReceivingStream"/>
+									<Button x:Name="YTHacks"
+                                            Content="Haxx"
+                                            Classes="danger"
+											Margin="0 0 15 0"
+                                            Click="TestYThacks"/>
 								</WrapPanel>
 
 								<StackPanel Margin="0 10 0 0">

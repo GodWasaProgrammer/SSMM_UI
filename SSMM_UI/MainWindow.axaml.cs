@@ -3,12 +3,16 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
+using Newtonsoft.Json;
+using SSMM_UI.hacks;
 using SSMM_UI.MetaData;
 using SSMM_UI.Services;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
+using static SSMM_UI.hacks.YouTubeStudioClient;
 namespace SSMM_UI;
 
 public partial class MainWindow : Window
@@ -40,7 +44,58 @@ public partial class MainWindow : Window
         await AutoLoginIfTokenized();
         _streamService = new(_centralAuthService);
         _streamService.StartStreamStatusPolling(this);
-        StreamService.StartServerStatusPolling(this);
+        //StreamService.StartServerStatusPolling(this);
+    }
+
+    public string haxx = "";
+    private async void TestYThacks(object? sender, RoutedEventArgs e)
+    {
+        var client = new YouTubeStudioClient();
+        // Skicka metadata update (du förbereder JSON själv)
+        var jsonBody = "{\"title\":\"Ny Titel från C#\"}";
+        //var response = await client.SendMetadataUpdateAsync("6v-gXvoTLAU", jsonBody, "HackerGod");
+
+        try
+        {
+            string filePath = "cookies_v20.json";
+            if (!File.Exists(filePath))
+            {
+                Console.WriteLine($"Filen {filePath} finns inte.");
+                return;
+            }
+
+            string json = File.ReadAllText(filePath);
+
+            var cookies2 = JsonConvert.DeserializeObject<List<CookieEntry>>(json);
+
+            var dictionary = new Dictionary<string, string>();
+
+            if (cookies2 != null)
+            {
+                foreach (var cookie in cookies2)
+                {
+                    if (!string.IsNullOrEmpty(cookie.Name))
+                    {
+                        dictionary[cookie.Name] = cookie.Value ?? string.Empty;
+                    }
+                }
+            }
+
+            string videoId = "6v-gXvoTLAU";
+            var res = await client.FetchStudioEditHtmlAsync(videoId);
+            var decryptor = new ChromeBrowserCookiesDecryptor();
+            var sapisidHash = decryptor.BuildSapisdHashHeader();
+            //"/g/11s0wvnggg"
+            await YouTubeStudioClient.UpdateCategoryAndGameAsync(videoId, res, dictionary, sapisidHash);
+
+
+
+            // string responseString = await response.Content.ReadAsStringAsync();
+
+            //await client.UpdateVideoMetadataAsync("6v-gXvoTLAU", jsonBody, "hackerGod");
+        }
+        catch (Exception ex) { }
+        //Console.WriteLine($"Response: {response.StatusCode}");
     }
 
     protected override void OnClosed(EventArgs e)

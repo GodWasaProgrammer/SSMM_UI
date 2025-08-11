@@ -114,6 +114,8 @@ public class StreamService
                 //await LoginCapture.RunAsync(); // Första gången
                 //await YouTubeStudioAutomation.RunAsync(insertedBroadcast.Id); // Efteråt
 
+                window.haxx = insertedBroadcast.Id;
+
                 // 5. Returnera RTMP-url + streamkey
                 var ingestionInfo = insertedStream.Cdn.IngestionInfo;
                 return (ingestionInfo.IngestionAddress, ingestionInfo.StreamName);
