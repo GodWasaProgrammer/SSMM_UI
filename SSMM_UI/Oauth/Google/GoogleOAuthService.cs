@@ -41,6 +41,29 @@ public class GoogleOAuthService
     private string? _currentCodeVerifier;
     private string? _currentState;
 
+    public async Task<string> LoginAutoIfTokenized()
+    {
+        if (File.Exists(_tokenPath))
+        {
+            _oauthResult = LoadSavedToken();
+            if (_oauthResult != null)
+            {
+                if (DateTime.UtcNow > _oauthResult.ExpiresAt)
+                {
+                    // token has passed check if we can refresh
+                    await RefreshTokenAsync(_oauthResult.RefreshToken);
+                }
+                var username = await GetUsernameAsync(_oauthResult.AccessToken);
+                if(username != null)
+                {
+                    _oauthResult.Username = username;
+                }
+                return _oauthResult.Username;
+            }
+        }
+        return "❌ Token missing or not valid";
+    }
+
     public async Task<string> LoginWithYoutube()
     {
         if (File.Exists(_tokenPath))
@@ -53,7 +76,7 @@ public class GoogleOAuthService
                     // token has passed check if we can refresh
                     await RefreshTokenAsync(_oauthResult.RefreshToken);
                 }
-                    return _oauthResult.Username;
+                return _oauthResult.Username;
             }
         }
 
@@ -102,7 +125,7 @@ public class GoogleOAuthService
         new KeyValuePair<string, string>("grant_type", "refresh_token"),
         new KeyValuePair<string, string>("refresh_token", refreshToken),
         new KeyValuePair<string, string>("client_id", ClientID),
-        
+
     });
 
         var response = await httpClient.PostAsync("https://oauth2.googleapis.com/token", content);

@@ -173,7 +173,7 @@ public class CentralAuthService
             {
                 GoogleAuthService = new();
             }
-            var user = await GoogleAuthService.LoginWithYoutube();
+            var user = await GoogleAuthService.LoginAutoIfTokenized();
             results.Add(new AuthResult(AuthProvider.YouTube, true, user, null));
         }
         catch (Exception ex)
