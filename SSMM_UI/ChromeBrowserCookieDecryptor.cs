@@ -1,4 +1,6 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using Avalonia.Logging;
+using Microsoft.Data.Sqlite;
+using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -71,44 +73,44 @@ public class ChromeBrowserCookiesDecryptor
 
     public Dictionary<string, string> GetCookiesFromProfile(string userDataDir = _userDataDir, string profileName = _profileName)
     {
-        Console.WriteLine("[1] Startar GetCookiesFromProfile...");
+        LogService.Log("[1] Startar GetCookiesFromProfile...");
         SQLitePCL.Batteries.Init();
-        Console.WriteLine("[2] SQLitePCL initierad.");
+        LogService.Log("[2] SQLitePCL initierad.");
 
         // Hitta cookies-filen
         string cookiesPath = Path.Combine(userDataDir, profileName, "Network", "Cookies");
         if (!File.Exists(cookiesPath))
         {
-            Console.WriteLine("[3] Hittade inte 'Network/Cookies', testar 'Cookies'...");
+            LogService.Log("[3] Hittade inte 'Network/Cookies', testar 'Cookies'...");
             cookiesPath = Path.Combine(userDataDir, profileName, "Cookies");
             if (!File.Exists(cookiesPath))
             {
-                Console.WriteLine("[4] ERROR: Cookies DB finns inte!");
+                LogService.Log("[4] ERROR: Cookies DB finns inte!");
                 throw new FileNotFoundException("Cookies DB not found", cookiesPath);
             }
         }
-        Console.WriteLine($"[5] Hittade cookies-fil: {cookiesPath}");
+        LogService.Log($"[5] Hittade cookies-fil: {cookiesPath}");
 
         // Kopiera till temporär fil
         var tmpFile = Path.Combine(Path.GetTempPath(), $"Cookies_{Guid.NewGuid():N}.db");
-        Console.WriteLine($"[6] Kopierar till tmp-fil: {tmpFile}");
+        LogService.Log($"[6] Kopierar till tmp-fil: {tmpFile}");
         File.Copy(cookiesPath, tmpFile, true);
 
         var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         try
         {
-            Console.WriteLine("[7] Skapar SQLite-anslutning...");
+            LogService.Log("[7] Skapar SQLite-anslutning...");
             var connString = new SqliteConnectionStringBuilder
             {
                 DataSource = tmpFile,
                 Mode = SqliteOpenMode.ReadOnly
             }.ToString();
-            Console.WriteLine($"[8] Anslutningssträng: {connString}");
+            LogService.Log($"[8] Anslutningssträng: {connString}");
 
             using var conn = new SqliteConnection(connString);
-            Console.WriteLine("[9] Försöker öppna anslutning...");
+            LogService.Log("[9] Försöker öppna anslutning...");
             conn.Open();
-            Console.WriteLine("[10] Anslutning öppnad!");
+            LogService.Log("[10] Anslutning öppnad!");
 
             using var cmd = conn.CreateCommand();
             // Ändrad SQL-fråga: Endast YouTube/Google-cookies
@@ -119,10 +121,10 @@ public class ChromeBrowserCookiesDecryptor
                OR host_key LIKE '%google.com'
                OR host_key = '.youtube.com'
                OR host_key = '.google.com';";
-            Console.WriteLine("[11] Kör SQL-fråga...");
+            LogService.Log("[11] Kör SQL-fråga...");
 
             using var reader = cmd.ExecuteReader();
-            Console.WriteLine("[12] Läser resultat...");
+            LogService.Log("[12] Läser resultat...");
             int cookieCount = 0;
 
             while (reader.Read())
@@ -136,16 +138,16 @@ public class ChromeBrowserCookiesDecryptor
                 {
                     dict[name] = value;
                     cookieCount++;
-                    Console.WriteLine($"[13] Cookie #{cookieCount}: {name}={value} (från {host})");
+                    LogService.Log($"[13] Cookie #{cookieCount}: {name}={value} (från {host})");
                 }
             }
-            Console.WriteLine($"[14] Klart! Totalt {cookieCount} YouTube/Google-cookies.");
+            LogService.Log($"[14] Klart! Totalt {cookieCount} YouTube/Google-cookies.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ERROR] Fel vid DB-åtkomst: {ex.GetType().Name}");
-            Console.WriteLine($"Meddelande: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            LogService.Log($"[ERROR] Fel vid DB-åtkomst: {ex.GetType().Name}");
+            LogService.Log($"Meddelande: {ex.Message}");
+            LogService.Log($"Stack trace: {ex.StackTrace}");
             throw;
         }
         finally
@@ -157,7 +159,7 @@ public class ChromeBrowserCookiesDecryptor
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[WARN] Kunde inte ta bort tmp-fil: {ex.Message}");
+                LogService.Log($"[WARN] Kunde inte ta bort tmp-fil: {ex.Message}");
             }
         }
 

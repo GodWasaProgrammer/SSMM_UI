@@ -1,5 +1,6 @@
 ﻿using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
+using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -40,7 +41,7 @@ public class MetaDataService
                 {
                     if (category.Snippet.Assignable == true)
                     {
-                        Console.WriteLine($"{category.Id} - {category.Snippet.Title}");
+                        LogService.Log($"{category.Id} - {category.Snippet.Title}");
                         _ytCategories.Add(category);
                     }
                 }
@@ -52,7 +53,7 @@ public class MetaDataService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            LogService.Log(ex.Message);
         }
     }
 

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -66,7 +67,7 @@ namespace SSMM_UI.hacks
             string filePath = "cookies_v20.json";
             if (!File.Exists(filePath))
             {
-                Console.WriteLine($"Filen {filePath} finns inte.");
+                LogService.Log($"Filen {filePath} finns inte.");
                 return;
             }
 
@@ -140,7 +141,7 @@ namespace SSMM_UI.hacks
                 throw new Exception($"API request failed: {response.StatusCode}, Content: {responseContent}");
             }
 
-            Console.WriteLine($"API Response: {responseContent}");
+            LogService.Log($"API Response: {responseContent}");
         }
 
         public static async Task UpdateCategoryAndGameAsync(
@@ -252,7 +253,7 @@ namespace SSMM_UI.hacks
             // Challenge-identifiering
             if (json.Contains("CHALLENGE_PROMPT_TYPE_AUTHENTICATE"))
             {
-                Console.WriteLine("YouTube kräver ytterligare verifiering...");
+                LogService.Log("YouTube kräver ytterligare verifiering...");
 
                 // 1. Extrahera exakt challenge-data
                 var challengeData = JObject.Parse(json);
@@ -293,7 +294,7 @@ namespace SSMM_UI.hacks
                         }
                         else
                         {
-                            Console.WriteLine("✅ Kategori och spel uppdaterat!");
+                            LogService.Log("✅ Kategori och spel uppdaterat!");
                         }
                     }
                 }
@@ -316,7 +317,7 @@ namespace SSMM_UI.hacks
 
                 // 3. Bygg standard-URL för denna challenge-typ
                 string challengeUrl = "https://studio.youtube.com/youtubei/v1/challenge";
-                Console.WriteLine($"Använder standard challenge URL: {challengeUrl}");
+                LogService.Log($"Använder standard challenge URL: {challengeUrl}");
 
                 // 4. Skapa request-body baserat på kända YouTube-mönster
                 var requestBody = new JObject
@@ -344,7 +345,7 @@ namespace SSMM_UI.hacks
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Challenge-lösning misslyckades: {ex.Message}");
+                LogService.Log($"Challenge-lösning misslyckades: {ex.Message}");
                 return null;
             }
         }
@@ -367,12 +368,12 @@ namespace SSMM_UI.hacks
             var cookiePairs = cookieNames.Where(c => cookies.TryGetValue(c, out var value) && !string.IsNullOrEmpty(value))
                                         .Select(c => $"{c}={cookies[c]}");
             var cookieHeader = string.Join("; ", cookiePairs);
-            Console.WriteLine($"Cookies: {cookieHeader}");
+            LogService.Log($"Cookies: {cookieHeader}");
 
             if (!cookies.ContainsKey("SAPISID") || !cookies.ContainsKey("ST-sbra4i") || !cookies.ContainsKey("VISITOR_INFO1_LIVE"))
                 throw new Exception("Missing critical cookies: SAPISID, ST-sbra4i, or VISITOR_INFO1_LIVE");
             if (!cookies.ContainsKey("YSC"))
-                Console.WriteLine("Warning: YSC cookie is missing, this may cause issues.");
+                LogService.Log("Warning: YSC cookie is missing, this may cause issues.");
 
             //var sapisidHash = _browserCookiesDecryptor.BuildSapisdHashHeader();
             var authHeaders = _browserCookiesDecryptor.BuildFullAuthHeaders();
@@ -413,8 +414,8 @@ namespace SSMM_UI.hacks
             //Console.WriteLine("VISITOR_DATA: " + ytCfg["VISITOR_DATA"]);
             //Console.WriteLine("XSRF_TOKEN: " + ytCfg["XSRF_TOKEN"]);
 
-            Console.WriteLine($"Response Status: {response.StatusCode}");
-            Console.WriteLine($"Response Content (first 500 chars): {html.Substring(0, Math.Min(500, html.Length))}");
+            LogService.Log($"Response Status: {response.StatusCode}");
+            LogService.Log($"Response Content (first 500 chars): {html.Substring(0, Math.Min(500, html.Length))}");
 
             if (!response.IsSuccessStatusCode || html.Contains("<title>Logga in"))
                 throw new Exception($"Failed to fetch Studio Edit HTML. Status: {response.StatusCode}, Content: {html.Substring(0, Math.Min(500, html.Length))}");
@@ -456,7 +457,7 @@ namespace SSMM_UI.hacks
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error parsing ytcfg: {ex.Message}");
+                        LogService.Log($"Error parsing ytcfg: {ex.Message}");
                     }
                 }
 
@@ -476,7 +477,7 @@ namespace SSMM_UI.hacks
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error parsing ytInitialData: {ex.Message}");
+                        LogService.Log($"Error parsing ytInitialData: {ex.Message}");
                     }
                 }
 
@@ -489,14 +490,14 @@ namespace SSMM_UI.hacks
                     .GetAttributeValue("content", null);
 
                 // 4. Debug-utskrift av alla värden
-                Console.WriteLine("=== Extraherade värden ===");
-                Console.WriteLine($"API Key: {result.ApiKey ?? "null"}");
-                Console.WriteLine($"Client Screen Nonce: {result.ClientScreenNonce ?? "null"}");
-                Console.WriteLine($"Visitor Data: {result.VisitorData ?? "null"}");
-                Console.WriteLine($"XSFR Token: {result.XsrfToken ?? "null"}");
-                Console.WriteLine($"Delegated Session ID: {result.DelegatedSessionId ?? "null"}");
-                Console.WriteLine($"Channel ID: {result.ChannelId ?? "null"}");
-                Console.WriteLine($"CSRF Token: {result.CsrfToken ?? "null"}");
+                LogService.Log("=== Extraherade värden ===");
+                LogService.Log($"API Key: {result.ApiKey ?? "null"}");
+                LogService.Log($"Client Screen Nonce: {result.ClientScreenNonce ?? "null"}");
+                LogService.Log($"Visitor Data: {result.VisitorData ?? "null"}");
+                LogService.Log($"XSFR Token: {result.XsrfToken ?? "null"}");
+                LogService.Log($"Delegated Session ID: {result.DelegatedSessionId ?? "null"}");
+                LogService.Log($"Channel ID: {result.ChannelId ?? "null"}");
+                LogService.Log($"CSRF Token: {result.CsrfToken ?? "null"}");
 
                 return result;
             }

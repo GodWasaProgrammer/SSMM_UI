@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using SSMM_UI.Services;
 
 
 namespace SSMM_UI.Oauth.Kick;
@@ -59,7 +60,7 @@ public class KickOAuthService
                            $"code_challenge_method=S256&" +
                            $"state={_currentState}";
 
-            Console.WriteLine($"Öppnar auktoriserings-URL: {authUrl}");
+            LogService.Log($"Öppnar auktoriserings-URL: {authUrl}");
 
             // 3. Öppna webbläsare
             OpenBrowser(authUrl);
@@ -155,7 +156,7 @@ public class KickOAuthService
         catch (Exception ex)
         {
             // Logga eller hantera fel (t.ex. korrupt fil)
-            Console.WriteLine($"❌ Fel vid autologin: {ex.Message}");
+            LogService.Log($"❌ Fel vid autologin: {ex.Message}");
             return null;
         }
     }

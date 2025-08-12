@@ -22,27 +22,17 @@ public class CentralAuthService
     public GoogleOAuthService? GoogleAuthService { get; set; }
     public TwitchDCAuthService TwitchService;
     private readonly KickOAuthService? _kickOauthService;
-    private readonly string _TwitchDCFClientId;
 
     public CentralAuthService()
     {
         _kickOauthService = new KickOAuthService();
-        var TwitchDcfClientId = Environment.GetEnvironmentVariable("TwitchDCFClient");
-        if (TwitchDcfClientId is not null)
-        {
-            _TwitchDCFClientId = TwitchDcfClientId;
-        }
-        else
-        {
-            throw new Exception("ClientID for Twitch was missing");
-        }
         var scopes = new[]
         {
             TwitchScopes.UserReadEmail,
             TwitchScopes.ChannelManageBroadcast,
             TwitchScopes.StreamKey
         };
-        TwitchService = new TwitchDCAuthService(new HttpClient(), _TwitchDCFClientId, scopes);
+        TwitchService = new TwitchDCAuthService(new HttpClient(), scopes);
     }
     public async Task<string> LoginWithTwitch()
     {
@@ -78,7 +68,7 @@ public class CentralAuthService
             }
             else
             {
-                Console.WriteLine("Timeout - användaren loggade inte in.");
+                LogService.Log("Timeout - användaren loggade inte in.");
             }
         }
         return LoginResult;
@@ -117,7 +107,7 @@ public class CentralAuthService
         catch (Exception ex)
         {
             // Logga för felsökning
-            Console.WriteLine($"❌ Kick-login error: {ex.Message}");
+            LogService.Log($"❌ Kick-login error: {ex.Message}");
             return $"❌ Fel vid inloggning: {ex.Message}";
         }
     }

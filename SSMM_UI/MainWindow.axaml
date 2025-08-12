@@ -217,16 +217,14 @@
 						<Border Classes="card">
 							<StackPanel>
 								<TextBlock Text="LOGS" Classes="secondary"/>
-								<TextBox x:Name="LogOutput"
-                                         AcceptsReturn="True"
-                                         Height="400"
-                                         IsReadOnly="True"
-                                         TextWrapping="Wrap"
-                                         FontFamily="Consolas, Courier New"
-                                         BorderThickness="0"
-                                         Background="{DynamicResource BorderColor}" Opacity="0.2"
-                                         Foreground="{DynamicResource PrimaryTextColor}"
-                                         Padding="10"/>
+								<ListBox ItemsSource="{Binding LogMessages}"
+										Height="400"
+										FontFamily="Consolas, Courier New"
+										BorderThickness="0"
+										Background="{DynamicResource BorderColor}"
+										Opacity="0.2"
+										Foreground="{DynamicResource PrimaryTextColor}"
+										Padding="10" />
 							</StackPanel>
 						</Border>
 					</StackPanel>

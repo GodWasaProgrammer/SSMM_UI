@@ -1,4 +1,5 @@
-﻿using Avalonia.Threading;
+﻿using Avalonia.Logging;
+using Avalonia.Threading;
 using FFmpeg.AutoGen;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
@@ -29,7 +30,7 @@ public class StreamService
         Server.StartSrv();
     }
     public StreamInfo? StreamInfo { get; set; }
-    public async Task<(string rtmpUrl, string streamKey)> CreateYouTubeBroadcastAsync(StreamMetadata metadata, MainWindow window)
+    public async Task<(string rtmpUrl, string streamKey)> CreateYouTubeBroadcastAsync(StreamMetadata metadata)
     {
         if (_centralAuthService.YTService is not null)
         {
@@ -40,8 +41,7 @@ public class StreamService
                     StreamInfo = info;
                 else
                 {
-                    window.LogOutput.Text += "stream failed to start, there was missing info from ffprobe";
-                    window.LogOutput.CaretIndex = window.LogOutput.Text.Length;
+                    LogService.Log("stream failed to start, there was missing info from ffprobe");
                 }
             }
             try
@@ -114,7 +114,7 @@ public class StreamService
                 //await LoginCapture.RunAsync(); // Första gången
                 //await YouTubeStudioAutomation.RunAsync(insertedBroadcast.Id); // Efteråt
 
-                window.haxx = insertedBroadcast.Id;
+                //window.haxx = insertedBroadcast.Id;
 
                 // 5. Returnera RTMP-url + streamkey
                 var ingestionInfo = insertedStream.Cdn.IngestionInfo;
@@ -122,11 +122,11 @@ public class StreamService
             }
             catch (Google.GoogleApiException ex)
             {
-                Console.WriteLine("YouTube API error:");
-                Console.WriteLine($"Message: {ex.Message}");
-                Console.WriteLine($"Details: {ex.Error?.Errors?.FirstOrDefault()?.Message}");
-                Console.WriteLine($"Reason: {ex.Error?.Errors?.FirstOrDefault()?.Reason}");
-                Console.WriteLine($"Domain: {ex.Error?.Errors?.FirstOrDefault()?.Domain}");
+                LogService.Log("YouTube API error:");
+                LogService.Log($"Message: {ex.Message}");
+                LogService.Log($"Details: {ex.Error?.Errors?.FirstOrDefault()?.Message}");
+                LogService.Log($"Reason: {ex.Error?.Errors?.FirstOrDefault()?.Reason}");
+                LogService.Log($"Domain: {ex.Error?.Errors?.FirstOrDefault()?.Domain}");
                 throw;
             }
         }
@@ -187,7 +187,7 @@ public class StreamService
             if (!process.HasExited)
             {
                 process.Kill();
-                Console.WriteLine("ffprobe process killed due to timeout.");
+                LogService.Log("ffprobe process killed due to timeout.");
                 return null;
             }
 
@@ -213,20 +213,18 @@ public class StreamService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Failed to probe RTMP stream: {ex.Message}");
+            LogService.Log($"Failed to probe RTMP stream: {ex.Message}");
             return null;
         }
     }
-    public async void StartStreamStatusPolling(MainWindow window)
+    public async void StartStreamStatusPolling()
     {
         while (true)
         {
             var isAlive = await Task.Run(() => CheckStreamIsAlive(RtmpAdress));
             Dispatcher.UIThread.Post(() =>
             {
-                window.StreamStatusText.Text = isAlive
-                    ? "Stream status: ✅ Live"
-                    : "Stream status: ❌ Not Receiving";
+                UIService.UpdateStreamStatus(isAlive);
             });
         }
     }
@@ -293,15 +291,13 @@ public class StreamService
         ffmpeg.avformat_close_input(&pFormatContext);
         return foundFrame;
     }
-    public static async void StartServerStatusPolling(MainWindow window)
+    public static async void StartServerStatusPolling()
     {
         while (true)
         {
             bool isResponding = await IsRtmpApiResponding(); // Använd await istället för .Result
 
-            window.ServerStatusText.Text = isResponding
-                ? "RTMP-server: ✅ Running"
-                : "RTMP-server: ❌ Inte startad";
+            UIService.UpdateServerStatus(isResponding);
 
             await Task.Delay(5000); // 5 sekunders delay
         }
@@ -323,7 +319,7 @@ public class StreamService
                     if (service.DisplayName.Contains("Youtube", StringComparison.OrdinalIgnoreCase))
                     {
                         // Skapa ny Youtube broadcast med metadata
-                        var (newUrl, newKey) = await CreateYouTubeBroadcastAsync(window.CurrentMetadata, window);
+                        var (newUrl, newKey) = await CreateYouTubeBroadcastAsync(window.CurrentMetadata);
                         //SetYouTubeCategoryAndGameAsync(newKey, newUrl, );
 
 
@@ -349,8 +345,7 @@ public class StreamService
                 }
                 catch (Exception ex)
                 {
-                    window.LogOutput.Text += $"Failed to create YouTube broadcast: {ex.Message}\n";
-                    window.LogOutput.CaretIndex = window.LogOutput.Text.Length;
+                    LogService.Log($"Failed to create YouTube broadcast: {ex.Message}\n");
                     return;
                 }
             }
@@ -383,16 +378,14 @@ public class StreamService
                 string? line;
                 while ((line = await process.StandardError.ReadLineAsync()) != null)
                 {
-                    window.LogOutput.Text += (line + Environment.NewLine);
-                    window.LogOutput.CaretIndex = window.LogOutput.Text.Length;
+                    LogService.Log((line + Environment.NewLine));
                 }
 
                 await process.WaitForExitAsync();
             }
             catch (Exception ex)
             {
-                window.LogOutput.Text += ($"FFmpeg start failed: {ex.Message}\n");
-                window.LogOutput.CaretIndex = window.LogOutput.Text.Length;
+                LogService.Log($"FFmpeg start failed: {ex.Message}\n");
             }
         }
     }

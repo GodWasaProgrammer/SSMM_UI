@@ -46,7 +46,7 @@ public class StateService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Kunde inte läsa in tjänster: {ex.Message}");
+            LogService.Log($"❌ Kunde inte läsa in tjänster: {ex.Message}");
         }
     }
 

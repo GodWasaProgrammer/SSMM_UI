@@ -20,9 +20,9 @@ public partial class MainWindow : Window
 {
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; private set; }
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; private set; }
+    public ObservableCollection<string> LogMessages => LogService.Messages;
     private CentralAuthService _centralAuthService;
     public StreamMetadata CurrentMetadata { get; set; } = new StreamMetadata();
-
     private readonly StateService _stateService = new();
     private StreamService? _streamService;
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
@@ -44,8 +44,19 @@ public partial class MainWindow : Window
         base.OnOpened(e);
         await AutoLoginIfTokenized();
         _streamService = new(_centralAuthService);
-        //_streamService.StartStreamStatusPolling(this);
-        //StreamService.StartServerStatusPolling(this);
+        UIService.StreamStatusChanged += text =>
+        {
+            StreamStatusText.Text = text;
+        };
+        UIService.ServerStatusChanged += text =>
+        {
+            ServerStatusText.Text = text;
+        };
+        if (!Design.IsDesignMode)
+        {
+            _streamService.StartStreamStatusPolling();
+            StreamService.StartServerStatusPolling();
+        }
     }
 
     public string haxx = "";
@@ -61,7 +72,7 @@ public partial class MainWindow : Window
             string filePath = "cookies_v20.json";
             if (!File.Exists(filePath))
             {
-                Console.WriteLine($"Filen {filePath} finns inte.");
+                LogService.Log($"Filen {filePath} finns inte.");
                 return;
             }
 
@@ -114,8 +125,7 @@ public partial class MainWindow : Window
 
             if (!result)
             {
-                LogOutput.Text += $"Cancelled adding service: {group.ServiceName}\n";
-                LogOutput.CaretIndex = LogOutput.Text.Length;
+                LogService.Log($"Cancelled adding service: {group.ServiceName}\n");
             }
         }
     }
@@ -241,8 +251,7 @@ public partial class MainWindow : Window
             }
             catch (Exception ex)
             {
-                LogOutput.Text += ex.ToString();
-                LogOutput.CaretIndex = LogOutput.Text.Length;
+                LogService.Log(ex.ToString());
             }
         }
     }
@@ -257,8 +266,7 @@ public partial class MainWindow : Window
             }
             catch (Exception ex)
             {
-                LogOutput.Text += ex.ToString();
-                LogOutput.CaretIndex = LogOutput.Text.Length;
+                LogService.Log(ex.ToString());
             }
         }
         StartStreamButton.IsEnabled = true;
@@ -297,8 +305,7 @@ public partial class MainWindow : Window
                 ThumbnailImage.Source = bitmap;
                 CurrentMetadata.Thumbnail = bitmap;
                 var path = file.Path?.LocalPath ?? "(no local path)";
-                LogOutput.Text += ($"Selected thumbnail: {path}");
-                LogOutput.CaretIndex = LogOutput.Text.Length;
+                LogService.Log($"Selected thumbnail: {path}");
 
                 StatusTextBlock.Foreground = Avalonia.Media.Brushes.Green;
                 StatusTextBlock.Text = "Thumbnail loaded successfully.";
@@ -412,23 +419,23 @@ public partial class MainWindow : Window
                 try
                 {
                     Directory.Delete(path, true);
-                    Console.WriteLine($"OAuth tokens cleared from: {path}");
+                    LogService.Log($"OAuth tokens cleared from: {path}");
                     foundAndDeleted = true;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Failed to clear OAuth tokens at {path}: {ex.Message}");
+                    LogService.Log($"Failed to clear OAuth tokens at {path}: {ex.Message}");
                 }
             }
             else
             {
-                Console.WriteLine($"No OAuth tokens found at: {path}");
+                LogService.Log($"No OAuth tokens found at: {path}");
             }
         }
 
         if (!foundAndDeleted)
         {
-            Console.WriteLine("No OAuth token directories found to clear.");
+            LogService.Log("No OAuth token directories found to clear.");
         }
     }
 

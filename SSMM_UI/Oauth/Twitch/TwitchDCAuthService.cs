@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
+using SSMM_UI.Services;
 
 namespace SSMM_UI.Oauth.Twitch;
 
@@ -14,16 +15,15 @@ public class TwitchDCAuthService
     private readonly HttpClient _httpClient;
     private const string DcfApiAdress = "https://id.twitch.tv/oauth2/device";
     private const string TokenAdress = "https://id.twitch.tv/oauth2/token";
-    public readonly string _clientId;
+    public readonly string _clientId = "y1cd8maguk5ob1m3lwvhdtupbj6pm3";
     private readonly string[] _scopes;
     private const string TokenFilePath = "twitch_tokenDCF.json";
     private const string ApiBaseUrl = "https://api.twitch.tv/helix";
-    public TwitchTokenTokenResponse AuthResult;
+    public TwitchTokenTokenResponse? AuthResult;
 
-    public TwitchDCAuthService(HttpClient httpClient, string clientId, string[] scopes)
+    public TwitchDCAuthService(HttpClient httpClient,string[] scopes)
     {
         _httpClient = httpClient;
-        _clientId = clientId;
         _scopes = scopes;
     }
 
@@ -61,7 +61,7 @@ public class TwitchDCAuthService
 
         if (!response.IsSuccessStatusCode)
         {
-            Console.WriteLine($"⚠️ Refresh failed: {response.StatusCode}\n{responseBody}");
+            LogService.Log($"⚠️ Refresh failed: {response.StatusCode}\n{responseBody}");
             return null;
         }
 
@@ -90,7 +90,7 @@ public class TwitchDCAuthService
 
         if (!string.IsNullOrWhiteSpace(token.RefreshToken))
         {
-            Console.WriteLine("🔁 Försöker förnya åtkomsttoken med refresh_token...");
+            LogService.Log("🔁 Försöker förnya åtkomsttoken med refresh_token...");
             await RefreshAccessTokenAsync(token.RefreshToken);
             token.UserName = await GetUsernameAsync(token.AccessToken);
             return token;
@@ -136,7 +136,7 @@ public class TwitchDCAuthService
 
             // Läser felmeddelandet som sträng (för debug/logg)
             var errorBody = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Polling error ({response.StatusCode}): {errorBody}");
+            LogService.Log($"Polling error ({response.StatusCode}): {errorBody}");
 
             try
             {
@@ -151,15 +151,15 @@ public class TwitchDCAuthService
                     case "slow_down":
                         // Twitch säger att vi pollar för snabbt – öka intervallet
                         intervalSeconds += 5;
-                        Console.WriteLine("Twitch säger att vi pollar för snabbt, ökar väntetiden...");
+                        LogService.Log("Twitch säger att vi pollar för snabbt, ökar väntetiden...");
                         continue;
 
                     case "access_denied":
-                        Console.WriteLine("Användaren nekade åtkomst.");
+                        LogService.Log("Användaren nekade åtkomst.");
                         return null;
 
                     case "expired_token":
-                        Console.WriteLine("Device code har gått ut. Timeout.");
+                        LogService.Log("Device code har gått ut. Timeout.");
                         return null;
 
                     case "":
@@ -174,7 +174,7 @@ public class TwitchDCAuthService
             }
         }
 
-        Console.WriteLine("Polling avbröts efter max väntetid utan godkännande.");
+        LogService.Log("Polling avbröts efter max väntetid utan godkännande.");
         return null;
     }
 
