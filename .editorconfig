@@ -1,0 +1,16 @@
+﻿[*.cs]
+
+# CA1416: Validate platform compatibility
+dotnet_diagnostic.CA1416.severity = none
+
+# CA1806: Do not ignore method results
+dotnet_diagnostic.CA1806.severity = none
+
+# SYSLIB1054: Use 'LibraryImportAttribute' instead of 'DllImportAttribute' to generate P/Invoke marshalling code at compile time
+dotnet_diagnostic.SYSLIB1054.severity = none
+
+# IDE0008: Use explicit type
+dotnet_diagnostic.IDE0008.severity = none
+
+# SYSLIB0053: Type or member is obsolete
+dotnet_diagnostic.SYSLIB0053.severity = none

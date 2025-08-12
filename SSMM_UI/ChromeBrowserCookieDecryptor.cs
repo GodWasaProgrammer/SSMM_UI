@@ -10,12 +10,14 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
+namespace SSMM_UI;
+
 public class ChromeBrowserCookiesDecryptor
 {
     private const string _userDataDir = "C:/users/Björn/AppData/Local/Google/Chrome/User Data/";
     private const string _profileName = "Default";
     private readonly string _origin = "https://studio.youtube.com";
-    public Dictionary<string, string> _cookies = new Dictionary<string, string>();
+    public Dictionary<string, string> _cookies = [];
 
     public ChromeBrowserCookiesDecryptor(string userDataDir = _userDataDir, string profileName = _profileName)
     {
@@ -45,16 +47,12 @@ public class ChromeBrowserCookiesDecryptor
 
     private static string ComputeSha1Hash(string input)
     {
-        using var sha1 = SHA1.Create();
-        byte[] bytes = sha1.ComputeHash(Encoding.UTF8.GetBytes(input));
+        byte[] bytes = SHA1.HashData(Encoding.UTF8.GetBytes(input));
         return BitConverter.ToString(bytes).Replace("-", "").ToLower();
     }
 
     public string BuildSapisdHashHeader()
     {
-        var masterKey = GetChromeMasterKey(_userDataDir);
-        if (masterKey == null) throw new Exception("Could not obtain Chrome master key (v20/v10).");
-
         if (_cookies == null || _cookies.Count == 0) throw new Exception("No cookies found.");
 
         var sapisid = _cookies.TryGetValue("SAPISID", out var s) ? s : null;
@@ -71,7 +69,7 @@ public class ChromeBrowserCookiesDecryptor
         return $"{timestamp}_{hex}_u"; // Lägg till _u
     }
 
-    public Dictionary<string, string> GetCookiesFromProfile(string userDataDir = _userDataDir, string profileName = _profileName)
+    public static Dictionary<string, string> GetCookiesFromProfile(string userDataDir = _userDataDir, string profileName = _profileName)
     {
         LogService.Log("[1] Startar GetCookiesFromProfile...");
         SQLitePCL.Batteries.Init();
@@ -169,7 +167,7 @@ public class ChromeBrowserCookiesDecryptor
     // -------------------------
     // Master key extraction (v20 + fallback)
     // -------------------------
-    private static byte[] GetChromeMasterKey(string userDataDir)
+    private static byte[]? GetChromeMasterKey(string userDataDir)
     {
         var localStatePath = Path.Combine(userDataDir, "Local State");
         if (!File.Exists(localStatePath)) return null;
@@ -251,7 +249,7 @@ public class ChromeBrowserCookiesDecryptor
     // -------------------------
     // IMPORTANT: app-bound v20 flow (system DPAPI -> user DPAPI -> parse -> NCrypt)
     // -------------------------
-    private static byte[] DecryptAppBoundKey(byte[] appBoundEncrypted)
+    private static byte[]? DecryptAppBoundKey(byte[] appBoundEncrypted)
     {
         // Step 1: system DPAPI unprotect (IMPERS0NATE LSASS)
         byte[] systemDecrypted;
@@ -355,8 +353,8 @@ public class ChromeBrowserCookiesDecryptor
 
     private static byte[] DecryptWithCng(byte[] input)
     {
-        IntPtr hProvider = IntPtr.Zero;
-        IntPtr hKey = IntPtr.Zero;
+        nint hProvider = nint.Zero;
+        nint hKey = nint.Zero;
         try
         {
             int status = NativeMethods.NCryptOpenStorageProvider(out hProvider, "Microsoft Software Key Storage Provider", 0);
@@ -365,11 +363,11 @@ public class ChromeBrowserCookiesDecryptor
             status = NativeMethods.NCryptOpenKey(hProvider, out hKey, "Google Chromekey1", 0, 0);
             if (status != 0) throw new Exception($"NCryptOpenKey failed: 0x{status:X}");
 
-            status = NativeMethods.NCryptDecrypt(hKey, input, input.Length, IntPtr.Zero, null, 0, out int requiredSize, NativeMethods.NCRYPT_SILENT_FLAG);
+            status = NativeMethods.NCryptDecrypt(hKey, input, input.Length, nint.Zero, null, 0, out int requiredSize, NativeMethods.NCRYPT_SILENT_FLAG);
             if (status != 0) throw new Exception($"NCryptDecrypt (size) failed: 0x{status:X}");
 
             var outBuf = new byte[requiredSize];
-            status = NativeMethods.NCryptDecrypt(hKey, input, input.Length, IntPtr.Zero, outBuf, outBuf.Length, out requiredSize, NativeMethods.NCRYPT_SILENT_FLAG);
+            status = NativeMethods.NCryptDecrypt(hKey, input, input.Length, nint.Zero, outBuf, outBuf.Length, out requiredSize, NativeMethods.NCRYPT_SILENT_FLAG);
             if (status != 0) throw new Exception($"NCryptDecrypt (decrypt) failed: 0x{status:X}");
 
             var result = new byte[requiredSize];
@@ -378,8 +376,8 @@ public class ChromeBrowserCookiesDecryptor
         }
         finally
         {
-            if (hKey != IntPtr.Zero) NativeMethods.NCryptFreeObject(hKey);
-            if (hProvider != IntPtr.Zero) NativeMethods.NCryptFreeObject(hProvider);
+            if (hKey != nint.Zero) NativeMethods.NCryptFreeObject(hKey);
+            if (hProvider != nint.Zero) NativeMethods.NCryptFreeObject(hProvider);
         }
     }
 
@@ -480,11 +478,11 @@ public class ChromeBrowserCookiesDecryptor
     private class KeyBlob
     {
         public int Flag;
-        public byte[] Header;
-        public byte[] EncryptedAesKey; // when flag == 3
-        public byte[] Iv;
-        public byte[] Ciphertext;
-        public byte[] Tag;
+        public byte[]? Header;
+        public byte[]? EncryptedAesKey; // when flag == 3
+        public byte[]? Iv;
+        public byte[]? Ciphertext;
+        public byte[]? Tag;
 
         public static KeyBlob Parse(byte[] blob)
         {
@@ -528,55 +526,55 @@ public class ChromeBrowserCookiesDecryptor
         public const int NCRYPT_SILENT_FLAG = 0x00000040;
 
         [DllImport("ncrypt.dll", CharSet = CharSet.Unicode)]
-        public static extern int NCryptOpenStorageProvider(out IntPtr phProvider, string pszProviderName, int dwFlags);
+        public static extern int NCryptOpenStorageProvider(out nint phProvider, string pszProviderName, int dwFlags);
 
         [DllImport("ncrypt.dll", CharSet = CharSet.Unicode)]
-        public static extern int NCryptOpenKey(IntPtr hProvider, out IntPtr phKey, string pszKeyName, int dwLegacyKeySpec, int dwFlags);
+        public static extern int NCryptOpenKey(nint hProvider, out nint phKey, string pszKeyName, int dwLegacyKeySpec, int dwFlags);
 
         [DllImport("ncrypt.dll")]
-        public static extern int NCryptDecrypt(IntPtr hKey,
+        public static extern int NCryptDecrypt(nint hKey,
             [In] byte[] pbInput,
             int cbInput,
-            IntPtr pPaddingInfo,
-            [Out] byte[] pbOutput,
+            nint pPaddingInfo,
+            [Out] byte[]? pbOutput,
             int cbOutput,
             out int pcbResult,
             int dwFlags);
 
         [DllImport("ncrypt.dll")]
-        public static extern int NCryptFreeObject(IntPtr hObject);
+        public static extern int NCryptFreeObject(nint hObject);
 
         public const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
         public const uint PROCESS_QUERY_INFORMATION = 0x0400;
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, int dwProcessId);
+        public static extern nint OpenProcess(uint dwDesiredAccess, bool bInheritHandle, int dwProcessId);
 
         [DllImport("advapi32.dll", SetLastError = true)]
-        public static extern bool OpenProcessToken(IntPtr ProcessHandle, uint DesiredAccess, out IntPtr TokenHandle);
+        public static extern bool OpenProcessToken(nint ProcessHandle, uint DesiredAccess, out nint TokenHandle);
 
         [DllImport("advapi32.dll", SetLastError = true)]
         public static extern bool DuplicateTokenEx(
-            IntPtr hExistingToken,
+            nint hExistingToken,
             uint dwDesiredAccess,
-            IntPtr lpTokenAttributes,
+            nint lpTokenAttributes,
             int ImpersonationLevel,
             int TokenType,
-            out IntPtr phNewToken);
+            out nint phNewToken);
 
         [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern bool LookupPrivilegeValue(string lpSystemName, string lpName, out LUID lpLuid);
+        public static extern bool LookupPrivilegeValue(string? lpSystemName, string lpName, out LUID lpLuid);
 
         [DllImport("advapi32.dll", SetLastError = true)]
-        public static extern bool AdjustTokenPrivileges(IntPtr TokenHandle, bool DisableAllPrivileges,
-            ref TOKEN_PRIVILEGES NewState, int BufferLength, IntPtr PreviousState, IntPtr ReturnLength);
+        public static extern bool AdjustTokenPrivileges(nint TokenHandle, bool DisableAllPrivileges,
+            ref TOKEN_PRIVILEGES NewState, int BufferLength, nint PreviousState, nint ReturnLength);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool CloseHandle(IntPtr hObject);
+        public static extern bool CloseHandle(nint hObject);
 
         // SetThreadToken - set token for current thread when first param is IntPtr.Zero
         [DllImport("advapi32.dll", SetLastError = true)]
-        public static extern bool SetThreadToken(IntPtr thread, IntPtr token);
+        public static extern bool SetThreadToken(nint thread, nint token);
 
         public const uint TOKEN_DUPLICATE = 0x0002;
         public const uint TOKEN_QUERY = 0x0008;
@@ -611,8 +609,8 @@ public class ChromeBrowserCookiesDecryptor
 
     private sealed class LsassImpersonation : IDisposable
     {
-        private IntPtr _dupToken = IntPtr.Zero;
-        private IntPtr _procHandle = IntPtr.Zero;
+        private nint _dupToken = nint.Zero;
+        private nint _procHandle = nint.Zero;
         private bool _applied = false;
 
         public LsassImpersonation()
@@ -629,10 +627,10 @@ public class ChromeBrowserCookiesDecryptor
 
             var lsass = procs[0];
             _procHandle = NativeMethods.OpenProcess(NativeMethods.PROCESS_QUERY_LIMITED_INFORMATION, false, lsass.Id);
-            if (_procHandle == IntPtr.Zero)
+            if (_procHandle == nint.Zero)
             {
                 _procHandle = NativeMethods.OpenProcess(NativeMethods.PROCESS_QUERY_INFORMATION, false, lsass.Id);
-                if (_procHandle == IntPtr.Zero)
+                if (_procHandle == nint.Zero)
                     throw new Exception($"OpenProcess failed: {Marshal.GetLastWin32Error()}");
             }
 
@@ -642,7 +640,7 @@ public class ChromeBrowserCookiesDecryptor
             // Duplicate as impersonation token
             if (!NativeMethods.DuplicateTokenEx(lsassToken,
                 NativeMethods.TOKEN_DUPLICATE | NativeMethods.TOKEN_QUERY | NativeMethods.TOKEN_IMPERSONATE,
-                IntPtr.Zero,
+                nint.Zero,
                 NativeMethods.SecurityImpersonation,
                 NativeMethods.TokenImpersonation,
                 out _dupToken))
@@ -654,7 +652,7 @@ public class ChromeBrowserCookiesDecryptor
             NativeMethods.CloseHandle(lsassToken);
 
             // Set token on current thread
-            if (!NativeMethods.SetThreadToken(IntPtr.Zero, _dupToken))
+            if (!NativeMethods.SetThreadToken(nint.Zero, _dupToken))
             {
                 var err = Marshal.GetLastWin32Error();
                 throw new Exception($"SetThreadToken failed: {err}");
@@ -667,7 +665,7 @@ public class ChromeBrowserCookiesDecryptor
         {
             if (!NativeMethods.OpenProcessToken(Process.GetCurrentProcess().Handle,
                 NativeMethods.TOKEN_ADJUST_PRIVILEGES | NativeMethods.TOKEN_QUERY,
-                out IntPtr token))
+                out nint token))
             {
                 throw new Exception($"OpenProcessToken(current) failed: {Marshal.GetLastWin32Error()}");
             }
@@ -687,7 +685,7 @@ public class ChromeBrowserCookiesDecryptor
                     }
                 };
 
-                if (!NativeMethods.AdjustTokenPrivileges(token, false, ref tp, Marshal.SizeOf(tp), IntPtr.Zero, IntPtr.Zero))
+                if (!NativeMethods.AdjustTokenPrivileges(token, false, ref tp, Marshal.SizeOf(tp), nint.Zero, nint.Zero))
                 {
                     throw new Exception($"AdjustTokenPrivileges failed: {Marshal.GetLastWin32Error()}");
                 }
@@ -704,22 +702,22 @@ public class ChromeBrowserCookiesDecryptor
             {
                 if (_applied)
                 {
-                    NativeMethods.SetThreadToken(IntPtr.Zero, IntPtr.Zero); // revert
+                    NativeMethods.SetThreadToken(nint.Zero, nint.Zero); // revert
                     _applied = false;
                 }
             }
             catch { }
 
-            if (_dupToken != IntPtr.Zero)
+            if (_dupToken != nint.Zero)
             {
                 NativeMethods.CloseHandle(_dupToken);
-                _dupToken = IntPtr.Zero;
+                _dupToken = nint.Zero;
             }
 
-            if (_procHandle != IntPtr.Zero)
+            if (_procHandle != nint.Zero)
             {
                 NativeMethods.CloseHandle(_procHandle);
-                _procHandle = IntPtr.Zero;
+                _procHandle = nint.Zero;
             }
         }
     }

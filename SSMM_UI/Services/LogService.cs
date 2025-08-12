@@ -5,7 +5,7 @@ namespace SSMM_UI.Services;
 
 public static class LogService
 {
-    public static ObservableCollection<string> Messages { get; } = new();
+    public static ObservableCollection<string> Messages { get; } = [];
 
     public static void Log(string message)
     {

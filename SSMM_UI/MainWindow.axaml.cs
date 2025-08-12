@@ -4,7 +4,6 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
 using Newtonsoft.Json;
-using SSMM_UI.hacks;
 using SSMM_UI.MetaData;
 using SSMM_UI.Oauth.Google;
 using SSMM_UI.Services;
@@ -13,20 +12,21 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
-using static SSMM_UI.hacks.YouTubeStudioClient;
+using static SSMM_UI.YouTubeStudioClient;
 namespace SSMM_UI;
 
 public partial class MainWindow : Window
 {
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; private set; }
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; private set; }
-    public ObservableCollection<string> LogMessages => LogService.Messages;
-    private CentralAuthService _centralAuthService;
+    public static ObservableCollection<string> LogMessages => LogService.Messages;
+    private readonly CentralAuthService _centralAuthService;
     public StreamMetadata CurrentMetadata { get; set; } = new StreamMetadata();
     private readonly StateService _stateService = new();
     private StreamService? _streamService;
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
     private bool isReceivingStream = false;
+    private GoogleOAuthService? GoogleAuthService { get; set; }
 
     public MainWindow()
     {
@@ -374,14 +374,14 @@ public partial class MainWindow : Window
         StatusTextBlock.Text = "Metadata updated successfully!";
     }
 
-    private GoogleOAuthService _GoogleAuthService { get; set; }
+    
     private async void OnLoginWithGoogleClicked(object? sender, RoutedEventArgs e)
     {
-        _GoogleAuthService = new GoogleOAuthService();
+        GoogleAuthService = new GoogleOAuthService();
 
         LoginStatusText.Text = "Loggar in...";
 
-        var userName = await _GoogleAuthService.LoginWithYoutube();
+        var userName = await GoogleAuthService.LoginWithYoutube();
         if (userName != null)
         {
             LoginStatusText.Text = $"✅ Inloggad som {userName}";

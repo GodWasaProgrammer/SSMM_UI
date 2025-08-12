@@ -11,8 +11,8 @@ public class StateService
     private const string SerializedServices = "Serialized_Services.json";
     private const string _obsServices = "services.json";
 
-    public ObservableCollection<SelectedService> SelectedServicesToStream { get; private set; } = new();
-    public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = new();
+    public ObservableCollection<SelectedService> SelectedServicesToStream { get; private set; } = [];
+    public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
 
     public StateService()
     {

@@ -12,7 +12,7 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace SSMM_UI.hacks
+namespace SSMM_UI
 {
     public class YouTubeStudioClient
     {
@@ -152,6 +152,10 @@ namespace SSMM_UI.hacks
         {
             if (string.IsNullOrEmpty(auth.ApiKey) || string.IsNullOrEmpty(auth.XsrfToken))
                 throw new ArgumentException("ApiKey eller XsrfToken saknas i auth-data.");
+            if (sapisidHash is null)
+            {
+                throw new ArgumentNullException(nameof(sapisidHash));
+            }
 
             using var handler = new HttpClientHandler { AllowAutoRedirect = true };
             using var client = new HttpClient(handler) { BaseAddress = new Uri("https://studio.youtube.com") };
@@ -301,7 +305,7 @@ namespace SSMM_UI.hacks
             }
         }
 
-        private static async Task<string> SolveYouTubeChallenge(string challengeResponse, string cookieHeader)
+        private static async Task<string?> SolveYouTubeChallenge(string challengeResponse, string cookieHeader)
         {
             try
             {
@@ -370,7 +374,7 @@ namespace SSMM_UI.hacks
             var cookieHeader = string.Join("; ", cookiePairs);
             LogService.Log($"Cookies: {cookieHeader}");
 
-            if (!cookies.ContainsKey("SAPISID") || !cookies.ContainsKey("ST-sbra4i") || !cookies.ContainsKey("VISITOR_INFO1_LIVE"))
+            if (!cookies.ContainsKey("SAPISID") || !cookies.ContainsKey("ST-sbra4i") || !cookies.TryGetValue("VISITOR_INFO1_LIVE", out string? value))
                 throw new Exception("Missing critical cookies: SAPISID, ST-sbra4i, or VISITOR_INFO1_LIVE");
             if (!cookies.ContainsKey("YSC"))
                 LogService.Log("Warning: YSC cookie is missing, this may cause issues.");
@@ -387,7 +391,7 @@ namespace SSMM_UI.hacks
             client.DefaultRequestHeaders.Add("Origin", "https://studio.youtube.com");
             client.DefaultRequestHeaders.Add("Referer", $"https://studio.youtube.com/video/{videoId}/livestreaming");
             client.DefaultRequestHeaders.Add("x-goog-authuser", "0");
-            client.DefaultRequestHeaders.Add("x-goog-visitor-id", cookies["VISITOR_INFO1_LIVE"]);
+            client.DefaultRequestHeaders.Add("x-goog-visitor-id", value);
             client.DefaultRequestHeaders.Add("x-youtube-client-name", "62");
             client.DefaultRequestHeaders.Add("x-youtube-client-version", "1.20250807");
             client.DefaultRequestHeaders.Add("x-youtube-delegation-context", "EhhVQ0NIYzJyRUlaTDFWT1dVTXNUQnk4N3cqAggI");
@@ -418,22 +422,22 @@ namespace SSMM_UI.hacks
             LogService.Log($"Response Content (first 500 chars): {html.Substring(0, Math.Min(500, html.Length))}");
 
             if (!response.IsSuccessStatusCode || html.Contains("<title>Logga in"))
-                throw new Exception($"Failed to fetch Studio Edit HTML. Status: {response.StatusCode}, Content: {html.Substring(0, Math.Min(500, html.Length))}");
+                throw new Exception($"Failed to fetch Studio Edit HTML. Status: {response.StatusCode}, Content: {html[..Math.Min(500, html.Length)]}");
 
             return ytCfg;
         }
 
         public class YouTubeStudioAuthData
         {
-            public string ApiKey { get; set; }
-            public string ClientScreenNonce { get; set; }
-            public string VisitorData { get; set; }
-            public string XsrfToken { get; set; }
-            public string DelegatedSessionId { get; set; }
-            public string VideoId { get; set; }
-            public string CsrfToken { get; set; }
-            public string ChannelId { get; set; }
-            public string PlaylistId { get; set; }
+            public string? ApiKey { get; set; }
+            public string? ClientScreenNonce { get; set; }
+            public string? VisitorData { get; set; }
+            public string? XsrfToken { get; set; }
+            public string? DelegatedSessionId { get; set; }
+            public string? VideoId { get; set; }
+            public string? CsrfToken { get; set; }
+            public string? ChannelId { get; set; }
+            public string? PlaylistId { get; set; }
         }
 
         public class YouTubeStudioDataExtractor
@@ -449,6 +453,7 @@ namespace SSMM_UI.hacks
                     try
                     {
                         var ytCfg = JObject.Parse(ytCfgMatch.Groups[1].Value);
+
                         result.ApiKey = ytCfg["INNERTUBE_API_KEY"]?.ToString();
                         result.ClientScreenNonce = ytCfg["CLIENT_SCREEN_NONCE"]?.ToString();
                         result.VisitorData = ytCfg["VISITOR_DATA"]?.ToString();

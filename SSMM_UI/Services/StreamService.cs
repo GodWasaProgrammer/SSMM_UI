@@ -19,7 +19,7 @@ namespace SSMM_UI.Services;
 
 public class StreamService
 {
-    private CentralAuthService _centralAuthService;
+    private readonly CentralAuthService _centralAuthService;
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
     private const string TwitchAdress = "rtmp://live.twitch.tv/app";
     private RTMPServer Server { get; set; } = new();

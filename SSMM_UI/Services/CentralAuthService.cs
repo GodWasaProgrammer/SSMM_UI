@@ -159,10 +159,7 @@ public class CentralAuthService
 
 
             // TODO: make sure that we instantiate YTService also or shit will break down the pipe
-            if(GoogleAuthService == null)
-            {
-                GoogleAuthService = new();
-            }
+            GoogleAuthService ??= new();
             var user = await GoogleAuthService.LoginAutoIfTokenized();
             results.Add(new AuthResult(AuthProvider.YouTube, true, user, null));
         }

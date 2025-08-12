@@ -16,7 +16,7 @@ public class MetaDataService
     public MetaDataService(YouTubeService service)
     {
         _youTubeService = service;
-        _ytCategories = new List<VideoCategory>();
+        _ytCategories = [];
     }
 
     public async Task Initialize()
@@ -29,15 +29,16 @@ public class MetaDataService
         var categoriesRequest = _youTubeService.VideoCategories.List("snippet");
         categoriesRequest.RegionCode = "SE"; // Eller "US", "GB", etc.
 
-        VideoCategoryListResponse response = new();
         try
         {
             var result = await categoriesRequest.ExecuteAsync();
             if (result is not null)
             {
+
+                VideoCategoryListResponse response = new();
                 response = result;
-                _ytCategories = new List<VideoCategory>();
-                foreach (var category in response.Items)
+                _ytCategories = [];
+                foreach (var category in new VideoCategoryListResponse().Items)
                 {
                     if (category.Snippet.Assignable == true)
                     {
@@ -57,12 +58,12 @@ public class MetaDataService
         }
     }
 
-    private async Task TwitchCategoryFetch()
+    private static void TwitchCategoryFetch()
     {
 
     }
     // TODO: API Support missing, need to be haxxy
-    private async Task YTGameFetch()
+    private static void YTGameFetch()
     {
 
     }

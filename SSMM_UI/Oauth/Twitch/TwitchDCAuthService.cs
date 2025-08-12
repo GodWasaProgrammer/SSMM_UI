@@ -31,7 +31,6 @@ public class TwitchDCAuthService
     {
         var request = new HttpRequestMessage(HttpMethod.Post, DcfApiAdress);
 
-        var bla = string.Join(" ", _scopes);
         var content = new FormUrlEncodedContent(new[]
         {
             new KeyValuePair<string, string>("client_id", _clientId),
@@ -49,12 +48,12 @@ public class TwitchDCAuthService
 
     public async Task<TwitchTokenTokenResponse?> RefreshAccessTokenAsync(string refreshToken)
     {
-        var content = new FormUrlEncodedContent(new[]
-        {
+        var content = new FormUrlEncodedContent(
+        [
         new KeyValuePair<string, string>("grant_type", "refresh_token"),
         new KeyValuePair<string, string>("refresh_token", refreshToken),
         new KeyValuePair<string, string>("client_id", _clientId)
-    });
+    ]);
 
         var response = await _httpClient.PostAsync("https://id.twitch.tv/oauth2/token", content);
         var responseBody = await response.Content.ReadAsStringAsync();
@@ -179,7 +178,7 @@ public class TwitchDCAuthService
     }
 
 
-    private async Task<string> GetUsernameAsync(string accessToken)
+    private async Task<string?> GetUsernameAsync(string accessToken)
     {
         using var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
@@ -228,7 +227,7 @@ public class TwitchDCAuthService
         File.WriteAllText(TokenFilePath, json);
     }
 
-    public static TwitchTokenTokenResponse LoadSavedToken()
+    public static TwitchTokenTokenResponse? LoadSavedToken()
     {
         if (!File.Exists(TokenFilePath)) return null;
 
