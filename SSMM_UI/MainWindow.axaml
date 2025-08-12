@@ -282,6 +282,19 @@
 					</StackPanel>
 				</ScrollViewer>
 			</TabItem>
+			<TabItem Header="Social Media AutoPoster">
+				<ScrollViewer>
+					<StackPanel Margin="15" Width="600">
+						<Border Classes="card">
+							<StackPanel>
+								<CheckBox Content="X(Twitter)"></CheckBox>
+								<CheckBox Content="Facebook"></CheckBox>
+								<CheckBox Content="Discord"></CheckBox>
+							</StackPanel>
+						</Border>
+					</StackPanel>
+				</ScrollViewer>
+			</TabItem>
 		</TabControl>
 	</Grid>
 </Window>
