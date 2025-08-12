@@ -362,3 +362,14 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /SSMM_UI/cookies_v20.json
+/SSMM_UI/Dependencies/avcodec-61.dll
+/SSMM_UI/Dependencies/avdevice-61.dll
+/SSMM_UI/Dependencies/avfilter-10.dll
+/SSMM_UI/Dependencies/avformat-61.dll
+/SSMM_UI/Dependencies/avutil-59.dll
+/SSMM_UI/Dependencies/ffmpeg.exe
+/SSMM_UI/Dependencies/ffplay.exe
+/SSMM_UI/Dependencies/ffprobe.exe
+/SSMM_UI/Dependencies/postproc-58.dll
+/SSMM_UI/Dependencies/swresample-5.dll
+/SSMM_UI/Dependencies/swscale-8.dll
