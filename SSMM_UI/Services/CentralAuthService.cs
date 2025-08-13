@@ -1,9 +1,4 @@
-﻿using Avalonia.Controls;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Oauth2.v2;
-using Google.Apis.Services;
-using Google.Apis.YouTube.v3;
-using SSMM_UI.Dialogs;
+﻿using Google.Apis.YouTube.v3;
 using SSMM_UI.Oauth.Google;
 using SSMM_UI.Oauth.Kick;
 using SSMM_UI.Oauth.Twitch;
@@ -11,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace SSMM_UI.Services;
@@ -125,39 +119,6 @@ public class CentralAuthService
         // Google/YouTube
         try
         {
-            //var clientSecrets = new ClientSecrets
-            //{
-            //    ClientId = Environment.GetEnvironmentVariable("SSMM_ClientID"),
-            //    ClientSecret = Environment.GetEnvironmentVariable("SSMM_ClientSecret")
-            //};
-
-            //var scopes = new[] {
-            //    Oauth2Service.Scope.UserinfoProfile,
-            //    Oauth2Service.Scope.UserinfoEmail,
-            //    YouTubeService.Scope.Youtube,
-            //    YouTubeService.Scope.YoutubeForceSsl
-            //};
-
-            //var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-            //    clientSecrets, scopes, "user", CancellationToken.None);
-
-            //await credential.RefreshTokenAsync(CancellationToken.None);
-
-            //YTService = new YouTubeService(new BaseClientService.Initializer()
-            //{
-            //    HttpClientInitializer = credential,
-            //    ApplicationName = "SSMM"
-            //});
-
-            //var oauth2 = new Oauth2Service(new BaseClientService.Initializer
-            //{
-            //    HttpClientInitializer = credential,
-            //    ApplicationName = "SSMM_UI"
-            //});
-
-            //var user = await oauth2.Userinfo.Get().ExecuteAsync();
-
-
             // TODO: make sure that we instantiate YTService also or shit will break down the pipe
             GoogleAuthService ??= new();
             var user = await GoogleAuthService.LoginAutoIfTokenized();

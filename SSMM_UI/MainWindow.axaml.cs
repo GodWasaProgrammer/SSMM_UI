@@ -3,16 +3,13 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
-using Newtonsoft.Json;
 using SSMM_UI.MetaData;
 using SSMM_UI.Oauth.Google;
 using SSMM_UI.Services;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
-using static SSMM_UI.YouTubeStudioClient;
 namespace SSMM_UI;
 
 public partial class MainWindow : Window
@@ -59,55 +56,70 @@ public partial class MainWindow : Window
         }
     }
 
+
+
     public string haxx = "";
     private async void TestYThacks(object? sender, RoutedEventArgs e)
     {
-        var client = new YouTubeStudioClient();
-        // Skicka metadata update (du förbereder JSON själv)
-        //var jsonBody = "{\"title\":\"Ny Titel från C#\"}";
-        //var response = await client.SendMetadataUpdateAsync("6v-gXvoTLAU", jsonBody, "HackerGod");
+        var videoId = "rJZZqhvgQ1A";
+        var userDataDirPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Google",
+            "Chrome",
+            "User Data"
+        );
+        var chromeExePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+        var defaultProfilePath = Path.Combine(userDataDirPath, "Default");
 
-        try
-        {
-            string filePath = "cookies_v20.json";
-            if (!File.Exists(filePath))
-            {
-                LogService.Log($"Filen {filePath} finns inte.");
-                return;
-            }
+        await StudioHeaderSniffer.ChangeGameTitle(videoId, defaultProfilePath, chromeExePath);
 
-            string json = File.ReadAllText(filePath);
+        //var client = new YouTubeStudioClient();
 
-            var cookies2 = JsonConvert.DeserializeObject<List<CookieEntry>>(json);
+        //// Skicka metadata update (du förbereder JSON själv)
+        ////var jsonBody = "{\"title\":\"Ny Titel från C#\"}";
+        ////var response = await client.SendMetadataUpdateAsync("6v-gXvoTLAU", jsonBody, "HackerGod");
 
-            var dictionary = new Dictionary<string, string>();
+        //try
+        //{
+        //    string filePath = "cookies_v20.json";
+        //    if (!File.Exists(filePath))
+        //    {
+        //        LogService.Log($"Filen {filePath} finns inte.");
+        //        return;
+        //    }
 
-            if (cookies2 != null)
-            {
-                foreach (var cookie in cookies2)
-                {
-                    if (!string.IsNullOrEmpty(cookie.Name))
-                    {
-                        dictionary[cookie.Name] = cookie.Value ?? string.Empty;
-                    }
-                }
-            }
+        //    string json = File.ReadAllText(filePath);
 
-            string videoId = "rJZZqhvgQ1A";
-            var res = await client.FetchStudioEditHtmlAsync(videoId);
-            var decryptor = new ChromeBrowserCookiesDecryptor();
-            var sapisidHash = decryptor.BuildSapisdHashHeader();
-            //"/g/11s0wvnggg"
-            await YouTubeStudioClient.UpdateCategoryAndGameAsync(videoId, res, dictionary, sapisidHash);
+        //    var cookies2 = JsonConvert.DeserializeObject<List<CookieEntry>>(json);
+
+        //    var dictionary = new Dictionary<string, string>();
+
+        //    if (cookies2 != null)
+        //    {
+        //        foreach (var cookie in cookies2)
+        //        {
+        //            if (!string.IsNullOrEmpty(cookie.Name))
+        //            {
+        //                dictionary[cookie.Name] = cookie.Value ?? string.Empty;
+        //            }
+        //        }
+        //    }
+
+        //    string videoId = "rJZZqhvgQ1A";
+        //    var res = await client.FetchStudioEditHtmlAsync(videoId);
+        //    var decryptor = new ChromeBrowserCookiesDecryptor();
+        //    var sapisidHash = decryptor.BuildSapisdHashHeader();
+        //    //"/g/11s0wvnggg"
+        //    await YouTubeStudioClient.UpdateCategoryAndGameAsync(videoId, res, dictionary, sapisidHash);
 
 
 
-            // string responseString = await response.Content.ReadAsStringAsync();
+        //    // string responseString = await response.Content.ReadAsStringAsync();
 
-            //await client.UpdateVideoMetadataAsync("6v-gXvoTLAU", jsonBody, "hackerGod");
-        }
-        catch (Exception ex) { }
-        //Console.WriteLine($"Response: {response.StatusCode}");
+        //    //await client.UpdateVideoMetadataAsync("6v-gXvoTLAU", jsonBody, "hackerGod");
+        //}
+        //catch (Exception ex) { }
+        ////Console.WriteLine($"Response: {response.StatusCode}");
     }
 
     protected override void OnClosed(EventArgs e)
@@ -140,7 +152,6 @@ public partial class MainWindow : Window
 
     private async Task AutoLoginIfTokenized()
     {
-
         var results = await _centralAuthService.TryAutoLoginAllAsync();
 
         foreach (var result in results)
@@ -374,7 +385,7 @@ public partial class MainWindow : Window
         StatusTextBlock.Text = "Metadata updated successfully!";
     }
 
-    
+
     private async void OnLoginWithGoogleClicked(object? sender, RoutedEventArgs e)
     {
         GoogleAuthService = new GoogleOAuthService();

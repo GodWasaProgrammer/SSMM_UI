@@ -1,5 +1,4 @@
-﻿using Avalonia.Logging;
-using Avalonia.Threading;
+﻿using Avalonia.Threading;
 using FFmpeg.AutoGen;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
@@ -162,6 +161,21 @@ public class StreamService
         var key = doc.RootElement.GetProperty("data")[0].GetProperty("stream_key").GetString();
 
         return (TwitchAdress, key);
+    }
+    public async Task<(string rtmpUrl, string? streamkey)> CreateKickBroadcastAsync(StreamMetadata metadata)
+    {
+        //TODO: implement 
+        return ("", "");
+    }
+    public async Task<(string rtmpUrl, string? streamkey)> CreateTrovoBroadcastAsync(StreamMetadata metadata)
+    {
+        // TODO: implement
+        return ("", "");
+    }
+    public async Task<(string rtmpUrl, string? streamkey)> CreateFacebookBroadcastAsync(StreamMetadata metadata)
+    {
+        // TODO: implement
+        return ("", "");
     }
     public static StreamInfo? ProbeStream(string rtmpUrl)
     {
