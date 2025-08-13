@@ -1,4 +1,5 @@
 ﻿using PuppeteerSharp;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,7 +12,7 @@ public record StudioHeadersResult(
 );
 
 
-public static class StudioHeaderSniffer
+public static class YoutubeStudioPuppeteer
 {
 
     public static async Task ChangeGameTitle(
@@ -54,26 +55,20 @@ public static class StudioHeaderSniffer
         await page.ClickAsync("#category-container > ytcp-form-gaming > ytcp-form-autocomplete > ytcp-dropdown-trigger > div > div.left-container.style-scope.ytcp-dropdown-trigger > input");
         await page.TypeAsync("#category-container > ytcp-form-gaming > ytcp-form-autocomplete > ytcp-dropdown-trigger > div > div.left-container.style-scope.ytcp-dropdown-trigger > input", "Hearts of Iron IV");
 
-        await Task.Delay(1000); // 1 sekund
-
-        await page.WaitForSelectorAsync("#dialog > div", new WaitForSelectorOptions { Visible = true });
-
-        // Lite extra väntetid för säkerhet
-        await Task.Delay(500);
-
-        // Klicka på rätt alternativ i listan inom dialogen
-        await page.EvaluateFunctionAsync(@"() => {
-    const items = Array.from(document.querySelectorAll('#dialog tp-yt-paper-item'));
-    const target = items.find(item => {
-        const span = item.querySelector('yt-formatted-string span');
-        return span && span.textContent.trim() === 'Hearts of Iron IV';
-    });
-    if (target) {
-        target.click();
-    } else {
-        console.warn('Alternativet Hearts of Iron IV hittades ej i dropdown-listan');
+        await Task.Delay(2500);
+       
+        // Leta upp rätt item genom text och klicka på det
+        await page.EvaluateFunctionAsync(@"(gameName) => {
+    const items = document.querySelectorAll('tp-yt-paper-item');
+    for (const item of items) {
+        if (item.innerText.trim().startsWith(gameName)) {
+            item.click();
+            break;
+        }
     }
-}");
+}", "Hearts of Iron IV");
+
+        
         // Klicka på spara-knappen
         await page.ClickAsync("#save-button > ytcp-button-shape > button");
 

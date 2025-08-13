@@ -71,7 +71,7 @@ public partial class MainWindow : Window
         var chromeExePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
         var defaultProfilePath = Path.Combine(userDataDirPath, "Default");
 
-        await StudioHeaderSniffer.ChangeGameTitle(videoId, defaultProfilePath, chromeExePath);
+        await YoutubeStudioPuppeteer.ChangeGameTitle(videoId, defaultProfilePath, chromeExePath);
 
         //var client = new YouTubeStudioClient();
 
