@@ -56,10 +56,30 @@ public class StateService
 
     private void DeSerializeYoutubeCategories()
     {
-        YoutubeVideoCategories.Clear();
-        var json = File.ReadAllText(YoutubeCategories);
-        var deserialized = JsonSerializer.Deserialize<ObservableCollection<VideoCategory>>(json);
-        YoutubeVideoCategories = deserialized;
+        try
+        {
+
+            YoutubeVideoCategories.Clear();
+            if (File.Exists(YoutubeCategories))
+            {
+                var json = File.ReadAllText(YoutubeCategories);
+                var deserialized = JsonSerializer.Deserialize<ObservableCollection<VideoCategory>>(json);
+                if (deserialized != null)
+                    YoutubeVideoCategories = deserialized;
+                if (deserialized == null)
+                {
+                    throw new Exception("There was an issue deserializing Youtube Category list");
+                }
+            }
+            else
+            {
+                throw new Exception("File for Youtube Categories was missing");
+            }
+        }
+        catch (Exception ex)
+        {
+            LogService.Log(ex.Message);
+        }
     }
 
     private void LoadRtmpServersFromServicesJson(string jsonPath)

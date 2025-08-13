@@ -17,7 +17,7 @@ namespace SSMM_UI.Services;
 public class CentralAuthService
 {
     public YouTubeService? YTService { get; set; }
-    public GoogleOAuthService? GoogleAuthService { get; set; }
+    private GoogleOAuthService GoogleAuthService { get; set; }
     public TwitchDCAuthService TwitchService;
     private readonly KickOAuthService? _kickOauthService;
 

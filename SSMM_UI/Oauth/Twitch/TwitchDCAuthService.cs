@@ -177,7 +177,7 @@ public class TwitchDCAuthService
         return null;
     }
 
-
+    // TODO: try catch on bad results
     private async Task<string?> GetUsernameAsync(string accessToken)
     {
         using var httpClient = new HttpClient();
