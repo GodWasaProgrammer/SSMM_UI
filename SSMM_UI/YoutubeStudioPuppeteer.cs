@@ -17,8 +17,8 @@ public static class YoutubeStudioPuppeteer
 
     public static async Task ChangeGameTitle(
         string videoId,
-        string userDataDir = null,
-        string executablePath = null,
+        string userDataDir = "",
+        string executablePath = "",
         int timeoutMs = 8000)
     {
         var args = new List<string>

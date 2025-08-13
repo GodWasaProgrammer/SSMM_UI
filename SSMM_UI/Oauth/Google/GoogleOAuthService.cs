@@ -4,12 +4,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Avalonia.Controls;
-using Google.Apis.Auth.OAuth2;
 using Google.Apis.Oauth2.v2;
-using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
-using SSMM_UI.Dialogs;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Net;
@@ -17,9 +13,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Net.Http;
-using SSMM_UI.Oauth.Kick;
 using SSMM_UI.MetaData;
-using SSMM_UI.Services;
 
 namespace SSMM_UI.Oauth.Google;
 

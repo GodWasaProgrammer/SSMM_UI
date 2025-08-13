@@ -1,6 +1,4 @@
-﻿using Google.Apis.Auth.OAuth2;
-using Google.Apis.Services;
-using Google.Apis.YouTube.v3;
+﻿using Google.Apis.YouTube.v3;
 using SSMM_UI.MetaData;
 using SSMM_UI.Oauth.Google;
 using SSMM_UI.Oauth.Kick;
@@ -8,7 +6,6 @@ using SSMM_UI.Oauth.Twitch;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
 using System.Net.Http;
 using System.Threading.Tasks;
 

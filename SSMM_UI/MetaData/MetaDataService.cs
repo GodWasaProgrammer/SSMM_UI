@@ -132,7 +132,7 @@ public class MetaDataService
         }
     }
 
-    public static async Task ChangeGameTitle(string videoId, string userDataDir = null, string executablePath = null, int timeoutMs = 8000)
+    public static async Task ChangeGameTitle(string videoId, string userDataDir = "", string executablePath = "", int timeoutMs = 8000)
     {
         var args = new List<string>
         {
