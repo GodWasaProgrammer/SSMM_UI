@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
+using Google.Apis.YouTube.v3.Data;
 
 namespace SSMM_UI.Services;
 
@@ -10,14 +11,17 @@ public class StateService
 {
     private const string SerializedServices = "Serialized_Services.json";
     private const string _obsServices = "services.json";
+    private const string YoutubeCategories = "youtube_categories.json";
 
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; private set; } = [];
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
+    public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; private set; } = [];
 
     public StateService()
     {
         DeSerializeServices();
         LoadRtmpServersFromServicesJson(_obsServices);
+        DeSerializeYoutubeCategories();
     }
 
     public void SerializeServices()
@@ -48,6 +52,14 @@ public class StateService
         {
             LogService.Log($"❌ Kunde inte läsa in tjänster: {ex.Message}");
         }
+    }
+
+    private void DeSerializeYoutubeCategories()
+    {
+        YoutubeVideoCategories.Clear();
+        var json = File.ReadAllText(YoutubeCategories);
+        var deserialized = JsonSerializer.Deserialize<ObservableCollection<VideoCategory>>(json);
+        YoutubeVideoCategories = deserialized;
     }
 
     private void LoadRtmpServersFromServicesJson(string jsonPath)

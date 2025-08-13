@@ -18,6 +18,8 @@ using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using SSMM_UI.Oauth.Kick;
+using SSMM_UI.MetaData;
+using SSMM_UI.Services;
 
 namespace SSMM_UI.Oauth.Google;
 
@@ -41,7 +43,7 @@ public class GoogleOAuthService
     private string? _currentCodeVerifier;
     private string? _currentState;
 
-    public async Task<string> LoginAutoIfTokenized()
+    public async Task<string> LoginAutoIfTokenized(MetaDataService MDService)
     {
         if (File.Exists(_tokenPath))
         {
@@ -54,7 +56,8 @@ public class GoogleOAuthService
                     await RefreshTokenAsync(_oauthResult.RefreshToken);
                 }
                 var username = await GetUsernameAsync(_oauthResult.AccessToken);
-                if(username != null)
+                MDService.CreateYouTubeService(_oauthResult.AccessToken);
+                if (username != null)
                 {
                     _oauthResult.Username = username;
                 }
@@ -64,7 +67,7 @@ public class GoogleOAuthService
         return "❌ Token missing or not valid";
     }
 
-    public async Task<string> LoginWithYoutube()
+    public async Task<string> LoginWithYoutube(MetaDataService MDService)
     {
         if (File.Exists(_tokenPath))
         {
@@ -109,6 +112,7 @@ public class GoogleOAuthService
         }
         if (_oauthResult != null)
         {
+            MDService.CreateYouTubeService(_oauthResult.AccessToken);
             return _oauthResult.Username;
 
         }

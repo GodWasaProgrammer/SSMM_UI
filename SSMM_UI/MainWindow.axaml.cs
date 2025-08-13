@@ -3,12 +3,15 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
+using Google.Apis.YouTube.v3.Data;
+using PuppeteerSharp.PageAccessibility;
 using SSMM_UI.MetaData;
 using SSMM_UI.Oauth.Google;
 using SSMM_UI.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 namespace SSMM_UI;
 
@@ -19,19 +22,23 @@ public partial class MainWindow : Window
     public static ObservableCollection<string> LogMessages => LogService.Messages;
     private readonly CentralAuthService _centralAuthService;
     public StreamMetadata CurrentMetadata { get; set; } = new StreamMetadata();
+    public MetaDataService MetaDataService { get; private set; }
+    public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; private set; }
     private readonly StateService _stateService = new();
     private StreamService? _streamService;
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
     private bool isReceivingStream = false;
-    private GoogleOAuthService? GoogleAuthService { get; set; }
 
     public MainWindow()
     {
         InitializeComponent();
         RtmpServiceGroups = _stateService.RtmpServiceGroups;
         SelectedServicesToStream = _stateService.SelectedServicesToStream;
+        YoutubeVideoCategories = _stateService.YoutubeVideoCategories;
+        YoutubeCategoriesCombo.SelectedIndex = 0;
         DataContext = this;
         _centralAuthService = new CentralAuthService();
+        MetaDataService = new();
         if (!Design.IsDesignMode)
             RtmpIncoming.Play(RtmpAdress);
     }
@@ -61,65 +68,20 @@ public partial class MainWindow : Window
     public string haxx = "";
     private async void TestYThacks(object? sender, RoutedEventArgs e)
     {
-        var videoId = "rJZZqhvgQ1A";
-        var userDataDirPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Google",
-            "Chrome",
-            "User Data"
-        );
-        var chromeExePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
-        var defaultProfilePath = Path.Combine(userDataDirPath, "Default");
 
-        await YoutubeStudioPuppeteer.ChangeGameTitle(videoId, defaultProfilePath, chromeExePath);
+        // ~~~~~~~~~~~~~~~~~~~WORKING~~~~~~~~~~~~~~//
+        //var videoId = "rJZZqhvgQ1A";
+        //var userDataDirPath = Path.Combine(
+        //    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        //    "Google",
+        //    "Chrome",
+        //    "User Data"
+        //);
+        //var chromeExePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+        //var defaultProfilePath = Path.Combine(userDataDirPath, "Default");
 
-        //var client = new YouTubeStudioClient();
-
-        //// Skicka metadata update (du förbereder JSON själv)
-        ////var jsonBody = "{\"title\":\"Ny Titel från C#\"}";
-        ////var response = await client.SendMetadataUpdateAsync("6v-gXvoTLAU", jsonBody, "HackerGod");
-
-        //try
-        //{
-        //    string filePath = "cookies_v20.json";
-        //    if (!File.Exists(filePath))
-        //    {
-        //        LogService.Log($"Filen {filePath} finns inte.");
-        //        return;
-        //    }
-
-        //    string json = File.ReadAllText(filePath);
-
-        //    var cookies2 = JsonConvert.DeserializeObject<List<CookieEntry>>(json);
-
-        //    var dictionary = new Dictionary<string, string>();
-
-        //    if (cookies2 != null)
-        //    {
-        //        foreach (var cookie in cookies2)
-        //        {
-        //            if (!string.IsNullOrEmpty(cookie.Name))
-        //            {
-        //                dictionary[cookie.Name] = cookie.Value ?? string.Empty;
-        //            }
-        //        }
-        //    }
-
-        //    string videoId = "rJZZqhvgQ1A";
-        //    var res = await client.FetchStudioEditHtmlAsync(videoId);
-        //    var decryptor = new ChromeBrowserCookiesDecryptor();
-        //    var sapisidHash = decryptor.BuildSapisdHashHeader();
-        //    //"/g/11s0wvnggg"
-        //    await YouTubeStudioClient.UpdateCategoryAndGameAsync(videoId, res, dictionary, sapisidHash);
-
-
-
-        //    // string responseString = await response.Content.ReadAsStringAsync();
-
-        //    //await client.UpdateVideoMetadataAsync("6v-gXvoTLAU", jsonBody, "hackerGod");
-        //}
-        //catch (Exception ex) { }
-        ////Console.WriteLine($"Response: {response.StatusCode}");
+        //await YoutubeStudioPuppeteer.ChangeGameTitle(videoId, defaultProfilePath, chromeExePath);
+        // ~~~~~~~~~~~~~~~~~~~~~~WORKING~~~~~~~~~~//
     }
 
     protected override void OnClosed(EventArgs e)
@@ -152,7 +114,7 @@ public partial class MainWindow : Window
 
     private async Task AutoLoginIfTokenized()
     {
-        var results = await _centralAuthService.TryAutoLoginAllAsync();
+        var results = await _centralAuthService.TryAutoLoginAllAsync(MetaDataService);
 
         foreach (var result in results)
         {
@@ -388,11 +350,10 @@ public partial class MainWindow : Window
 
     private async void OnLoginWithGoogleClicked(object? sender, RoutedEventArgs e)
     {
-        GoogleAuthService = new GoogleOAuthService();
 
         LoginStatusText.Text = "Loggar in...";
 
-        var userName = await GoogleAuthService.LoginWithYoutube();
+        var userName = await _centralAuthService.LoginWithYoutube(MetaDataService);
         if (userName != null)
         {
             LoginStatusText.Text = $"✅ Inloggad som {userName}";

@@ -1,10 +1,14 @@
-﻿using Google.Apis.YouTube.v3;
+﻿using Google.Apis.Auth.OAuth2;
+using Google.Apis.Services;
+using Google.Apis.YouTube.v3;
+using SSMM_UI.MetaData;
 using SSMM_UI.Oauth.Google;
 using SSMM_UI.Oauth.Kick;
 using SSMM_UI.Oauth.Twitch;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -19,7 +23,8 @@ public class CentralAuthService
 
     public CentralAuthService()
     {
-        _kickOauthService = new KickOAuthService();
+        _kickOauthService = new();
+        GoogleAuthService = new();
         var scopes = new[]
         {
             TwitchScopes.UserReadEmail,
@@ -28,6 +33,7 @@ public class CentralAuthService
         };
         TwitchService = new TwitchDCAuthService(new HttpClient(), scopes);
     }
+
     public async Task<string> LoginWithTwitch()
     {
         if (TwitchService == null)
@@ -67,10 +73,27 @@ public class CentralAuthService
         }
         return LoginResult;
     }
-    public async Task<string> LoginWithYoutube()
+    public async Task<string> LoginWithYoutube(MetaDataService MDService)
     {
-        GoogleAuthService = new();
-        return await GoogleAuthService.LoginWithYoutube();
+        try
+        {
+
+            if (GoogleAuthService == null)
+            {
+                throw new Exception("Google Auth Service was null");
+            }
+            else
+            {
+
+                return await GoogleAuthService.LoginWithYoutube(MDService);
+            }
+        }
+        catch
+        (Exception ex)
+        {
+            LogService.Log(ex.Message);
+        }
+        return "Unable to login to youtube";
     }
     public async Task<string> LoginWithKick()
     {
@@ -106,7 +129,7 @@ public class CentralAuthService
         }
     }
 
-    public async Task<List<AuthResult>> TryAutoLoginAllAsync()
+    public async Task<List<AuthResult>> TryAutoLoginAllAsync(MetaDataService MDService)
     {
         var results = new List<AuthResult>();
 
@@ -120,8 +143,7 @@ public class CentralAuthService
         try
         {
             // TODO: make sure that we instantiate YTService also or shit will break down the pipe
-            GoogleAuthService ??= new();
-            var user = await GoogleAuthService.LoginAutoIfTokenized();
+            var user = await GoogleAuthService.LoginAutoIfTokenized(MDService);
             results.Add(new AuthResult(AuthProvider.YouTube, true, user, null));
         }
         catch (Exception ex)
