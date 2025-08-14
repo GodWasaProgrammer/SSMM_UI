@@ -35,10 +35,9 @@ public partial class MainWindowViewModel : ObservableObject
     private SelectedService? _selectedService;
 
     // ==== Stream Status ====
-    [ObservableProperty] private string receivingStatus;
     [ObservableProperty] private string streamStatusText = "Stream status: ❌ Not Receiving";
     [ObservableProperty] private string serverStatusText = "Polling...";
-
+    [ObservableProperty] private string streamButtonText = "Start Receiving";
     // ==== Login Status ====
     [ObservableProperty] private string youtubeLoginStatus;
     [ObservableProperty] private string kickLoginStatus;
@@ -55,8 +54,15 @@ public partial class MainWindowViewModel : ObservableObject
     public ICommand LoginWithKickCommand { get; }
     public ICommand LoginWithTwitchCommand { get; }
 
+    // bool toggler for stopping your output streams
     public bool CanStopStream { get; set; }
-    public bool IsReceivingStream { get; set; }
+
+    // ==== Stream & Server polling =====
+    const string RtmpAdress = "rtmp://localhost:1935/live/demo";
+
+
+    // bool toggler for the preview window for stream
+    [ObservableProperty] private bool isReceivingStream;
 
     public bool PostToDiscord { get; set; }
     public bool PostToFacebook { get; set; }
@@ -96,7 +102,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         StartStreamCommand = new RelayCommand(OnStartStream);
         StopStreamsCommand = new RelayCommand(OnStopStreams);
-        ToggleReceivingStreamCommand = new RelayCommand(OnToggleReceivingStream);
+        ToggleReceivingStreamCommand = new RelayCommand(ToggleReceivingStream);
         TestYtHacksCommand = new RelayCommand(OnTestYtHacks);
         AddServiceCommand = new AsyncRelayCommand<RtmpServiceGroup>(OnRTMPServiceSelected);
         UploadThumbnailCommand = new AsyncRelayCommand(UploadThumbnail);
@@ -113,6 +119,7 @@ public partial class MainWindowViewModel : ObservableObject
         SelectedServicesToStream = _stateService.SelectedServicesToStream;
         YoutubeVideoCategories = _stateService.YoutubeVideoCategories;
         _dialogService = dialogService;
+        RtmpIncoming.Play(RtmpAdress);
         _ = Initialize();
     }
     private readonly IDialogService _dialogService;
@@ -123,6 +130,26 @@ public partial class MainWindowViewModel : ObservableObject
 
         if (!result)
             LogService.Log($"Cancelled adding service: {group.ServiceName}\n");
+    }
+    private MyVideoView RtmpIncoming = new();
+    private void ToggleReceivingStream()
+    {
+        if (!IsReceivingStream)
+        {
+            RtmpIncoming.IsVisible = true;
+            StreamStatusText = "Receiving stream...";
+            StreamButtonText = "Stop Receiving";
+            IsReceivingStream = true;
+        }
+        else
+        {
+            //RtmpIncoming.Stop();
+            RtmpIncoming.IsVisible = false;
+
+            StreamStatusText = "Stream stopped";
+            StreamButtonText = "Start Receiving";
+            IsReceivingStream = false;
+        }
     }
 
     private async Task OnLoginWithGoogleClicked()
@@ -189,12 +216,6 @@ public partial class MainWindowViewModel : ObservableObject
     {
         StreamStatusText = "Stream status: ❌ Not Receiving";
         LogMessages.Add("Stopped all streams.");
-    }
-
-    private void OnToggleReceivingStream()
-    {
-        // ReceivingStatus = ReceivingStatus == "Receiving" ? "Not Receiving" : "Receiving";
-        //  LogMessages.Add($"Receiving status toggled to: {ReceivingStatus}");
     }
 
     private void OnTestYtHacks()

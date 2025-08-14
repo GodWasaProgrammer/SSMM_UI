@@ -15,21 +15,19 @@ namespace SSMM_UI;
 public partial class MainWindow : Window
 {
     public static ObservableCollection<string> LogMessages => LogService.Messages;
-    private readonly CentralAuthService _centralAuthService;
     public StreamMetadata CurrentMetadata { get; set; } = new StreamMetadata();
     public MetaDataService MetaDataService { get; private set; }
     private readonly StateService _stateService = new();
     private StreamService? _streamService;
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
-    private bool isReceivingStream = false;
+    
 
     public MainWindow()
     {
         InitializeComponent();
-        _centralAuthService = new CentralAuthService();
         MetaDataService = new();
         //if (!Design.IsDesignMode)
-        //    RtmpIncoming.Play(RtmpAdress);
+           //RtmpIncoming.Play(RtmpAdress);
     }
 
     protected override async void OnOpened(EventArgs e)
@@ -87,26 +85,8 @@ public partial class MainWindow : Window
         base.OnClosed(e);
         _stateService.SerializeServices();
     }
-    
-    //private void ToggleReceivingStream(object? sender, RoutedEventArgs e)
-    //{
-    //    if (!isReceivingStream)
-    //    {
-    //        RtmpIncoming.IsVisible = true;
-    //        ReceivingStatus.Text = "Receiving stream...";
-    //        ToggleStreamButton.Content = "Stop Receiving";
-    //        isReceivingStream = true;
-    //    }
-    //    else
-    //    {
-    //        //RtmpIncoming.Stop();
-    //        RtmpIncoming.IsVisible = false;
 
-    //        ReceivingStatus.Text = "Stream stopped";
-    //        ToggleStreamButton.Content = "Start Receiving";
-    //        isReceivingStream = false;
-    //    }
-    //}
+    
 
     //private async Task SetYouTubeCategoryAndGameAsync(string videoId, string wikipediaUrl, string accessToken)
     //{
@@ -195,57 +175,6 @@ public partial class MainWindow : Window
         }
         //StartStreamButton.IsEnabled = true;
         //StopStreamButton.IsEnabled = false;
-    }
-
-    private async void OnUploadThumbnailClicked(object? sender, RoutedEventArgs e)
-    {
-        if (this.VisualRoot is Window window)
-        {
-
-            var options = new Avalonia.Platform.Storage.FilePickerOpenOptions
-            {
-                Title = "Select Thumbnail Image",
-                AllowMultiple = false,
-                FileTypeFilter =
-            [
-                new Avalonia.Platform.Storage.FilePickerFileType("Image Files")
-            {
-                Patterns = ["*.jpg", "*.jpeg", "*.png", "*.bmp"]
-            }
-            ]
-            };
-
-
-            var files = await window.StorageProvider.OpenFilePickerAsync(options);
-
-            if (files is not null && files.Count > 0)
-            {
-                var file = files[0];
-
-                using var stream = await file.OpenReadAsync();
-                var bitmap = new Avalonia.Media.Imaging.Bitmap(stream);
-
-                // show image in UI
-                //ThumbnailImage.Source = bitmap;
-                CurrentMetadata.Thumbnail = bitmap;
-                var path = file.Path?.LocalPath ?? "(no local path)";
-                LogService.Log($"Selected thumbnail: {path}");
-//
-//                //StatusTextBlock.Foreground = Avalonia.Media.Brushes.Green;
-                //StatusTextBlock.Text = "Thumbnail loaded successfully.";
-                // set path to metadataobjekt
-                CurrentMetadata.ThumbnailPath = path;
-            }
-            else
-            {
-               // StatusTextBlock.Foreground = Avalonia.Media.Brushes.Red;
-               // StatusTextBlock.Text = "No file selected.";
-            }
-        }
-        else
-        {
-            throw new Exception("Our parameter window was null");
-        }
     }
 
     private static void DetectSystemTheme()

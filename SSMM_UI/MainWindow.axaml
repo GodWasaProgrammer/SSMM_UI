@@ -162,7 +162,7 @@
 								</WrapPanel>
 
 								<StackPanel Margin="0 10 0 0">
-									<TextBlock Text="{Binding ReceivingStatus}" Classes="secondary"/>
+									<TextBlock Text="{Binding StreamStatusText}" Classes="secondary"/>
 									<TextBlock Text="{Binding StreamStatusText}" FontWeight="SemiBold"/>
 									<TextBlock Text="{Binding ServerStatusText}" FontWeight="SemiBold"/>
 								</StackPanel>
