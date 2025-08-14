@@ -53,6 +53,14 @@ public partial class MainWindow : Window
         {
             ServerStatusText.Text = text;
         };
+        UIService.StartStreamButtonChanged += change =>
+        {
+            StartStreamButton.IsEnabled = change;
+        };
+        UIService.StopStreamButtonChanged += change =>
+        {
+            StopStreamButton.IsEnabled = change;
+        };
         if (!Design.IsDesignMode)
         {
             _streamService.StartStreamStatusPolling();
