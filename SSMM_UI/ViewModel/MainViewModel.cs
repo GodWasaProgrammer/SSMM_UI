@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
 using SSMM_UI.Services;
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
@@ -27,6 +28,11 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly CentralAuthService _centralAuthService;
     private readonly StateService _stateService = new();
     private StreamService? _streamService;
+    private readonly IFilePickerService _filePickerService;
+
+    // ==== Service Selections ====
+    [ObservableProperty]
+    private SelectedService? _selectedService;
 
     // ==== Stream Status ====
     [ObservableProperty] private string receivingStatus;
@@ -81,7 +87,7 @@ public partial class MainWindowViewModel : ObservableObject
         await AutoLoginIfTokenized();
     }
 
-    public MainWindowViewModel(IDialogService dialogService)
+    public MainWindowViewModel(IDialogService dialogService, IFilePickerService filePickerService)
     {
         // Init commands
         LoginWithGoogleCommand = new AsyncRelayCommand(OnLoginWithGoogleClicked);
@@ -93,12 +99,16 @@ public partial class MainWindowViewModel : ObservableObject
         ToggleReceivingStreamCommand = new RelayCommand(OnToggleReceivingStream);
         TestYtHacksCommand = new RelayCommand(OnTestYtHacks);
         AddServiceCommand = new AsyncRelayCommand<RtmpServiceGroup>(OnRTMPServiceSelected);
-        UploadThumbnailCommand = new RelayCommand(OnUploadThumbnail);
+        UploadThumbnailCommand = new AsyncRelayCommand(UploadThumbnail);
         UpdateMetadataCommand = new RelayCommand(OnUpdateMetadata);
 
-        RemoveSelectedServiceCommand = new RelayCommand(OnRemoveSelectedService);
+        RemoveSelectedServiceCommand = new RelayCommand(RemoveSelectedService);
+
         MetaDataService = new();
         _centralAuthService = new();
+        _filePickerService = filePickerService;
+
+
         RtmpServiceGroups = _stateService.RtmpServiceGroups;
         SelectedServicesToStream = _stateService.SelectedServicesToStream;
         YoutubeVideoCategories = _stateService.YoutubeVideoCategories;
@@ -192,20 +202,28 @@ public partial class MainWindowViewModel : ObservableObject
         LogMessages.Add("Tested YouTube Hacks.");
     }
 
-    private void OnUploadThumbnail()
+    private async Task UploadThumbnail()
     {
-        // Simulate loading an image
-        var dummyImagePath = "Assets/dummy_thumbnail.png";
-        if (File.Exists(dummyImagePath))
+        try
         {
-            ThumbnailImage = new Bitmap(dummyImagePath);
-            LogMessages.Add("Thumbnail uploaded.");
+            var bitmap = await _filePickerService.PickImageAsync();
+
+            if (bitmap != null)
+            {
+                ThumbnailImage = bitmap;
+                LogMessages.Add("Thumbnail loaded successfully");
+            }
+            else
+            {
+                LogMessages.Add("No file selected");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            LogMessages.Add("No thumbnail file found.");
+            LogMessages.Add($"Error loading thumbnail: {ex.Message}");
         }
     }
+
 
     private void OnUpdateMetadata()
     {
@@ -213,13 +231,23 @@ public partial class MainWindowViewModel : ObservableObject
         //  StatusTextBlock = "Metadata updated successfully.";
     }
 
-    private void OnRemoveSelectedService()
+    private void RemoveSelectedService()
     {
-        if (SelectedServicesToStream.Count > 0)
+        if (SelectedService == null)
         {
-            var service = SelectedServicesToStream[0];
-            SelectedServicesToStream.Remove(service);
-            LogMessages.Add($"Removed service: {service.DisplayName}");
+            LogMessages.Add("Ingen tjänst vald att ta bort");
+            return;
         }
+
+        if (!SelectedServicesToStream.Contains(SelectedService))
+        {
+            LogMessages.Add("Den valda tjänsten finns inte i listan");
+            return;
+        }
+
+        var serviceName = SelectedService.DisplayName;
+        SelectedServicesToStream.Remove(SelectedService);
+        LogMessages.Add($"Tog bort tjänst: {serviceName}");
+        SelectedService = null;
     }
 }

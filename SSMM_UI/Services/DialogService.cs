@@ -8,6 +8,10 @@ namespace SSMM_UI.Services;
 
 public class DialogService : IDialogService
 {
+    public DialogService()
+    {
+
+    }
     public async Task<bool> ShowServerDetailsAsync(RtmpServiceGroup group)
     {
         var detailsWindow = new ServerDetailsWindow(group);

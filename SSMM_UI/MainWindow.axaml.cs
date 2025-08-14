@@ -26,8 +26,6 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        
-        DataContext = new MainWindowViewModel(new DialogService());
         _centralAuthService = new CentralAuthService();
         MetaDataService = new();
         //if (!Design.IsDesignMode)
@@ -89,31 +87,7 @@ public partial class MainWindow : Window
         base.OnClosed(e);
         _stateService.SerializeServices();
     }
-
-    private async void RTMPServiceList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        //if (RTMPServiceList.SelectedItem is RtmpServiceGroup group)
-        //{
-        //    var detailsWindow = new ServerDetailsWindow(group); // Skicka med MainWindow-instansen
-        //    var result = await detailsWindow.ShowDialog<bool>(this);
-
-        //    if (!result)
-        //    {
-        //        LogService.Log($"Cancelled adding service: {group.ServiceName}\n");
-        //    }
-        //}
-    }
-
-    private void RemoveSelectedService(object? sender, RoutedEventArgs e)
-    {
-        //if (SelectedServices.SelectedItem is SelectedService service)
-        //{
-        //    SelectedServicesToStream.Remove(service);
-        //}
-    }
-
     
-
     //private void ToggleReceivingStream(object? sender, RoutedEventArgs e)
     //{
     //    if (!isReceivingStream)
