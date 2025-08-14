@@ -129,31 +129,31 @@ public class CentralAuthService
     public async Task<List<AuthResult>> TryAutoLoginAllAsync(MetaDataService MDService)
     {
         var results = new List<AuthResult>();
-
-        // Twitch
-        var twitchToken = await TwitchService.TryLoadValidOrRefreshTokenAsync();
-        results.Add(twitchToken is not null
-            ? new AuthResult(AuthProvider.Twitch, true, twitchToken.UserName, null)
-            : new AuthResult(AuthProvider.Twitch, false, null, "Token saknas eller ogiltig"));
-
-        // Google/YouTube
         try
         {
+
+            // Twitch
+            var twitchToken = await TwitchService.TryLoadValidOrRefreshTokenAsync();
+            results.Add(twitchToken is not null
+                ? new AuthResult(AuthProvider.Twitch, true, twitchToken.UserName, null)
+                : new AuthResult(AuthProvider.Twitch, false, null, "Token saknas eller ogiltig"));
+
             // TODO: make sure that we instantiate YTService also or shit will break down the pipe
+            // Google/YouTube
             var user = await GoogleAuthService.LoginAutoIfTokenized(MDService);
             results.Add(new AuthResult(AuthProvider.YouTube, true, user, null));
+
+            // Kick
+            var kickToken = await KickOAuthService.IfTokenIsValidLoginAuto();
+            results.Add(kickToken is not null
+                ? new AuthResult(AuthProvider.Kick, true, kickToken.Username, null)
+                : new AuthResult(AuthProvider.Kick, false, null, "Token saknas eller ogiltig"));
+
         }
         catch (Exception ex)
         {
             results.Add(new AuthResult(AuthProvider.YouTube, false, null, ex.Message));
         }
-
-        // Kick
-        var kickToken = await KickOAuthService.IfTokenIsValidLoginAuto();
-        results.Add(kickToken is not null
-            ? new AuthResult(AuthProvider.Kick, true, kickToken.Username, null)
-            : new AuthResult(AuthProvider.Kick, false, null, "Token saknas eller ogiltig"));
-
         return results;
     }
 }
