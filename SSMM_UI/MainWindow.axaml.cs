@@ -4,14 +4,11 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
 using Google.Apis.YouTube.v3.Data;
-using PuppeteerSharp.PageAccessibility;
 using SSMM_UI.MetaData;
-using SSMM_UI.Oauth.Google;
 using SSMM_UI.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Text.Json;
 using System.Threading.Tasks;
 namespace SSMM_UI;
 
@@ -220,7 +217,7 @@ public partial class MainWindow : Window
         {
             try
             {
-                _streamService.StartStream(this);
+                _streamService.StartStream(CurrentMetadata, SelectedServicesToStream);
             }
             catch (Exception ex)
             {

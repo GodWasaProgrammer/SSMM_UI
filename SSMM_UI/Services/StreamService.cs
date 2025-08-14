@@ -4,6 +4,7 @@ using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -316,24 +317,24 @@ public class StreamService
             await Task.Delay(5000); // 5 sekunders delay
         }
     }
-    public async void StartStream(MainWindow window)
+    public async void StartStream(StreamMetadata metadata, ObservableCollection<SelectedService> SelectedServicesToStream)
     {
-        window.StartStreamButton.IsEnabled = false;
-        if (window.SelectedServicesToStream.Count == 0)
+        UIService.StartBroadCastStream(false);
+        if (SelectedServicesToStream.Count == 0)
             return;
 
-        foreach (var service in window.SelectedServicesToStream)
+        foreach (var service in SelectedServicesToStream)
         {
             // Kolla om metadata finns satt (titel eller thumbnail-path)
-            if (!string.IsNullOrWhiteSpace(window.CurrentMetadata?.Title) ||
-                !string.IsNullOrWhiteSpace(window.CurrentMetadata?.ThumbnailPath))
+            if (!string.IsNullOrWhiteSpace(metadata?.Title) ||
+                !string.IsNullOrWhiteSpace(metadata?.ThumbnailPath))
             {
                 try
                 {
                     if (service.DisplayName.Contains("Youtube", StringComparison.OrdinalIgnoreCase))
                     {
                         // Skapa ny Youtube broadcast med metadata
-                        var (newUrl, newKey) = await CreateYouTubeBroadcastAsync(window.CurrentMetadata);
+                        var (newUrl, newKey) = await CreateYouTubeBroadcastAsync(metadata);
                         //SetYouTubeCategoryAndGameAsync(newKey, newUrl, );
 
 
@@ -344,7 +345,7 @@ public class StreamService
                     }
                     if (service.DisplayName.Contains("Twitch", StringComparison.OrdinalIgnoreCase))
                     {
-                        var (newUrl, newKey) = await CreateTwitchBroadcastAsync(window.CurrentMetadata);
+                        var (newUrl, newKey) = await CreateTwitchBroadcastAsync(metadata);
 
                         if (newUrl != null && newKey != null)
                         {
@@ -388,7 +389,7 @@ public class StreamService
                 process.Start();
 
                 // Läs FFmpeg:s standardfelutgång asynkront
-                window.StopStreamButton.IsEnabled = true;
+                UIService.ToggleStopStreamButton(true);
                 string? line;
                 while ((line = await process.StandardError.ReadLineAsync()) != null)
                 {
@@ -412,8 +413,8 @@ public class StreamService
                 process.Kill();
             }
         }
-        window.StartStreamButton.IsEnabled = true;
-        window.StopStreamButton.IsEnabled = false;
+        UIService.StartBroadCastStream(true);
+        UIService.ToggleStopStreamButton(false);
     }
 
 }
