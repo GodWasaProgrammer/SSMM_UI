@@ -3,15 +3,18 @@
         xmlns:vlc="clr-namespace:LibVLCSharp.Avalonia;assembly=LibVLCSharp.Avalonia"
         xmlns:local="clr-namespace:SSMM_UI"
         x:Class="SSMM_UI.MainWindow"
-        x:DataType="local:MainWindow"
+		x:Name="Root"
+		xmlns:ia="using:Avalonia.Xaml.Interactivity"
+		xmlns:ic="using:Avalonia.Xaml.Interactions.Core"
+        x:DataType="local:MainWindowViewModel"
         Title="SSMM_UI" Width="1920" Height="1080"
         Background="{DynamicResource BackgroundColor}">
+
 	<Window.Styles>
 		<!-- Text Styles -->
 		<Style Selector="TextBlock">
 			<Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
 		</Style>
-
 		<Style Selector="TextBlock.secondary">
 			<Setter Property="Foreground" Value="{DynamicResource SecondaryTextColor}"/>
 			<Setter Property="FontSize" Value="12"/>
@@ -36,16 +39,15 @@
 			<Setter Property="Width" Value="180"/>
 			<Setter Property="Height" Value="40"/>
 		</Style>
-
 		<Style Selector="Button.success">
 			<Setter Property="Background" Value="{DynamicResource SuccessColor}"/>
 			<Setter Property="Foreground" Value="White"/>
 		</Style>
-
 		<Style Selector="Button.danger">
 			<Setter Property="Background" Value="{DynamicResource DangerColor}"/>
 			<Setter Property="Foreground" Value="White"/>
 		</Style>
+
 		<!-- ListBoxItem hover style -->
 		<Style Selector="ListBoxItem:pointerover">
 			<Setter Property="Background">
@@ -54,7 +56,15 @@
 				</Setter.Value>
 			</Setter>
 		</Style>
+		<Style Selector="Button.listItemButton">
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Padding" Value="0"/>
+			<Setter Property="HorizontalContentAlignment" Value="Left"/>
+			<Setter Property="HorizontalAlignment" Value="Stretch"/>
+		</Style>
 	</Window.Styles>
+
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="250"/>
@@ -65,46 +75,46 @@
 		<Border Grid.Column="0" Background="{DynamicResource CardColor}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0 0 1 0">
 			<ScrollViewer>
 				<StackPanel Margin="15">
+
 					<!-- Video Preview -->
 					<Border Classes="card">
-						<local:MyVideoView x:Name="RtmpIncoming" Width="220" Height="124" IsVisible="False"/>
+						<local:MyVideoView Width="220" Height="124" IsVisible="{Binding IsReceivingStream}"/>
 					</Border>
 
 					<!-- Services Section -->
 					<Border Classes="card">
 						<StackPanel>
 							<TextBlock Text="STREAM SERVICES" Classes="secondary" Margin="0 0 0 5"/>
-							<ListBox x:Name="RTMPServiceList"
-                                     ItemsSource="{Binding RtmpServiceGroups}"
-                                     SelectionChanged="RTMPServiceList_SelectionChanged"
-                                     Height="250" Width="220"
-                                     Background="Transparent"
-                                     BorderBrush="{DynamicResource BorderColor}">
+							<ListBox ItemsSource="{Binding RtmpServiceGroups}"
+									 SelectedItem="{Binding SelectedRtmpService, Mode=TwoWay}"
+									 Height="250" Width="220"
+									 Background="Transparent"
+									 BorderBrush="{DynamicResource BorderColor}">
 								<ListBox.ItemTemplate>
-									<DataTemplate>
-										<TextBlock Text="{Binding ServiceName}" Padding="5 3" FontSize="14"/>
+									<DataTemplate x:DataType="local:RtmpServiceGroup">
+										<Button Command="{Binding DataContext.AddServiceCommand, ElementName=Root}"
+												CommandParameter="{Binding}"
+												Classes="listItemButton">
+											<TextBlock Text="{Binding ServiceName}" Padding="5 3" FontSize="14"/>
+										</Button>
 									</DataTemplate>
 								</ListBox.ItemTemplate>
 							</ListBox>
 						</StackPanel>
 					</Border>
-
 					<!-- Login Section -->
 					<Border Classes="card">
 						<StackPanel>
 							<TextBlock Text="Logins" HorizontalAlignment="Center" Classes="secondary" Margin="0 0 0 5"/>
-							<Button Content="Youtube" Classes="primary"
-									HorizontalAlignment="Center"
-                                    Click="OnLoginWithGoogleClicked"/>
-							<TextBlock x:Name="LoginStatusText" Classes="secondary" Margin="0 10 0 0"/>
-							<Button Content="Kick" Classes="primary"
-									HorizontalAlignment="Center"
-                                    Click="LoginWithKick"/>
-							<TextBlock x:Name="KickLogin" Classes="secondary" Margin="0 10 0 0"/>
-							<Button Content="Twitch" Classes="primary"
-									HorizontalAlignment="Center"
-                                    Click="LoginWithTwitch"/>
-							<TextBlock x:Name="TwitchLogin" Classes="secondary" Margin="0 10 0 0"/>
+							<Button Content="Youtube" Classes="primary" HorizontalAlignment="Center"
+                                    Command="{Binding LoginWithGoogleCommand}"/>
+							<TextBlock Text="{Binding YoutubeLoginStatus}" Classes="secondary" Margin="0 10 0 0"/>
+							<Button Content="Kick" Classes="primary" HorizontalAlignment="Center"
+                                    Command="{Binding LoginWithKickCommand}"/>
+							<TextBlock Text="{Binding KickLoginStatus}" Classes="secondary" Margin="0 10 0 0"/>
+							<Button Content="Twitch" Classes="primary" HorizontalAlignment="Center"
+                                    Command="{Binding LoginWithTwitchCommand}"/>
+							<TextBlock Text="{Binding TwitchLoginStatus}" Classes="secondary" Margin="0 10 0 0"/>
 						</StackPanel>
 					</Border>
 
@@ -112,36 +122,15 @@
 					<Border Classes="card">
 						<StackPanel>
 							<TextBlock Text="SELECTED SERVICES" Classes="secondary" Margin="0 0 0 5"/>
-							<Border BorderBrush="{DynamicResource BorderColor}"
-                BorderThickness="1"
-                CornerRadius="4"
-                Margin="0 0 0 5"
-                Padding="1">
-								<ListBox x:Name="SelectedServices"
-										 Height="250"
-										 ItemsSource="{Binding SelectedServicesToStream}"
-										 Background="Transparent"
-										 BorderThickness="0"
-										 Padding="5"
-										 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-									<ListBox.Styles>
-										<Style Selector="ListBoxItem">
-											<Setter Property="Margin" Value="0 0 5 0"/>
-											<Setter Property="Padding" Value="5 3"/>
-										</Style>
-										<Style Selector="ListBoxItem:selected">
-											<Setter Property="Background">
-												<Setter.Value>
-													<SolidColorBrush Color="{DynamicResource BorderColor}" Opacity="0.3"/>
-												</Setter.Value>
-											</Setter>
-										</Style>
-									</ListBox.Styles>
+							<Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" CornerRadius="4" Margin="0 0 0 5" Padding="1">
+								<ListBox ItemsSource="{Binding SelectedServicesToStream}" Height="250" Background="Transparent" BorderThickness="0" Padding="5"
+                                         >
 									<ListBox.ItemTemplate>
 										<DataTemplate>
 											<StackPanel Margin="0 5">
-												<TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="14"/>
-												<TextBlock Text="{Binding FullUrl}" FontSize="11" Classes="secondary" TextWrapping="Wrap"/>
+												
+													<TextBlock Text="{Binding DisplayName}" />
+												
 											</StackPanel>
 										</DataTemplate>
 									</ListBox.ItemTemplate>
@@ -149,33 +138,15 @@
 							</Border>
 						</StackPanel>
 					</Border>
-					<Button Content="Remove Selected"
-                Width="180"
-                HorizontalAlignment="Center"
-                Classes="danger"
-                Margin="0 5 0 0"
-                Click="RemoveSelectedService"/>
+
+					<Button Content="Remove Selected" Width="180" HorizontalAlignment="Center" Classes="danger" Margin="0 5 0 0"
+                            Command="{Binding RemoveSelectedServiceCommand}"/>
 				</StackPanel>
 			</ScrollViewer>
 		</Border>
 
 		<!-- Main Content Area -->
 		<TabControl Grid.Column="1" Background="Transparent" BorderThickness="0">
-			<TabControl.Styles>
-				<Style Selector="TabItem">
-					<Setter Property="Padding" Value="15 10"/>
-					<Setter Property="FontSize" Value="14"/>
-					<Setter Property="FontWeight" Value="SemiBold"/>
-					<Setter Property="Background" Value="Transparent"/>
-					<Setter Property="BorderBrush" Value="Transparent"/>
-				</Style>
-				<Style Selector="TabItem:selected">
-					<Setter Property="Background" Value="{DynamicResource CardColor}"/>
-					<Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
-				</Style>
-			</TabControl.Styles>
-
-			<!-- Tab 1: Stream Controls + Logs -->
 			<TabItem Header="Stream">
 				<ScrollViewer>
 					<StackPanel Margin="15">
@@ -183,33 +154,18 @@
 							<StackPanel>
 								<TextBlock Text="STREAM CONTROLS" Classes="secondary"/>
 								<WrapPanel>
-									<Button x:Name="StartStreamButton"
-                                            Content="Start Stream"
-                                            Classes="success"
-                                            Margin="0 0 15 0"
-                                            Click="StartStream"/>
-									<Button x:Name="StopStreamButton"
-                                            Content="Stop Streams"
-                                            Classes="danger"
-                                            Margin="0 0 15 0"
-                                            Click="StopStreams"
-                                            IsEnabled="False"/>
-									<Button x:Name="ToggleStreamButton"
-                                            Content="Start Receiving"
-                                            Classes="danger"
-											Margin="0 0 15 0"
-                                            Click="ToggleReceivingStream"/>
-									<Button x:Name="YTHacks"
-                                            Content="Haxx"
-                                            Classes="danger"
-											Margin="0 0 15 0"
-                                            Click="TestYThacks"/>
+									<Button Content="Start Stream" Classes="success" Margin="0 0 15 0"
+                                            Command="{Binding StartStreamCommand}"/>
+									<Button Content="Stop Streams" Classes="danger" Margin="0 0 15 0"
+                                            Command="{Binding StopStreamsCommand}" IsEnabled="{Binding CanStopStream}"/>
+									<Button Content="Start Receiving" Classes="danger" Margin="0 0 15 0"
+                                            Command="{Binding ToggleReceivingStreamCommand}"/>
 								</WrapPanel>
 
 								<StackPanel Margin="0 10 0 0">
-									<TextBlock x:Name="ReceivingStatus" Classes="secondary"/>
-									<TextBlock x:Name="StreamStatusText" Text="Stream status: ❌ Not Receiving" FontWeight="SemiBold"/>
-									<TextBlock x:Name="ServerStatusText" Text="Polling..." FontWeight="SemiBold"/>
+									<TextBlock Text="{Binding ReceivingStatus}" Classes="secondary"/>
+									<TextBlock Text="{Binding StreamStatusText}" FontWeight="SemiBold"/>
+									<TextBlock Text="{Binding ServerStatusText}" FontWeight="SemiBold"/>
 								</StackPanel>
 							</StackPanel>
 						</Border>
@@ -217,21 +173,16 @@
 						<Border Classes="card">
 							<StackPanel>
 								<TextBlock Text="LOGS" Classes="secondary"/>
-								<ListBox ItemsSource="{Binding LogMessages}"
-										Height="400"
-										FontFamily="Consolas, Courier New"
-										BorderThickness="0"
-										Background="{DynamicResource BorderColor}"
-										Opacity="0.2"
-										Foreground="{DynamicResource PrimaryTextColor}"
-										Padding="10" />
+								<ListBox ItemsSource="{Binding LogMessages}" Height="400"
+                                         FontFamily="Consolas, Courier New" BorderThickness="0"
+                                         Background="{DynamicResource BorderColor}" Opacity="0.2"
+                                         Foreground="{DynamicResource PrimaryTextColor}" Padding="10"/>
 							</StackPanel>
 						</Border>
 					</StackPanel>
 				</ScrollViewer>
 			</TabItem>
 
-			<!-- Tab 2: YouTube Metadata -->
 			<TabItem Header="Stream Metadata">
 				<ScrollViewer>
 					<StackPanel Margin="15" Width="600">
@@ -239,17 +190,11 @@
 							<StackPanel>
 								<TextBlock Text="STREAM METADATA" Classes="secondary"/>
 
-								<StackPanel Margin="0 10 0 0">
-									<TextBlock Text="Title" FontWeight="SemiBold"/>
-									<TextBox x:Name="TitleTextBox"
-                                             FontSize="14"
-                                             Padding="10"
-                                             BorderBrush="{DynamicResource BorderColor}"
-                                             BorderThickness="1"
-                                             CornerRadius="4"
-                                             Background="{DynamicResource CardColor}"
-                                             Foreground="{DynamicResource PrimaryTextColor}"/>
-								</StackPanel>
+								<TextBlock Text="Title" FontWeight="SemiBold"/>
+								<TextBox Text="{Binding StreamTitle}" FontSize="14" Padding="10"
+                                         BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
+                                         CornerRadius="4" Background="{DynamicResource CardColor}" Foreground="{DynamicResource PrimaryTextColor}"/>
+
 								<StackPanel>
 									<TextBlock FontWeight="SemiBold">Category (Youtube)</TextBlock>
 									<ComboBox x:Name="YoutubeCategoriesCombo"
@@ -281,43 +226,30 @@
 									</ComboBox>
 								</StackPanel>
 
-								<StackPanel Margin="0 10 0 0">
-									<TextBlock Text="Thumbnail" FontWeight="SemiBold"/>
-									<Border Width="300" Height="168"
-                                            BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                                            CornerRadius="4" Background="{DynamicResource BorderColor}" Opacity="0.1">
-										<Image x:Name="ThumbnailImage"
-                                               Stretch="Uniform"
-                                               Margin="5"/>
-									</Border>
-									<Button Content="Upload Thumbnail"
-                                            Classes="primary"
-                                            Margin="0 10 0 0"
-                                            Click="OnUploadThumbnailClicked"/>
-								</StackPanel>
+								<TextBlock Text="Thumbnail" FontWeight="SemiBold" Margin="0 10 0 0"/>
+								<Border Width="300" Height="168" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
+                                        CornerRadius="4" Background="{DynamicResource BorderColor}" Opacity="0.1">
+									<Image Source="{Binding StreamThumbnail}" Stretch="Uniform" Margin="5"/>
+								</Border>
+								<Button Content="Upload Thumbnail" Classes="primary" Margin="0 10 0 0" Command="{Binding UploadThumbnailCommand}"/>
 
-								<Button Content="Update Metadata"
-                                        Classes="primary"
-                                        Margin="0 10 0 0"
-                                        Click="OnUpdateMetadataClicked"/>
+								<Button Content="Update Metadata" Classes="primary" Margin="0 10 0 0" Command="{Binding UpdateMetadataCommand}"/>
 
-								<TextBlock x:Name="StatusTextBlock"
-                                           Foreground="{DynamicResource DangerColor}"
-                                           Margin="0 10 0 0"
-                                           TextWrapping="Wrap"/>
+								<TextBlock Text="{Binding MetadataStatus}" Foreground="{DynamicResource DangerColor}" Margin="0 10 0 0" TextWrapping="Wrap"/>
 							</StackPanel>
 						</Border>
 					</StackPanel>
 				</ScrollViewer>
 			</TabItem>
+
 			<TabItem Header="Social Media AutoPoster">
 				<ScrollViewer>
 					<StackPanel Margin="15" Width="600">
 						<Border Classes="card">
 							<StackPanel>
-								<CheckBox Content="X(Twitter)"></CheckBox>
-								<CheckBox Content="Facebook"></CheckBox>
-								<CheckBox Content="Discord"></CheckBox>
+								<CheckBox Content="X(Twitter)" IsChecked="{Binding PostToX}"/>
+								<CheckBox Content="Facebook" IsChecked="{Binding PostToFacebook}"/>
+								<CheckBox Content="Discord" IsChecked="{Binding PostToDiscord}"/>
 							</StackPanel>
 						</Border>
 					</StackPanel>

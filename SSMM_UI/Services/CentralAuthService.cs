@@ -81,7 +81,6 @@ public class CentralAuthService
             }
             else
             {
-
                 return await GoogleAuthService.LoginWithYoutube(MDService);
             }
         }

@@ -39,9 +39,9 @@ namespace SSMM_UI
 
             if (!string.IsNullOrWhiteSpace(streamKey))
             {
-                if (Owner is MainWindow mainWindow)
+                if (Owner?.DataContext is MainWindowViewModel mainVm)
                 {
-                    mainWindow.SelectedServicesToStream.Add(new SelectedService
+                    mainVm.SelectedServicesToStream.Add(new SelectedService
                     {
                         ServiceGroup = ServiceGroup,
                         SelectedServer = SelectedServer,

@@ -82,6 +82,7 @@ public class GoogleOAuthService
                     // token has passed check if we can refresh
                     await RefreshTokenAsync(_oauthResult.RefreshToken);
                 }
+                _oauthResult.Username = await GetUsernameAsync(_oauthResult.AccessToken);
                 return _oauthResult.Username;
             }
         }

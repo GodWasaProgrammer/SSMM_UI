@@ -14,13 +14,10 @@ namespace SSMM_UI;
 
 public partial class MainWindow : Window
 {
-    public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; private set; }
-    public ObservableCollection<SelectedService> SelectedServicesToStream { get; private set; }
     public static ObservableCollection<string> LogMessages => LogService.Messages;
     private readonly CentralAuthService _centralAuthService;
     public StreamMetadata CurrentMetadata { get; set; } = new StreamMetadata();
     public MetaDataService MetaDataService { get; private set; }
-    public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; private set; }
     private readonly StateService _stateService = new();
     private StreamService? _streamService;
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
@@ -29,43 +26,41 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        RtmpServiceGroups = _stateService.RtmpServiceGroups;
-        SelectedServicesToStream = _stateService.SelectedServicesToStream;
-        YoutubeVideoCategories = _stateService.YoutubeVideoCategories;
-        YoutubeCategoriesCombo.SelectedIndex = 0;
-        DataContext = this;
+        
+        DataContext = new MainWindowViewModel(new DialogService());
         _centralAuthService = new CentralAuthService();
         MetaDataService = new();
-        if (!Design.IsDesignMode)
-            RtmpIncoming.Play(RtmpAdress);
+        //if (!Design.IsDesignMode)
+        //    RtmpIncoming.Play(RtmpAdress);
     }
 
     protected override async void OnOpened(EventArgs e)
     {
-        base.OnOpened(e);
-        await AutoLoginIfTokenized();
-        _streamService = new(_centralAuthService);
-        UIService.StreamStatusChanged += text =>
-        {
-            StreamStatusText.Text = text;
-        };
-        UIService.ServerStatusChanged += text =>
-        {
-            ServerStatusText.Text = text;
-        };
-        UIService.StartStreamButtonChanged += change =>
-        {
-            StartStreamButton.IsEnabled = change;
-        };
-        UIService.StopStreamButtonChanged += change =>
-        {
-            StopStreamButton.IsEnabled = change;
-        };
-        if (!Design.IsDesignMode)
-        {
-            _streamService.StartStreamStatusPolling();
-            StreamService.StartServerStatusPolling();
-        }
+        //    base.OnOpened(e);
+        //    await AutoLoginIfTokenized();
+        //    _streamService = new(_centralAuthService);
+        //    UIService.StreamStatusChanged += text =>
+        //    {
+        //        StreamStatusText.Text = text;
+        //    };
+        //    UIService.ServerStatusChanged += text =>
+        //    {
+        //        ServerStatusText.Text = text;
+        //    };
+        //    UIService.StartStreamButtonChanged += change =>
+        //    {
+        //        StartStreamButton.IsEnabled = change;
+        //    };
+        //    UIService.StopStreamButtonChanged += change =>
+        //    {
+        //        StopStreamButton.IsEnabled = change;
+        //    };
+        //    if (!Design.IsDesignMode)
+        //    {
+        //        _streamService.StartStreamStatusPolling();
+        //        StreamService.StartServerStatusPolling();
+        //    }
+        //}
     }
 
 
@@ -97,70 +92,47 @@ public partial class MainWindow : Window
 
     private async void RTMPServiceList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (RTMPServiceList.SelectedItem is RtmpServiceGroup group)
-        {
-            var detailsWindow = new ServerDetailsWindow(group); // Skicka med MainWindow-instansen
-            var result = await detailsWindow.ShowDialog<bool>(this);
+        //if (RTMPServiceList.SelectedItem is RtmpServiceGroup group)
+        //{
+        //    var detailsWindow = new ServerDetailsWindow(group); // Skicka med MainWindow-instansen
+        //    var result = await detailsWindow.ShowDialog<bool>(this);
 
-            if (!result)
-            {
-                LogService.Log($"Cancelled adding service: {group.ServiceName}\n");
-            }
-        }
+        //    if (!result)
+        //    {
+        //        LogService.Log($"Cancelled adding service: {group.ServiceName}\n");
+        //    }
+        //}
     }
 
     private void RemoveSelectedService(object? sender, RoutedEventArgs e)
     {
-        if (SelectedServices.SelectedItem is SelectedService service)
-        {
-            SelectedServicesToStream.Remove(service);
-        }
+        //if (SelectedServices.SelectedItem is SelectedService service)
+        //{
+        //    SelectedServicesToStream.Remove(service);
+        //}
     }
 
-    private async Task AutoLoginIfTokenized()
-    {
-        var results = await _centralAuthService.TryAutoLoginAllAsync(MetaDataService);
+    
 
-        foreach (var result in results)
-        {
-            var message = result.Success
-                ? $"✅ Logged in as: {result.Username}"
-                : $"❌ {result.ErrorMessage}";
+    //private void ToggleReceivingStream(object? sender, RoutedEventArgs e)
+    //{
+    //    if (!isReceivingStream)
+    //    {
+    //        RtmpIncoming.IsVisible = true;
+    //        ReceivingStatus.Text = "Receiving stream...";
+    //        ToggleStreamButton.Content = "Stop Receiving";
+    //        isReceivingStream = true;
+    //    }
+    //    else
+    //    {
+    //        //RtmpIncoming.Stop();
+    //        RtmpIncoming.IsVisible = false;
 
-            switch (result.Provider)
-            {
-                case AuthProvider.Twitch:
-                    TwitchLogin.Text = message;
-                    break;
-                case AuthProvider.YouTube:
-                    LoginStatusText.Text = message;
-                    break;
-                case AuthProvider.Kick:
-                    KickLogin.Text = message;
-                    break;
-            }
-        }
-    }
-
-    private void ToggleReceivingStream(object? sender, RoutedEventArgs e)
-    {
-        if (!isReceivingStream)
-        {
-            RtmpIncoming.IsVisible = true;
-            ReceivingStatus.Text = "Receiving stream...";
-            ToggleStreamButton.Content = "Stop Receiving";
-            isReceivingStream = true;
-        }
-        else
-        {
-            //RtmpIncoming.Stop();
-            RtmpIncoming.IsVisible = false;
-
-            ReceivingStatus.Text = "Stream stopped";
-            ToggleStreamButton.Content = "Start Receiving";
-            isReceivingStream = false;
-        }
-    }
+    //        ReceivingStatus.Text = "Stream stopped";
+    //        ToggleStreamButton.Content = "Start Receiving";
+    //        isReceivingStream = false;
+    //    }
+    //}
 
     //private async Task SetYouTubeCategoryAndGameAsync(string videoId, string wikipediaUrl, string accessToken)
     //{
@@ -218,21 +190,21 @@ public partial class MainWindow : Window
 
 
     // TODO: Figure out a better way to deduct which stream is which...
-    private void StartStream(object? sender, RoutedEventArgs e)
-    {
-        StartStreamButton.IsEnabled = false;
-        if (_streamService != null)
-        {
-            try
-            {
-                _streamService.StartStream(CurrentMetadata, SelectedServicesToStream);
-            }
-            catch (Exception ex)
-            {
-                LogService.Log(ex.ToString());
-            }
-        }
-    }
+    //private void StartStream(object? sender, RoutedEventArgs e)
+    //{
+    //    //StartStreamButton.IsEnabled = false;
+    //    if (_streamService != null)
+    //    {
+    //        try
+    //        {
+    //            _streamService.StartStream(CurrentMetadata, SelectedServicesToStream);
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            LogService.Log(ex.ToString());
+    //        }
+    //    }
+    //}
 
     private void StopStreams(object? sender, RoutedEventArgs e)
     {
@@ -247,8 +219,8 @@ public partial class MainWindow : Window
                 LogService.Log(ex.ToString());
             }
         }
-        StartStreamButton.IsEnabled = true;
-        StopStreamButton.IsEnabled = false;
+        //StartStreamButton.IsEnabled = true;
+        //StopStreamButton.IsEnabled = false;
     }
 
     private async void OnUploadThumbnailClicked(object? sender, RoutedEventArgs e)
@@ -280,20 +252,20 @@ public partial class MainWindow : Window
                 var bitmap = new Avalonia.Media.Imaging.Bitmap(stream);
 
                 // show image in UI
-                ThumbnailImage.Source = bitmap;
+                //ThumbnailImage.Source = bitmap;
                 CurrentMetadata.Thumbnail = bitmap;
                 var path = file.Path?.LocalPath ?? "(no local path)";
                 LogService.Log($"Selected thumbnail: {path}");
-
-                StatusTextBlock.Foreground = Avalonia.Media.Brushes.Green;
-                StatusTextBlock.Text = "Thumbnail loaded successfully.";
+//
+//                //StatusTextBlock.Foreground = Avalonia.Media.Brushes.Green;
+                //StatusTextBlock.Text = "Thumbnail loaded successfully.";
                 // set path to metadataobjekt
                 CurrentMetadata.ThumbnailPath = path;
             }
             else
             {
-                StatusTextBlock.Foreground = Avalonia.Media.Brushes.Red;
-                StatusTextBlock.Text = "No file selected.";
+               // StatusTextBlock.Foreground = Avalonia.Media.Brushes.Red;
+               // StatusTextBlock.Text = "No file selected.";
             }
         }
         else
@@ -334,12 +306,12 @@ public partial class MainWindow : Window
 
     private void OnUpdateMetadataClicked(object? sender, RoutedEventArgs e)
     {
-        var title = TitleTextBox.Text?.Trim();
+        var title = ""; //TitleTextBox.Text?.Trim();
 
         if (string.IsNullOrEmpty(title))
         {
-            StatusTextBlock.Foreground = Avalonia.Media.Brushes.Red;
-            StatusTextBlock.Text = "Please enter a stream title.";
+            //StatusTextBlock.Foreground = Avalonia.Media.Brushes.Red;
+            //StatusTextBlock.Text = "Please enter a stream title.";
             return;
         }
 
@@ -349,29 +321,8 @@ public partial class MainWindow : Window
         CurrentMetadata.Title = title;
 
         // UI indicator
-        StatusTextBlock.Foreground = Avalonia.Media.Brushes.Green;
-        StatusTextBlock.Text = "Metadata updated successfully!";
-    }
-
-    private async void OnLoginWithGoogleClicked(object? sender, RoutedEventArgs e)
-    {
-
-        LoginStatusText.Text = "Loggar in...";
-
-        var userName = await _centralAuthService.LoginWithYoutube(MetaDataService);
-        if (userName != null)
-        {
-            LoginStatusText.Text = $"✅ Inloggad som {userName}";
-        }
-        else
-        {
-            LoginStatusText.Text = "Inloggning misslyckades";
-        }
-    }
-
-    private async void LoginWithTwitch(object? sender, RoutedEventArgs e)
-    {
-        TwitchLogin.Text = await _centralAuthService.LoginWithTwitch();
+        //StatusTextBlock.Foreground = Avalonia.Media.Brushes.Green;
+        //StatusTextBlock.Text = "Metadata updated successfully!";
     }
 
     /// <summary>
@@ -414,11 +365,5 @@ public partial class MainWindow : Window
         {
             LogService.Log("No OAuth token directories found to clear.");
         }
-    }
-
-    private async void LoginWithKick(object? sender, RoutedEventArgs e)
-    {
-        var Result = await _centralAuthService.LoginWithKick();
-        KickLogin.Text = Result;
     }
 }
