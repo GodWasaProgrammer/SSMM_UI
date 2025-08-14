@@ -409,7 +409,7 @@ public class StreamService
             }
         }
     }
-    public void StopStreams(MainWindow window)
+    public void StopStreams()
     {
         if (ffmpegProcess != null)
         {

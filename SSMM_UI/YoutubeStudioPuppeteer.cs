@@ -1,5 +1,4 @@
 ﻿using PuppeteerSharp;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -55,8 +54,10 @@ public static class YoutubeStudioPuppeteer
         await page.ClickAsync("#category-container > ytcp-form-gaming > ytcp-form-autocomplete > ytcp-dropdown-trigger > div > div.left-container.style-scope.ytcp-dropdown-trigger > input");
         await page.TypeAsync("#category-container > ytcp-form-gaming > ytcp-form-autocomplete > ytcp-dropdown-trigger > div > div.left-container.style-scope.ytcp-dropdown-trigger > input", "Hearts of Iron IV");
 
+        // await page.WaitForSelectorAsync("#paper-list");
+
         await Task.Delay(2500);
-       
+
         // Leta upp rätt item genom text och klicka på det
         await page.EvaluateFunctionAsync(@"(gameName) => {
     const items = document.querySelectorAll('tp-yt-paper-item');
@@ -68,7 +69,7 @@ public static class YoutubeStudioPuppeteer
     }
 }", "Hearts of Iron IV");
 
-        
+
         // Klicka på spara-knappen
         await page.ClickAsync("#save-button > ytcp-button-shape > button");
 

@@ -1,19 +1,20 @@
-﻿using System;
+﻿using Google.Apis.Oauth2.v2;
+using Google.Apis.YouTube.v3;
+using SSMM_UI.MetaData;
+using SSMM_UI.Services;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Google.Apis.Oauth2.v2;
-using Google.Apis.YouTube.v3;
-using System.Threading.Tasks;
 using System.Threading;
-using System.Net;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using SSMM_UI.MetaData;
+using System.Threading.Tasks;
 
 namespace SSMM_UI.Oauth.Google;
 
@@ -39,24 +40,32 @@ public class GoogleOAuthService
 
     public async Task<string> LoginAutoIfTokenized(MetaDataService MDService)
     {
-        if (File.Exists(_tokenPath))
+        try
         {
-            _oauthResult = LoadSavedToken();
-            if (_oauthResult != null)
+
+            if (File.Exists(_tokenPath))
             {
-                if (DateTime.UtcNow > _oauthResult.ExpiresAt)
+                _oauthResult = LoadSavedToken();
+                if (_oauthResult != null)
                 {
-                    // token has passed check if we can refresh
-                    await RefreshTokenAsync(_oauthResult.RefreshToken);
+                    if (DateTime.UtcNow > _oauthResult.ExpiresAt)
+                    {
+                        // token has passed check if we can refresh
+                        await RefreshTokenAsync(_oauthResult.RefreshToken);
+                    }
+                    var username = await GetUsernameAsync(_oauthResult.AccessToken);
+                    MDService.CreateYouTubeService(_oauthResult.AccessToken);
+                    if (username != null)
+                    {
+                        _oauthResult.Username = username;
+                    }
+                    return _oauthResult.Username;
                 }
-                var username = await GetUsernameAsync(_oauthResult.AccessToken);
-                MDService.CreateYouTubeService(_oauthResult.AccessToken);
-                if (username != null)
-                {
-                    _oauthResult.Username = username;
-                }
-                return _oauthResult.Username;
             }
+        }
+        catch (Exception ex)
+        {
+            LogService.Log(ex.Message);
         }
         return "❌ Token missing or not valid";
     }
@@ -149,7 +158,7 @@ public class GoogleOAuthService
         return newToken;
     }
 
-    private string BuildAuthorizationUrl(string[] requestedScopes, string clientId, string redirectUri, string codeChallenge, string state)
+    private static string BuildAuthorizationUrl(string[] requestedScopes, string clientId, string redirectUri, string codeChallenge, string state)
     {
         // Scopes ska vara ett mellanslag-separerat string (inte komma-separerat)
         string scope = string.Join(" ", requestedScopes);
@@ -275,35 +284,41 @@ public class GoogleOAuthService
 
     private static async Task<string> GetUsernameAsync(string accessToken)
     {
-        using var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-
-        var response = await httpClient.GetAsync(_userInfoUrl);
-        var responseData = await response.Content.ReadAsStringAsync();
-
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            throw new Exception($"User info request failed: {response.StatusCode}\n{responseData}");
-        }
+            using var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
 
-        var json = JsonDocument.Parse(responseData).RootElement;
+            var response = await httpClient.GetAsync(_userInfoUrl);
+            var responseData = await response.Content.ReadAsStringAsync();
 
-        // Försök först med "email", annars fallback till "name", annars "sub"
-        if (json.TryGetProperty("email", out var emailProp))
-        {
-            return emailProp.GetString() ?? throw new Exception("Email field is null");
-        }
-        else if (json.TryGetProperty("name", out var nameProp))
-        {
-            return nameProp.GetString() ?? throw new Exception("Name field is null");
-        }
-        else if (json.TryGetProperty("sub", out var subProp))
-        {
-            return subProp.GetString() ?? throw new Exception("Sub field is null");
-        }
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"User info request failed: {response.StatusCode}\n{responseData}");
+            }
 
-        throw new Exception("No user identifier returned from Google userinfo endpoint");
+            var json = JsonDocument.Parse(responseData).RootElement;
+
+            // Försök först med "email", annars fallback till "name", annars "sub"
+            if (json.TryGetProperty("email", out var emailProp))
+            {
+                return emailProp.GetString() ?? throw new Exception("Email field is null");
+            }
+            else if (json.TryGetProperty("name", out var nameProp))
+            {
+                return nameProp.GetString() ?? throw new Exception("Name field is null");
+            }
+            else if (json.TryGetProperty("sub", out var subProp))
+            {
+                return subProp.GetString() ?? throw new Exception("Sub field is null");
+            }
+        }
+        catch (Exception ex)
+        {
+            LogService.Log(ex.Message);
+        }
+        return "Failed to get username";
     }
 
     private static (string codeVerifier, string codeChallenge) GeneratePkceParameters()

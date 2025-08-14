@@ -75,17 +75,17 @@ public partial class MainWindow : Window
     {
 
         // ~~~~~~~~~~~~~~~~~~~WORKING~~~~~~~~~~~~~~//
-        //var videoId = "rJZZqhvgQ1A";
-        //var userDataDirPath = Path.Combine(
-        //    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        //    "Google",
-        //    "Chrome",
-        //    "User Data"
-        //);
-        //var chromeExePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
-        //var defaultProfilePath = Path.Combine(userDataDirPath, "Default");
+        var videoId = "rJZZqhvgQ1A";
+        var userDataDirPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Google",
+            "Chrome",
+            "User Data"
+        );
+        var chromeExePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+        var defaultProfilePath = Path.Combine(userDataDirPath, "Default");
 
-        //await YoutubeStudioPuppeteer.ChangeGameTitle(videoId, defaultProfilePath, chromeExePath);
+        await YoutubeStudioPuppeteer.ChangeGameTitle(videoId, defaultProfilePath, chromeExePath);
         // ~~~~~~~~~~~~~~~~~~~~~~WORKING~~~~~~~~~~//
     }
 
@@ -240,7 +240,7 @@ public partial class MainWindow : Window
         {
             try
             {
-                _streamService.StopStreams(this);
+                _streamService.StopStreams();
             }
             catch (Exception ex)
             {
@@ -331,6 +331,7 @@ public partial class MainWindow : Window
             throw new Exception("Our Application.Current was null. Major error");
         }
     }
+
     private void OnUpdateMetadataClicked(object? sender, RoutedEventArgs e)
     {
         var title = TitleTextBox.Text?.Trim();
@@ -351,7 +352,6 @@ public partial class MainWindow : Window
         StatusTextBlock.Foreground = Avalonia.Media.Brushes.Green;
         StatusTextBlock.Text = "Metadata updated successfully!";
     }
-
 
     private async void OnLoginWithGoogleClicked(object? sender, RoutedEventArgs e)
     {

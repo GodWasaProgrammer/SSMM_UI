@@ -292,30 +292,38 @@ public class KickOAuthService
 
     private static async Task<string> GetUsernameAsync(string accessToken)
     {
-        using var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-
-        var response = await httpClient.GetAsync("https://api.kick.com/public/v1/users");
-        var responseData = await response.Content.ReadAsStringAsync();
-
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            throw new Exception($"User info request failed: {response.StatusCode}\n{responseData}");
-        }
 
-        var json = JsonDocument.Parse(responseData).RootElement;
+            using var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
 
-        if (json.TryGetProperty("data", out var dataArray) && dataArray.ValueKind == JsonValueKind.Array && dataArray.GetArrayLength() > 0)
-        {
-            var firstUser = dataArray[0];
-            if (firstUser.TryGetProperty("name", out var nameProp))
+            var response = await httpClient.GetAsync("https://api.kick.com/public/v1/users");
+            var responseData = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
             {
-                return nameProp.GetString() ?? throw new Exception("Name field is null");
+                throw new Exception($"User info request failed: {response.StatusCode}\n{responseData}");
+            }
+
+            var json = JsonDocument.Parse(responseData).RootElement;
+
+            if (json.TryGetProperty("data", out var dataArray) && dataArray.ValueKind == JsonValueKind.Array && dataArray.GetArrayLength() > 0)
+            {
+                var firstUser = dataArray[0];
+                if (firstUser.TryGetProperty("name", out var nameProp))
+                {
+                    return nameProp.GetString() ?? throw new Exception("Name field is null");
+                }
             }
         }
+        catch (Exception ex)
+        {
+            LogService.Log(ex.Message);
+        }
 
-        throw new Exception("No user data returned or malformed response");
+        return ("No user data returned or malformed response");
     }
 
     private static (string codeVerifier, string codeChallenge) GeneratePkceParameters()
