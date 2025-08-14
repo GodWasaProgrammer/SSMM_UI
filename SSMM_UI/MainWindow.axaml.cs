@@ -86,8 +86,6 @@ public partial class MainWindow : Window
         _stateService.SerializeServices();
     }
 
-    
-
     //private async Task SetYouTubeCategoryAndGameAsync(string videoId, string wikipediaUrl, string accessToken)
     //{
     //    // 1. Uppdatera kategorin till "Gaming" via klient-API
@@ -205,27 +203,6 @@ public partial class MainWindow : Window
         {
             throw new Exception("Our Application.Current was null. Major error");
         }
-    }
-
-    private void OnUpdateMetadataClicked(object? sender, RoutedEventArgs e)
-    {
-        var title = ""; //TitleTextBox.Text?.Trim();
-
-        if (string.IsNullOrEmpty(title))
-        {
-            //StatusTextBlock.Foreground = Avalonia.Media.Brushes.Red;
-            //StatusTextBlock.Text = "Please enter a stream title.";
-            return;
-        }
-
-        //TitleOfStream.Text = $"Stream Title: {title}";
-
-        // set title of MetaData 
-        CurrentMetadata.Title = title;
-
-        // UI indicator
-        //StatusTextBlock.Foreground = Avalonia.Media.Brushes.Green;
-        //StatusTextBlock.Text = "Metadata updated successfully!";
     }
 
     /// <summary>

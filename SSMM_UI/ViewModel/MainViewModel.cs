@@ -1,6 +1,4 @@
-﻿using Avalonia.Controls;
-using Avalonia.Interactivity;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Google.Apis.YouTube.v3.Data;
@@ -8,7 +6,6 @@ using SSMM_UI.MetaData;
 using SSMM_UI.Services;
 using System;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -73,7 +70,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     public RtmpServiceGroup SelectedRtmpService { get; set; }
 
-    public Bitmap StreamThumbnail { get; set; } 
+    public Bitmap StreamThumbnail { get; set; }
 
     public ICommand StartStreamCommand { get; }
     public ICommand StopStreamsCommand { get; }
@@ -85,12 +82,15 @@ public partial class MainWindowViewModel : ObservableObject
 
     public ICommand RemoveSelectedServiceCommand { get; }
 
-    
+
     public StreamMetadata CurrentMetadata { get; set; } = new StreamMetadata();
 
     private async Task Initialize()
     {
         await AutoLoginIfTokenized();
+        if (_streamService != null)
+            _streamService.StartStreamStatusPolling();
+        StreamService.StartServerStatusPolling();
     }
 
     public MainWindowViewModel(IDialogService dialogService, IFilePickerService filePickerService)
@@ -110,15 +110,20 @@ public partial class MainWindowViewModel : ObservableObject
 
         RemoveSelectedServiceCommand = new RelayCommand(RemoveSelectedService);
 
+        // services
         MetaDataService = new();
         _centralAuthService = new();
         _filePickerService = filePickerService;
+        _dialogService = dialogService;
+        _streamService = new(_centralAuthService);
 
-
+        // set state of lists
         RtmpServiceGroups = _stateService.RtmpServiceGroups;
         SelectedServicesToStream = _stateService.SelectedServicesToStream;
         YoutubeVideoCategories = _stateService.YoutubeVideoCategories;
-        _dialogService = dialogService;
+
+        // start stream inspection ( its really never off its just a toggle for the visibility)
+        RtmpIncoming = new();
         RtmpIncoming.Play(RtmpAdress);
         _ = Initialize();
     }
@@ -131,13 +136,14 @@ public partial class MainWindowViewModel : ObservableObject
         if (!result)
             LogService.Log($"Cancelled adding service: {group.ServiceName}\n");
     }
-    private MyVideoView RtmpIncoming = new();
+
+    private readonly MyVideoView RtmpIncoming;
     private void ToggleReceivingStream()
     {
         if (!IsReceivingStream)
         {
             RtmpIncoming.IsVisible = true;
-            StreamStatusText = "Receiving stream...";
+            //StreamStatusText = "Receiving stream...";
             StreamButtonText = "Stop Receiving";
             IsReceivingStream = true;
         }
@@ -146,7 +152,7 @@ public partial class MainWindowViewModel : ObservableObject
             //RtmpIncoming.Stop();
             RtmpIncoming.IsVisible = false;
 
-            StreamStatusText = "Stream stopped";
+            //StreamStatusText = "Stream stopped";
             StreamButtonText = "Start Receiving";
             IsReceivingStream = false;
         }
