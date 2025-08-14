@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SSMM_UI.Services;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,7 +12,6 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using SSMM_UI.Services;
 
 
 namespace SSMM_UI.Oauth.Kick;
@@ -151,6 +151,7 @@ public class KickOAuthService
             }
 
             // Token är fortfarande giltig
+            token.Username = await GetUsernameAsync(token.AccessToken);
             return token;
         }
         catch (Exception ex)
