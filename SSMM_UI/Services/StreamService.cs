@@ -1,5 +1,4 @@
-﻿using Avalonia.Threading;
-using FFmpeg.AutoGen;
+﻿using FFmpeg.AutoGen;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
 using System;
@@ -17,13 +16,17 @@ using System.Threading.Tasks;
 
 namespace SSMM_UI.Services;
 
-public class StreamService
+public class StreamService : IDisposable
 {
     private readonly CentralAuthService _centralAuthService;
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
     private const string TwitchAdress = "rtmp://live.twitch.tv/app";
+    public event Action<bool>? ServerStatusChanged;
+    public event Action<bool>? StreamStatusChanged;
+
     private RTMPServer Server { get; set; } = new();
     private readonly List<Process>? ffmpegProcess = [];
+    private readonly CancellationTokenSource _cts = new();
     public StreamService(CentralAuthService _AuthService)
     {
         _centralAuthService = _AuthService;
@@ -232,15 +235,21 @@ public class StreamService
             return null;
         }
     }
-    public async void StartStreamStatusPolling()
+
+    public void Dispose() => _cts.Cancel();
+
+    public void StartPolling()
     {
-        while (true)
+        _ = StartStreamStatusPolling();
+        _ = StartServerStatusPolling();
+    }
+
+    private async Task StartStreamStatusPolling()
+    {
+        while (!_cts.IsCancellationRequested)
         {
             var isAlive = await Task.Run(() => CheckStreamIsAlive(RtmpAdress));
-            Dispatcher.UIThread.Post(() =>
-            {
-                UIService.UpdateStreamStatus(isAlive);
-            });
+            StreamStatusChanged?.Invoke(isAlive);
         }
     }
     private static async Task<bool> IsRtmpApiResponding()
@@ -306,13 +315,13 @@ public class StreamService
         ffmpeg.avformat_close_input(&pFormatContext);
         return foundFrame;
     }
-    public static async void StartServerStatusPolling()
+    private async Task StartServerStatusPolling()
     {
-        while (true)
+        while (!_cts.IsCancellationRequested)
         {
             bool isResponding = await IsRtmpApiResponding(); // Använd await istället för .Result
 
-            UIService.UpdateServerStatus(isResponding);
+            ServerStatusChanged?.Invoke(isResponding);
 
             await Task.Delay(5000); // 5 sekunders delay
         }
@@ -421,5 +430,4 @@ public class StreamService
         UIService.StartBroadCastStream(true);
         UIService.ToggleStopStreamButton(false);
     }
-
 }

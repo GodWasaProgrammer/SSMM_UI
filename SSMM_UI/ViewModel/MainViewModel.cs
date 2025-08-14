@@ -33,8 +33,9 @@ public partial class MainWindowViewModel : ObservableObject
 
     // ==== Stream Status ====
     [ObservableProperty] private string streamStatusText = "Stream status: ❌ Not Receiving";
-    [ObservableProperty] private string serverStatusText = "Polling...";
+    [ObservableProperty] private string serverStatusText = "Stream status: ❌ Not Receiving";
     [ObservableProperty] private string streamButtonText = "Start Receiving";
+
     // ==== Login Status ====
     [ObservableProperty] private string youtubeLoginStatus;
     [ObservableProperty] private string kickLoginStatus;
@@ -88,10 +89,40 @@ public partial class MainWindowViewModel : ObservableObject
     private async Task Initialize()
     {
         await AutoLoginIfTokenized();
+        SubscribeToEvents();
         if (_streamService != null)
-            _streamService.StartStreamStatusPolling();
-        StreamService.StartServerStatusPolling();
+            _streamService.StartPolling();
+
     }
+
+    [ObservableProperty]
+    private string _serverStatus = "RTMP-server: ❌ Not Running";
+
+    [ObservableProperty]
+    private string _streamStatus = "Stream status: ❌ Not Receiving";
+    private void SubscribeToEvents()
+    {
+        try
+        {
+            if (_streamService != null)
+            {
+                _streamService.ServerStatusChanged += isAlive =>
+                    ServerStatusText = isAlive ? "RTMP-server: ✅ Running" : "RTMP-server: ❌ Not Running";
+
+                _streamService.StreamStatusChanged += isAlive =>
+                    StreamStatusText = isAlive ? "Stream status: ✅ Live" : "Stream status: ❌ Not Receiving";
+            }
+            else
+            {
+                throw new Exception("streamservice was null");
+            }
+        }
+        catch (Exception ex)
+        {
+            LogService.Log(ex.Message);
+        }
+    }
+
 
     public MainWindowViewModel(IDialogService dialogService, IFilePickerService filePickerService)
     {
