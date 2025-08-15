@@ -1,4 +1,5 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia.Interactivity;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Google.Apis.YouTube.v3.Data;
@@ -13,6 +14,51 @@ namespace SSMM_UI;
 
 public partial class MainWindowViewModel : ObservableObject
 {
+    public MainWindowViewModel(IDialogService dialogService, IFilePickerService filePickerService, VideoPlayerService vidPlayer)
+    {
+        // Init commands
+
+        // ==== Login ====
+        LoginWithGoogleCommand = new AsyncRelayCommand(OnLoginWithGoogleClicked);
+        LoginWithKickCommand = new AsyncRelayCommand(LoginWithKick);
+        LoginWithTwitchCommand = new AsyncRelayCommand(LoginWithTwitch);
+
+        // ==== OutPut Streams ====
+        StartStreamCommand = new RelayCommand(OnStartStream);
+        StopStreamsCommand = new RelayCommand(OnStopStreams);
+
+        // ==== Stream Inspection window ====
+        ToggleReceivingStreamCommand = new RelayCommand(ToggleReceivingStream);
+
+        // ==== testing shit ====
+        TestYtHacksCommand = new RelayCommand(OnTestYtHacks);
+
+        // ==== Selected Services controls ====
+        AddServiceCommand = new AsyncRelayCommand<RtmpServiceGroup>(OnRTMPServiceSelected);
+        RemoveSelectedServiceCommand = new RelayCommand(RemoveSelectedService);
+
+        // ==== Metadata Controls ====
+        UploadThumbnailCommand = new AsyncRelayCommand(UploadThumbnail);
+        UpdateMetadataCommand = new RelayCommand(OnUpdateMetadata);
+
+        // services
+        MetaDataService = new();
+        _centralAuthService = new();
+        _filePickerService = filePickerService;
+        _dialogService = dialogService;
+        _streamService = new(_centralAuthService);
+        _videoPlayerService = vidPlayer;
+
+        // set state of lists
+        RtmpServiceGroups = _stateService.RtmpServiceGroups;
+        SelectedServicesToStream = _stateService.SelectedServicesToStream;
+        YoutubeVideoCategories = _stateService.YoutubeVideoCategories;
+
+
+        // ==== Fire and forget awaits ====
+        _ = Initialize();
+    }
+
     // ==== Collections ====
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; } = [];
@@ -35,8 +81,11 @@ public partial class MainWindowViewModel : ObservableObject
 
     // ==== Stream Status ====
     [ObservableProperty] private string streamStatusText = "Stream status: ❌ Not Receiving";
-    [ObservableProperty] private string serverStatusText = "Stream status: ❌ Not Receiving";
     [ObservableProperty] private string streamButtonText = "Start Receiving";
+
+    // ==== RTMP Server and internal RTMP feed from OBS Status ====
+    [ObservableProperty] private string serverStatusText = "Stream status: ❌ Not Receiving";
+    [ObservableProperty] private string _serverStatus = "RTMP-server: ❌ Not Running";
 
     // ==== Login Status ====
     [ObservableProperty] private string youtubeLoginStatus;
@@ -47,42 +96,43 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string titleText;
     [ObservableProperty] private VideoCategory selectedYoutubeCategory;
     [ObservableProperty] private Bitmap thumbnailImage;
-    [ObservableProperty] private string statusTextBlock;
+    [ObservableProperty] private string updateTitle;
+    [ObservableProperty] private string metadataStatus;
 
     // ==== Commands ====
+
+    // == Login ===
     public ICommand LoginWithGoogleCommand { get; }
     public ICommand LoginWithKickCommand { get; }
     public ICommand LoginWithTwitchCommand { get; }
 
+    // == Output Controls ==
+    public ICommand StartStreamCommand { get; }
+    public ICommand StopStreamsCommand { get; }
+
+    // == Internal stream inspection toggle ==
+    public ICommand ToggleReceivingStreamCommand { get; }
+    public ICommand TestYtHacksCommand { get; }
+
+    // == Service Selections ==
+    public IAsyncRelayCommand<RtmpServiceGroup> AddServiceCommand { get; }
+    public ICommand RemoveSelectedServiceCommand { get; }
+
+    // == Metadata Selections ==
+    public ICommand UploadThumbnailCommand { get; }
+    public ICommand UpdateMetadataCommand { get; }
+
     // bool toggler for stopping your output streams
-    public bool CanStopStream { get; set; }
-
-
+    [ObservableProperty] private bool canStopStream;
 
     // bool toggler for the preview window for stream
     [ObservableProperty] private bool isReceivingStream;
 
-    public bool PostToDiscord { get; set; }
-    public bool PostToFacebook { get; set; }
-    public bool PostToX { get; set; }
-
-    public string StreamTitle { get; set; }
-    public string MetadataStatus { get; set; }
-
-    public RtmpServiceGroup SelectedRtmpService { get; set; }
-
-    public Bitmap StreamThumbnail { get; set; }
-
-    public ICommand StartStreamCommand { get; }
-    public ICommand StopStreamsCommand { get; }
-    public ICommand ToggleReceivingStreamCommand { get; }
-    public ICommand TestYtHacksCommand { get; }
-    public IAsyncRelayCommand<RtmpServiceGroup> AddServiceCommand { get; }
-    public ICommand UploadThumbnailCommand { get; }
-    public ICommand UpdateMetadataCommand { get; }
-
-    public ICommand RemoveSelectedServiceCommand { get; }
-
+    // ==== Social Media Poster ====
+    [ObservableProperty] private bool postToDiscord;
+    [ObservableProperty] private bool postToFacebook;
+    [ObservableProperty] private bool postToX;
+    [ObservableProperty] private RtmpServiceGroup selectedRtmpService;
 
     public StreamMetadata CurrentMetadata { get; set; } = new StreamMetadata();
 
@@ -95,11 +145,6 @@ public partial class MainWindowViewModel : ObservableObject
 
     }
 
-    [ObservableProperty]
-    private string _serverStatus = "RTMP-server: ❌ Not Running";
-
-    [ObservableProperty]
-    private string _streamStatus = "Stream status: ❌ Not Receiving";
     private void SubscribeToEvents()
     {
         try
@@ -122,42 +167,6 @@ public partial class MainWindowViewModel : ObservableObject
             LogService.Log(ex.Message);
         }
     }
-
-
-    public MainWindowViewModel(IDialogService dialogService, IFilePickerService filePickerService, VideoPlayerService vidPlayer)
-    {
-        // Init commands
-        LoginWithGoogleCommand = new AsyncRelayCommand(OnLoginWithGoogleClicked);
-        LoginWithKickCommand = new AsyncRelayCommand(LoginWithKick);
-        LoginWithTwitchCommand = new AsyncRelayCommand(LoginWithTwitch);
-
-        StartStreamCommand = new RelayCommand(OnStartStream);
-        StopStreamsCommand = new RelayCommand(OnStopStreams);
-        ToggleReceivingStreamCommand = new RelayCommand(ToggleReceivingStream);
-        TestYtHacksCommand = new RelayCommand(OnTestYtHacks);
-        AddServiceCommand = new AsyncRelayCommand<RtmpServiceGroup>(OnRTMPServiceSelected);
-        UploadThumbnailCommand = new AsyncRelayCommand(UploadThumbnail);
-        UpdateMetadataCommand = new RelayCommand(OnUpdateMetadata);
-
-        RemoveSelectedServiceCommand = new RelayCommand(RemoveSelectedService);
-
-        // services
-        MetaDataService = new();
-        _centralAuthService = new();
-        _filePickerService = filePickerService;
-        _dialogService = dialogService;
-        _streamService = new(_centralAuthService);
-        _videoPlayerService = vidPlayer;
-
-        // set state of lists
-        RtmpServiceGroups = _stateService.RtmpServiceGroups;
-        SelectedServicesToStream = _stateService.SelectedServicesToStream;
-        YoutubeVideoCategories = _stateService.YoutubeVideoCategories;
-
-        // start stream inspection ( its really never off its just a toggle for the visibility)
-        _ = Initialize();
-    }
-
 
     private async Task OnRTMPServiceSelected(RtmpServiceGroup group)
     {
@@ -227,7 +236,6 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
-    // ==== Command handlers ====
     private void OnStartStream()
     {
         StreamStatusText = "Stream status: 🟢 Live";
@@ -245,6 +253,22 @@ public partial class MainWindowViewModel : ObservableObject
         LogMessages.Add("Tested YouTube Hacks.");
     }
 
+    private void StartStream(object? sender, RoutedEventArgs e)
+    {
+        //StartStreamButton.IsEnabled = false;
+        if (_streamService != null)
+        {
+            try
+            {
+                _streamService.StartStream(CurrentMetadata, SelectedServicesToStream);
+            }
+            catch (Exception ex)
+            {
+                LogService.Log(ex.ToString());
+            }
+        }
+    }
+
     private async Task UploadThumbnail()
     {
         try
@@ -254,6 +278,7 @@ public partial class MainWindowViewModel : ObservableObject
             if (bitmap != null)
             {
                 ThumbnailImage = bitmap;
+                CurrentMetadata.Thumbnail = ThumbnailImage;
                 LogMessages.Add("Thumbnail loaded successfully");
             }
             else
@@ -270,8 +295,9 @@ public partial class MainWindowViewModel : ObservableObject
 
     private void OnUpdateMetadata()
     {
-        //  LogMessages.Add($"Updated metadata: Title={TitleText}, Category={SelectedYoutubeCategory?.Snippet?.Title}");
-        //  StatusTextBlock = "Metadata updated successfully.";
+        CurrentMetadata.Title = TitleText;
+        LogMessages.Add($"Updated metadata: Title={TitleText}");
+        MetadataStatus = "Metadata updated successfully.";
     }
 
     private void RemoveSelectedService()

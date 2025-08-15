@@ -135,21 +135,7 @@ public partial class MainWindow : Window
 
 
     // TODO: Figure out a better way to deduct which stream is which...
-    //private void StartStream(object? sender, RoutedEventArgs e)
-    //{
-    //    //StartStreamButton.IsEnabled = false;
-    //    if (_streamService != null)
-    //    {
-    //        try
-    //        {
-    //            _streamService.StartStream(CurrentMetadata, SelectedServicesToStream);
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            LogService.Log(ex.ToString());
-    //        }
-    //    }
-    //}
+
 
     private void StopStreams(object? sender, RoutedEventArgs e)
     {

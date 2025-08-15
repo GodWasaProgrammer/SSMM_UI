@@ -189,7 +189,7 @@
 								<TextBlock Text="STREAM METADATA" Classes="secondary"/>
 
 								<TextBlock Text="Title" FontWeight="SemiBold"/>
-								<TextBox Text="{Binding StreamTitle}" FontSize="14" Padding="10"
+								<TextBox Text="{Binding TitleText}" FontSize="14" Padding="10"
                                          BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
                                          CornerRadius="4" Background="{DynamicResource CardColor}" Foreground="{DynamicResource PrimaryTextColor}"/>
 
