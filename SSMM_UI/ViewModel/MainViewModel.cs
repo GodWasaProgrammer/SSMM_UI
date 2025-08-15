@@ -2,6 +2,7 @@
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
 using SSMM_UI.Services;
@@ -24,7 +25,7 @@ public partial class MainWindowViewModel : ObservableObject
         LoginWithTwitchCommand = new AsyncRelayCommand(LoginWithTwitch);
 
         // ==== OutPut Streams ====
-        StartStreamCommand = new RelayCommand(OnStartStream);
+        StartStreamCommand = new RelayCommand(StartStream);
         StopStreamsCommand = new RelayCommand(OnStopStreams);
 
         // ==== Stream Inspection window ====
@@ -74,6 +75,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly IFilePickerService _filePickerService;
     private readonly VideoPlayerService _videoPlayerService;
     private readonly IDialogService _dialogService;
+    private YouTubeService YTService;
 
     // ==== Service Selections ====
     [ObservableProperty]
@@ -188,7 +190,11 @@ public partial class MainWindowViewModel : ObservableObject
 
         YoutubeLoginStatus = "Loggar in...";
 
-        var userName = await _centralAuthService.LoginWithYoutube(MetaDataService);
+        var (userName, ytservice) = await _centralAuthService.LoginWithYoutube();
+        if(ytservice != null)
+        {
+            YTService = ytservice;
+        }
         if (userName != null)
         {
             YoutubeLoginStatus = $"✅ Inloggad som {userName}";
@@ -213,8 +219,12 @@ public partial class MainWindowViewModel : ObservableObject
 
     private async Task AutoLoginIfTokenized()
     {
-        var results = await _centralAuthService.TryAutoLoginAllAsync(MetaDataService);
+        var (results, ytService)= await _centralAuthService.TryAutoLoginAllAsync();
 
+        if (ytService != null) 
+        {
+            YTService = ytService;
+        }
         foreach (var result in results)
         {
             var message = result.Success
@@ -236,16 +246,18 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
-    private void OnStartStream()
-    {
-        StreamStatusText = "Stream status: 🟢 Live";
-        LogMessages.Add("Started streaming...");
-    }
-
     private void OnStopStreams()
     {
-        StreamStatusText = "Stream status: ❌ Not Receiving";
-        LogMessages.Add("Stopped all streams.");
+        try
+        {
+            if (_streamService != null)
+                _streamService.StopStreams();
+            LogMessages.Add("Stopped all streams.");
+        }
+        catch(Exception ex)
+        {
+            LogMessages.Add(ex.ToString());
+        }
     }
 
     private void OnTestYtHacks()
@@ -253,14 +265,16 @@ public partial class MainWindowViewModel : ObservableObject
         LogMessages.Add("Tested YouTube Hacks.");
     }
 
-    private void StartStream(object? sender, RoutedEventArgs e)
+    private void StartStream()
     {
         //StartStreamButton.IsEnabled = false;
         if (_streamService != null)
         {
             try
             {
+                _streamService.CreateYTService(YTService);
                 _streamService.StartStream(CurrentMetadata, SelectedServicesToStream);
+                LogMessages.Add("Started streaming...");
             }
             catch (Exception ex)
             {

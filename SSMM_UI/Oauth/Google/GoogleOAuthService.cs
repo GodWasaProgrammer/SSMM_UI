@@ -38,7 +38,7 @@ public class GoogleOAuthService
     private string? _currentCodeVerifier;
     private string? _currentState;
 
-    public async Task<string> LoginAutoIfTokenized(MetaDataService MDService)
+    public async Task<GoogleOauthResult> LoginAutoIfTokenized()
     {
         try
         {
@@ -54,12 +54,11 @@ public class GoogleOAuthService
                         await RefreshTokenAsync(_oauthResult.RefreshToken);
                     }
                     var username = await GetUsernameAsync(_oauthResult.AccessToken);
-                    MDService.CreateYouTubeService(_oauthResult.AccessToken);
                     if (username != null)
                     {
                         _oauthResult.Username = username;
                     }
-                    return _oauthResult.Username;
+                    return _oauthResult;
                 }
             }
         }
@@ -67,10 +66,10 @@ public class GoogleOAuthService
         {
             LogService.Log(ex.Message);
         }
-        return "❌ Token missing or not valid";
+        return _oauthResult;
     }
 
-    public async Task<string> LoginWithYoutube(MetaDataService MDService)
+    public async Task<GoogleOauthResult> LoginWithYoutube()
     {
         if (File.Exists(_tokenPath))
         {
@@ -83,7 +82,7 @@ public class GoogleOAuthService
                     await RefreshTokenAsync(_oauthResult.RefreshToken);
                 }
                 _oauthResult.Username = await GetUsernameAsync(_oauthResult.AccessToken);
-                return _oauthResult.Username;
+                return _oauthResult;
             }
         }
 
@@ -116,12 +115,12 @@ public class GoogleOAuthService
         }
         if (_oauthResult != null)
         {
-            MDService.CreateYouTubeService(_oauthResult.AccessToken);
-            return _oauthResult.Username;
+
+            return _oauthResult;
 
         }
         else
-            return "Login Failed!";
+            return _oauthResult;
 
     }
 
@@ -302,13 +301,13 @@ public class GoogleOAuthService
             var json = JsonDocument.Parse(responseData).RootElement;
 
             // Försök först med "email", annars fallback till "name", annars "sub"
-            if (json.TryGetProperty("email", out var emailProp))
-            {
-                return emailProp.GetString() ?? throw new Exception("Email field is null");
-            }
-            else if (json.TryGetProperty("name", out var nameProp))
+            if (json.TryGetProperty("name", out var nameProp))
             {
                 return nameProp.GetString() ?? throw new Exception("Name field is null");
+            }
+            else if (json.TryGetProperty("email", out var emailProp))
+            {
+                return emailProp.GetString() ?? throw new Exception("Email field is null");
             }
             else if (json.TryGetProperty("sub", out var subProp))
             {

@@ -6,6 +6,7 @@ using PuppeteerSharp;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -21,19 +22,11 @@ public class MetaDataService
         return _ytCategories;
     }
 
-    public void CreateYouTubeService(string accessToken)
+    public void CreateYouTubeService(YouTubeService ytservice)
     {
-        var credential = GoogleCredential
-            .FromAccessToken(accessToken)
-            .CreateScoped(YouTubeService.Scope.Youtube);
-
-        var youtubeService = new YouTubeService(new BaseClientService.Initializer()
-        {
-            HttpClientInitializer = credential,
-            ApplicationName = "Streamer & Social Media Manager"
-        });
-        _youTubeService = youtubeService;
+        _youTubeService = ytservice;
     }
+
     public IReadOnlyList<VideoCategory> YouTubeCategories => _ytCategories;
 
     public MetaDataService()

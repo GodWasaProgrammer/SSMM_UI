@@ -1,4 +1,5 @@
 ﻿using FFmpeg.AutoGen;
+using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
 using System;
@@ -18,7 +19,6 @@ namespace SSMM_UI.Services;
 
 public class StreamService : IDisposable
 {
-    private readonly CentralAuthService _centralAuthService;
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
     private const string TwitchAdress = "rtmp://live.twitch.tv/app";
     public event Action<bool>? ServerStatusChanged;
@@ -27,15 +27,23 @@ public class StreamService : IDisposable
     private RTMPServer Server { get; set; } = new();
     private readonly List<Process>? ffmpegProcess = [];
     private readonly CancellationTokenSource _cts = new();
-    public StreamService(CentralAuthService _AuthService)
+    private YouTubeService? _youTubeService;
+    private CentralAuthService _authService;
+    public StreamService(CentralAuthService authService)
     {
-        _centralAuthService = _AuthService;
         Server.StartSrv();
+        _authService = authService;
     }
+
+    public void CreateYTService(YouTubeService YTService)
+    {
+        _youTubeService = YTService;
+    }
+
     public StreamInfo? StreamInfo { get; set; }
     public async Task<(string rtmpUrl, string streamKey)> CreateYouTubeBroadcastAsync(StreamMetadata metadata)
     {
-        if (_centralAuthService.YTService is not null)
+        if (_youTubeService is not null)
         {
             if (StreamInfo == null)
             {
@@ -68,7 +76,7 @@ public class StreamService : IDisposable
                     Status = broadcastStatus
                 };
 
-                var broadcastInsert = _centralAuthService.YTService.LiveBroadcasts.Insert(liveBroadcast, "snippet,status");
+                var broadcastInsert = _youTubeService.LiveBroadcasts.Insert(liveBroadcast, "snippet,status");
                 var insertedBroadcast = await broadcastInsert.ExecuteAsync();
 
                 // 2. Skapa LiveStream
@@ -96,11 +104,11 @@ public class StreamService : IDisposable
                     Cdn = cdn
                 };
 
-                var streamInsert = _centralAuthService.YTService.LiveStreams.Insert(liveStream, "snippet,cdn");
+                var streamInsert = _youTubeService.LiveStreams.Insert(liveStream, "snippet,cdn");
                 var insertedStream = await streamInsert.ExecuteAsync();
 
                 // 3. Koppla stream till broadcast
-                var bindRequest = _centralAuthService.YTService.LiveBroadcasts.Bind(insertedBroadcast.Id, "id,contentDetails");
+                var bindRequest = _youTubeService.LiveBroadcasts.Bind(insertedBroadcast.Id, "id,contentDetails");
                 bindRequest.StreamId = insertedStream.Id;
                 await bindRequest.ExecuteAsync();
 
@@ -108,7 +116,7 @@ public class StreamService : IDisposable
                 if (!string.IsNullOrWhiteSpace(metadata.ThumbnailPath))
                 {
                     using var fs = new FileStream(metadata.ThumbnailPath, FileMode.Open, FileAccess.Read);
-                    var thumbnailRequest = _centralAuthService.YTService.Thumbnails.Set(insertedBroadcast.Id, fs, "image/jpeg");
+                    var thumbnailRequest = _youTubeService.Thumbnails.Set(insertedBroadcast.Id, fs, "image/jpeg");
                     await thumbnailRequest.UploadAsync();
                 }
 
@@ -140,9 +148,9 @@ public class StreamService : IDisposable
     }
     public async Task<(string rtmpUrl, string? streamKey)> CreateTwitchBroadcastAsync(StreamMetadata metadata)
     {
-        var accessToken = _centralAuthService.TwitchService.AuthResult.AccessToken;
-        var ClientId = _centralAuthService.TwitchService._clientId;
-        var userId = _centralAuthService.TwitchService.AuthResult.UserId;
+        var accessToken = _authService.TwitchService.AuthResult.AccessToken;
+        var ClientId = _authService.TwitchService._clientId;
+        var userId = _authService.TwitchService.AuthResult.UserId;
         using var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         httpClient.DefaultRequestHeaders.Add("Client-Id", ClientId);
@@ -183,11 +191,12 @@ public class StreamService : IDisposable
     }
     public static StreamInfo? ProbeStream(string rtmpUrl)
     {
+        var path = "Dependencies/ffprobe";
         try
         {
             var startInfo = new ProcessStartInfo
             {
-                FileName = "ffprobe",
+                FileName = path,
                 Arguments = $"-v error -select_streams v:0 -read_intervals %+#5 -show_entries stream=width,height,r_frame_rate " +
                             $"-of default=noprint_wrappers=1:nokey=1 \"{rtmpUrl}\"",
                 RedirectStandardOutput = true,
@@ -378,6 +387,7 @@ public class StreamService : IDisposable
                 UIService.ToggleStopStreamButton(true);
             }
 
+            var path = "Dependencies/ffmpeg";
             // Bygg ffmpeg argument
             var fullUrl = $"{service.SelectedServer.Url}/{service.StreamKey}";
             var input = RtmpAdress; // exempel, justera efter behov
@@ -387,7 +397,7 @@ public class StreamService : IDisposable
 
             var startInfo = new ProcessStartInfo
             {
-                FileName = "ffmpeg",
+                FileName = path,
                 Arguments = args.ToString(),
                 RedirectStandardError = true,
                 UseShellExecute = false,

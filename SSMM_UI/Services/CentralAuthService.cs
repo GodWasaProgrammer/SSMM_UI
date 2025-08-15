@@ -1,4 +1,6 @@
-﻿using Google.Apis.YouTube.v3;
+﻿using Google.Apis.Auth.OAuth2;
+using Google.Apis.Services;
+using Google.Apis.YouTube.v3;
 using SSMM_UI.MetaData;
 using SSMM_UI.Oauth.Google;
 using SSMM_UI.Oauth.Kick;
@@ -8,12 +10,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
+using static Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp;
 
 namespace SSMM_UI.Services;
 
 public class CentralAuthService
 {
-    public YouTubeService? YTService { get; set; }
     private GoogleOAuthService GoogleAuthService { get; set; }
     public TwitchDCAuthService TwitchService;
     private readonly KickOAuthService? _kickOauthService;
@@ -70,8 +72,10 @@ public class CentralAuthService
         }
         return LoginResult;
     }
-    public async Task<string> LoginWithYoutube(MetaDataService MDService)
+    public async Task<(string, YouTubeService? _uTube)> LoginWithYoutube()
     {
+        YouTubeService ytService = null;
+        string username = "Failed to log in";
         try
         {
 
@@ -81,7 +85,20 @@ public class CentralAuthService
             }
             else
             {
-                return await GoogleAuthService.LoginWithYoutube(MDService);
+                   var res = await GoogleAuthService.LoginWithYoutube();
+                username = res.Username;
+                if (res.AccessToken != null)
+                {
+                    var credential = GoogleCredential.FromAccessToken(res.AccessToken);
+                    var YTService = new YouTubeService(new BaseClientService.Initializer
+                    {
+                        HttpClientInitializer = credential,
+                        ApplicationName = "Streamer & Social Media Manager"
+                    });
+                    ytService = YTService;
+
+                }
+                return (username, ytService);
             }
         }
         catch
@@ -89,7 +106,7 @@ public class CentralAuthService
         {
             LogService.Log(ex.Message);
         }
-        return "Unable to login to youtube";
+        return ("Unable to login to youtube", ytService);
     }
     public async Task<string> LoginWithKick()
     {
@@ -125,9 +142,11 @@ public class CentralAuthService
         }
     }
 
-    public async Task<List<AuthResult>> TryAutoLoginAllAsync(MetaDataService MDService)
+    public async Task<(List<AuthResult>, YouTubeService?)> TryAutoLoginAllAsync()
     {
         var results = new List<AuthResult>();
+        GoogleOauthResult GoogleAuthResult = new();
+        YouTubeService ytService = null;
         try
         {
 
@@ -139,8 +158,9 @@ public class CentralAuthService
 
             // TODO: make sure that we instantiate YTService also or shit will break down the pipe
             // Google/YouTube
-            var user = await GoogleAuthService.LoginAutoIfTokenized(MDService);
-            results.Add(new AuthResult(AuthProvider.YouTube, true, user, null));
+            GoogleAuthResult = await GoogleAuthService.LoginAutoIfTokenized();
+            
+            results.Add(new AuthResult(AuthProvider.YouTube, true, GoogleAuthResult.Username, null));
 
             // Kick
             var kickToken = await KickOAuthService.IfTokenIsValidLoginAuto();
@@ -153,7 +173,18 @@ public class CentralAuthService
         {
             results.Add(new AuthResult(AuthProvider.YouTube, false, null, ex.Message));
         }
-        return results;
+        if (GoogleAuthResult.AccessToken != null)
+        {
+            var credential = GoogleCredential.FromAccessToken(GoogleAuthResult.AccessToken);
+            var YTService = new YouTubeService(new BaseClientService.Initializer
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = "Streamer & Social Media Manager"
+            });
+            ytService = YTService;
+
+        }
+        return (results, ytService);
     }
 }
 

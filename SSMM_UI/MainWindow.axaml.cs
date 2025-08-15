@@ -11,7 +11,6 @@ namespace SSMM_UI;
 
 public partial class MainWindow : Window
 {
-    public MetaDataService MetaDataService { get; private set; }
     private readonly StateService _stateService = new();
     private StreamService? _streamService;
 
@@ -19,40 +18,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        MetaDataService = new();
         //if (!Design.IsDesignMode)
     }
-
-    protected override async void OnOpened(EventArgs e)
-    {
-        //    base.OnOpened(e);
-        //    await AutoLoginIfTokenized();
-        //    _streamService = new(_centralAuthService);
-        //    UIService.StreamStatusChanged += text =>
-        //    {
-        //        StreamStatusText.Text = text;
-        //    };
-        //    UIService.ServerStatusChanged += text =>
-        //    {
-        //        ServerStatusText.Text = text;
-        //    };
-        //    UIService.StartStreamButtonChanged += change =>
-        //    {
-        //        StartStreamButton.IsEnabled = change;
-        //    };
-        //    UIService.StopStreamButtonChanged += change =>
-        //    {
-        //        StopStreamButton.IsEnabled = change;
-        //    };
-        //    if (!Design.IsDesignMode)
-        //    {
-        //        _streamService.StartStreamStatusPolling();
-        //        StreamService.StartServerStatusPolling();
-        //    }
-        //}
-    }
-
-
 
     public string haxx = "";
     private async void TestYThacks(object? sender, RoutedEventArgs e)
