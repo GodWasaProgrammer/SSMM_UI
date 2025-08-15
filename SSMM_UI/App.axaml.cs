@@ -4,6 +4,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using LibVLCSharp.Shared;
 using Microsoft.Extensions.DependencyInjection;
+using SSMM_UI.MetaData;
 using SSMM_UI.Services;
 
 namespace SSMM_UI;
@@ -30,6 +31,8 @@ public partial class App : Application
                 .AddSingleton<VideoPlayerService>()
                 .AddSingleton<IDialogService, DialogService>()
                 .AddSingleton<MainWindowViewModel>()
+                .AddSingleton<CentralAuthService>()
+                .AddSingleton<MetaDataService>()
                 .BuildServiceProvider();
 
             // Hämta video view från MainWindow och registrera

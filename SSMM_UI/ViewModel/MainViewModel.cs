@@ -14,7 +14,7 @@ namespace SSMM_UI;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    public MainWindowViewModel(IDialogService dialogService, IFilePickerService filePickerService, VideoPlayerService vidPlayer)
+    public MainWindowViewModel(IDialogService dialogService, IFilePickerService filePickerService, VideoPlayerService vidPlayer, CentralAuthService authservice, MetaDataService MdService)
     {
         // Init commands
 
@@ -42,8 +42,8 @@ public partial class MainWindowViewModel : ObservableObject
         UpdateMetadataCommand = new RelayCommand(OnUpdateMetadata);
 
         // services
-        MetaDataService = new();
-        _centralAuthService = new();
+        MetaDataService = MdService;
+        _centralAuthService = authservice;
         _filePickerService = filePickerService;
         _dialogService = dialogService;
         _streamService = new(_centralAuthService);
