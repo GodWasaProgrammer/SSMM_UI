@@ -29,10 +29,12 @@ public class StreamService : IDisposable
     private readonly CancellationTokenSource _cts = new();
     private YouTubeService? _youTubeService;
     private CentralAuthService _authService;
-    public StreamService(CentralAuthService authService)
+    private ILogService _logger;
+    public StreamService(CentralAuthService authService, ILogService logger)
     {
         Server.StartSrv();
         _authService = authService;
+        _logger = logger;
     }
 
     public void CreateYTService(YouTubeService YTService)
@@ -52,7 +54,7 @@ public class StreamService : IDisposable
                     StreamInfo = info;
                 else
                 {
-                    LogService.Log("stream failed to start, there was missing info from ffprobe");
+                    _logger.Log("stream failed to start, there was missing info from ffprobe");
                 }
             }
             try
@@ -133,11 +135,11 @@ public class StreamService : IDisposable
             }
             catch (Google.GoogleApiException ex)
             {
-                LogService.Log("YouTube API error:");
-                LogService.Log($"Message: {ex.Message}");
-                LogService.Log($"Details: {ex.Error?.Errors?.FirstOrDefault()?.Message}");
-                LogService.Log($"Reason: {ex.Error?.Errors?.FirstOrDefault()?.Reason}");
-                LogService.Log($"Domain: {ex.Error?.Errors?.FirstOrDefault()?.Domain}");
+                _logger.Log("YouTube API error:");
+                _logger.Log($"Message: {ex.Message}");
+                _logger.Log($"Details: {ex.Error?.Errors?.FirstOrDefault()?.Message}");
+                _logger.Log($"Reason: {ex.Error?.Errors?.FirstOrDefault()?.Reason}");
+                _logger.Log($"Domain: {ex.Error?.Errors?.FirstOrDefault()?.Domain}");
                 throw;
             }
         }
@@ -189,7 +191,7 @@ public class StreamService : IDisposable
         // TODO: implement
         return ("", "");
     }
-    public static StreamInfo? ProbeStream(string rtmpUrl)
+    public StreamInfo? ProbeStream(string rtmpUrl)
     {
         var path = "Dependencies/ffprobe";
         try
@@ -214,7 +216,7 @@ public class StreamService : IDisposable
             if (!process.HasExited)
             {
                 process.Kill();
-                LogService.Log("ffprobe process killed due to timeout.");
+                _logger.Log("ffprobe process killed due to timeout.");
                 return null;
             }
 
@@ -240,7 +242,7 @@ public class StreamService : IDisposable
         }
         catch (Exception ex)
         {
-            LogService.Log($"Failed to probe RTMP stream: {ex.Message}");
+            _logger.Log($"Failed to probe RTMP stream: {ex.Message}");
             return null;
         }
     }
@@ -379,7 +381,7 @@ public class StreamService : IDisposable
                 }
                 catch (Exception ex)
                 {
-                    LogService.Log($"Failed to create YouTube broadcast: {ex.Message}\n");
+                    _logger.Log($"Failed to create YouTube broadcast: {ex.Message}\n");
                     return;
                 }
             }
@@ -407,20 +409,20 @@ public class StreamService : IDisposable
 
                 ffmpegProcess?.Add(process);
                 process.Start();
-                
+
 
                 // Läs FFmpeg:s standardfelutgång asynkront
                 string? line;
                 while ((line = await process.StandardError.ReadLineAsync()) != null)
                 {
-                    LogService.Log((line + Environment.NewLine));
+                    _logger.Log((line + Environment.NewLine));
                 }
 
                 await process.WaitForExitAsync();
             }
             catch (Exception ex)
             {
-                LogService.Log($"FFmpeg start failed: {ex.Message}\n");
+                _logger.Log($"FFmpeg start failed: {ex.Message}\n");
             }
         }
     }

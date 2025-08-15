@@ -39,6 +39,11 @@ public class KickOAuthService
     private string? _currentCodeVerifier;
     private string? _currentState;
 
+    private ILogService _logger;
+    public KickOAuthService(ILogService logger)
+    {
+        _logger = logger;
+    }
 
     public async Task<KickAuthResult> AuthenticateUserAsync(string[] requestedScopes)
     {
@@ -60,7 +65,7 @@ public class KickOAuthService
                            $"code_challenge_method=S256&" +
                            $"state={_currentState}";
 
-            LogService.Log($"Öppnar auktoriserings-URL: {authUrl}");
+            _logger.Log($"Öppnar auktoriserings-URL: {authUrl}");
 
             // 3. Öppna webbläsare
             OpenBrowser(authUrl);
@@ -125,7 +130,7 @@ public class KickOAuthService
         return newToken;
     }
 
-    public static async Task<KickAuthResult?> IfTokenIsValidLoginAuto()
+    public async Task<KickAuthResult?> IfTokenIsValidLoginAuto()
     {
         if (!File.Exists(TokenFilePath))
         {
@@ -157,7 +162,7 @@ public class KickOAuthService
         catch (Exception ex)
         {
             // Logga eller hantera fel (t.ex. korrupt fil)
-            LogService.Log($"❌ Fel vid autologin: {ex.Message}");
+            _logger.Log($"❌ Fel vid autologin: {ex.Message}");
             return null;
         }
     }
@@ -290,7 +295,7 @@ public class KickOAuthService
         }
     }
 
-    private static async Task<string> GetUsernameAsync(string accessToken)
+    private async Task<string> GetUsernameAsync(string accessToken)
     {
         try
         {
@@ -320,7 +325,7 @@ public class KickOAuthService
         }
         catch (Exception ex)
         {
-            LogService.Log(ex.Message);
+            _logger.Log(ex.Message);
         }
 
         return ("No user data returned or malformed response");

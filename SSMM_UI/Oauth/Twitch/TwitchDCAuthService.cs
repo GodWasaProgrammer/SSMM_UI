@@ -20,11 +20,17 @@ public class TwitchDCAuthService
     private const string TokenFilePath = "twitch_tokenDCF.json";
     private const string ApiBaseUrl = "https://api.twitch.tv/helix";
     public TwitchTokenTokenResponse? AuthResult;
-
-    public TwitchDCAuthService(HttpClient httpClient,string[] scopes)
+    string[] scopes = new[]
+        {
+            TwitchScopes.UserReadEmail,
+            TwitchScopes.ChannelManageBroadcast,
+            TwitchScopes.StreamKey
+        };
+    private ILogService _logger;
+    public TwitchDCAuthService(ILogService logger)
     {
-        _httpClient = httpClient;
-        _scopes = scopes;
+        _logger = logger;
+        _httpClient = new HttpClient();
     }
 
     public async Task<TwitchDCResponse> StartDeviceCodeFlowAsync()
@@ -60,7 +66,7 @@ public class TwitchDCAuthService
 
         if (!response.IsSuccessStatusCode)
         {
-            LogService.Log($"⚠️ Refresh failed: {response.StatusCode}\n{responseBody}");
+            _logger.Log($"⚠️ Refresh failed: {response.StatusCode}\n{responseBody}");
             return null;
         }
 
@@ -89,7 +95,7 @@ public class TwitchDCAuthService
 
         if (!string.IsNullOrWhiteSpace(token.RefreshToken))
         {
-            LogService.Log("🔁 Försöker förnya åtkomsttoken med refresh_token...");
+            _logger.Log("🔁 Försöker förnya åtkomsttoken med refresh_token...");
             await RefreshAccessTokenAsync(token.RefreshToken);
             token.UserName = await GetUsernameAsync(token.AccessToken);
             return token;
@@ -135,7 +141,7 @@ public class TwitchDCAuthService
 
             // Läser felmeddelandet som sträng (för debug/logg)
             var errorBody = await response.Content.ReadAsStringAsync();
-            LogService.Log($"Polling error ({response.StatusCode}): {errorBody}");
+            _logger.Log($"Polling error ({response.StatusCode}): {errorBody}");
 
             try
             {
@@ -150,15 +156,15 @@ public class TwitchDCAuthService
                     case "slow_down":
                         // Twitch säger att vi pollar för snabbt – öka intervallet
                         intervalSeconds += 5;
-                        LogService.Log("Twitch säger att vi pollar för snabbt, ökar väntetiden...");
+                        _logger.Log("Twitch säger att vi pollar för snabbt, ökar väntetiden...");
                         continue;
 
                     case "access_denied":
-                        LogService.Log("Användaren nekade åtkomst.");
+                        _logger.Log("Användaren nekade åtkomst.");
                         return null;
 
                     case "expired_token":
-                        LogService.Log("Device code har gått ut. Timeout.");
+                        _logger.Log("Device code har gått ut. Timeout.");
                         return null;
 
                     case "":
@@ -173,7 +179,7 @@ public class TwitchDCAuthService
             }
         }
 
-        LogService.Log("Polling avbröts efter max väntetid utan godkännande.");
+        _logger.Log("Polling avbröts efter max väntetid utan godkännande.");
         return null;
     }
 

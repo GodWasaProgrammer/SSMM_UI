@@ -117,6 +117,7 @@
 							<StackPanel>
 								<TextBlock Text="LOGS" Classes="secondary"/>
 								<ListBox ItemsSource="{Binding LogMessages}" Height="400"
+										 SelectedItem="{Binding SelectedLogItem}"
                                          FontFamily="Consolas, Courier New" BorderThickness="0"
                                          Background="{DynamicResource BorderColor}" Opacity="0.2"
                                          Foreground="{DynamicResource PrimaryTextColor}" Padding="10"/>

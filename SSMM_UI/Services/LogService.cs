@@ -1,19 +1,29 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using Avalonia.Threading;
 
 namespace SSMM_UI.Services;
 
-public static class LogService
+public interface ILogService
 {
-    public static ObservableCollection<string> Messages { get; } = [];
+    void Log(string message);
+    ObservableCollection<string> Messages { get; }
+    public Action? OnLogAdded { get; set; }
+}
 
-    public static void Log(string message)
+// 2. Implementera
+public class LogService : ILogService
+{
+    public ObservableCollection<string> Messages { get; } = new();
+    public Action? OnLogAdded { get; set; }
+
+    public void Log(string message)
     {
-        var timestamped = $"[{DateTime.Now:HH:mm:ss}] {message}";
-        Messages.Add(timestamped);
-
-        // Behåll inte oändligt många rader
-        if (Messages.Count > 500)
-            Messages.RemoveAt(0);
+        Dispatcher.UIThread.Post(() =>
+        {
+            Messages.Add($"[{DateTime.Now:HH:mm:ss}] {message}");
+            if (Messages.Count > 500) Messages.RemoveAt(0);
+            OnLogAdded?.Invoke();
+        });
     }
 }

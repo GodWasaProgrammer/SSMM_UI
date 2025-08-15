@@ -11,8 +11,6 @@ namespace SSMM_UI;
 
 public partial class MainWindow : Window
 {
-    private readonly StateService _stateService = new();
-
     public MainWindow()
     {
         InitializeComponent();
@@ -40,7 +38,6 @@ public partial class MainWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         base.OnClosed(e);
-        _stateService.SerializeServices();
     }
 
     //private async Task SetYouTubeCategoryAndGameAsync(string videoId, string wikipediaUrl, string accessToken)
@@ -135,40 +132,40 @@ public partial class MainWindow : Window
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    public void ClearGoogleOAuthTokens(object? sender, RoutedEventArgs e)
-    {
-        string[] possiblePaths =
-        [
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".credentials"),
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Google.Apis.Auth")
-    ];
+    //public void ClearGoogleOAuthTokens(object? sender, RoutedEventArgs e)
+    //{
+    //    string[] possiblePaths =
+    //    [
+    //    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".credentials"),
+    //    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Google.Apis.Auth")
+    //];
 
-        bool foundAndDeleted = false;
+    //    bool foundAndDeleted = false;
 
-        foreach (var path in possiblePaths)
-        {
-            if (Directory.Exists(path))
-            {
-                try
-                {
-                    Directory.Delete(path, true);
-                    LogService.Log($"OAuth tokens cleared from: {path}");
-                    foundAndDeleted = true;
-                }
-                catch (Exception ex)
-                {
-                    LogService.Log($"Failed to clear OAuth tokens at {path}: {ex.Message}");
-                }
-            }
-            else
-            {
-                LogService.Log($"No OAuth tokens found at: {path}");
-            }
-        }
+    //    foreach (var path in possiblePaths)
+    //    {
+    //        if (Directory.Exists(path))
+    //        {
+    //            try
+    //            {
+    //                Directory.Delete(path, true);
+    //                LogService.Log($"OAuth tokens cleared from: {path}");
+    //                foundAndDeleted = true;
+    //            }
+    //            catch (Exception ex)
+    //            {
+    //                LogService.Log($"Failed to clear OAuth tokens at {path}: {ex.Message}");
+    //            }
+    //        }
+    //        else
+    //        {
+    //            LogService.Log($"No OAuth tokens found at: {path}");
+    //        }
+    //    }
 
-        if (!foundAndDeleted)
-        {
-            LogService.Log("No OAuth token directories found to clear.");
-        }
-    }
+    //    if (!foundAndDeleted)
+    //    {
+    //        LogService.Log("No OAuth token directories found to clear.");
+    //    }
+    //}
 }

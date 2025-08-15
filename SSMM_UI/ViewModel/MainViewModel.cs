@@ -15,7 +15,7 @@ namespace SSMM_UI;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    public MainWindowViewModel(IDialogService dialogService, IFilePickerService filePickerService, VideoPlayerService vidPlayer, CentralAuthService authservice, MetaDataService MdService)
+    public MainWindowViewModel(IDialogService dialogService, IFilePickerService filePickerService, VideoPlayerService vidPlayer, CentralAuthService authservice, MetaDataService MdService, ILogService logService)
     {
         // Init commands
 
@@ -47,15 +47,16 @@ public partial class MainWindowViewModel : ObservableObject
         _centralAuthService = authservice;
         _filePickerService = filePickerService;
         _dialogService = dialogService;
-        _streamService = new(_centralAuthService);
         _videoPlayerService = vidPlayer;
-
+        _logService = logService;
+        _streamService = new(_centralAuthService, _logService);
+        _stateService = new(_logService);
         // set state of lists
         RtmpServiceGroups = _stateService.RtmpServiceGroups;
         SelectedServicesToStream = _stateService.SelectedServicesToStream;
         YoutubeVideoCategories = _stateService.YoutubeVideoCategories;
-
-
+        LogMessages = _logService.Messages;
+        _logService.OnLogAdded = ScrollToEnd;
         // ==== Fire and forget awaits ====
         _ = Initialize();
     }
@@ -65,17 +66,18 @@ public partial class MainWindowViewModel : ObservableObject
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; } = [];
     public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; } = [];
 
-    public ObservableCollection<string> LogMessages { get; } = [];
+    public ObservableCollection<string> LogMessages { get; }
 
     // ==== Services =====
     public MetaDataService MetaDataService { get; private set; }
     private readonly CentralAuthService _centralAuthService;
-    private readonly StateService _stateService = new();
+    private readonly StateService _stateService;
     private StreamService? _streamService;
     private readonly IFilePickerService _filePickerService;
     private readonly VideoPlayerService _videoPlayerService;
     private readonly IDialogService _dialogService;
     private YouTubeService YTService;
+    private readonly ILogService _logService;
 
     // ==== Service Selections ====
     [ObservableProperty]
@@ -100,7 +102,15 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string metadataStatus;
 
     // === Log things ====
-    [ObservableProperty] private int caretPosition;
+    [ObservableProperty] private string? _selectedLogItem;
+
+    public void ScrollToEnd()
+    {
+        if (LogMessages.Count > 0)
+        {
+            SelectedLogItem = LogMessages[^1]; // Senaste item
+        }
+    }
 
     // ==== Commands ====
 
@@ -168,7 +178,7 @@ public partial class MainWindowViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            LogService.Log(ex.Message);
+            _logService.Log(ex.Message);
         }
     }
 
@@ -177,7 +187,7 @@ public partial class MainWindowViewModel : ObservableObject
         var result = await _dialogService.ShowServerDetailsAsync(group);
 
         if (!result)
-            LogService.Log($"Cancelled adding service: {group.ServiceName}\n");
+            _logService.Log($"Cancelled adding service: {group.ServiceName}\n");
     }
 
     private void ToggleReceivingStream()
@@ -254,19 +264,19 @@ public partial class MainWindowViewModel : ObservableObject
         {
             if (_streamService != null)
                 _streamService.StopStreams();
-            LogMessages.Add("Stopped all streams.");
+            _logService.Log("Stopped all streams.");
             CanStartStream = true;
             CanStopStream = false;
         }
         catch(Exception ex)
         {
-            LogMessages.Add(ex.ToString());
+            _logService.Log(ex.ToString());
         }
     }
 
     private void OnTestYtHacks()
     {
-        LogMessages.Add("Tested YouTube Hacks.");
+        _logService.Log("Tested YouTube Hacks.");
     }
 
     private void StartStream()
@@ -279,11 +289,11 @@ public partial class MainWindowViewModel : ObservableObject
             {
                 _streamService.CreateYTService(YTService);
                 _streamService.StartStream(CurrentMetadata, SelectedServicesToStream);
-                LogMessages.Add("Started streaming...");
+                _logService.Log("Started streaming...");
             }
             catch (Exception ex)
             {
-                LogService.Log(ex.ToString());
+                _logService.Log(ex.ToString());
             }
         }
     }
@@ -298,16 +308,16 @@ public partial class MainWindowViewModel : ObservableObject
             {
                 ThumbnailImage = bitmap;
                 CurrentMetadata.Thumbnail = ThumbnailImage;
-                LogMessages.Add("Thumbnail loaded successfully");
+                _logService.Log("Thumbnail loaded successfully");
             }
             else
             {
-                LogMessages.Add("No file selected");
+                _logService.Log("No file selected");
             }
         }
         catch (Exception ex)
         {
-            LogMessages.Add($"Error loading thumbnail: {ex.Message}");
+            _logService.Log($"Error loading thumbnail: {ex.Message}");
         }
     }
 
@@ -315,7 +325,7 @@ public partial class MainWindowViewModel : ObservableObject
     private void OnUpdateMetadata()
     {
         CurrentMetadata.Title = TitleText;
-        LogMessages.Add($"Updated metadata: Title={TitleText}");
+        _logService.Log($"Updated metadata: Title={TitleText}");
         MetadataStatus = "Metadata updated successfully.";
     }
 
@@ -323,19 +333,19 @@ public partial class MainWindowViewModel : ObservableObject
     {
         if (SelectedService == null)
         {
-            LogMessages.Add("Ingen tjänst vald att ta bort");
+            _logService.Log("Ingen tjänst vald att ta bort");
             return;
         }
 
         if (!SelectedServicesToStream.Contains(SelectedService))
         {
-            LogMessages.Add("Den valda tjänsten finns inte i listan");
+            _logService.Log("Den valda tjänsten finns inte i listan");
             return;
         }
 
         var serviceName = SelectedService.DisplayName;
         SelectedServicesToStream.Remove(SelectedService);
-        LogMessages.Add($"Tog bort tjänst: {serviceName}");
+        _logService.Log($"Tog bort tjänst: {serviceName}");
         SelectedService = null;
     }
 }

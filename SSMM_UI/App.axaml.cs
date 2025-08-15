@@ -33,6 +33,7 @@ public partial class App : Application
                 .AddSingleton<MainWindowViewModel>()
                 .AddSingleton<CentralAuthService>()
                 .AddSingleton<MetaDataService>()
+                .AddSingleton<ILogService, LogService>()
                 .BuildServiceProvider();
 
             // Hämta video view från MainWindow och registrera

@@ -19,18 +19,20 @@ public class CentralAuthService
     private GoogleOAuthService GoogleAuthService { get; set; }
     public TwitchDCAuthService TwitchService;
     private readonly KickOAuthService? _kickOauthService;
+    private ILogService _logger;
 
-    public CentralAuthService()
+    public CentralAuthService(ILogService logger)
     {
-        _kickOauthService = new();
-        GoogleAuthService = new();
+        _kickOauthService = new(logger);
+        GoogleAuthService = new(logger);
         var scopes = new[]
         {
             TwitchScopes.UserReadEmail,
             TwitchScopes.ChannelManageBroadcast,
             TwitchScopes.StreamKey
         };
-        TwitchService = new TwitchDCAuthService(new HttpClient(), scopes);
+        _logger = logger;
+        TwitchService = new TwitchDCAuthService(_logger);
     }
 
     public async Task<string> LoginWithTwitch()
@@ -67,7 +69,7 @@ public class CentralAuthService
             }
             else
             {
-                LogService.Log("Timeout - användaren loggade inte in.");
+                _logger.Log("Timeout - användaren loggade inte in.");
             }
         }
         return LoginResult;
@@ -104,7 +106,7 @@ public class CentralAuthService
         catch
         (Exception ex)
         {
-            LogService.Log(ex.Message);
+            _logger.Log(ex.Message);
         }
         return ("Unable to login to youtube", ytService);
     }
@@ -137,7 +139,7 @@ public class CentralAuthService
         catch (Exception ex)
         {
             // Logga för felsökning
-            LogService.Log($"❌ Kick-login error: {ex.Message}");
+            _logger.Log($"❌ Kick-login error: {ex.Message}");
             return $"❌ Fel vid inloggning: {ex.Message}";
         }
     }
@@ -163,7 +165,7 @@ public class CentralAuthService
             results.Add(new AuthResult(AuthProvider.YouTube, true, GoogleAuthResult.Username, null));
 
             // Kick
-            var kickToken = await KickOAuthService.IfTokenIsValidLoginAuto();
+            var kickToken = await _kickOauthService.IfTokenIsValidLoginAuto();
             results.Add(kickToken is not null
                 ? new AuthResult(AuthProvider.Kick, true, kickToken.Username, null)
                 : new AuthResult(AuthProvider.Kick, false, null, "Token saknas eller ogiltig"));

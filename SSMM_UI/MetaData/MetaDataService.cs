@@ -28,10 +28,11 @@ public class MetaDataService
     }
 
     public IReadOnlyList<VideoCategory> YouTubeCategories => _ytCategories;
-
-    public MetaDataService()
+    private ILogService _logger;
+    public MetaDataService(ILogService logger)
     {
         _ytCategories = [];
+        _logger = logger;
     }
 
     public async Task YTCategoryFetch()
@@ -58,7 +59,7 @@ public class MetaDataService
                 {
                     if (category.Snippet.Assignable == true)
                     {
-                        LogService.Log($"{category.Id} - {category.Snippet.Title}");
+                        _logger.Log($"{category.Id} - {category.Snippet.Title}");
                     }
                 }
             }
@@ -69,11 +70,11 @@ public class MetaDataService
         }
         catch (Exception ex)
         {
-            LogService.Log(ex.Message);
+            _logger.Log(ex.Message);
         }
     }
 
-    private static void TwitchCategoryFetch(string accessToken, string clientId)
+    private void TwitchCategoryFetch(string accessToken, string clientId)
     {
         var categories = new Dictionary<string, (string Name, string BoxArtUrl)>();
         var searchChars = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -121,7 +122,7 @@ public class MetaDataService
         // Skriver ut alla kategorier
         foreach (var kv in categories)
         {
-            LogService.Log($"{kv.Value.Name} ({kv.Key}) - {kv.Value.BoxArtUrl}");
+            _logger.Log($"{kv.Value.Name} ({kv.Key}) - {kv.Value.BoxArtUrl}");
         }
     }
 

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
 using Google.Apis.YouTube.v3.Data;
+using Microsoft.Extensions.Logging;
 
 namespace SSMM_UI.Services;
 
@@ -17,8 +18,10 @@ public class StateService
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
     public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; private set; } = [];
 
-    public StateService()
+    private ILogService _logger;
+    public StateService(ILogService logger)
     {
+        _logger = logger;
         DeSerializeServices();
         LoadRtmpServersFromServicesJson(_obsServices);
         DeSerializeYoutubeCategories();
@@ -50,7 +53,7 @@ public class StateService
         }
         catch (Exception ex)
         {
-            LogService.Log($"❌ Kunde inte läsa in tjänster: {ex.Message}");
+            _logger.Log($"❌ Kunde inte läsa in tjänster: {ex.Message}");
         }
     }
 
@@ -78,7 +81,7 @@ public class StateService
         }
         catch (Exception ex)
         {
-            LogService.Log(ex.Message);
+            _logger.Log(ex.Message);
         }
     }
 

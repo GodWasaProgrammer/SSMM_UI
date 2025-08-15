@@ -38,6 +38,12 @@ public class GoogleOAuthService
     private string? _currentCodeVerifier;
     private string? _currentState;
 
+    private ILogService _logger;
+    public GoogleOAuthService(ILogService logger)
+    {
+        _logger = logger;
+    }
+
     public async Task<GoogleOauthResult> LoginAutoIfTokenized()
     {
         try
@@ -64,7 +70,7 @@ public class GoogleOAuthService
         }
         catch (Exception ex)
         {
-            LogService.Log(ex.Message);
+            _logger.Log(ex.Message);
         }
         return _oauthResult;
     }
@@ -282,7 +288,7 @@ public class GoogleOAuthService
         }
     }
 
-    private static async Task<string> GetUsernameAsync(string accessToken)
+    private async Task<string> GetUsernameAsync(string accessToken)
     {
         try
         {
@@ -316,7 +322,7 @@ public class GoogleOAuthService
         }
         catch (Exception ex)
         {
-            LogService.Log(ex.Message);
+            _logger.Log(ex.Message);
         }
         return "Failed to get username";
     }
