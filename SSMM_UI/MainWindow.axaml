@@ -99,7 +99,7 @@
 								<TextBlock Text="STREAM CONTROLS" Classes="secondary"/>
 								<WrapPanel>
 									<Button Content="Start Stream" Classes="success" Margin="0 0 15 0"
-                                            Command="{Binding StartStreamCommand}"/>
+                                            Command="{Binding StartStreamCommand}" IsEnabled="{Binding CanStartStream}"/>
 									<Button Content="Stop Streams" Classes="danger" Margin="0 0 15 0"
                                             Command="{Binding StopStreamsCommand}" IsEnabled="{Binding CanStopStream}"/>
 									<Button Content="Start Receiving" Classes="danger" Margin="0 0 15 0"

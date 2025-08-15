@@ -81,13 +81,11 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private SelectedService? _selectedService;
 
-    // ==== Stream Status ====
-    [ObservableProperty] private string streamStatusText = "Stream status: ❌ Not Receiving";
-    [ObservableProperty] private string streamButtonText = "Start Receiving";
-
     // ==== RTMP Server and internal RTMP feed from OBS Status ====
     [ObservableProperty] private string serverStatusText = "Stream status: ❌ Not Receiving";
     [ObservableProperty] private string _serverStatus = "RTMP-server: ❌ Not Running";
+    [ObservableProperty] private string streamStatusText = "Stream status: ❌ Not Receiving";
+    [ObservableProperty] private string streamButtonText = "Start Receiving";
 
     // ==== Login Status ====
     [ObservableProperty] private string youtubeLoginStatus;
@@ -124,10 +122,11 @@ public partial class MainWindowViewModel : ObservableObject
     public ICommand UploadThumbnailCommand { get; }
     public ICommand UpdateMetadataCommand { get; }
 
-    // bool toggler for stopping your output streams
-    [ObservableProperty] private bool canStopStream;
+    // == bool toggler for stopping your output streams ==
+    [ObservableProperty] private bool canStopStream = false;
+    [ObservableProperty] private bool canStartStream = true;
 
-    // bool toggler for the preview window for stream
+    // == bool toggler for the preview window for stream ==
     [ObservableProperty] private bool isReceivingStream;
 
     // ==== Social Media Poster ====
@@ -253,6 +252,8 @@ public partial class MainWindowViewModel : ObservableObject
             if (_streamService != null)
                 _streamService.StopStreams();
             LogMessages.Add("Stopped all streams.");
+            CanStartStream = true;
+            CanStopStream = false;
         }
         catch(Exception ex)
         {
@@ -267,7 +268,8 @@ public partial class MainWindowViewModel : ObservableObject
 
     private void StartStream()
     {
-        //StartStreamButton.IsEnabled = false;
+        CanStartStream = false;
+        CanStopStream = true;
         if (_streamService != null)
         {
             try

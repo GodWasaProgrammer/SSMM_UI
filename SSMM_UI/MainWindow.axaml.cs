@@ -12,13 +12,10 @@ namespace SSMM_UI;
 public partial class MainWindow : Window
 {
     private readonly StateService _stateService = new();
-    private StreamService? _streamService;
-
 
     public MainWindow()
     {
         InitializeComponent();
-        //if (!Design.IsDesignMode)
     }
 
     public string haxx = "";
@@ -102,24 +99,6 @@ public partial class MainWindow : Window
 
 
     // TODO: Figure out a better way to deduct which stream is which...
-
-
-    private void StopStreams(object? sender, RoutedEventArgs e)
-    {
-        if (_streamService != null)
-        {
-            try
-            {
-                _streamService.StopStreams();
-            }
-            catch (Exception ex)
-            {
-                LogService.Log(ex.ToString());
-            }
-        }
-        //StartStreamButton.IsEnabled = true;
-        //StopStreamButton.IsEnabled = false;
-    }
 
     private static void DetectSystemTheme()
     {
