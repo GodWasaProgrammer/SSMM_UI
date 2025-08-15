@@ -3,31 +3,24 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
-using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
 using SSMM_UI.Services;
 using System;
-using System.Collections.ObjectModel;
 using System.IO;
-using System.Threading.Tasks;
 namespace SSMM_UI;
 
 public partial class MainWindow : Window
 {
-    public static ObservableCollection<string> LogMessages => LogService.Messages;
-    public StreamMetadata CurrentMetadata { get; set; } = new StreamMetadata();
     public MetaDataService MetaDataService { get; private set; }
     private readonly StateService _stateService = new();
     private StreamService? _streamService;
-    const string RtmpAdress = "rtmp://localhost:1935/live/demo";
-    
+
 
     public MainWindow()
     {
         InitializeComponent();
         MetaDataService = new();
         //if (!Design.IsDesignMode)
-           //RtmpIncoming.Play(RtmpAdress);
     }
 
     protected override async void OnOpened(EventArgs e)

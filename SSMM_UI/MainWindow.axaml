@@ -78,7 +78,7 @@
 
 					<!-- Video Preview -->
 					<Border Classes="card">
-						<local:MyVideoView Width="220" Height="124" IsVisible="{Binding IsReceivingStream}"/>
+						<local:MyVideoView x:Name="RtmpIncoming" Width="220" Height="124" IsVisible="{Binding IsReceivingStream}"/>
 					</Border>
 
 					<!-- Services Section -->

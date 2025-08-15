@@ -3,69 +3,68 @@ using Avalonia.Platform;
 using LibVLCSharp.Shared;
 using System;
 
-namespace SSMM_UI
+namespace SSMM_UI;
+
+public class MyVideoView : NativeControlHost
 {
-    public class MyVideoView : NativeControlHost
+    private readonly LibVLC _libVLC;
+    private readonly MediaPlayer _mediaPlayer;
+    private IntPtr _hwnd;
+    private Media? _media;
+
+    public MyVideoView()
     {
-        private readonly LibVLC _libVLC;
-        private readonly MediaPlayer _mediaPlayer;
-        private IntPtr _hwnd;
-        private Media? _media;
-
-        public MyVideoView()
+        if (App.SharedLibVLC != null)
         {
-            if (App.SharedLibVLC != null)
-            {
-                _libVLC = App.SharedLibVLC;
-                _mediaPlayer = new MediaPlayer(_libVLC);
-            }
-            else
-            {
-                throw new Exception("we done fucked up");
-            }
-
+            _libVLC = App.SharedLibVLC;
+            _mediaPlayer = new MediaPlayer(_libVLC);
+        }
+        else
+        {
+            throw new Exception("we done fucked up");
         }
 
-        protected override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent)
-        {
-            // Här får vi native hwnd
-            _hwnd = parent.Handle;
+    }
 
-            // Sätt hwnd för mediaPlayer så det kan visa video i rätt kontroll
-            _mediaPlayer.Hwnd = _hwnd;
+    protected override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent)
+    {
+        // Här får vi native hwnd
+        _hwnd = parent.Handle;
 
-            return parent;
-        }
+        // Sätt hwnd för mediaPlayer så det kan visa video i rätt kontroll
+        _mediaPlayer.Hwnd = _hwnd;
 
-        protected override void DestroyNativeControlCore(IPlatformHandle control)
-        {
-            _mediaPlayer.Stop();
-            _media?.Dispose();
-            _mediaPlayer.Dispose();
-            // Disposar ej LibVLC eftersom den är delad
+        return parent;
+    }
 
-            base.DestroyNativeControlCore(control);
-        }
+    protected override void DestroyNativeControlCore(IPlatformHandle control)
+    {
+        _mediaPlayer.Stop();
+        _media?.Dispose();
+        _mediaPlayer.Dispose();
+        // Disposar ej LibVLC eftersom den är delad
 
-        public void Play(string url)
-        {
-            if (_mediaPlayer == null)
-                return;
+        base.DestroyNativeControlCore(control);
+    }
 
-            _media?.Dispose();
-            _media = new Media(_libVLC, url, FromType.FromLocation);
+    public void Play(string url)
+    {
+        if (_mediaPlayer == null)
+            return;
 
-            _mediaPlayer.Play(_media);
-        }
+        _media?.Dispose();
+        _media = new Media(_libVLC, url, FromType.FromLocation);
 
-        public void Stop()
-        {
-            if (_mediaPlayer == null)
-                return;
+        _mediaPlayer.Play(_media);
+    }
 
-            _mediaPlayer.Stop();
-            _media?.Dispose();
-            _media = null;
-        }
+    public void Stop()
+    {
+        if (_mediaPlayer == null)
+            return;
+
+        _mediaPlayer.Stop();
+        _media?.Dispose();
+        _media = null;
     }
 }

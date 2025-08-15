@@ -26,6 +26,8 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly StateService _stateService = new();
     private StreamService? _streamService;
     private readonly IFilePickerService _filePickerService;
+    private readonly VideoPlayerService _videoPlayerService;
+    private readonly IDialogService _dialogService;
 
     // ==== Service Selections ====
     [ObservableProperty]
@@ -55,8 +57,6 @@ public partial class MainWindowViewModel : ObservableObject
     // bool toggler for stopping your output streams
     public bool CanStopStream { get; set; }
 
-    // ==== Stream & Server polling =====
-    const string RtmpAdress = "rtmp://localhost:1935/live/demo";
 
 
     // bool toggler for the preview window for stream
@@ -124,7 +124,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
 
-    public MainWindowViewModel(IDialogService dialogService, IFilePickerService filePickerService)
+    public MainWindowViewModel(IDialogService dialogService, IFilePickerService filePickerService, VideoPlayerService vidPlayer)
     {
         // Init commands
         LoginWithGoogleCommand = new AsyncRelayCommand(OnLoginWithGoogleClicked);
@@ -147,6 +147,7 @@ public partial class MainWindowViewModel : ObservableObject
         _filePickerService = filePickerService;
         _dialogService = dialogService;
         _streamService = new(_centralAuthService);
+        _videoPlayerService = vidPlayer;
 
         // set state of lists
         RtmpServiceGroups = _stateService.RtmpServiceGroups;
@@ -154,11 +155,9 @@ public partial class MainWindowViewModel : ObservableObject
         YoutubeVideoCategories = _stateService.YoutubeVideoCategories;
 
         // start stream inspection ( its really never off its just a toggle for the visibility)
-        RtmpIncoming = new();
-        RtmpIncoming.Play(RtmpAdress);
         _ = Initialize();
     }
-    private readonly IDialogService _dialogService;
+
 
     private async Task OnRTMPServiceSelected(RtmpServiceGroup group)
     {
@@ -168,25 +167,11 @@ public partial class MainWindowViewModel : ObservableObject
             LogService.Log($"Cancelled adding service: {group.ServiceName}\n");
     }
 
-    private readonly MyVideoView RtmpIncoming;
     private void ToggleReceivingStream()
     {
-        if (!IsReceivingStream)
-        {
-            RtmpIncoming.IsVisible = true;
-            //StreamStatusText = "Receiving stream...";
-            StreamButtonText = "Stop Receiving";
-            IsReceivingStream = true;
-        }
-        else
-        {
-            //RtmpIncoming.Stop();
-            RtmpIncoming.IsVisible = false;
-
-            //StreamStatusText = "Stream stopped";
-            StreamButtonText = "Start Receiving";
-            IsReceivingStream = false;
-        }
+        IsReceivingStream = !IsReceivingStream;
+        _videoPlayerService.ToggleVisibility(IsReceivingStream);
+        StreamButtonText = IsReceivingStream ? "Stop Receiving" : "Start Receiving";
     }
 
     private async Task OnLoginWithGoogleClicked()
