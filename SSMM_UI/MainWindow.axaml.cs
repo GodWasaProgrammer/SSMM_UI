@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
-using SSMM_UI.MetaData;
+using Microsoft.Extensions.DependencyInjection;
 using SSMM_UI.Services;
 using System;
 using System.IO;
@@ -11,12 +11,22 @@ namespace SSMM_UI;
 
 public partial class MainWindow : Window
 {
+
     public MainWindow()
     {
         InitializeComponent();
+        Closed += (_, _) =>
+        {
+            App.Services?.GetRequiredService<StateService>().SerializeServices();
+        };
     }
 
-    public string haxx = "";
+    
+    /// <summary>
+    /// Just for debugging new functions
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private async void TestYThacks(object? sender, RoutedEventArgs e)
     {
 
@@ -34,68 +44,6 @@ public partial class MainWindow : Window
         await YoutubeStudioPuppeteer.ChangeGameTitle(videoId, defaultProfilePath, chromeExePath);
         // ~~~~~~~~~~~~~~~~~~~~~~WORKING~~~~~~~~~~//
     }
-
-    protected override void OnClosed(EventArgs e)
-    {
-        base.OnClosed(e);
-    }
-
-    //private async Task SetYouTubeCategoryAndGameAsync(string videoId, string wikipediaUrl, string accessToken)
-    //{
-    //    // 1. Uppdatera kategorin till "Gaming" via klient-API
-    //    var videosList = _youtubeService.Videos.List("snippet,topicDetails"); // ändrat här
-    //    videosList.Id = videoId;
-
-    //    var video = (await videosList.ExecuteAsync()).Items.FirstOrDefault();
-
-    //    if (video == null)
-    //    {
-    //        Console.WriteLine("Kunde inte hitta videon med angivet ID.");
-    //        return;
-    //    }
-
-    //    video.Snippet.CategoryId = "20"; // Gaming
-
-    //    var updateRequest = _youtubeService.Videos.Update(video, "snippet");
-    //    await updateRequest.ExecuteAsync();
-
-    //    // 2. Gör PATCH-anrop för att sätta spel/topicDetails
-    //    var patchPayload = new
-    //    {
-    //        id = videoId,
-    //        topicDetails = new
-    //        {
-    //            topicCategories = new[] { wikipediaUrl }
-    //        }
-    //    };
-
-    //    using var httpClient = new HttpClient();
-    //    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-    //    var json = JsonSerializer.Serialize(patchPayload);
-    //    var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-    //    var patchRequest = new HttpRequestMessage(new HttpMethod("PATCH"),
-    //        $"https://www.googleapis.com/youtube/v3/videos?part=topicDetails")
-    //    {
-    //        Content = content
-    //    };
-
-    //    var response = await httpClient.SendAsync(patchRequest);
-    //    var body = await response.Content.ReadAsStringAsync();
-
-    //    if (!response.IsSuccessStatusCode)
-    //    {
-    //        Console.WriteLine($"PATCH failed: {response.StatusCode}\n{body}");
-    //    }
-    //    else
-    //    {
-    //        Console.WriteLine("Gaming-topic satt korrekt.");
-    //    }
-    //}
-
-
-    // TODO: Figure out a better way to deduct which stream is which...
 
     private static void DetectSystemTheme()
     {
@@ -127,45 +75,4 @@ public partial class MainWindow : Window
         }
     }
 
-    /// <summary>
-    /// Debug only
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    //public void ClearGoogleOAuthTokens(object? sender, RoutedEventArgs e)
-    //{
-    //    string[] possiblePaths =
-    //    [
-    //    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".credentials"),
-    //    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Google.Apis.Auth")
-    //];
-
-    //    bool foundAndDeleted = false;
-
-    //    foreach (var path in possiblePaths)
-    //    {
-    //        if (Directory.Exists(path))
-    //        {
-    //            try
-    //            {
-    //                Directory.Delete(path, true);
-    //                LogService.Log($"OAuth tokens cleared from: {path}");
-    //                foundAndDeleted = true;
-    //            }
-    //            catch (Exception ex)
-    //            {
-    //                LogService.Log($"Failed to clear OAuth tokens at {path}: {ex.Message}");
-    //            }
-    //        }
-    //        else
-    //        {
-    //            LogService.Log($"No OAuth tokens found at: {path}");
-    //        }
-    //    }
-
-    //    if (!foundAndDeleted)
-    //    {
-    //        LogService.Log("No OAuth token directories found to clear.");
-    //    }
-    //}
 }

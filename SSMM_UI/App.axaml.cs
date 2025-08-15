@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -13,6 +14,7 @@ public partial class App : Application
 {
     public static LibVLC? SharedLibVLC { get; private set; }
     public VideoPlayerService? VideoService { get; private set; }
+    public static IServiceProvider? Services { get; private set; }
 
     public override void Initialize()
     {
@@ -26,23 +28,24 @@ public partial class App : Application
         {
             var mainWindow = new MainWindow();
 
-            var services = new ServiceCollection()
+            Services = new ServiceCollection()
                 .AddSingleton<IFilePickerService>(_ => new FilePickerService(mainWindow))
                 .AddSingleton<VideoPlayerService>()
                 .AddSingleton<IDialogService, DialogService>()
                 .AddSingleton<MainWindowViewModel>()
                 .AddSingleton<CentralAuthService>()
                 .AddSingleton<MetaDataService>()
+                .AddSingleton<StateService>()
                 .AddSingleton<ILogService, LogService>()
                 .BuildServiceProvider();
 
             // Hämta video view från MainWindow och registrera
             if (mainWindow.FindControl<MyVideoView>("RtmpIncoming") is { } videoView)
             {
-                services.GetRequiredService<VideoPlayerService>().RegisterVideoView(videoView);
+                Services.GetRequiredService<VideoPlayerService>().RegisterVideoView(videoView);
             }
 
-            mainWindow.DataContext = services.GetRequiredService<MainWindowViewModel>();
+            mainWindow.DataContext = Services.GetRequiredService<MainWindowViewModel>();
             desktop.MainWindow = mainWindow;
         }
 

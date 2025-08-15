@@ -15,7 +15,7 @@ namespace SSMM_UI;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    public MainWindowViewModel(IDialogService dialogService, IFilePickerService filePickerService, VideoPlayerService vidPlayer, CentralAuthService authservice, MetaDataService MdService, ILogService logService)
+    public MainWindowViewModel(IDialogService dialogService, IFilePickerService filePickerService, VideoPlayerService vidPlayer, CentralAuthService authservice, MetaDataService MdService, ILogService logService, StateService stateService)
     {
         // Init commands
 
@@ -50,7 +50,7 @@ public partial class MainWindowViewModel : ObservableObject
         _videoPlayerService = vidPlayer;
         _logService = logService;
         _streamService = new(_centralAuthService, _logService);
-        _stateService = new(_logService);
+        _stateService = stateService;
         // set state of lists
         RtmpServiceGroups = _stateService.RtmpServiceGroups;
         SelectedServicesToStream = _stateService.SelectedServicesToStream;
