@@ -16,5 +16,57 @@
 	</Application.Resources>
     <Application.Styles>
         <FluentTheme />
+			<!-- Text Styles -->
+			<Style Selector="TextBlock">
+				<Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+			</Style>
+			<Style Selector="TextBlock.secondary">
+				<Setter Property="Foreground" Value="{DynamicResource SecondaryTextColor}"/>
+				<Setter Property="FontSize" Value="12"/>
+			</Style>
+
+			<!-- Card Style -->
+			<Style Selector="Border.card">
+				<Setter Property="Background" Value="{DynamicResource CardColor}"/>
+				<Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+				<Setter Property="BorderThickness" Value="1"/>
+				<Setter Property="CornerRadius" Value="6"/>
+				<Setter Property="Padding" Value="15"/>
+				<Setter Property="Margin" Value="0 0 0 15"/>
+			</Style>
+
+			<!-- Button Styles -->
+			<Style Selector="Button.primary">
+				<Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
+				<Setter Property="Foreground" Value="White"/>
+				<Setter Property="FontWeight" Value="Bold"/>
+				<Setter Property="CornerRadius" Value="4"/>
+				<Setter Property="Width" Value="180"/>
+				<Setter Property="Height" Value="40"/>
+			</Style>
+			<Style Selector="Button.success">
+				<Setter Property="Background" Value="{DynamicResource SuccessColor}"/>
+				<Setter Property="Foreground" Value="White"/>
+			</Style>
+			<Style Selector="Button.danger">
+				<Setter Property="Background" Value="{DynamicResource DangerColor}"/>
+				<Setter Property="Foreground" Value="White"/>
+			</Style>
+
+			<!-- ListBoxItem hover style -->
+			<Style Selector="ListBoxItem:pointerover">
+				<Setter Property="Background">
+					<Setter.Value>
+						<SolidColorBrush Color="{DynamicResource BorderColor}" Opacity="0.3"/>
+					</Setter.Value>
+				</Setter>
+			</Style>
+			<Style Selector="Button.listItemButton">
+				<Setter Property="Background" Value="Transparent"/>
+				<Setter Property="BorderThickness" Value="0"/>
+				<Setter Property="Padding" Value="0"/>
+				<Setter Property="HorizontalContentAlignment" Value="Left"/>
+				<Setter Property="HorizontalAlignment" Value="Stretch"/>
+			</Style>
     </Application.Styles>
 </Application>
