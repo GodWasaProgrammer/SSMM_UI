@@ -339,7 +339,6 @@ public class StreamService : IDisposable
     {
         if (SelectedServicesToStream.Count == 0)
         {
-            UIService.StartBroadCastStream(true);
             return;
         }
 
@@ -383,8 +382,6 @@ public class StreamService : IDisposable
                     LogService.Log($"Failed to create YouTube broadcast: {ex.Message}\n");
                     return;
                 }
-                UIService.StartBroadCastStream(false);
-                UIService.ToggleStopStreamButton(true);
             }
 
             var path = "Dependencies/ffmpeg";
@@ -410,8 +407,7 @@ public class StreamService : IDisposable
 
                 ffmpegProcess?.Add(process);
                 process.Start();
-                UIService.StartBroadCastStream(false);
-                UIService.ToggleStopStreamButton(true);
+                
 
                 // Läs FFmpeg:s standardfelutgång asynkront
                 string? line;
@@ -437,7 +433,5 @@ public class StreamService : IDisposable
                 process.Kill();
             }
         }
-        UIService.StartBroadCastStream(true);
-        UIService.ToggleStopStreamButton(false);
     }
 }

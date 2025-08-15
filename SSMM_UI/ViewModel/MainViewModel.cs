@@ -99,6 +99,9 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string updateTitle;
     [ObservableProperty] private string metadataStatus;
 
+    // === Log things ====
+    [ObservableProperty] private int caretPosition;
+
     // ==== Commands ====
 
     // == Login ===
