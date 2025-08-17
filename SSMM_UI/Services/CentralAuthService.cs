@@ -1,16 +1,13 @@
 ﻿using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
-using SSMM_UI.MetaData;
 using SSMM_UI.Oauth.Google;
 using SSMM_UI.Oauth.Kick;
 using SSMM_UI.Oauth.Twitch;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Net.Http;
 using System.Threading.Tasks;
-using static Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp;
 
 namespace SSMM_UI.Services;
 
@@ -87,7 +84,7 @@ public class CentralAuthService
             }
             else
             {
-                   var res = await GoogleAuthService.LoginWithYoutube();
+                var res = await GoogleAuthService.LoginWithYoutube();
                 username = res.Username;
                 if (res.AccessToken != null)
                 {
@@ -156,35 +153,40 @@ public class CentralAuthService
             var twitchToken = await TwitchService.TryLoadValidOrRefreshTokenAsync();
             results.Add(twitchToken is not null
                 ? new AuthResult(AuthProvider.Twitch, true, twitchToken.UserName, null)
-                : new AuthResult(AuthProvider.Twitch, false, null, "Token saknas eller ogiltig"));
+                : new AuthResult(AuthProvider.Twitch, false, null, "Token was missing or is invalid"));
 
             // TODO: make sure that we instantiate YTService also or shit will break down the pipe
             // Google/YouTube
             GoogleAuthResult = await GoogleAuthService.LoginAutoIfTokenized();
-            
-            results.Add(new AuthResult(AuthProvider.YouTube, true, GoogleAuthResult.Username, null));
+            results.Add(GoogleAuthResult is not null
+                ? new AuthResult(AuthProvider.YouTube, true, GoogleAuthResult.Username, null)
+                : new AuthResult(AuthProvider.YouTube, false, null, "Token was missing or is invalid"));
 
             // Kick
             var kickToken = await _kickOauthService.IfTokenIsValidLoginAuto();
             results.Add(kickToken is not null
                 ? new AuthResult(AuthProvider.Kick, true, kickToken.Username, null)
-                : new AuthResult(AuthProvider.Kick, false, null, "Token saknas eller ogiltig"));
+                : new AuthResult(AuthProvider.Kick, false, null, "Token was missing or is invalid"));
 
         }
         catch (Exception ex)
         {
             results.Add(new AuthResult(AuthProvider.YouTube, false, null, ex.Message));
         }
-        if (GoogleAuthResult.AccessToken != null)
+        if (GoogleAuthResult != null)
         {
-            var credential = GoogleCredential.FromAccessToken(GoogleAuthResult.AccessToken);
-            var YTService = new YouTubeService(new BaseClientService.Initializer
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = "Streamer & Social Media Manager"
-            });
-            ytService = YTService;
 
+            if (GoogleAuthResult.AccessToken != null)
+            {
+                var credential = GoogleCredential.FromAccessToken(GoogleAuthResult.AccessToken);
+                var YTService = new YouTubeService(new BaseClientService.Initializer
+                {
+                    HttpClientInitializer = credential,
+                    ApplicationName = "Streamer & Social Media Manager"
+                });
+                ytService = YTService;
+
+            }
         }
         return (results, ytService);
     }
