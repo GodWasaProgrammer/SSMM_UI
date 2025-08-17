@@ -1,4 +1,3 @@
-using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -7,6 +6,9 @@ using LibVLCSharp.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using SSMM_UI.MetaData;
 using SSMM_UI.Services;
+using SSMM_UI.ViewModel;
+using SSMM_UI.Views;
+using System;
 
 namespace SSMM_UI;
 
@@ -28,6 +30,7 @@ public partial class App : Application
         {
             var mainWindow = new MainWindow();
 
+
             Services = new ServiceCollection()
                 .AddSingleton<IFilePickerService>(_ => new FilePickerService(mainWindow))
                 .AddSingleton<VideoPlayerService>()
@@ -37,12 +40,16 @@ public partial class App : Application
                 .AddSingleton<MetaDataService>()
                 .AddSingleton<StateService>()
                 .AddSingleton<ILogService, LogService>()
+                .AddSingleton<LeftSideBarViewModel>()
                 .BuildServiceProvider();
 
-            // Hämta video view från MainWindow och registrera
-            if (mainWindow.FindControl<MyVideoView>("RtmpIncoming") is { } videoView)
+
+            if (mainWindow.FindControl<LeftSideBarView>("LeftSideBar") is { } leftSideBar)
             {
-                Services.GetRequiredService<VideoPlayerService>().RegisterVideoView(videoView);
+                if (leftSideBar.FindControl<MyVideoView>("RtmpIncoming") is { } videoView)
+                {
+                    Services.GetRequiredService<VideoPlayerService>().RegisterVideoView(videoView);
+                }
             }
 
             mainWindow.DataContext = Services.GetRequiredService<MainWindowViewModel>();

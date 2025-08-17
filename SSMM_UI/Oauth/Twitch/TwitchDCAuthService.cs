@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SSMM_UI.Services;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -6,7 +7,6 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
-using SSMM_UI.Services;
 
 namespace SSMM_UI.Oauth.Twitch;
 
@@ -16,7 +16,6 @@ public class TwitchDCAuthService
     private const string DcfApiAdress = "https://id.twitch.tv/oauth2/device";
     private const string TokenAdress = "https://id.twitch.tv/oauth2/token";
     public readonly string _clientId = "y1cd8maguk5ob1m3lwvhdtupbj6pm3";
-    private readonly string[] _scopes;
     private const string TokenFilePath = "twitch_tokenDCF.json";
     private const string ApiBaseUrl = "https://api.twitch.tv/helix";
     public TwitchTokenTokenResponse? AuthResult;
@@ -40,7 +39,7 @@ public class TwitchDCAuthService
         var content = new FormUrlEncodedContent(new[]
         {
             new KeyValuePair<string, string>("client_id", _clientId),
-            new KeyValuePair<string, string>("scope", string.Join(" ", _scopes))
+            new KeyValuePair<string, string>("scope", string.Join(" ", scopes))
         });
 
         request.Content = content;

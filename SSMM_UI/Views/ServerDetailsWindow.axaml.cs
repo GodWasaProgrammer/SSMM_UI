@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using SSMM_UI.Dialogs;
+using SSMM_UI.ViewModel;
 
 namespace SSMM_UI
 {
@@ -41,7 +42,8 @@ namespace SSMM_UI
             {
                 if (Owner?.DataContext is MainWindowViewModel mainVm)
                 {
-                    mainVm.SelectedServicesToStream.Add(new SelectedService
+
+                    mainVm.LeftSideBarViewModel.SelectedServicesToStream.Add(new SelectedService
                     {
                         ServiceGroup = ServiceGroup,
                         SelectedServer = SelectedServer,

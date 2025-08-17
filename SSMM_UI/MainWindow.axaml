@@ -1,11 +1,8 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vlc="clr-namespace:LibVLCSharp.Avalonia;assembly=LibVLCSharp.Avalonia"
-        xmlns:local="clr-namespace:SSMM_UI"
         x:Class="SSMM_UI.MainWindow"
-		x:Name="Root"
-		xmlns:ia="using:Avalonia.Xaml.Interactivity"
-		xmlns:ic="using:Avalonia.Xaml.Interactions.Core"
+		xmlns:local="clr-namespace:SSMM_UI.ViewModel" 
+		xmlns:Views="clr-namespace:SSMM_UI.Views"
         x:DataType="local:MainWindowViewModel"
         Title="SSMM_UI" Width="1920" Height="1080"
         Background="{DynamicResource BackgroundColor}">
@@ -15,80 +12,9 @@
 			<ColumnDefinition Width="250"/>
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
-
-		<!-- Left Sidebar -->
-		<Border Grid.Column="0" Background="{DynamicResource CardColor}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0 0 1 0">
-			<ScrollViewer>
-				<StackPanel Margin="15">
-
-					<!-- Video Preview -->
-					<Border Classes="card">
-						<local:MyVideoView x:Name="RtmpIncoming" Width="220" Height="124" IsVisible="{Binding IsReceivingStream}"/>
-					</Border>
-
-					<!-- Services Section -->
-					<Border Classes="card">
-						<StackPanel>
-							<TextBlock Text="STREAM SERVICES" Classes="secondary" Margin="0 0 0 5"/>
-							<ListBox ItemsSource="{Binding RtmpServiceGroups}"
-									 SelectedItem="{Binding SelectedRtmpService, Mode=TwoWay}"
-									 Height="250" Width="220"
-									 Background="Transparent"
-									 BorderBrush="{DynamicResource BorderColor}">
-								<ListBox.ItemTemplate>
-									<DataTemplate x:DataType="local:RtmpServiceGroup">
-										<Button Command="{Binding DataContext.AddServiceCommand, ElementName=Root}"
-												CommandParameter="{Binding}"
-												Classes="listItemButton">
-											<TextBlock Text="{Binding ServiceName}" Padding="5 3" FontSize="14"/>
-										</Button>
-									</DataTemplate>
-								</ListBox.ItemTemplate>
-							</ListBox>
-						</StackPanel>
-					</Border>
-					<!-- Login Section -->
-					<Border Classes="card">
-						<StackPanel>
-							<TextBlock Text="Logins" HorizontalAlignment="Center" Classes="secondary" Margin="0 0 0 5"/>
-							<Button Content="Youtube" Classes="primary" HorizontalAlignment="Center"
-                                    Command="{Binding LoginWithGoogleCommand}"/>
-							<TextBlock Text="{Binding YoutubeLoginStatus}" Classes="secondary" Margin="0 10 0 0"/>
-							<Button Content="Kick" Classes="primary" HorizontalAlignment="Center"
-                                    Command="{Binding LoginWithKickCommand}"/>
-							<TextBlock Text="{Binding KickLoginStatus}" Classes="secondary" Margin="0 10 0 0"/>
-							<Button Content="Twitch" Classes="primary" HorizontalAlignment="Center"
-                                    Command="{Binding LoginWithTwitchCommand}"/>
-							<TextBlock Text="{Binding TwitchLoginStatus}" Classes="secondary" Margin="0 10 0 0"/>
-						</StackPanel>
-					</Border>
-
-					<!-- Selected Services Section -->
-					<Border Classes="card">
-						<StackPanel>
-							<TextBlock Text="SELECTED SERVICES" Classes="secondary" Margin="0 0 0 5"/>
-							<Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" CornerRadius="4" Margin="0 0 0 5" Padding="1">
-								<ListBox SelectedItem="{Binding SelectedService, Mode=TwoWay}" ItemsSource="{Binding SelectedServicesToStream}" Height="250" Background="Transparent" BorderThickness="0" Padding="5">
-									<ListBox.ItemTemplate>
-										<DataTemplate>
-											<StackPanel Margin="0 5">
-												
-													<TextBlock Text="{Binding DisplayName}" />
-												
-											</StackPanel>
-										</DataTemplate>
-									</ListBox.ItemTemplate>
-								</ListBox>
-							</Border>
-						</StackPanel>
-					</Border>
-
-					<Button Content="Remove Selected" Width="180" HorizontalAlignment="Center" Classes="danger" Margin="0 5 0 0"
-                            Command="{Binding RemoveSelectedServiceCommand}"/>
-				</StackPanel>
-			</ScrollViewer>
-		</Border>
-
+		<Grid>
+			<Views:LeftSideBarView x:Name="LeftSideBar" DataContext="{Binding LeftSideBarViewModel}"/>
+		</Grid>
 		<!-- Main Content Area -->
 		<TabControl Grid.Column="1" Background="Transparent" BorderThickness="0">
 			<TabItem Header="Stream">
@@ -103,7 +29,7 @@
 									<Button Content="Stop Streams" Classes="danger" Margin="0 0 15 0"
                                             Command="{Binding StopStreamsCommand}" IsEnabled="{Binding CanStopStream}"/>
 									<Button Content="Start Receiving" Classes="danger" Margin="0 0 15 0"
-                                            Command="{Binding ToggleReceivingStreamCommand}"/>
+                                            Command="{Binding LeftSideBarViewModel.ToggleReceivingStreamCommand}"/>
 								</WrapPanel>
 
 								<StackPanel Margin="0 10 0 0">
