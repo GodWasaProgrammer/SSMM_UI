@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="400"
+			 xmlns:local="clr-namespace:SSMM_UI.ViewModel"
+			 x:DataType="local:SettingsViewModel"
+             x:Class="SSMM_UI.SettingsDialogView">
+    <Border Classes="card" Margin="20">
+        <StackPanel Spacing="15">
+            <!-- Header -->
+            <TextBlock Text="Settings" FontSize="16" FontWeight="Bold" 
+                       Foreground="{DynamicResource PrimaryTextColor}"/>
+            
+            <!-- Settings Options -->
+            <CheckBox IsChecked="{Binding SaveTokens}" Content="Save Tokens (Turn off if you dont want to have autologin )" x:Name="tokens"
+                      Foreground="{DynamicResource PrimaryTextColor}"/>
+            
+            <CheckBox IsChecked="{Binding SaveServices}" Content="Save Services ( Turn off if you dont want streamkeys to be saved )" x:Name="services"
+                      Foreground="{DynamicResource PrimaryTextColor}"/>
+            
+            <CheckBox IsChecked="{Binding SaveMetaData}" Content="Save MetaData ( Turn this off if you dont want Metadata saved )"
+                      Foreground="{DynamicResource PrimaryTextColor}"/>
+			<CheckBox IsChecked="{Binding ServerPolling}" Content="Poll Server (turn this off to save CPU power )" Foreground="{DynamicResource PrimaryTextColor}"/>
+			<CheckBox IsChecked="{Binding StreamFeedPolling}" Content="Poll Stream (turn this off to save CPU power )" Foreground="{DynamicResource PrimaryTextColor}"/>
+            <!-- Action Buttons -->
+            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                <Button Command="{Binding SaveSettingsCommand}" Content="Save" Classes="success" Width="100"/>
+                <Button Command="{Binding CancelCommand}" Content="Cancel" Classes="danger" Width="100"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

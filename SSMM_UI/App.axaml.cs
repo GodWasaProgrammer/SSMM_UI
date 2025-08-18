@@ -6,6 +6,7 @@ using LibVLCSharp.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using SSMM_UI.MetaData;
 using SSMM_UI.Services;
+using SSMM_UI.Settings;
 using SSMM_UI.ViewModel;
 using SSMM_UI.Views;
 using System;
@@ -39,6 +40,7 @@ public partial class App : Application
                 .AddSingleton<CentralAuthService>()
                 .AddSingleton<MetaDataService>()
                 .AddSingleton<StateService>()
+                .AddSingleton<UserSettings>()
                 .AddSingleton<ILogService, LogService>()
                 .AddSingleton<LeftSideBarViewModel>()
                 .BuildServiceProvider();

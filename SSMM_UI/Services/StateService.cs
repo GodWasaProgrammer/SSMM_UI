@@ -5,6 +5,7 @@ using System.IO;
 using System.Text.Json;
 using Google.Apis.YouTube.v3.Data;
 using Microsoft.Extensions.Logging;
+using SSMM_UI.Settings;
 
 namespace SSMM_UI.Services;
 
@@ -13,24 +14,51 @@ public class StateService
     private const string SerializedServices = "Serialized_Services.json";
     private const string _obsServices = "services.json";
     private const string YoutubeCategories = "youtube_categories.json";
+    private const string _userSettings = "UserSettings.json";
 
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; private set; } = [];
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
     public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; private set; } = [];
+    public UserSettings UserSettingsObj { get; private set; } = new UserSettings();
 
     private ILogService _logger;
     public StateService(ILogService logger)
     {
         _logger = logger;
         DeSerializeServices();
+        DeserializeSettings();
         LoadRtmpServersFromServicesJson(_obsServices);
         DeSerializeYoutubeCategories();
+    }
+
+    public void SettingsChanged(UserSettings settings)
+    {
+        UserSettingsObj = settings;
     }
 
     public void SerializeServices()
     {
         var json = JsonSerializer.Serialize(SelectedServicesToStream, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(SerializedServices, json);
+    }
+
+    public void SerializeSettings()
+    {
+        var json = JsonSerializer.Serialize(UserSettingsObj, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(_userSettings, json);
+    }
+
+    private void DeserializeSettings()
+    {
+        if(File.Exists(_userSettings))
+        {
+            var json = File.ReadAllText(_userSettings);
+            var deserialized = JsonSerializer.Deserialize<UserSettings>(json);
+            if(deserialized != null)
+            {
+                UserSettingsObj = deserialized;
+            }
+        }
     }
 
     private void DeSerializeServices()

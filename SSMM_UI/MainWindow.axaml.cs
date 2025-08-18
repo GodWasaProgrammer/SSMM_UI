@@ -18,6 +18,7 @@ public partial class MainWindow : Window
         Closed += (_, _) =>
         {
             App.Services?.GetRequiredService<StateService>().SerializeServices();
+            App.Services?.GetRequiredService<StateService>().SerializeSettings();
         };
     }
 

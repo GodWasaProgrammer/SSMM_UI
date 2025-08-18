@@ -5,6 +5,7 @@ using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
 using SSMM_UI.Services;
+using SSMM_UI.Settings;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace SSMM_UI.ViewModel;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    public MainWindowViewModel(IFilePickerService filePickerService, CentralAuthService authservice, MetaDataService MdService, ILogService logService, StateService stateService, LeftSideBarViewModel leftSideBarViewModel)
+    public MainWindowViewModel(IFilePickerService filePickerService, CentralAuthService authservice, MetaDataService MdService, ILogService logService, StateService stateService, LeftSideBarViewModel leftSideBarViewModel, UserSettings settings, IDialogService dialogService)
     {
         // Init commands
 
@@ -25,12 +26,19 @@ public partial class MainWindowViewModel : ObservableObject
         // ==== testing shit ====
         TestYtHacksCommand = new RelayCommand(OnTestYtHacks);
 
+        //Settings 
+        _settings = settings;
+        _dialogService = dialogService;
+        OpenSetting = new AsyncRelayCommand(OpenSettings);
+        
         // ==== Metadata Controls ====
         UploadThumbnailCommand = new AsyncRelayCommand(UploadThumbnail);
         UpdateMetadataCommand = new RelayCommand(OnUpdateMetadata);
 
         // === start children ====
         LeftSideBarViewModel = leftSideBarViewModel;
+
+
 
         // services
         MetaDataService = MdService;
@@ -42,9 +50,15 @@ public partial class MainWindowViewModel : ObservableObject
         YoutubeVideoCategories = _stateService.YoutubeVideoCategories;
         LogMessages = _logService.Messages;
         _logService.OnLogAdded = ScrollToEnd;
+        
+        // state
+        _settings = _stateService.UserSettingsObj;
+
         // ==== Fire and forget awaits ====
         _ = Initialize();
     }
+
+    private UserSettings _settings = new();
 
     // ==== Child Models ====
     public LeftSideBarViewModel LeftSideBarViewModel { get; }
@@ -62,6 +76,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly IFilePickerService _filePickerService;
     private YouTubeService YTService;
     private readonly ILogService _logService;
+    private readonly IDialogService _dialogService;
 
     // ==== RTMP Server and internal RTMP feed from OBS Status ====
     [ObservableProperty] private string serverStatusText = "Stream status: ❌ Not Receiving";
@@ -91,6 +106,15 @@ public partial class MainWindowViewModel : ObservableObject
     // == Output Controls ==
     public ICommand StartStreamCommand { get; }
     public ICommand StopStreamsCommand { get; }
+
+    public ICommand OpenSetting {  get; }
+
+    private async Task OpenSettings()
+    {
+        var newSettings = await _dialogService.ShowSettingsDialogAsync(_settings);
+        _settings = newSettings;
+        _stateService.SettingsChanged(_settings);
+    }
 
     // == Internal stream inspection toggle ==
     public ICommand TestYtHacksCommand { get; }
