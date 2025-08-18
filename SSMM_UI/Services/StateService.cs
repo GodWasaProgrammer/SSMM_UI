@@ -11,6 +11,8 @@ namespace SSMM_UI.Services;
 
 public class StateService
 {
+    //TODO: Centralize auth token serialization to here
+
     private const string SerializedServices = "Serialized_Services.json";
     private const string _obsServices = "services.json";
     private const string YoutubeCategories = "youtube_categories.json";

@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Google.Apis.YouTube.v3;
 using SSMM_UI.Services;
+using SSMM_UI.Settings;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -33,6 +34,7 @@ namespace SSMM_UI.ViewModel
             _stateService = stateService;
             RtmpServiceGroups = _stateService.RtmpServiceGroups;
             SelectedServicesToStream = _stateService.SelectedServicesToStream;
+            _userSettings = _stateService.UserSettingsObj;
 
             _ = Initialize();
         }
@@ -40,7 +42,10 @@ namespace SSMM_UI.ViewModel
 
         public async Task Initialize()
         {
-            await AutoLoginIfTokenized();
+            if (_userSettings.SaveTokens)
+            {
+                await AutoLoginIfTokenized();
+            }
         }
 
         public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
@@ -76,6 +81,9 @@ namespace SSMM_UI.ViewModel
         // == bool toggler for the preview window for stream ==
         [ObservableProperty] private bool isReceivingStream;
         [ObservableProperty] private RtmpServiceGroup selectedRtmpService;
+
+        // Settings
+        private UserSettings _userSettings;
 
         // ==== Service Selections ====
         [ObservableProperty]

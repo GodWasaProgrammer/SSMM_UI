@@ -290,6 +290,7 @@ public class StreamService : IDisposable
 
     public void Dispose() => _cts.Cancel();
 
+    // TODO: to reflect user settings this needs to be called individually
     public void StartPolling()
     {
         _ = StartStreamStatusPolling();

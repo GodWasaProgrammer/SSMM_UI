@@ -30,7 +30,7 @@ public partial class MainWindowViewModel : ObservableObject
         _settings = settings;
         _dialogService = dialogService;
         OpenSetting = new AsyncRelayCommand(OpenSettings);
-        
+
         // ==== Metadata Controls ====
         UploadThumbnailCommand = new AsyncRelayCommand(UploadThumbnail);
         UpdateMetadataCommand = new RelayCommand(OnUpdateMetadata);
@@ -50,7 +50,7 @@ public partial class MainWindowViewModel : ObservableObject
         YoutubeVideoCategories = _stateService.YoutubeVideoCategories;
         LogMessages = _logService.Messages;
         _logService.OnLogAdded = ScrollToEnd;
-        
+
         // state
         _settings = _stateService.UserSettingsObj;
 
@@ -107,7 +107,7 @@ public partial class MainWindowViewModel : ObservableObject
     public ICommand StartStreamCommand { get; }
     public ICommand StopStreamsCommand { get; }
 
-    public ICommand OpenSetting {  get; }
+    public ICommand OpenSetting { get; }
 
     private async Task OpenSettings()
     {
@@ -137,10 +137,17 @@ public partial class MainWindowViewModel : ObservableObject
 
     private async Task Initialize()
     {
-        SubscribeToEvents();
-        if (_streamService != null)
-            _streamService.StartPolling();
-
+        if (_settings.PollStream && _settings.PollServer)
+        {
+            SubscribeToEvents();
+            if (_streamService != null)
+                _streamService.StartPolling();
+        }
+        else
+        {
+            ServerStatusText = "Polling is turned off for RTMP Server";
+            StreamStatusText = "Polling is turned off for incoming Stream";
+        }
     }
 
     private void SubscribeToEvents()
