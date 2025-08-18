@@ -178,13 +178,54 @@ public class StreamService : IDisposable
     }
     public async Task<(string rtmpUrl, string? streamkey)> CreateKickBroadcastAsync(StreamMetadata metadata)
     {
-        //TODO: implement 
-        return ("", "");
+        //TODO: There needs to be automation with for example puppeteer here to control the stream name, title etc as the Kick API does not support setting this programmatically.
+        string kickRtmpUrl = "rtmp://live.kick.com/kick";
+        return (kickRtmpUrl, "");
     }
-    public async Task<(string rtmpUrl, string? streamkey)> CreateTrovoBroadcastAsync(StreamMetadata metadata)
+    public async Task<(string rtmpUrl, string? streamKey)> CreateTrovoBroadcastAsync(StreamMetadata metadata)
     {
-        // TODO: implement
-        return ("", "");
+        try
+        {
+            using var httpClient = new HttpClient();
+
+            // 1. Sätt headers för autentisering
+            httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+            //httpClient.DefaultRequestHeaders.Add("Client-ID", _trovoClientId);
+            //httpClient.DefaultRequestHeaders.Add("Authorization", $"OAuth {_trovoAccessToken}");
+
+            // 2. Skapa PATCH-data (Trovo förväntar sig JSON)
+            var patchData = new
+            {
+                title = metadata.Title,
+              //  category_id = metadata.CategoryId, // Kräver Trovo-specifikt kategori-ID
+                language = "en",                   // Exempel: "sv" för svenska
+                is_live = true                     // Markera som live-sändning
+            };
+
+            var jsonContent = JsonSerializer.Serialize(patchData);
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+            // 3. Skicka PATCH-förfrågan
+            var response = await httpClient.PatchAsync(
+                "https://open-api.trovo.live/openplatform/channels/update",
+                content
+            );
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Trovo API error: {response.StatusCode} - {errorContent}");
+            }
+
+            // 4. Returnera RTMP-uppgifter
+            const string trovoRtmpUrl = "rtmp://live.trovo.live/live/";
+            return (trovoRtmpUrl, "_trovoStreamKey"); // Se anteckning nedan om streamKey
+        }
+        catch (Exception ex)
+        {
+            _logger.Log($"Failed to create Trovo broadcast: {ex.Message}");
+            throw;
+        }
     }
     public async Task<(string rtmpUrl, string? streamkey)> CreateFacebookBroadcastAsync(StreamMetadata metadata)
     {

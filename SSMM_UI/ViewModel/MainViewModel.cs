@@ -19,7 +19,7 @@ public partial class MainWindowViewModel : ObservableObject
         // Init commands
 
         // ==== OutPut Streams ====
-        //StartStreamCommand = new RelayCommand(StartStream);
+        StartStreamCommand = new RelayCommand(StartStream);
         StopStreamsCommand = new RelayCommand(OnStopStreams);
 
         // ==== testing shit ====
@@ -163,24 +163,24 @@ public partial class MainWindowViewModel : ObservableObject
         _logService.Log("Tested YouTube Hacks.");
     }
 
-    //private void StartStream()
-    //{
-    //    CanStartStream = false;
-    //    CanStopStream = true;
-    //    if (_streamService != null)
-    //    {
-    //        try
-    //        {
-    //            _streamService.CreateYTService(YTService);
-    //            _streamService.StartStream(CurrentMetadata, SelectedServicesToStream);
-    //            _logService.Log("Started streaming...");
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            _logService.Log(ex.ToString());
-    //        }
-    //    }
-    //}
+    private void StartStream()
+    {
+        CanStartStream = false;
+        CanStopStream = true;
+        if (_streamService != null)
+        {
+            try
+            {
+                _streamService.CreateYTService(YTService);
+                _streamService.StartStream(CurrentMetadata, LeftSideBarViewModel.SelectedServicesToStream);
+                _logService.Log("Started streaming...");
+            }
+            catch (Exception ex)
+            {
+                _logService.Log(ex.ToString());
+            }
+        }
+    }
 
     private async Task UploadThumbnail()
     {

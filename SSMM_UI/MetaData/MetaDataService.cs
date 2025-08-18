@@ -29,10 +29,16 @@ public class MetaDataService
 
     public IReadOnlyList<VideoCategory> YouTubeCategories => _ytCategories;
     private ILogService _logger;
-    public MetaDataService(ILogService logger)
+    private CentralAuthService _AuthService;
+    public MetaDataService(ILogService logger, CentralAuthService AuthService)
     {
         _ytCategories = [];
         _logger = logger;
+    }
+
+    public void Initialize(string accessToken, string clientId)
+    {
+        TwitchCategoryFetch(accessToken, clientId);
     }
 
     public async Task YTCategoryFetch()

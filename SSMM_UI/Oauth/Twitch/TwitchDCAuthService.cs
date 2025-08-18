@@ -32,15 +32,32 @@ public class TwitchDCAuthService
         _httpClient = new HttpClient();
     }
 
+    public string GetClientId()
+    {
+        return _clientId;
+    }
+
+    public string GetAccessToken()
+    {
+        if (AuthResult == null)
+        {
+            return string.Empty;
+        }
+        else
+        {
+            return AuthResult.AccessToken;
+        }
+    }
+
     public async Task<TwitchDCResponse> StartDeviceCodeFlowAsync()
     {
         var request = new HttpRequestMessage(HttpMethod.Post, DcfApiAdress);
 
         var content = new FormUrlEncodedContent(new[]
         {
-            new KeyValuePair<string, string>("client_id", _clientId),
-            new KeyValuePair<string, string>("scope", string.Join(" ", scopes))
-        });
+                    new KeyValuePair<string, string>("client_id", _clientId),
+                    new KeyValuePair<string, string>("scope", string.Join(" ", scopes))
+                });
 
         request.Content = content;
 

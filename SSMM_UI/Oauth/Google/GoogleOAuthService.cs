@@ -44,6 +44,23 @@ public class GoogleOAuthService
         _logger = logger;
     }
 
+    public string GetClientId()
+    {
+        return ClientID;
+    }
+
+    public string GetAccessToken()
+    {
+        if(_oauthResult != null)
+        {
+            return _oauthResult.AccessToken;
+        }
+        else
+        {
+            return "";
+        }
+    }
+
     public async Task<GoogleOauthResult> LoginAutoIfTokenized()
     {
         try

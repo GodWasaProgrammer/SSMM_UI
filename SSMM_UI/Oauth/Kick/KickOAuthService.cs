@@ -21,6 +21,26 @@ public class KickOAuthService
     private const string ApiBaseUrl = "https://api.kick.com";
     private const string RedirectUri = "http://localhost:12345/callback/";
     private const string TokenFilePath = "kick_token.json";
+    private const string ClientID = "01K1N4MW57X4G7Q50G7ZS6CA9Y";
+    private KickAuthResult _kickAuthResult;
+
+    public string GetClientId()
+    {
+        return ClientID;
+    }
+
+    public string GetAccessToken()
+    {
+        if(_kickAuthResult != null)
+        {
+        return _kickAuthResult.AccessToken;
+        }
+        else
+        {
+            return string.Empty;
+        }
+    }
+
 
     // Klass för scope-hantering
     public static class Scopes
@@ -40,6 +60,7 @@ public class KickOAuthService
     private string? _currentState;
 
     private ILogService _logger;
+
     public KickOAuthService(ILogService logger)
     {
         _logger = logger;
@@ -58,7 +79,7 @@ public class KickOAuthService
             string scope = Scopes.Combine(requestedScopes);
             string authUrl = $"{OAuthBaseUrl}/oauth/authorize?" +
                            $"response_type=code&" +
-                           $"client_id={Uri.EscapeDataString(Environment.GetEnvironmentVariable("KickClientID") ?? throw new Exception("ClientID not set"))}&" +
+                           $"client_id={Uri.EscapeDataString(ClientID)}&" +
                            $"redirect_uri={Uri.EscapeDataString(RedirectUri)}&" +
                            $"scope={Uri.EscapeDataString(scope)}&" +
                            $"code_challenge={codeChallenge}&" +
@@ -86,6 +107,7 @@ public class KickOAuthService
             // 7. Spara token
             SaveToken(tokenResult);
 
+            _kickAuthResult = tokenResult;
             return tokenResult;
         }
         finally
@@ -98,7 +120,6 @@ public class KickOAuthService
 
     private static async Task<KickAuthResult> RefreshTokenAsync(string refreshToken)
     {
-        string clientId = Environment.GetEnvironmentVariable("KickClientID")!;
         string clientSecret = Environment.GetEnvironmentVariable("KickClientSecret")!;
 
         using var httpClient = new HttpClient();
@@ -106,8 +127,8 @@ public class KickOAuthService
         [
         new KeyValuePair<string, string>("grant_type", "refresh_token"),
         new KeyValuePair<string, string>("refresh_token", refreshToken),
-        new KeyValuePair<string, string>("client_id", clientId),
-        new KeyValuePair<string, string>("client_secret", clientSecret),
+        new KeyValuePair<string, string>("client_id", ClientID),
+        //new KeyValuePair<string, string>("client_secret", clientSecret),
     ]);
 
         var response = await httpClient.PostAsync($"{OAuthBaseUrl}/oauth/token", content);
@@ -152,6 +173,7 @@ public class KickOAuthService
                 // Token har gått ut, försök förnya
                 await RefreshTokenAsync(token.RefreshToken);
                 token.Username = await GetUsernameAsync(token.AccessToken);
+                _kickAuthResult = token;
                 return token;
             }
 
@@ -246,8 +268,7 @@ public class KickOAuthService
         if (_currentCodeVerifier != null)
         {
 
-            string clientId = Environment.GetEnvironmentVariable("KickClientID") ??
-                            throw new Exception("ClientID not set");
+            
             string clientSecret = Environment.GetEnvironmentVariable("KickClientSecret") ??
                                throw new Exception("ClientSecret not set");
 
@@ -257,7 +278,7 @@ public class KickOAuthService
                 new KeyValuePair<string, string>("grant_type", "authorization_code"),
             new KeyValuePair<string, string>("code", authCode),
             new KeyValuePair<string, string>("redirect_uri", RedirectUri),
-            new KeyValuePair<string, string>("client_id", clientId),
+            new KeyValuePair<string, string>("client_id", ClientID),
             new KeyValuePair<string, string>("client_secret", clientSecret),
             new KeyValuePair<string, string>("code_verifier", _currentCodeVerifier)
             ]);

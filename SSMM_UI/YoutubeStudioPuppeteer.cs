@@ -4,13 +4,6 @@ using System.Threading.Tasks;
 
 namespace SSMM_UI;
 
-public record StudioHeadersResult(
-    Dictionary<string, string> Headers,
-    string InnerTubeKey,
-    string XsrfToken
-);
-
-
 public static class YoutubeStudioPuppeteer
 {
 
