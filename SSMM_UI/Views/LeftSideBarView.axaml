@@ -7,6 +7,7 @@
 			xmlns:local="clr-namespace:SSMM_UI"
              x:Class="SSMM_UI.Views.LeftSideBarView"
 			 xmlns:vm="clr-namespace:SSMM_UI.ViewModel"
+			 xmlns:rtmp="clr-namespace:SSMM_UI.RTMP"
 			 x:DataType="vm:LeftSideBarViewModel"
 			 x:Name="Root">
 
@@ -30,7 +31,7 @@
 								 Background="Transparent"
 								 BorderBrush="{DynamicResource BorderColor}">
 							<ListBox.ItemTemplate>
-								<DataTemplate x:DataType="local:RtmpServiceGroup">
+								<DataTemplate x:DataType="rtmp:RtmpServiceGroup">
 									<Button Command="{Binding DataContext.AddServiceCommand, ElementName=Root}"
 											CommandParameter="{Binding}"
 											Classes="listItemButton">

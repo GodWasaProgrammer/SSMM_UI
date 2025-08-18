@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace SSMM_UI;
+namespace SSMM_UI.RTMP;
 
 // TODO: Fix cert or just run HTTP
 public class RTMPServer

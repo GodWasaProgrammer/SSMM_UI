@@ -1,4 +1,4 @@
-﻿namespace SSMM_UI;
+﻿namespace SSMM_UI.RTMP;
 
 public class RtmpServerInfo
 {

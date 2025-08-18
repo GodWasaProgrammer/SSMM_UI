@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SSMM_UI"
+		xmlns:rtmp="clr-namespace:SSMM_UI.RTMP" 
         mc:Ignorable="d"
         x:Class="SSMM_UI.ServerDetailsWindow"
         x:DataType="local:ServerDetailsWindow"
@@ -17,7 +18,7 @@
                  SelectedItem="{Binding SelectedServer, Mode=TwoWay}"
                  Margin="10" Height="300">
 			<ListBox.ItemTemplate>
-				<DataTemplate x:DataType="local:RtmpServerInfo">
+				<DataTemplate x:DataType="rtmp:RtmpServerInfo">
 					<TextBlock Text="{Binding ServerName}"/>
 				</DataTemplate>
 			</ListBox.ItemTemplate>

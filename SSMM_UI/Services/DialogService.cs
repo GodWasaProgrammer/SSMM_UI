@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using SSMM_UI;
+using SSMM_UI.RTMP;
 using SSMM_UI.Settings;
 using SSMM_UI.ViewModel;
 using System;
