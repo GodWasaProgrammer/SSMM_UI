@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
 using Microsoft.Extensions.DependencyInjection;
+using SSMM_UI.Puppeteering;
 using SSMM_UI.Services;
 using System;
 using System.IO;

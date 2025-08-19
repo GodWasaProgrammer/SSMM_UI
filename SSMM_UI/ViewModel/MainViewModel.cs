@@ -4,10 +4,12 @@ using CommunityToolkit.Mvvm.Input;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
+using SSMM_UI.Puppeteering;
 using SSMM_UI.Services;
 using SSMM_UI.Settings;
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -24,7 +26,7 @@ public partial class MainWindowViewModel : ObservableObject
         StopStreamsCommand = new RelayCommand(OnStopStreams);
 
         // ==== testing shit ====
-        TestYtHacksCommand = new RelayCommand(OnTestYtHacks);
+        TestYtHacksCommand = new AsyncRelayCommand(OnTestYtHacks);
 
         //Settings 
         _settings = settings;
@@ -189,9 +191,23 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
-    private void OnTestYtHacks()
+    public async Task OnTestYtHacks()
     {
-        _logService.Log("Tested YouTube Hacks.");
+        //YT Puppeteeer
+        //var videoId = "rJZZqhvgQ1A";
+        //var userDataDirPath = Path.Combine(
+        //Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        //"Google",
+        //"Chrome",
+        //"User Data"
+        //);
+        //var chromeExePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+        //var defaultProfilePath = Path.Combine(userDataDirPath, "Default");
+
+        //await YoutubeStudioPuppeteer.ChangeGameTitle(videoId, defaultProfilePath, chromeExePath);
+
+        var puppy = new KickPuppeteer();
+        await puppy.SetGameTitleKick("Hearts Of Iron IV");
     }
 
     private void StartStream()

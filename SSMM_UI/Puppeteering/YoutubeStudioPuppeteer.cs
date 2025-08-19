@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace SSMM_UI;
+namespace SSMM_UI.Puppeteering;
 
 public static class YoutubeStudioPuppeteer
 {
 
     public static async Task ChangeGameTitle(
         string videoId,
-        string userDataDir = "",
+        string userDataDir = "C:\\Users\\vemha\\AppData\\Local\\Google\\Chrome\\User Data",
         string executablePath = "",
         int timeoutMs = 8000)
     {
@@ -18,7 +18,8 @@ public static class YoutubeStudioPuppeteer
             "--remote-allow-origins=*",
             "--disable-blink-features=AutomationControlled",
             "--no-first-run",
-            "--no-default-browser-check"
+            "--no-default-browser-check",
+            "--profile-directory=Default"
         };
         if (!string.IsNullOrEmpty(userDataDir))
             args.Add($"--user-data-dir={userDataDir}");
