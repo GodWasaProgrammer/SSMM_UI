@@ -247,18 +247,19 @@ namespace SSMM_UI.Puppeteering
                 //}
 
                 // Klicka på rätt item och kolla om det lyckades
-                var clickResult = await page.EvaluateFunctionAsync<bool>(@"(gameName) => {
-            const items = document.querySelectorAll('tp-yt-paper-item');
-            let clicked = false;
-            for (const item of items) {
-                if (item.innerText.trim().startsWith(gameName)) {
-                    item.click();
-                    clicked = true;
-                    break;
-                }
-            }
-            return clicked;
-        }", title);
+                var clickResult = await page.EvaluateFunctionAsync<bool>(@"(searchText) => {
+                    const items = document.querySelectorAll('tp-yt-paper-item.selectable-item');
+                    
+                    for (const item of items) {
+                        const text = item.innerText.trim();
+                        // Bättre matchning: ignorerar case och mellanslag
+                        if (text.toLowerCase().includes(searchText.toLowerCase())) {
+                            item.click();
+                            return true;
+                        }
+                    }
+                    return false;
+                }", title);
 
                 if (!clickResult)
                 {
