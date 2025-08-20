@@ -202,22 +202,53 @@ public class TwitchDCAuthService
     // TODO: try catch on bad results
     private async Task<string?> GetUsernameAsync(string accessToken)
     {
-        using var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        httpClient.DefaultRequestHeaders.Add("Client-Id", _clientId);
+        try
+        {
 
-        var response = await httpClient.GetAsync($"{ApiBaseUrl}/users");
-        var responseData = await response.Content.ReadAsStringAsync();
+            using var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            httpClient.DefaultRequestHeaders.Add("Client-Id", _clientId);
 
-        if (!response.IsSuccessStatusCode)
-            throw new Exception($"User info failed: {response.StatusCode}\n{responseData}");
+            var response = await httpClient.GetAsync($"{ApiBaseUrl}/users");
+            var responseData = await response.Content.ReadAsStringAsync();
 
-        var json = JsonDocument.Parse(responseData).RootElement;
-        var user = json.GetProperty("data")[0];
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"User info failed: {response.StatusCode}\n{responseData}");
 
-        return user.TryGetProperty("login", out var login)
-            ? login.GetString()
-            : user.GetProperty("display_name").GetString();
+            var json = JsonDocument.Parse(responseData).RootElement;
+            var user = json.GetProperty("data")[0];
+
+            return user.TryGetProperty("login", out var login)
+                ? login.GetString()
+                : user.GetProperty("display_name").GetString();
+        }
+        catch (Exception ex)
+        {
+            _logger.Log(ex.Message);
+        }
+        return null;
+    }
+
+    public async Task<string> FetchUserId()
+    {
+        if (AuthResult != null)
+        {
+            if (AuthResult.UserId != null)
+            {
+                return AuthResult.UserId;
+            }
+            if(AuthResult.UserId == null)
+            {
+                var userId = GetUserIdAsync(AuthResult.AccessToken);
+                AuthResult.UserId = userId.Result;
+                return AuthResult.UserId;
+            }
+        }
+        else
+        {
+            throw new Exception("AuthResult was null");
+        }
+        return "Failure";
     }
 
     private async Task<string> GetUserIdAsync(string accessToken)

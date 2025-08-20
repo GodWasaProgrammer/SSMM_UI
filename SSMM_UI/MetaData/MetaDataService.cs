@@ -1,10 +1,12 @@
 ﻿using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
-using PuppeteerSharp;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace SSMM_UI.MetaData;
@@ -14,9 +16,80 @@ public class MetaDataService
     private YouTubeService? _youTubeService;
     private List<VideoCategory> _ytCategories;
 
+    // redundant as we jsonize the list and load it in stateservice
     public List<VideoCategory> GetCategoriesYoutube()
     {
         return _ytCategories;
+    }
+
+    public async Task SetTwitchTitleAndCategory(string? title = null, string? Category = null)
+    {
+        if (title == null && Category == null)
+        {
+            return;
+        }
+        // get necessary stuff
+        var Accesstoken = _AuthService.TwitchService.GetAccessToken();
+        var clientId = _AuthService.TwitchService.GetClientId();
+        var userId = _AuthService.TwitchService.FetchUserId();
+
+        using var client = new HttpClient();
+        var updateJson = new TwitchChannelUpdate();
+
+        // change title
+        if (title != null)
+        {
+            updateJson.Title = title;
+        }
+
+        string? gameId = null;
+        //change category
+        if (Category != null)
+        {
+            gameId = await GetGameIdTwitch(Category, Accesstoken, clientId);
+            updateJson.GameId = gameId;
+        }
+
+        var request = new HttpRequestMessage(HttpMethod.Patch,
+            $"https://api.twitch.tv/helix/channels?broadcaster_id={userId.Result}");
+
+        // build headers
+        request.Headers.Add("Authorization", $"Bearer {Accesstoken}");
+        request.Headers.Add("Client-Id", $"{clientId}");
+
+
+        request.Content = new StringContent(
+           JsonSerializer.Serialize(updateJson),
+           Encoding.UTF8,
+           "application/json"
+            );
+
+        var response = await client.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+    }
+
+    private async Task<string?> GetGameIdTwitch(string categoryName, string accessToken, string clientId)
+    {
+        using var client = new HttpClient();
+        var request = new HttpRequestMessage(HttpMethod.Get,
+            $"https://api.twitch.tv/helix/games?name={Uri.EscapeDataString(categoryName)}");
+
+        request.Headers.Add("Authorization", $"Bearer {accessToken}");
+        request.Headers.Add("Client-Id", $"{clientId}"); // Måste läggas till
+
+        var response = await client.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        var gamesData = JsonSerializer.Deserialize<JsonElement>(content);
+
+        if (gamesData.TryGetProperty("data", out var data) && data.GetArrayLength() > 0)
+        {
+            return data[0].GetProperty("id").GetString();
+        }
+
+        return null;
     }
 
     public void CreateYouTubeService(YouTubeService ytservice)
@@ -30,6 +103,7 @@ public class MetaDataService
     public MetaDataService(ILogService logger, CentralAuthService AuthService)
     {
         _ytCategories = [];
+        _AuthService = AuthService;
         _logger = logger;
     }
 
@@ -38,6 +112,7 @@ public class MetaDataService
         TwitchCategoryFetch(accessToken, clientId);
     }
 
+    // only for making json, is stored locally
     public async Task YTCategoryFetch()
     {
         var categoriesRequest = _youTubeService.VideoCategories.List("snippet");
@@ -129,60 +204,83 @@ public class MetaDataService
         }
     }
 
-    public static async Task ChangeGameTitle(string videoId, string userDataDir = "", string executablePath = "")
+    public async Task<bool> SetTitleAndCategoryYoutubeAsync(string videoId, string title, int categoryId)
     {
-        var args = new List<string>
+        try
         {
-            "--remote-allow-origins=*",
-            "--disable-blink-features=AutomationControlled",
-            "--no-first-run",
-            "--no-default-browser-check"
-        };
-        if (!string.IsNullOrEmpty(userDataDir))
-            args.Add($"--user-data-dir={userDataDir}");
+            // check that we have our instance of YTService
+            if (_youTubeService == null)
+            {
+                throw new Exception("YoutubeService was null!");
+            }
+            // check it exists
+            var videosListRequest = _youTubeService.Videos.List("snippet");
+            videosListRequest.Id = videoId;
 
-        var launchOptions = new LaunchOptions
+            var videosListResponse = await videosListRequest.ExecuteAsync();
+
+            if (videosListResponse.Items.Count == 0)
+            {
+                throw new Exception($"Video med ID {videoId} hittades inte");
+            }
+
+            var video = videosListResponse.Items[0];
+
+            // Uppdatera metadata
+            if (title != null)
+            {
+                video.Snippet.Title = title;
+            }
+
+            // TODO: Should we have a -1 param to avoid doing this if its not set?
+            video.Snippet.CategoryId = categoryId.ToString();
+
+            // Skapa update request
+            var videosUpdateRequest = _youTubeService.Videos.Update(video, "snippet");
+
+            // Utför uppdateringen
+            var updatedVideo = await videosUpdateRequest.ExecuteAsync();
+
+            Console.WriteLine($"Video uppdaterad: {updatedVideo.Snippet.Title} (Kategori: {categoryId})");
+            return true;
+        }
+        catch (Exception ex)
         {
-            Headless = false,
-            Args = [.. args],
-            ExecutablePath = executablePath
-        };
-
-        using var browser = await Puppeteer.LaunchAsync(launchOptions);
-        var page = await browser.NewPageAsync();
-
-        var tcs = new TaskCompletionSource<Dictionary<string, string>>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-
-        var studioUrl = $"https://studio.youtube.com/video/{videoId}/livestreaming";
-        await page.GoToAsync(studioUrl, WaitUntilNavigation.Networkidle0);
-
-        await page.WaitForSelectorAsync("#edit-button > ytcp-button-shape > button");
-
-        await page.ClickAsync("#edit-button > ytcp-button-shape > button");
-
-        await page.WaitForSelectorAsync("#category-container > ytcp-form-gaming > ytcp-form-autocomplete > ytcp-dropdown-trigger > div > div.left-container.style-scope.ytcp-dropdown-trigger > input");
-        await page.ClickAsync("#category-container > ytcp-form-gaming > ytcp-form-autocomplete > ytcp-dropdown-trigger > div > div.left-container.style-scope.ytcp-dropdown-trigger > input");
-        await page.TypeAsync("#category-container > ytcp-form-gaming > ytcp-form-autocomplete > ytcp-dropdown-trigger > div > div.left-container.style-scope.ytcp-dropdown-trigger > input", "Hearts of Iron IV");
-
-        await Task.Delay(2500);
-
-        // Leta upp rätt item genom text och klicka på det
-        await page.EvaluateFunctionAsync(@"(gameName) => {
-    const items = document.querySelectorAll('tp-yt-paper-item');
-    for (const item of items) {
-        if (item.innerText.trim().startsWith(gameName)) {
-            item.click();
-            break;
+            Console.WriteLine($"Fel vid uppdatering: {ex.Message}");
+            return false;
         }
     }
-}", "Hearts of Iron IV");
 
+    // TODO: Implement in Metadata UI
+    public async Task<List<TwitchCategory>> SearchTwitchCategories(string query, string accessToken, string clientId)
+    {
+        using var http = new HttpClient();
+        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        http.DefaultRequestHeaders.Add("Client-Id", clientId);
 
-        // Klicka på spara-knappen
-        await page.ClickAsync("#save-button > ytcp-button-shape > button");
+        var url = $"https://api.twitch.tv/helix/search/categories?query={Uri.EscapeDataString(query)}&first=20";
 
-        await Task.Delay(500000);
+        var response = await http.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(content);
+
+        var results = new List<TwitchCategory>();
+
+        if (doc.RootElement.TryGetProperty("data", out var dataArr))
+        {
+            foreach (var item in dataArr.EnumerateArray())
+            {
+                results.Add(new TwitchCategory
+                {
+                    Id = item.GetProperty("id").GetString(),
+                    Name = item.GetProperty("name").GetString(),
+                    BoxArtUrl = item.GetProperty("box_art_url").GetString()
+                });
+            }
+        }
+
+        return results;
     }
-
 }

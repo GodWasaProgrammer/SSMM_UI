@@ -2,6 +2,7 @@
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
+using SSMM_UI.Puppeteering;
 using SSMM_UI.RTMP;
 using System;
 using System.Collections.Generic;
@@ -31,11 +32,13 @@ public class StreamService : IDisposable
     private YouTubeService? _youTubeService;
     private CentralAuthService _authService;
     private ILogService _logger;
-    public StreamService(CentralAuthService authService, ILogService logger)
+    private MetaDataService MDService;
+    public StreamService(CentralAuthService authService, ILogService logger, MetaDataService MdService)
     {
         Server.StartSrv();
         _authService = authService;
         _logger = logger;
+        MDService = MdService;
     }
 
     public void CreateYTService(YouTubeService YTService)
@@ -123,12 +126,24 @@ public class StreamService : IDisposable
                     await thumbnailRequest.UploadAsync();
                 }
 
-                //await SetYouTubeCategoryAndGameAsync(insertedBroadcast.Id, "https://en.wikipedia.org/wiki/Hearts_of_Iron_IV", YTAccessToken);
+                int category;
+                if (metadata != null)
+                {
+                    if (metadata.YouTubeCategory != null)
+                    {
+                        if (metadata.YouTubeCategory.Id != null)
+                        {
+                            var success = int.TryParse(metadata.YouTubeCategory.Id, out category);
+                            if (success)
+                            {
+                                await MDService.SetTitleAndCategoryYoutubeAsync(insertedBroadcast.Id, null, category);
 
-                //await LoginCapture.RunAsync(); // Första gången
-                //await YouTubeStudioAutomation.RunAsync(insertedBroadcast.Id); // Efteråt
+                            }
+                        }
+                    }
+                }
 
-                //window.haxx = insertedBroadcast.Id;
+                await PuppetMaster.ChangeGameTitleYoutube(insertedBroadcast.Id, "Hearts Of Iron IV");
 
                 // 5. Returnera RTMP-url + streamkey
                 var ingestionInfo = insertedStream.Cdn.IngestionInfo;
@@ -164,8 +179,9 @@ public class StreamService : IDisposable
             //game_id = metadata.GameId // Valfritt: kräver att du hämtat game_id först
         }), Encoding.UTF8, "application/json");
 
-        var response = await httpClient.PatchAsync($"https://api.twitch.tv/helix/channels?broadcaster_id={userId}", content);
-        response.EnsureSuccessStatusCode();
+
+        // Title and game should be set after this
+        await MDService.SetTwitchTitleAndCategory(metadata.Title, metadata.TwitchCategory);
 
         // Twitch RTMP-info är statisk (RTMP URL och stream key)
         var streamKeyResponse = await httpClient.GetAsync($"https://api.twitch.tv/helix/streams/key?broadcaster_id={userId}");
@@ -198,7 +214,7 @@ public class StreamService : IDisposable
             var patchData = new
             {
                 title = metadata.Title,
-              //  category_id = metadata.CategoryId, // Kräver Trovo-specifikt kategori-ID
+                //  category_id = metadata.CategoryId, // Kräver Trovo-specifikt kategori-ID
                 language = "en",                   // Exempel: "sv" för svenska
                 is_live = true                     // Markera som live-sändning
             };

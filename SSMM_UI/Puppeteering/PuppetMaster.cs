@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SSMM_UI.Puppeteering
 {
-    internal class PuppetMaster
+    public static class PuppetMaster
     {
         private const string KickUrl = "https://dashboard.kick.com/stream";
         private const string StudioUrl = "https://studio.youtube.com/";
@@ -239,12 +239,12 @@ namespace SSMM_UI.Puppeteering
                 await Task.Delay(2500);
 
                 // Validera att dropdown-items finns
-                var items = await page.QuerySelectorAllAsync("tp-yt-paper-item");
-                if (items.Count() == 0)
-                {
-                    Console.WriteLine("INGA DROPDOWN-ALTERNATIV HITTADES");
-                    return false;
-                }
+                //var items = await page.QuerySelectorAllAsync("tp-yt-paper-item");
+                //if (items.Count() == 0)
+                //{
+                //    Console.WriteLine("INGA DROPDOWN-ALTERNATIV HITTADES");
+                //    return false;
+                //}
 
                 // Klicka på rätt item och kolla om det lyckades
                 var clickResult = await page.EvaluateFunctionAsync<bool>(@"(gameName) => {

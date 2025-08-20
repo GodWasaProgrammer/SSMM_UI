@@ -4,12 +4,10 @@ using CommunityToolkit.Mvvm.Input;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
-using SSMM_UI.Puppeteering;
 using SSMM_UI.Services;
 using SSMM_UI.Settings;
 using System;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -40,14 +38,12 @@ public partial class MainWindowViewModel : ObservableObject
         // === start children ====
         LeftSideBarViewModel = leftSideBarViewModel;
 
-
-
         // services
         MetaDataService = MdService;
         _centralAuthService = authservice;
         _filePickerService = filePickerService;
         _logService = logService;
-        _streamService = new(_centralAuthService, _logService);
+        _streamService = new(_centralAuthService, _logService, MetaDataService);
         _stateService = stateService;
         YoutubeVideoCategories = _stateService.YoutubeVideoCategories;
         LogMessages = _logService.Messages;
@@ -76,7 +72,6 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly StateService _stateService;
     private StreamService? _streamService;
     private readonly IFilePickerService _filePickerService;
-    private YouTubeService YTService;
     private readonly ILogService _logService;
     private readonly IDialogService _dialogService;
 
@@ -206,8 +201,11 @@ public partial class MainWindowViewModel : ObservableObject
 
         //await YoutubeStudioPuppeteer.ChangeGameTitle(videoId, defaultProfilePath, chromeExePath);
 
-        var puppy = new KickPuppeteer();
-        await puppy.SetGameTitleKick("Hearts Of Iron IV");
+        //var puppy = new KickPuppeteer();
+        //await puppy.SetGameTitleKick("Hearts Of Iron IV");
+        //await MetaDataService.SetTwitchTitleAndCategory("SSMM_RULES_THE_DAY", "Hearts Of Iron IV");
+        //MetaDataService.CreateYouTubeService(LeftSideBarViewModel.YTService);
+        //await MetaDataService.SetTitleAndCategoryYoutubeAsync("G5Ko1fLdMFM","SSMM_RULES_THE_DAY", 20);
     }
 
     private void StartStream()
@@ -218,7 +216,11 @@ public partial class MainWindowViewModel : ObservableObject
         {
             try
             {
-                _streamService.CreateYTService(YTService);
+                if (LeftSideBarViewModel.YTService != null)
+                {
+                    _streamService.CreateYTService(LeftSideBarViewModel.YTService);
+                    MetaDataService.CreateYouTubeService(LeftSideBarViewModel.YTService);
+                }
                 _streamService.StartStream(CurrentMetadata, LeftSideBarViewModel.SelectedServicesToStream);
                 _logService.Log("Started streaming...");
             }

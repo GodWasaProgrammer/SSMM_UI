@@ -83,6 +83,7 @@
 									<ComboBox x:Name="YoutubeCategoriesCombo"
 											  ItemsSource="{Binding YoutubeVideoCategories}"
 											  Width="250"
+											  SelectedItem="{Binding CurrentMetadata.YouTubeCategory}"
 											  Background="Transparent"
 											  BorderThickness="0"
 											  Padding="5">

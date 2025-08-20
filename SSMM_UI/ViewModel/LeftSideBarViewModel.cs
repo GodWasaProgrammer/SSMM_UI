@@ -71,7 +71,7 @@ namespace SSMM_UI.ViewModel
         private readonly VideoPlayerService _videoPlayerService;
         private readonly IDialogService _dialogService;
         private readonly ILogService _logService;
-        private YouTubeService? YTService;
+        public YouTubeService? YTService;
         private readonly StateService _stateService;
 
         // ==== Login Status ====

@@ -155,7 +155,6 @@ public class CentralAuthService
                 ? new AuthResult(AuthProvider.Twitch, true, twitchToken.UserName, null)
                 : new AuthResult(AuthProvider.Twitch, false, null, "Token was missing or is invalid"));
 
-            // TODO: make sure that we instantiate YTService also or shit will break down the pipe
             // Google/YouTube
             GoogleAuthResult = await GoogleAuthService.LoginAutoIfTokenized();
             results.Add(GoogleAuthResult is not null

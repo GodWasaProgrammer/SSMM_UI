@@ -1,15 +1,23 @@
 ﻿using System.Collections.Generic;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Google.Apis.YouTube.v3.Data;
 
 namespace SSMM_UI.MetaData;
-public class StreamMetadata
+public partial class StreamMetadata : ObservableObject
 {
-    public string Title { get; set; } = string.Empty;
-    public Avalonia.Media.Imaging.Bitmap? Thumbnail { get; set; }
+    // ALL
+    [ObservableProperty] public string title;
+
+    // Primary Youtube might be relevant for others
+    [ObservableProperty] public Avalonia.Media.Imaging.Bitmap? thumbnail;
     // optional
-    public string? Category { get; set; }
+
+    [ObservableProperty] public VideoCategory? youTubeCategory;
     // optional
-    public string? Game { get; set; }
+    [ObservableProperty] public string? twitchCategory;
     // optional
-    public List<string>? Tags { get; set; }
-    public string? ThumbnailPath { get; set; }
+
+    [ObservableProperty] public List<string>? tags;
+
+    [ObservableProperty] public string? thumbnailPath;
 }
