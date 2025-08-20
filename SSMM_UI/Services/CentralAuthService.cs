@@ -151,9 +151,17 @@ public class CentralAuthService
 
             // Twitch
             var twitchToken = await TwitchService.TryLoadValidOrRefreshTokenAsync();
-            results.Add(twitchToken is not null
-                ? new AuthResult(AuthProvider.Twitch, true, twitchToken.UserName, null)
-                : new AuthResult(AuthProvider.Twitch, false, null, "Token was missing or is invalid"));
+
+            if (twitchToken.ErrorMessage == null)
+            {
+                results.Add(twitchToken is not null
+                    ? new AuthResult(AuthProvider.Twitch, true, twitchToken.UserName, null)
+                    : new AuthResult(AuthProvider.Twitch, false, null, "Token was missing or is invalid"));
+            }
+            else
+            {
+                results.Add(new AuthResult(AuthProvider.Twitch, false, null, twitchToken.ErrorMessage));
+            }
 
             // Google/YouTube
             GoogleAuthResult = await GoogleAuthService.LoginAutoIfTokenized();

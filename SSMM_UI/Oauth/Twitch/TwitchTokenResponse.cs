@@ -29,4 +29,6 @@ public class TwitchTokenTokenResponse
 
     [JsonIgnore]
     public bool IsValid => !string.IsNullOrWhiteSpace(AccessToken) && ExpiresAt > DateTime.UtcNow;
+    [JsonIgnore]
+    public string? ErrorMessage { get; set; }
 }

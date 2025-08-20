@@ -83,7 +83,11 @@ public class TwitchDCAuthService
         if (!response.IsSuccessStatusCode)
         {
             _logger.Log($"⚠️ Refresh failed: {response.StatusCode}\n{responseBody}");
-            return null;
+            var errorToken = new TwitchTokenTokenResponse();
+            errorToken.ErrorMessage = $"⚠️ Refresh failed: {response.StatusCode}\n{responseBody}";
+            // since the refresh failed, the token nor its refreshtoken is no longer valid, delete local token to force full relog
+            File.Delete(TokenFilePath);
+            return errorToken;
         }
 
         var token = JsonSerializer.Deserialize<TwitchTokenTokenResponse>(responseBody);
@@ -112,8 +116,15 @@ public class TwitchDCAuthService
         if (!string.IsNullOrWhiteSpace(token.RefreshToken))
         {
             _logger.Log("🔁 Försöker förnya åtkomsttoken med refresh_token...");
-            await RefreshAccessTokenAsync(token.RefreshToken);
-            token.UserName = await GetUsernameAsync(token.AccessToken);
+            var res = await RefreshAccessTokenAsync(token.RefreshToken);
+            if (res.ErrorMessage == null)
+            {
+                token.UserName = await GetUsernameAsync(token.AccessToken);
+            }
+            else
+            {
+                token.ErrorMessage = res.ErrorMessage;
+            }
             return token;
         }
 
@@ -237,7 +248,7 @@ public class TwitchDCAuthService
             {
                 return AuthResult.UserId;
             }
-            if(AuthResult.UserId == null)
+            if (AuthResult.UserId == null)
             {
                 var userId = GetUserIdAsync(AuthResult.AccessToken);
                 AuthResult.UserId = userId.Result;
