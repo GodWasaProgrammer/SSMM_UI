@@ -14,7 +14,7 @@ namespace SSMM_UI.ViewModel;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    public MainWindowViewModel(IFilePickerService filePickerService, CentralAuthService authservice, MetaDataService MdService, ILogService logService, StateService stateService, LeftSideBarViewModel leftSideBarViewModel, UserSettings settings, IDialogService dialogService)
+    public MainWindowViewModel(IFilePickerService filePickerService, CentralAuthService authservice, MetaDataService MdService, ILogService logService, StateService stateService, LeftSideBarViewModel leftSideBarViewModel, UserSettings settings, IDialogService dialogService, SearchViewModel searchmodel)
     {
         // Init commands
 
@@ -36,7 +36,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         // === start children ====
         LeftSideBarViewModel = leftSideBarViewModel;
-
+        SearchVM = searchmodel;
         // services
         MetaDataService = MdService;
         _centralAuthService = authservice;
@@ -59,6 +59,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     // ==== Child Models ====
     public LeftSideBarViewModel LeftSideBarViewModel { get; }
+    public SearchViewModel SearchVM { get; }
 
     // ==== Collections ====
     public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; } = [];

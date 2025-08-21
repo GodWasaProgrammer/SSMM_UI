@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:SSMM_UI.ViewModel"
+             xmlns:conv="clr-namespace:SSMM_UI.Converters;assembly=SSMM_UI"
+             x:Class="SSMM_UI.Views.SearchView"
+			 x:DataType="vm:SearchViewModel"
+             Width="400"
+             Height="600">
+	
+	<StackPanel Margin="20" Spacing="10">
+		<!-- Sökruta -->
+		<TextBox Text="{Binding SearchQuery, Mode=TwoWay}"
+                 Watermark="Sök efter Twitch kategorier..."
+                 FontSize="14"
+                 Padding="10" />
+
+		<!-- Laddningsindikator -->
+		<ProgressBar IsIndeterminate="True"
+                     Height="4"
+                     Margin="0,5,0,0"
+                     IsVisible="{Binding IsSearching}" />
+
+		<!-- Sökresultat -->
+		<ListBox ItemsSource="{Binding SearchResults}"
+         ScrollViewer.VerticalScrollBarVisibility="Auto">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<Border Background="#f0f0f0"
+							CornerRadius="5"
+							Margin="0,2"
+							Padding="10">
+						<StackPanel Orientation="Horizontal" Spacing="10">
+							<Image Width="52" Height="72"
+							Source="{Binding BoxArt}"/>
+
+							<!-- Textinformation -->
+							<StackPanel VerticalAlignment="Center">
+								<TextBlock Text="{Binding Name}"
+										   FontWeight="Bold"
+										   FontSize="14"
+										   TextWrapping="Wrap" />
+							</StackPanel>
+						</StackPanel>
+					</Border>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+
+		<!-- Meddelanden -->
+		<TextBlock Text="Skriv minst 3 tecken för att söka..."
+                   Foreground="Gray"
+                   FontStyle="Italic"
+                   IsVisible="{Binding SearchQuery, Converter={x:Static conv:StringConverters.IsNullOrEmpty}}" />
+
+		<TextBlock Text="Inga resultat hittades"
+                   Foreground="Gray"
+                   FontStyle="Italic"
+                   IsVisible="{Binding SearchResults.Count, Converter={x:Static conv:IntConverters.Equals}, ConverterParameter=0}" />
+	</StackPanel>
+</UserControl>

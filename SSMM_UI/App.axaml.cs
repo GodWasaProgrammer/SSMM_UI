@@ -43,6 +43,7 @@ public partial class App : Application
                 .AddSingleton<UserSettings>()
                 .AddSingleton<ILogService, LogService>()
                 .AddSingleton<LeftSideBarViewModel>()
+                .AddSingleton<SearchViewModel>()
                 .BuildServiceProvider();
 
 
