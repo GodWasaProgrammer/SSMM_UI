@@ -1,7 +1,6 @@
 ﻿using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
 using SSMM_UI.Services;
@@ -235,17 +234,23 @@ public partial class MainWindowViewModel : ObservableObject
     {
         try
         {
-            var bitmap = await _filePickerService.PickImageAsync();
+            var result = await _filePickerService.PickImageAsync();
 
-            if (bitmap != null)
+            if (result != null)
             {
-                ThumbnailImage = bitmap;
-                CurrentMetadata.Thumbnail = ThumbnailImage;
-                _logService.Log("Thumbnail loaded successfully");
-            }
-            else
-            {
-                _logService.Log("No file selected");
+                var (bitmap, path) = result.Value;
+                if (bitmap != null)
+                {
+                    ThumbnailImage = bitmap;
+                    if (path != null)
+                        CurrentMetadata.ThumbnailPath = path;
+                    CurrentMetadata.Thumbnail = ThumbnailImage;
+                    _logService.Log("Thumbnail loaded successfully");
+                }
+                else
+                {
+                    _logService.Log("No file selected");
+                }
             }
         }
         catch (Exception ex)

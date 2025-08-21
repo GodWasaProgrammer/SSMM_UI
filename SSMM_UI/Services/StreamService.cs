@@ -49,18 +49,27 @@ public class StreamService : IDisposable
     public StreamInfo? StreamInfo { get; set; }
     public async Task<(string rtmpUrl, string streamKey)> CreateYouTubeBroadcastAsync(StreamMetadata metadata)
     {
-        if (_youTubeService is not null)
+
+        try
         {
-            if (StreamInfo == null)
+            var info = await ProbeStreamAsync(RtmpAdress);
+            if (info is not null)
             {
-                var info = await Task.Run(() => ProbeStream(RtmpAdress));
-                if (info is not null)
-                    StreamInfo = info;
-                else
-                {
-                    _logger.Log("stream failed to start, there was missing info from ffprobe");
-                }
+                StreamInfo = info;
             }
+            else
+            {
+                _logger.Log("stream failed to start, there was missing info from ffprobe");
+                throw new Exception("ffprobe failed to find any stream");
+            }
+
+        }
+        catch (Exception ex)
+        {
+            _logger.Log(ex.Message);
+        }
+        if (_youTubeService is not null && StreamInfo is not null)
+        {
             try
             {
                 // 1. Skapa LiveBroadcast
@@ -161,9 +170,14 @@ public class StreamService : IDisposable
         }
         else
         {
-            throw new Exception("CentralAuthService.YTService Was null");
+            if (_youTubeService is null)
+                throw new Exception("CentralAuthService.YTService Was null");
+            if (StreamInfo is null)
+                throw new Exception("Streaminfo failed to fetch data");
         }
+        return (string.Empty, string.Empty);
     }
+
     public async Task<(string rtmpUrl, string? streamKey)> CreateTwitchBroadcastAsync(StreamMetadata metadata)
     {
         var accessToken = _authService.TwitchService.AuthResult.AccessToken;
@@ -249,7 +263,7 @@ public class StreamService : IDisposable
         // TODO: implement
         return ("", "");
     }
-    public StreamInfo? ProbeStream(string rtmpUrl)
+    public async Task<StreamInfo?> ProbeStreamAsync(string rtmpUrl)
     {
         var path = "Dependencies/ffprobe";
         try
@@ -268,22 +282,31 @@ public class StreamService : IDisposable
             using var process = new Process { StartInfo = startInfo };
             process.Start();
 
-            var output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit(5000); // max 5 sekunder
+            // Läs output asynkront med timeout
+            var outputTask = process.StandardOutput.ReadToEndAsync();
+            var timeoutTask = Task.Delay(5000);
 
-            if (!process.HasExited)
+            var completedTask = await Task.WhenAny(outputTask, timeoutTask);
+
+            if (completedTask == timeoutTask)
             {
                 process.Kill();
                 _logger.Log("ffprobe process killed due to timeout.");
-                return null;
+                return null; // ✅ Returnerar null vid timeout
             }
 
+            var output = await outputTask;
+            await Task.Run(() => process.WaitForExit(1000));
+
             var lines = output.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
-            if (lines.Length < 3) return null;
+            if (lines.Length < 3)
+            {
+                return null; // ✅ Returnerar null vid för få rader
+            }
 
             int width = int.Parse(lines[0]);
             int height = int.Parse(lines[1]);
-            string rawFramerate = lines[2]; // ex: "60/1"
+            string rawFramerate = lines[2];
 
             var parts = rawFramerate.Split('/');
             double fps = parts.Length == 2 && double.TryParse(parts[0], out var num) && double.TryParse(parts[1], out var den) && den != 0
@@ -291,7 +314,8 @@ public class StreamService : IDisposable
                 : 30.0;
 
             string frameRateLabel = fps >= 59 ? "60fps" : (fps >= 29 ? "30fps" : "24fps");
-            return new StreamInfo
+
+            return new StreamInfo // ✅ Returnerar StreamInfo vid success
             {
                 Width = width,
                 Height = height,
@@ -301,8 +325,10 @@ public class StreamService : IDisposable
         catch (Exception ex)
         {
             _logger.Log($"Failed to probe RTMP stream: {ex.Message}");
-            return null;
+            return null; // ✅ Returnerar null vid exception
         }
+
+        // ✅ Alla kodvägar returnerar nu ett värde!
     }
 
     public void Dispose() => _cts.Cancel();
@@ -396,6 +422,8 @@ public class StreamService : IDisposable
             await Task.Delay(5000); // 5 sekunders delay
         }
     }
+
+    // TODO: needs to indicate success
     public async void StartStream(StreamMetadata metadata, ObservableCollection<SelectedService> SelectedServicesToStream)
     {
         if (SelectedServicesToStream.Count == 0)

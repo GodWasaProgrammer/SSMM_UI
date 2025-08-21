@@ -11,8 +11,6 @@ Select which services you wish to stream to, and add the relevant streamkey when
 2.
 Go to OBS(or other RTMP-viable streaming software)
 Go into Settings -> Stream -> "Custom" set server to : "rtmp://localhost:1935/live/";
-
-
 Set streamkey to -> demo
 
 3. 

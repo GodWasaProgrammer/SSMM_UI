@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
+using System.Threading.Tasks;
 
 namespace SSMM_UI.Services;
 
@@ -18,7 +14,7 @@ public class FilePickerService : IFilePickerService
         _window = window;
     }
 
-    public async Task<Bitmap?> PickImageAsync()
+    public async Task<(Bitmap?, string Path)?> PickImageAsync()
     {
         var options = new FilePickerOpenOptions
         {
@@ -38,7 +34,9 @@ public class FilePickerService : IFilePickerService
         if (files is { Count: > 0 })
         {
             await using var stream = await files[0].OpenReadAsync();
-            return new Bitmap(stream);
+
+            var returntuple = (new Bitmap(stream), files[0].Path.LocalPath);
+            return returntuple;
         }
 
         return null;
@@ -46,5 +44,5 @@ public class FilePickerService : IFilePickerService
 }
 public interface IFilePickerService
 {
-    Task<Bitmap?> PickImageAsync();
+    Task<(Bitmap?, string Path)?> PickImageAsync();
 }
