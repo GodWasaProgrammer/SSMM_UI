@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Google.Apis.YouTube.v3.Data;
 
@@ -9,7 +10,7 @@ public partial class StreamMetadata : ObservableObject
     [ObservableProperty] public string title;
 
     // Primary Youtube might be relevant for others
-    [ObservableProperty] public Avalonia.Media.Imaging.Bitmap? thumbnail;
+    [ObservableProperty] public Bitmap? thumbnail;
     // optional
 
     [ObservableProperty] public VideoCategory? youTubeCategory;

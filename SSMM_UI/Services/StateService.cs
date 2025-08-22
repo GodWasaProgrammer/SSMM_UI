@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using Google.Apis.YouTube.v3.Data;
 using Microsoft.Extensions.Logging;
@@ -146,12 +147,29 @@ public class StateService
                 });
             }
 
+            RecommendedSettings? recommended = null;
+
+            if (service.TryGetProperty("recommended", out var rec))
+            {
+                recommended = JsonSerializer.Deserialize<RecommendedSettings>(rec.GetRawText());
+            }
+
+            // Plocka supported video codecs
+            if (service.TryGetProperty("supported video codecs", out var codecs))
+            {
+                recommended ??= new RecommendedSettings();
+                recommended.SupportedVideoCodes = codecs.EnumerateArray()
+                                                        .Select(c => c.GetString()!)
+                                                        .ToArray();
+            }
+
             if (rtmpServers.Count > 0)
             {
                 RtmpServiceGroups.Add(new RtmpServiceGroup
                 {
                     ServiceName = serviceName,
-                    Servers = rtmpServers
+                    Servers = rtmpServers,
+                    RecommendedSettings = recommended
                 });
             }
         }
