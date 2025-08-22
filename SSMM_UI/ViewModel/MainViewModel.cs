@@ -52,6 +52,14 @@ public partial class MainWindowViewModel : ObservableObject
         // state
         _settings = _stateService.UserSettingsObj;
 
+        SearchVM.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(SearchViewModel.SelectedItem))
+            {
+                CurrentMetadata.TwitchCategory = SearchVM.SelectedItem;
+            }
+        };
+
         // ==== Fire and forget awaits ====
         _ = Initialize();
     }
@@ -222,7 +230,7 @@ public partial class MainWindowViewModel : ObservableObject
                     _streamService.CreateYTService(LeftSideBarViewModel.YTService);
                     MetaDataService.CreateYouTubeService(LeftSideBarViewModel.YTService);
                 }
-                CurrentMetadata.TwitchCategory = SearchVM.SelectedItem;
+                
                 _streamService.StartStream(CurrentMetadata, LeftSideBarViewModel.SelectedServicesToStream);
                 _logService.Log("Started streaming...");
             }
