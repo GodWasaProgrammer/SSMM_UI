@@ -1,8 +1,11 @@
-﻿namespace SSMM_UI.MetaData;
+﻿using Avalonia.Media.Imaging;
+
+namespace SSMM_UI.MetaData;
 
 public class TwitchCategory
 {
-    public string Id { get; set; }
-    public string Name { get; set; }
-    public string BoxArtUrl { get; set; }
+    public string? Id { get; set; }
+    public string? Name { get; set; }
+    public string? BoxArtUrl { get; set; }
+    public Bitmap? BoxArt { get; set; }
 }

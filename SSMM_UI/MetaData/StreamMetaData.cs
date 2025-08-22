@@ -14,7 +14,7 @@ public partial class StreamMetadata : ObservableObject
 
     [ObservableProperty] public VideoCategory? youTubeCategory;
     // optional
-    [ObservableProperty] public string? twitchCategory;
+    [ObservableProperty] public TwitchCategory? twitchCategory;
     // optional
 
     [ObservableProperty] public List<string>? tags;

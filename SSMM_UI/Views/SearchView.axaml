@@ -8,12 +8,43 @@
              Height="400">
 	
 	<StackPanel Margin="20" Spacing="10">
+		
+		
+		<!-- selected item-->
+		<TextBlock Text="Selected Item"/>
+		<Border CornerRadius="5"
+            Margin="0,2"
+            Padding="10"
+            Background="{DynamicResource CardBackground}"
+            BorderBrush="{DynamicResource BorderColor}"
+            BorderThickness="1">
+			<StackPanel Orientation="Horizontal" Spacing="10">
+
+				<Image Width="52" Height="72" Source="{Binding SelectedItem.BoxArt}"/>
+				<StackPanel VerticalAlignment="Center">
+					<TextBlock Text="{Binding SelectedItem.Name}"
+							   FontWeight="Bold"
+							   FontSize="14"
+							   TextWrapping="Wrap" />
+				</StackPanel>
+			</StackPanel>
+		</Border>
+		
 		<!-- Sökruta -->
 		<TextBox Text="{Binding SearchQuery, Mode=TwoWay}"
                  Watermark="Sök efter Twitch kategorier..."
                  FontSize="14"
                  Padding="10" />
+		<!-- Meddelanden -->
+		<TextBlock Text="Minimum three letters to search"
+                   Foreground="Gray"
+                   FontStyle="Italic"
+                   IsVisible="{Binding SearchQuery, Converter={x:Static conv:StringConverters.IsNullOrEmpty}}" />
 
+		<TextBlock Text="No results found"
+                   Foreground="Gray"
+                   FontStyle="Italic"
+                   IsVisible="{Binding SearchResults.Count, Converter={x:Static conv:IntConverters.Equals}, ConverterParameter=0}" />
 		<!-- Laddningsindikator -->
 		<ProgressBar IsIndeterminate="True"
                      Height="4"
@@ -22,7 +53,8 @@
 
 		<!-- Sökresultat -->
 		<ListBox ItemsSource="{Binding SearchResults}"
-         ScrollViewer.VerticalScrollBarVisibility="Auto">
+				 SelectedItem="{Binding SelectedItem}"
+         ScrollViewer.VerticalScrollBarVisibility="Visible" Height="250">
 			<ListBox.ItemTemplate>
 				<DataTemplate>
 					<Border CornerRadius="5"
@@ -45,15 +77,6 @@
 			</ListBox.ItemTemplate>
 		</ListBox>
 
-		<!-- Meddelanden -->
-		<TextBlock Text="Skriv minst 3 tecken för att söka..."
-                   Foreground="Gray"
-                   FontStyle="Italic"
-                   IsVisible="{Binding SearchQuery, Converter={x:Static conv:StringConverters.IsNullOrEmpty}}" />
-
-		<TextBlock Text="Inga resultat hittades"
-                   Foreground="Gray"
-                   FontStyle="Italic"
-                   IsVisible="{Binding SearchResults.Count, Converter={x:Static conv:IntConverters.Equals}, ConverterParameter=0}" />
+		
 	</StackPanel>
 </UserControl>

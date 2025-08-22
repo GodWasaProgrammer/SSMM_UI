@@ -195,7 +195,7 @@ public class StreamService : IDisposable
 
 
         // Title and game should be set after this
-        await MDService.SetTwitchTitleAndCategory(metadata.Title, metadata.TwitchCategory);
+        await MDService.SetTwitchTitleAndCategory(metadata.Title, metadata.TwitchCategory.Name);
 
         // Twitch RTMP-info är statisk (RTMP URL och stream key)
         var streamKeyResponse = await httpClient.GetAsync($"https://api.twitch.tv/helix/streams/key?broadcaster_id={userId}");

@@ -10,6 +10,7 @@ using System.Timers;
 using SSMM_UI.Services;
 using Avalonia.Media.Imaging;
 using System.IO;
+using SSMM_UI.MetaData;
 
 namespace SSMM_UI.ViewModel;
 
@@ -17,19 +18,23 @@ namespace SSMM_UI.ViewModel;
 public partial class SearchViewModel : ObservableObject
 {
     private readonly Timer _searchTimer;
-    private readonly string _accessToken;
+    private string _accessToken;
     private readonly string _clientId;
-    private CentralAuthService CentralAuthService;
+    private CentralAuthService CentAuthService;
     public SearchViewModel(CentralAuthService authsrv)
     {
-        CentralAuthService = authsrv;
-        _accessToken = CentralAuthService.TwitchService.GetAccessToken();
-        _clientId = CentralAuthService.TwitchService.GetClientId();
+        CentAuthService = authsrv;
+        _accessToken = CentAuthService.TwitchService.GetAccessToken();
+        _clientId = CentAuthService.TwitchService.GetClientId();
+        CentAuthService.TwitchService.OnAccessTokenUpdated += OnTokenChange;
         // Sätt upp timer för debounce
         _searchTimer = new Timer(300);
         _searchTimer.Elapsed += async (s, e) => await PerformSearch();
         _searchTimer.AutoReset = false;
     }
+
+    [ObservableProperty]
+    TwitchCategory selectedItem;
 
     [ObservableProperty]
     private string _searchQuery = string.Empty;
@@ -40,6 +45,11 @@ public partial class SearchViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<TwitchCategory> _searchResults = new();
 
+
+    private void OnTokenChange(string accessTokenUpdated)
+    {
+        _accessToken = accessTokenUpdated;
+    }
     partial void OnSearchQueryChanged(string value)
     {
         // Starta om timern när text ändras
@@ -147,12 +157,4 @@ public partial class SearchViewModel : ObservableObject
 
         return newlist;
     }
-}
-
-public class TwitchCategory
-{
-    public string? Id { get; set; }
-    public string? Name { get; set; }
-    public string? BoxArtUrl { get; set; }
-    public Bitmap BoxArt { get; set; }
 }

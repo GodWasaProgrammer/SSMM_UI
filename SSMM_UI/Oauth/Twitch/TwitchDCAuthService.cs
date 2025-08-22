@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
+using static Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp;
 
 namespace SSMM_UI.Oauth.Twitch;
 
@@ -18,7 +19,26 @@ public class TwitchDCAuthService
     public readonly string _clientId = "y1cd8maguk5ob1m3lwvhdtupbj6pm3";
     private const string TokenFilePath = "twitch_tokenDCF.json";
     private const string ApiBaseUrl = "https://api.twitch.tv/helix";
-    public TwitchTokenTokenResponse? AuthResult;
+    private TwitchTokenTokenResponse _authResult;
+    public TwitchTokenTokenResponse? AuthResult
+    {
+        get => _authResult;
+        set
+        {
+            _authResult = value;
+
+            // 4. Invoka delegaten när propertyn uppdateras
+            if (OnAccessTokenUpdated != null && value != null)
+            {
+                OnAccessTokenUpdated.Invoke(value.AccessToken);
+            }
+        }
+    }
+
+    public delegate void AccessTokenUpdatedDelegate(string token);
+    // 2. Skapa en publik delegat-instans
+    public AccessTokenUpdatedDelegate OnAccessTokenUpdated;
+
     string[] scopes = new[]
         {
             TwitchScopes.UserReadEmail,

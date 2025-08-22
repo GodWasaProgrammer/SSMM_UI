@@ -5,6 +5,7 @@ using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
 using SSMM_UI.Services;
 using SSMM_UI.Settings;
+using SSMM_UI.Views;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -221,6 +222,7 @@ public partial class MainWindowViewModel : ObservableObject
                     _streamService.CreateYTService(LeftSideBarViewModel.YTService);
                     MetaDataService.CreateYouTubeService(LeftSideBarViewModel.YTService);
                 }
+                CurrentMetadata.TwitchCategory = SearchVM.SelectedItem;
                 _streamService.StartStream(CurrentMetadata, LeftSideBarViewModel.SelectedServicesToStream);
                 _logService.Log("Started streaming...");
             }
