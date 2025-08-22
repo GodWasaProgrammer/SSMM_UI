@@ -187,13 +187,6 @@ public class StreamService : IDisposable
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         httpClient.DefaultRequestHeaders.Add("Client-Id", ClientId);
 
-        var content = new StringContent(JsonSerializer.Serialize(new
-        {
-            title = metadata.Title,
-            //game_id = metadata.GameId // Valfritt: kräver att du hämtat game_id först
-        }), Encoding.UTF8, "application/json");
-
-
         // Title and game should be set after this
         await MDService.SetTwitchTitleAndCategory(metadata.Title, metadata.TwitchCategory.Name);
 
@@ -474,12 +467,49 @@ public class StreamService : IDisposable
             }
 
             var path = "Dependencies/ffmpeg";
-            // Bygg ffmpeg argument
-            var fullUrl = $"{service.SelectedServer.Url}/{service.StreamKey}";
-            var input = RtmpAdress; // exempel, justera efter behov
 
+            // Build FFMpeg Args
+
+            // endpoint to send output through
+            var fullUrl = $"{service.SelectedServer.Url}/{service.StreamKey}";
+
+            // our internal rtmp feed
+            var input = RtmpAdress;
+
+            // create our stringbuilder
             var args = new StringBuilder($"-i \"{input}\" ");
-            args.Append($"-c:v copy -c:a aac -f flv \"{fullUrl}\" ");
+            
+            var recommended = service.ServiceGroup.RecommendedSettings;
+
+            // Video codec
+            if (recommended?.SupportedVideoCodes?.Length > 0)
+            {
+                args.Append($"-c:v {recommended.SupportedVideoCodes[0]} ");
+            }
+            else
+            {
+                args.Append("-c:v copy "); // fallback
+            }
+
+            // Video bitrate
+            if (recommended?.MaxVideoBitRate != null)
+            {
+                args.Append($"-b:v {recommended.MaxVideoBitRate}k ");
+            }
+
+            // Keyint (nyckelframe interval)
+            if (recommended?.KeyInt != null)
+            {
+                args.Append($"-g {recommended.KeyInt} ");
+            }
+
+            // Audio bitrate
+            if (recommended?.MaxAudioBitRate != null)
+            {
+                args.Append($"-b:a {recommended.MaxAudioBitRate}k ");
+            }
+
+            args.Append($"-f flv \"{fullUrl}\"");
 
             var startInfo = new ProcessStartInfo
             {
@@ -497,22 +527,30 @@ public class StreamService : IDisposable
                 ffmpegProcess?.Add(process);
                 process.Start();
 
-
-                // Läs FFmpeg:s standardfelutgång asynkront
-                string? line;
-                while ((line = await process.StandardError.ReadLineAsync()) != null)
-                {
-                    _logger.Log((line + Environment.NewLine));
-                }
-
-                await process.WaitForExitAsync();
             }
             catch (Exception ex)
             {
                 _logger.Log($"FFmpeg start failed: {ex.Message}\n");
             }
         }
+        ReadOutPut();
     }
+
+    public void ReadOutPut()
+    {
+        foreach(var process in ffmpegProcess)
+
+        // Läs standardfel asynkront utan att blockera loopen
+        _ = Task.Run(async () =>
+        {
+            string? line;
+            while ((line = await process.StandardError.ReadLineAsync()) != null)
+            {
+                _logger.Log(line + Environment.NewLine);
+            }
+        });
+    }
+
     public void StopStreams()
     {
         if (ffmpegProcess != null)

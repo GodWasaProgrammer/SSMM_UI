@@ -115,6 +115,7 @@ public class TwitchDCAuthService
         {
             token.ExpiresAt = DateTime.UtcNow.AddSeconds(token.ExpiresIn);
             token.UserName = await GetUsernameAsync(token.AccessToken);
+            token.UserId = await GetUserIdAsync(token.AccessToken);
             SaveToken(token);
         }
 
