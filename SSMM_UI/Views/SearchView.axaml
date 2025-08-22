@@ -5,7 +5,7 @@
              x:Class="SSMM_UI.Views.SearchView"
 			 x:DataType="vm:SearchViewModel"
              Width="400"
-             Height="600">
+             Height="400">
 	
 	<StackPanel Margin="20" Spacing="10">
 		<!-- Sökruta -->
@@ -25,8 +25,7 @@
          ScrollViewer.VerticalScrollBarVisibility="Auto">
 			<ListBox.ItemTemplate>
 				<DataTemplate>
-					<Border Background="#f0f0f0"
-							CornerRadius="5"
+					<Border CornerRadius="5"
 							Margin="0,2"
 							Padding="10">
 						<StackPanel Orientation="Horizontal" Spacing="10">
