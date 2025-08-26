@@ -7,6 +7,7 @@ using SSMM_UI.Services;
 using SSMM_UI.Settings;
 using SSMM_UI.Views;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -69,6 +70,7 @@ public partial class MainWindowViewModel : ObservableObject
     // ==== Child Models ====
     public LeftSideBarViewModel LeftSideBarViewModel { get; }
     public SearchViewModel SearchVM { get; }
+    public ObservableCollection<OutputViewModel> OutputViewModels { get; }
 
     // ==== Collections ====
     public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; } = [];

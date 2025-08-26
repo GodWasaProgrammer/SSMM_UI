@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="250"
+	         xmlns:local="clr-namespace:SSMM_UI.ViewModel"
+	         xmlns:Views="clr-namespace:SSMM_UI.Views"
+			 x:DataType="local:OutputViewModel"
+             x:Class="SSMM_UI.OutPutView">
+
+		<Border Classes="card">
+	<StackPanel>
+			
+		<TextBlock Text="Output Stream" Classes="secondary"/>
+		<ListBox ItemsSource="{Binding LogMessages}" VerticalAlignment="Stretch"
+                 HorizontalAlignment="Stretch"
+				 FontFamily="Consolas, Courier New" BorderThickness="0"
+				 Background="{DynamicResource BorderColor}" Opacity="0.2"
+				Foreground="{DynamicResource PrimaryTextColor}" Padding="10"/>
+		
+	</StackPanel>
+		</Border>
+	
+</UserControl> 

@@ -190,6 +190,7 @@ public class StreamService : IDisposable
         // Title and game should be set after this
         await MDService.SetTwitchTitleAndCategory(metadata.Title, metadata.TwitchCategory.Name);
 
+
         // Twitch RTMP-info är statisk (RTMP URL och stream key)
         var streamKeyResponse = await httpClient.GetAsync($"https://api.twitch.tv/helix/streams/key?broadcaster_id={userId}");
         streamKeyResponse.EnsureSuccessStatusCode();
@@ -203,6 +204,13 @@ public class StreamService : IDisposable
     public async Task<(string rtmpUrl, string? streamkey)> CreateKickBroadcastAsync(StreamMetadata metadata)
     {
         //TODO: There needs to be automation with for example puppeteer here to control the stream name, title etc as the Kick API does not support setting this programmatically.
+
+        // kick keys remain the same unless reset
+
+
+        await PuppetMaster.SetKickGameTitle(metadata.Title);
+
+
         string kickRtmpUrl = "rtmp://live.kick.com/kick";
         return (kickRtmpUrl, "");
     }
@@ -436,13 +444,10 @@ public class StreamService : IDisposable
                     {
                         // Skapa ny Youtube broadcast med metadata
                         var (newUrl, newKey) = await CreateYouTubeBroadcastAsync(metadata);
-                        //SetYouTubeCategoryAndGameAsync(newKey, newUrl, );
-
 
                         // Uppdatera service med nya värden så vi kör rätt stream
                         service.SelectedServer.Url = newUrl;
                         service.StreamKey = newKey;
-
                     }
                     if (service.DisplayName.Contains("Twitch", StringComparison.OrdinalIgnoreCase))
                     {
@@ -548,7 +553,7 @@ public class StreamService : IDisposable
             {
                 _logger.Log(line + Environment.NewLine);
             }
-        });
+        }); 
     }
 
     public void StopStreams()
