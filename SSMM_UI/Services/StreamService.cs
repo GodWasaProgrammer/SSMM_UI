@@ -426,7 +426,7 @@ public class StreamService : IDisposable
     }
 
     // TODO: needs to indicate success
-    public async void StartStream(StreamMetadata metadata, ObservableCollection<SelectedService> SelectedServicesToStream)
+    public async Task StartStream(StreamMetadata metadata, ObservableCollection<SelectedService> SelectedServicesToStream)
     {
         if (SelectedServicesToStream.Count == 0)
         {
@@ -530,6 +530,7 @@ public class StreamService : IDisposable
             {
                 var process = new Process { StartInfo = startInfo };
                 var processinfo = new StreamProcessInfo { Header = service.DisplayName, Process = process };
+                ProcessInfos.Add(processinfo);
                 ffmpegProcess?.Add(process);
                 process.Start();
 

@@ -19,7 +19,7 @@ public partial class MainWindowViewModel : ObservableObject
         // Init commands
 
         // ==== OutPut Streams ====
-        StartStreamCommand = new RelayCommand(StartStream);
+        StartStreamCommand = new AsyncRelayCommand(StartStream);
         StopStreamsCommand = new RelayCommand(OnStopStreams);
 
         // ==== testing shit ====
@@ -76,6 +76,8 @@ public partial class MainWindowViewModel : ObservableObject
     // ==== Collections ====
     public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; } = [];
 
+    // === Log things ====
+    [ObservableProperty] private string? _selectedLogItem;
     public ObservableCollection<string> LogMessages { get; }
 
     // ==== Services =====
@@ -99,8 +101,7 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string updateTitle;
     [ObservableProperty] private string metadataStatus;
 
-    // === Log things ====
-    [ObservableProperty] private string? _selectedLogItem;
+
 
     public void ScrollToEnd()
     {
@@ -220,7 +221,7 @@ public partial class MainWindowViewModel : ObservableObject
         //await MetaDataService.SetTitleAndCategoryYoutubeAsync("G5Ko1fLdMFM","SSMM_RULES_THE_DAY", 20);
     }
 
-    private void StartStream()
+    private async Task StartStream()
     {
         CanStartStream = false;
         CanStopStream = true;
@@ -234,7 +235,7 @@ public partial class MainWindowViewModel : ObservableObject
                     MetaDataService.CreateYouTubeService(LeftSideBarViewModel.YTService);
                 }
 
-                _streamService.StartStream(CurrentMetadata, LeftSideBarViewModel.SelectedServicesToStream);
+                await _streamService.StartStream(CurrentMetadata, LeftSideBarViewModel.SelectedServicesToStream);
                 _logService.Log("Started streaming...");
             }
             catch (Exception ex)
@@ -242,6 +243,7 @@ public partial class MainWindowViewModel : ObservableObject
                 _logService.Log(ex.ToString());
             }
             var bla = _streamService.ProcessInfos;
+            StreamOutPutVM.Outputs.Clear();
             foreach (var info in bla)
             {
                 var outputview = new OutputViewModel(info.Header, info.Process);

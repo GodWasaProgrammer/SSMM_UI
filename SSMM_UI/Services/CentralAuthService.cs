@@ -171,8 +171,8 @@ public class CentralAuthService
                 results.Add(new AuthResult(AuthProvider.Twitch, false, null, "Failed to Log in"));
             }
 
-                // Google/YouTube
-                GoogleAuthResult = await GoogleAuthService.LoginAutoIfTokenized();
+            // Google/YouTube
+            GoogleAuthResult = await GoogleAuthService.LoginAutoIfTokenized();
             results.Add(GoogleAuthResult is not null
                 ? new AuthResult(AuthProvider.YouTube, true, GoogleAuthResult.Username, null)
                 : new AuthResult(AuthProvider.YouTube, false, null, "Token was missing or is invalid"));

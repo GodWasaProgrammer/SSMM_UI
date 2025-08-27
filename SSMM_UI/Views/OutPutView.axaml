@@ -14,8 +14,9 @@
 				<TextBlock Text="{Binding Header}"></TextBlock>
 				<!-- ListBox med ändrad opacitet och bättre utrymmesanvändning -->
 				<ListBox ItemsSource="{Binding LogMessages}"
-						 VerticalAlignment="Stretch"
-						 HorizontalAlignment="Stretch"
+						 SelectedItem="{Binding SelectedMessage}"
+						 Height="200"
+						 Width="400"
 						 FontFamily="Consolas, Courier New"
 						 BorderThickness="0"
 						 Background="{DynamicResource BorderColor}"

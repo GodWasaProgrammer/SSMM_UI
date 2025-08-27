@@ -17,9 +17,10 @@ public partial class OutputViewModel : ObservableObject
 
     [ObservableProperty] string header;
     [ObservableProperty] string content;
+    [ObservableProperty] string selectedMessage;
 
     /// Take Task of stream with the output ? 
-    public ObservableCollection<string> LogMessages { get; }
+    public ObservableCollection<string> LogMessages { get; } = new();
 
     private void StartReadingOutput(Process process)
     {
@@ -31,10 +32,19 @@ public partial class OutputViewModel : ObservableObject
                 Dispatcher.UIThread.Post(() =>
                 {
                     LogMessages.Add($"[{DateTime.Now:HH:mm:ss}] {line}");
+                    ScrollToEnd();
                     if (LogMessages.Count > 500)
                         LogMessages.RemoveAt(0);
                 });
             }
         });
+    }
+
+    public void ScrollToEnd()
+    {
+        if (LogMessages.Count > 0)
+        {
+            SelectedMessage = LogMessages[^1]; // Senaste item
+        }
     }
 }

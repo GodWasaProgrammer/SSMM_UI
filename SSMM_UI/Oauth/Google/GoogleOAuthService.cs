@@ -50,7 +50,7 @@ public class GoogleOAuthService
 
     public string GetAccessToken()
     {
-        if(_oauthResult != null)
+        if (_oauthResult != null)
         {
             return _oauthResult.AccessToken;
         }
@@ -161,7 +161,11 @@ public class GoogleOAuthService
         var responseData = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
+        {
+            // we have failed to refresh token, do full login
+            File.Delete(_tokenPath);
             throw new Exception($"Google refresh-token misslyckades: {response.StatusCode}\n{responseData}");
+        }
 
         var tokenData = JsonDocument.Parse(responseData).RootElement;
         var newToken = new GoogleOauthResult
