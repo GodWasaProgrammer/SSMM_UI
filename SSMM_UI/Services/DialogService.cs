@@ -6,6 +6,7 @@ using SSMM_UI.Settings;
 using SSMM_UI.ViewModel;
 using System;
 using System.Threading.Tasks;
+using SSMM_UI.Views;
 
 namespace SSMM_UI.Services;
 
@@ -17,11 +18,40 @@ public class DialogService : IDialogService
     }
     public async Task<bool> ShowServerDetailsAsync(RtmpServiceGroup group)
     {
-        var detailsWindow = new ServerDetailsWindow(group);
-        return await detailsWindow.ShowDialog<bool>(Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
-            ? desktop.MainWindow
-            : null);
+        var tcs = new TaskCompletionSource<bool>();
+        SelectedService selectedService = null;
+
+        var detailsWindow = new ServerDetailsWindow(group, (success, streamKey, server, serviceGroup) =>
+        {
+            if (success && !string.IsNullOrEmpty(streamKey) && server != null)
+            {
+                // Spara den valda servicen
+                selectedService = new SelectedService
+                {
+                    ServiceGroup = serviceGroup,
+                    SelectedServer = server,
+                    StreamKey = streamKey
+                };
+            }
+            tcs.SetResult(success);
+        });
+
+        await detailsWindow.ShowDialog(GetMainWindow());
+        var result = await tcs.Task;
+
+        // EFTER att dialogen stängts - lägg till i huvud-viewmodel
+        if (result && selectedService != null)
+        {
+            var mainVM = GetMainWindow();
+            if (mainVM.DataContext is MainWindowViewModel mainVm)
+            {
+                mainVm.LeftSideBarViewModel.SelectedServicesToStream.Add(selectedService);
+            }
+        }
+
+        return result;
     }
+
     public async Task<UserSettings> ShowSettingsDialogAsync(UserSettings currentSettings)
     {
         var viewModel = new SettingsViewModel

@@ -12,7 +12,6 @@
 		<Border Classes="card">
 			<Grid>
 				<TextBlock Text="{Binding Header}"></TextBlock>
-				<!-- ListBox med ändrad opacitet och bättre utrymmesanvändning -->
 				<ListBox ItemsSource="{Binding LogMessages}"
 						 SelectedItem="{Binding SelectedMessage}"
 						 Height="200"

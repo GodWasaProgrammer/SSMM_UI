@@ -2,11 +2,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SSMM_UI"
+        xmlns:local="clr-namespace:SSMM_UI.ViewModel"
 		xmlns:rtmp="clr-namespace:SSMM_UI.RTMP" 
         mc:Ignorable="d"
-        x:Class="SSMM_UI.ServerDetailsWindow"
-        x:DataType="local:ServerDetailsWindow"
+        x:Class="SSMM_UI.Views.ServerDetailsWindow"
+        x:DataType="local:ServerDetailsWindowViewModel"
         Title="RTMP Servers" Width="400" Height="450">
 
 	<StackPanel>
@@ -25,8 +25,8 @@
 		</ListBox>
 
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
-			<Button Content="OK" Width="80" Margin="0,0,10,0" Click="OkButton_Click"/>
-			<Button Content="Cancel" Width="80" Click="CancelButton_Click"/>
+			<Button Content="OK" Width="80" Margin="0,0,10,0" Command="{Binding OkCommand}"/>
+			<Button Content="Cancel" Width="80" Command="{Binding CancelCommand}"/>
 		</StackPanel>
 	</StackPanel>
 </Window>
