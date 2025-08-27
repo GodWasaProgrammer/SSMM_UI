@@ -44,6 +44,7 @@ public partial class App : Application
                 .AddSingleton<ILogService, LogService>()
                 .AddSingleton<LeftSideBarViewModel>()
                 .AddSingleton<SearchViewModel>()
+                .AddSingleton<DisplayStreamOutputViewModel>()
                 .BuildServiceProvider();
 
 

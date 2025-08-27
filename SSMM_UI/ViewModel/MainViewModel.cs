@@ -5,9 +5,7 @@ using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
 using SSMM_UI.Services;
 using SSMM_UI.Settings;
-using SSMM_UI.Views;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -16,7 +14,7 @@ namespace SSMM_UI.ViewModel;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    public MainWindowViewModel(IFilePickerService filePickerService, CentralAuthService authservice, MetaDataService MdService, ILogService logService, StateService stateService, LeftSideBarViewModel leftSideBarViewModel, UserSettings settings, IDialogService dialogService, SearchViewModel searchmodel)
+    public MainWindowViewModel(IFilePickerService filePickerService, CentralAuthService authservice, MetaDataService MdService, ILogService logService, StateService stateService, LeftSideBarViewModel leftSideBarViewModel, UserSettings settings, IDialogService dialogService, SearchViewModel searchmodel, DisplayStreamOutputViewModel StreamOutPutDisplay)
     {
         // Init commands
 
@@ -39,6 +37,7 @@ public partial class MainWindowViewModel : ObservableObject
         // === start children ====
         LeftSideBarViewModel = leftSideBarViewModel;
         SearchVM = searchmodel;
+        StreamOutPutVM = StreamOutPutDisplay;
         // services
         MetaDataService = MdService;
         _centralAuthService = authservice;
@@ -71,6 +70,8 @@ public partial class MainWindowViewModel : ObservableObject
     public LeftSideBarViewModel LeftSideBarViewModel { get; }
     public SearchViewModel SearchVM { get; }
     public ObservableCollection<OutputViewModel> OutputViewModels { get; }
+
+    public DisplayStreamOutputViewModel StreamOutPutVM { get; }
 
     // ==== Collections ====
     public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; } = [];
@@ -232,7 +233,7 @@ public partial class MainWindowViewModel : ObservableObject
                     _streamService.CreateYTService(LeftSideBarViewModel.YTService);
                     MetaDataService.CreateYouTubeService(LeftSideBarViewModel.YTService);
                 }
-                
+
                 _streamService.StartStream(CurrentMetadata, LeftSideBarViewModel.SelectedServicesToStream);
                 _logService.Log("Started streaming...");
             }

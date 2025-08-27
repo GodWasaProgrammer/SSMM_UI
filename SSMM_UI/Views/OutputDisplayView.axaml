@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="450"
+             xmlns:local="clr-namespace:SSMM_UI.ViewModel"
+             xmlns:Views="clr-namespace:SSMM_UI.Views"
+             x:DataType="local:DisplayStreamOutputViewModel"
+             x:Class="SSMM_UI.Views.OutputDisplayView"
+             Background="{DynamicResource BackGroundColor}">
+
+	<!-- Använd en ItemsControl för att visa samlingen -->
+	<ItemsControl ItemsSource="{Binding Outputs}">
+		<ItemsControl.ItemsPanel>
+			<ItemsPanelTemplate>
+				<!-- Välj layoutpanel här - StackPanel, WrapPanel, eller UniformGrid -->
+				<StackPanel Orientation="Horizontal" />
+			</ItemsPanelTemplate>
+		</ItemsControl.ItemsPanel>
+
+		<ItemsControl.ItemTemplate>
+			<DataTemplate>
+				<!-- Här refererar vi till din OutPutView -->
+				<Views:OutPutView />
+			</DataTemplate>
+		</ItemsControl.ItemTemplate>
+	</ItemsControl>
+
+</UserControl>

@@ -1,10 +1,11 @@
 using Avalonia.Controls;
 
+
 namespace SSMM_UI.Views;
 
-public partial class OutPutView : UserControl
+public partial class OutputDisplayView : UserControl
 {
-    public OutPutView()
+    public OutputDisplayView()
     {
         InitializeComponent();
     }
