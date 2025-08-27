@@ -33,6 +33,7 @@ public class StreamService : IDisposable
     private CentralAuthService _authService;
     private ILogService _logger;
     private MetaDataService MDService;
+    public List<StreamProcessInfo> ProcessInfos { get; private set; } = new List<StreamProcessInfo>();
     public StreamService(CentralAuthService authService, ILogService logger, MetaDataService MdService)
     {
         Server.StartSrv();
@@ -483,7 +484,7 @@ public class StreamService : IDisposable
 
             // create our stringbuilder
             var args = new StringBuilder($"-i \"{input}\" ");
-            
+
             var recommended = service.ServiceGroup.RecommendedSettings;
 
             // Video codec
@@ -528,7 +529,7 @@ public class StreamService : IDisposable
             try
             {
                 var process = new Process { StartInfo = startInfo };
-
+                var processinfo = new StreamProcessInfo { Header = service.DisplayName, Process = process };
                 ffmpegProcess?.Add(process);
                 process.Start();
 
@@ -538,22 +539,23 @@ public class StreamService : IDisposable
                 _logger.Log($"FFmpeg start failed: {ex.Message}\n");
             }
         }
-        ReadOutPut();
+        //ReadOutPut();
     }
 
     public void ReadOutPut()
     {
-        foreach(var process in ffmpegProcess)
-
-        // Läs standardfel asynkront utan att blockera loopen
-        _ = Task.Run(async () =>
+        foreach (var process in ffmpegProcess)
         {
-            string? line;
-            while ((line = await process.StandardError.ReadLineAsync()) != null)
+            // Läs standardfel asynkront utan att blockera loopen
+            _ = Task.Run(async () =>
             {
-                _logger.Log(line + Environment.NewLine);
-            }
-        }); 
+                string? line;
+                while ((line = await process.StandardError.ReadLineAsync()) != null)
+                {
+                    _logger.Log(line + Environment.NewLine);
+                }
+            });
+        }
     }
 
     public void StopStreams()

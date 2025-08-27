@@ -241,6 +241,12 @@ public partial class MainWindowViewModel : ObservableObject
             {
                 _logService.Log(ex.ToString());
             }
+            var bla = _streamService.ProcessInfos;
+            foreach (var info in bla)
+            {
+                var outputview = new OutputViewModel(info.Header, info.Process);
+                StreamOutPutVM.Outputs.Add(outputview);
+            }
         }
     }
 

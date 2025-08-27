@@ -9,8 +9,5 @@ public class DisplayStreamOutputViewModel
     public DisplayStreamOutputViewModel()
     {
         Outputs = new ObservableCollection<OutputViewModel>();
-        Outputs.Add(new OutputViewModel("Example", "test"));
-        Outputs.Add(new OutputViewModel("Example", "test"));
-        Outputs.Add(new OutputViewModel("Example", "test"));
     }
 }

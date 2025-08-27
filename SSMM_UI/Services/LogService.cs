@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Avalonia.Threading;
+using System;
 using System.Collections.ObjectModel;
-using Avalonia.Threading;
 
 namespace SSMM_UI.Services;
 
