@@ -45,7 +45,7 @@ public class DialogService : IDialogService
             var mainVM = GetMainWindow();
             if (mainVM.DataContext is MainWindowViewModel mainVm)
             {
-                mainVm.LeftSideBarViewModel.SelectedServicesToStream.Add(selectedService);
+                mainVm.LeftSideBarVM.SelectedServicesToStream.Add(selectedService);
             }
         }
 

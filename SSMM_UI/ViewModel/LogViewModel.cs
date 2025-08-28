@@ -12,6 +12,7 @@ public partial class LogViewModel : ObservableObject
     {
         _logService = logService;
         _streamOutputVM = StreamOutPutDisplay;
+        _logService.OnLogAdded = ScrollToEnd;
     }
 
     public ObservableCollection<string> LogMessages { get; } = new ObservableCollection<string>();

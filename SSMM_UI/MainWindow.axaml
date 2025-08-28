@@ -24,54 +24,30 @@
 					<MenuItem Header="Settings" Command="{Binding OpenSetting}">
 					</MenuItem>
 				</Menu>
-				<Views:LeftSideBarView x:Name="LeftSideBar" DataContext="{Binding LeftSideBarViewModel}"/>
+				<Views:LeftSideBarView x:Name="LeftSideBar" DataContext="{Binding LeftSideBarVM}"/>
 			</DockPanel>
 		</Grid>
 		<!-- Main Content Area -->
 		<TabControl Grid.Column="1" Background="Transparent" BorderThickness="0">
 			<TabItem Header="Stream">
-				<ScrollViewer>
-					<StackPanel Margin="15">
-						<Border Classes="card">
-							<StackPanel>
-								<TextBlock Text="STREAM CONTROLS" Classes="secondary"/>
-								<WrapPanel>
-									<Button Content="Start Stream" Classes="success" Margin="0 0 15 0"
-                                            Command="{Binding StartStreamCommand}" IsEnabled="{Binding CanStartStream}"/>
-									<Button Content="Stop Streams" Classes="danger" Margin="0 0 15 0"
-                                            Command="{Binding StopStreamsCommand}" IsEnabled="{Binding CanStopStream}"/>
-									<Button Content="Start Receiving" Classes="danger" Margin="0 0 15 0"
-                                            Command="{Binding LeftSideBarViewModel.ToggleReceivingStreamCommand}"/>
-									<Button Content="Test" Command="{Binding TestYtHacksCommand}"></Button>
-								</WrapPanel>
-
-								<StackPanel Margin="0 10 0 0">
-									<TextBlock Text="{Binding StreamStatusText}" Classes="secondary"/>
-									<TextBlock Text="{Binding ServerStatusText}" FontWeight="SemiBold"/>
-								</StackPanel>
-							</StackPanel>
-						</Border>
-
+				<StackPanel>
+					<Views:StreamControlView DataContext="{Binding StreamControlVM} "></Views:StreamControlView>
 						<Views:LogView DataContext="{Binding LogVM}"></Views:LogView>
-					</StackPanel>
-					
-				</ScrollViewer>
+				</StackPanel>
 			</TabItem>
 
 			<TabItem Header="Stream Metadata">
 				<ScrollViewer>
 					<StackPanel Margin="15" Width="1000">
 						<Border Classes="card">
-							<!-- Använd DockPanel för att placera element bredvid varandra -->
+							
 							<DockPanel LastChildFill="True">
-								<!-- SearchView dockad till vänster -->
+								
 								<Views:SearchView DataContext="{Binding SearchVM}" DockPanel.Dock="Left" Width="400"/>
-
-								<!-- Mellanrum -->
+								
 								<Border Width="10" DockPanel.Dock="Left" Background="Transparent"/>
-
-								<!-- Huvudinnehåll som fyller resten -->
 								<StackPanel>
+									
 									<TextBlock Text="STREAM METADATA" Classes="secondary"/>
 									<TextBlock Text="Title" FontWeight="SemiBold"/>
 									<TextBox Text="{Binding TitleText}" FontSize="14" Padding="10"

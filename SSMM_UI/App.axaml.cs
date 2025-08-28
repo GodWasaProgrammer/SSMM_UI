@@ -39,6 +39,7 @@ public partial class App : Application
                 .AddSingleton<MainWindowViewModel>()
                 .AddSingleton<CentralAuthService>()
                 .AddSingleton<MetaDataService>()
+                .AddSingleton<StreamService>()
                 .AddSingleton<StateService>()
                 .AddSingleton<UserSettings>()
                 .AddSingleton<ILogService, LogService>()
@@ -47,6 +48,7 @@ public partial class App : Application
                 .AddSingleton<DisplayStreamOutputViewModel>()
                 .AddSingleton<LogViewModel>()
                 .AddSingleton<SocialPosterViewModel>()
+                .AddSingleton<StreamControlViewModel>()
                 .BuildServiceProvider();
 
 

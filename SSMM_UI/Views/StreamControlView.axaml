@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:local="clr-namespace:SSMM_UI.ViewModel;assembly=SSMM_UI"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SSMM_UI.Views.StreamControlView"
+			 x:DataType="local:StreamControlViewModel">
+	<ScrollViewer>
+		<StackPanel Margin="15">
+			<Border Classes="card">
+				<StackPanel>
+					<TextBlock Text="STREAM CONTROLS" Classes="secondary"/>
+					<WrapPanel>
+						<Button Content="Start Stream" Classes="success" Margin="0 0 15 0"
+								Command="{Binding StartStreamCommand}" IsEnabled="{Binding CanStartStream}"/>
+						<Button Content="Stop Streams" Classes="danger" Margin="0 0 15 0"
+								Command="{Binding StopStreamsCommand}" IsEnabled="{Binding CanStopStream}"/>
+						<Button Content="Start Receiving" Classes="danger" Margin="0 0 15 0"
+								Command="{Binding LeftSideBarViewModel.ToggleReceivingStreamCommand }"/>
+					</WrapPanel>
+
+					<StackPanel Margin="0 10 0 0">
+						<TextBlock Text="{Binding StreamStatusText}" Classes="secondary"/>
+						<TextBlock Text="{Binding ServerStatusText}" FontWeight="SemiBold"/>
+					</StackPanel>
+				</StackPanel>
+
+			</Border>
+
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>

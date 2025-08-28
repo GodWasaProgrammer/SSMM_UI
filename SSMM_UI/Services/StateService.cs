@@ -4,8 +4,10 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Google.Apis.YouTube.v3.Data;
 using Microsoft.Extensions.Logging;
+using SSMM_UI.MetaData;
 using SSMM_UI.RTMP;
 using SSMM_UI.Settings;
 
@@ -23,6 +25,19 @@ public class StateService
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; private set; } = [];
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
     public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; private set; } = [];
+
+    public StreamMetadata CurrentMetaData { get; private set; } = new StreamMetadata();
+
+    public StreamMetadata GetCurrentMetaData()
+    {
+        return CurrentMetaData;
+    }
+
+    public void UpdateCurrentMetaData(StreamMetadata metadata)
+    {
+        CurrentMetaData = metadata;
+    }
+
     public UserSettings UserSettingsObj { get; private set; } = new UserSettings();
 
     private ILogService _logger;
