@@ -128,17 +128,7 @@
 			</TabItem>
 
 			<TabItem Header="Social Media AutoPoster">
-				<ScrollViewer>
-					<StackPanel Margin="15" Width="600">
-						<Border Classes="card">
-							<StackPanel>
-								<CheckBox Content="X(Twitter)" IsChecked="{Binding PostToX}"/>
-								<CheckBox Content="Facebook" IsChecked="{Binding PostToFacebook}"/>
-								<CheckBox Content="Discord" IsChecked="{Binding PostToDiscord}"/>
-							</StackPanel>
-						</Border>
-					</StackPanel>
-				</ScrollViewer>
+				<Views:SocialPosterView DataContext="{Binding SocialPosterVM}"></Views:SocialPosterView>
 			</TabItem>
 		</TabControl>
 	</Grid>

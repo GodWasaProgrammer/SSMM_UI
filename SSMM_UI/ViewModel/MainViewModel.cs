@@ -14,7 +14,7 @@ namespace SSMM_UI.ViewModel;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    public MainWindowViewModel(IFilePickerService filePickerService, CentralAuthService authservice, MetaDataService MdService, ILogService logService, StateService stateService, LeftSideBarViewModel leftSideBarViewModel, UserSettings settings, IDialogService dialogService, SearchViewModel searchmodel, LogViewModel logview)
+    public MainWindowViewModel(IFilePickerService filePickerService, CentralAuthService authservice, MetaDataService MdService, ILogService logService, StateService stateService, LeftSideBarViewModel leftSideBarViewModel, UserSettings settings, IDialogService dialogService, SearchViewModel searchmodel, LogViewModel logview, SocialPosterViewModel socialposter)
     {
         // Init commands
 
@@ -38,6 +38,7 @@ public partial class MainWindowViewModel : ObservableObject
         LeftSideBarViewModel = leftSideBarViewModel;
         SearchVM = searchmodel;
         LogVM = logview;
+        SocialPosterVM = socialposter;
 
         // services
         MetaDataService = MdService;
@@ -72,6 +73,7 @@ public partial class MainWindowViewModel : ObservableObject
     public SearchViewModel SearchVM { get; }
     public ObservableCollection<OutputViewModel> OutputViewModels { get; }
     public LogViewModel LogVM { get; }
+    public SocialPosterViewModel SocialPosterVM { get; }
 
 
     // ==== Collections ====
@@ -248,7 +250,7 @@ public partial class MainWindowViewModel : ObservableObject
             foreach (var info in bla)
             {
                 var outputview = new OutputViewModel(info.Header, info.Process);
-               LogVM.StreamOutputVM.Outputs.Add(outputview);
+                LogVM.StreamOutputVM.Outputs.Add(outputview);
             }
         }
     }

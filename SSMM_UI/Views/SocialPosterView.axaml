@@ -1,0 +1,20 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 xmlns:local="clr-namespace:SSMM_UI.ViewModel"
+             x:Class="SSMM_UI.Views.SocialPosterView"
+			 x:DataType="local:SocialPosterViewModel">
+	<ScrollViewer>
+		<StackPanel Margin="15" Width="600">
+			<Border Classes="card">
+				<StackPanel>
+					<CheckBox Content="X(Twitter)" IsChecked="{Binding PostToX}"/>
+					<CheckBox Content="Facebook" IsChecked="{Binding PostToFB}"/>
+					<CheckBox Content="Discord" IsChecked="{Binding PostToDiscord}"/>
+				</StackPanel>
+			</Border>
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>
