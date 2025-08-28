@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:views="clr-namespace:SSMM_UI.Views"
+             xmlns:vm="clr-namespace:SSMM_UI.ViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="vm:LogViewModel"
+             x:Class="SSMM_UI.Views.LogView">
+
+	<Border Classes="card">
+		<StackPanel>
+			<TextBlock Text="LOGS" Classes="secondary"/>
+			<ListBox ItemsSource="{Binding LogMessages}" Height="300"
+                     SelectedItem="{Binding SelectedLogItem}"
+                     FontFamily="Consolas, Courier New" BorderThickness="0"
+                     Background="{DynamicResource BorderColor}" Opacity="0.2"
+                     Foreground="{DynamicResource PrimaryTextColor}" Padding="10"/>
+
+			<!-- OUTPUT DISPLAY - den hör hemma här! -->
+			<views:OutputDisplayView DataContext="{Binding StreamOutputVM}"
+                                   Margin="0,10,0,0"/>
+		</StackPanel>
+	</Border>
+</UserControl>

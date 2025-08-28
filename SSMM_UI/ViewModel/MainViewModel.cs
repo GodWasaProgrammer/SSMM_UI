@@ -14,7 +14,7 @@ namespace SSMM_UI.ViewModel;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    public MainWindowViewModel(IFilePickerService filePickerService, CentralAuthService authservice, MetaDataService MdService, ILogService logService, StateService stateService, LeftSideBarViewModel leftSideBarViewModel, UserSettings settings, IDialogService dialogService, SearchViewModel searchmodel, DisplayStreamOutputViewModel StreamOutPutDisplay)
+    public MainWindowViewModel(IFilePickerService filePickerService, CentralAuthService authservice, MetaDataService MdService, ILogService logService, StateService stateService, LeftSideBarViewModel leftSideBarViewModel, UserSettings settings, IDialogService dialogService, SearchViewModel searchmodel, LogViewModel logview)
     {
         // Init commands
 
@@ -37,7 +37,8 @@ public partial class MainWindowViewModel : ObservableObject
         // === start children ====
         LeftSideBarViewModel = leftSideBarViewModel;
         SearchVM = searchmodel;
-        StreamOutPutVM = StreamOutPutDisplay;
+        LogVM = logview;
+
         // services
         MetaDataService = MdService;
         _centralAuthService = authservice;
@@ -70,8 +71,8 @@ public partial class MainWindowViewModel : ObservableObject
     public LeftSideBarViewModel LeftSideBarViewModel { get; }
     public SearchViewModel SearchVM { get; }
     public ObservableCollection<OutputViewModel> OutputViewModels { get; }
+    public LogViewModel LogVM { get; }
 
-    public DisplayStreamOutputViewModel StreamOutPutVM { get; }
 
     // ==== Collections ====
     public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; } = [];
@@ -243,11 +244,11 @@ public partial class MainWindowViewModel : ObservableObject
                 _logService.Log(ex.ToString());
             }
             var bla = _streamService.ProcessInfos;
-            StreamOutPutVM.Outputs.Clear();
+            LogVM.StreamOutputVM.Outputs.Clear();
             foreach (var info in bla)
             {
                 var outputview = new OutputViewModel(info.Header, info.Process);
-                StreamOutPutVM.Outputs.Add(outputview);
+               LogVM.StreamOutputVM.Outputs.Add(outputview);
             }
         }
     }
