@@ -12,6 +12,7 @@ public partial class LogViewModel : ObservableObject
     {
         _logService = logService;
         _streamOutputVM = StreamOutPutDisplay;
+        LogMessages = _logService.Messages;
         _logService.OnLogAdded = ScrollToEnd;
     }
 
