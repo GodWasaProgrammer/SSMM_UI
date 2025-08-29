@@ -49,6 +49,7 @@ public partial class App : Application
                 .AddSingleton<LogViewModel>()
                 .AddSingleton<SocialPosterViewModel>()
                 .AddSingleton<StreamControlViewModel>()
+                .AddSingleton<MetaDataViewModel>()
                 .BuildServiceProvider();
 
 

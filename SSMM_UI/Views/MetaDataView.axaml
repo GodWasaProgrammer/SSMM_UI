@@ -1,0 +1,74 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1000"
+             x:Class="SSMM_UI.Views.MetaDataView"
+			 xmlns:Views="clr-namespace:SSMM_UI.Views"
+			 xmlns:local="clr-namespace:SSMM_UI.ViewModel" 
+			 x:DataType="local:MetaDataViewModel">
+	<ScrollViewer>
+		<StackPanel Margin="15" Width="1000">
+			<Border Classes="card">
+
+				<DockPanel LastChildFill="True">
+
+					<Views:SearchView DataContext="{Binding SearchVM}" DockPanel.Dock="Left" Width="400"/>
+
+					<Border Width="10" DockPanel.Dock="Left" Background="Transparent"/>
+					<StackPanel>
+
+						<TextBlock Text="STREAM METADATA" Classes="secondary"/>
+						<TextBlock Text="Title" FontWeight="SemiBold"/>
+						<TextBox Text="{Binding TitleText}" FontSize="14" Padding="10"
+								 BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
+								 CornerRadius="4" Background="{DynamicResource CardColor}"
+								 Foreground="{DynamicResource PrimaryTextColor}"/>
+						<StackPanel>
+							<TextBlock FontWeight="SemiBold">Category (Youtube)</TextBlock>
+							<ComboBox x:Name="YoutubeCategoriesCombo"
+									  ItemsSource="{Binding YoutubeVideoCategories}"
+									  Width="250"
+									  SelectedItem="{Binding CurrentMetadata.YouTubeCategory}"
+									  Background="Transparent"
+									  BorderThickness="0"
+									  Padding="5">
+								<ComboBox.Styles>
+									<Style Selector="ComboBoxItem">
+										<Setter Property="Margin" Value="0 0 5 0"/>
+										<Setter Property="Padding" Value="5 3"/>
+									</Style>
+									<Style Selector="ComboBoxItem:selected">
+										<Setter Property="Background">
+											<Setter.Value>
+												<SolidColorBrush Color="{DynamicResource BorderColor}" Opacity="0.3"/>
+											</Setter.Value>
+										</Setter>
+									</Style>
+								</ComboBox.Styles>
+								<ComboBox.ItemTemplate>
+									<DataTemplate>
+										<StackPanel Margin="0 5">
+											<TextBlock Text="{Binding Path=Snippet.Title}" FontWeight="SemiBold" FontSize="14"/>
+										</StackPanel>
+									</DataTemplate>
+								</ComboBox.ItemTemplate>
+							</ComboBox>
+						</StackPanel>
+						<Button Content="Upload Thumbnail" Classes="primary" Margin="0 10 0 0"
+								Command="{Binding UploadThumbnailCommand}"/>
+						<Border Width="300" Height="168" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
+								CornerRadius="4" Background="{DynamicResource BorderColor}" Opacity="0.1">
+							<Image Source="{Binding ThumbnailImage}" Stretch="Uniform" Margin="5"/>
+						</Border>
+
+						<Button Content="Update Metadata" Classes="primary" Margin="0 10 0 0"
+								Command="{Binding UpdateMetadataCommand}"/>
+						<TextBlock Text="{Binding MetadataStatus}" Foreground="{DynamicResource DangerColor}"
+								   Margin="0 10 0 0" TextWrapping="Wrap"/>
+					</StackPanel>
+				</DockPanel>
+			</Border>
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>
