@@ -5,7 +5,8 @@
 		xmlns:Views="clr-namespace:SSMM_UI.Views"
         x:DataType="local:MainWindowViewModel"
         Title="SSMM_UI" Width="1920" Height="1080"
-        Background="{DynamicResource BackgroundColor}">
+        Background="{DynamicResource BackgroundColor}"
+		Icon="avares://SSMM_UI/Assets/MainIcon.png">
 	
 	<Grid>
 		<Grid.ColumnDefinitions>
