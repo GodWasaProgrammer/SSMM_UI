@@ -16,6 +16,23 @@ public class DialogService : IDialogService
     {
 
     }
+
+    public async Task About()
+    {
+        try
+        {
+            var aboutViewModel = new AboutViewModel();
+            var aboutView = new AboutView(aboutViewModel);
+
+            await aboutView.ShowDialog(GetMainWindow());
+        }
+        catch (Exception ex)
+        {
+            // Hantera fel här, t.ex. visa ett meddelande
+            Console.WriteLine($"Error showing about dialog: {ex.Message}");
+        }
+    }
+
     public async Task<bool> ShowServerDetailsAsync(RtmpServiceGroup group)
     {
         var tcs = new TaskCompletionSource<bool>();
@@ -98,4 +115,5 @@ public interface IDialogService
 {
     Task<bool> ShowServerDetailsAsync(RtmpServiceGroup group);
     Task<UserSettings> ShowSettingsDialogAsync(UserSettings currentSettings);
+    Task About();
 }

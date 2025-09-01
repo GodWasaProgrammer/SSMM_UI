@@ -18,6 +18,7 @@ public partial class MainWindowViewModel : ObservableObject
         _dialogService = dialogService;
         OpenSetting = new AsyncRelayCommand(OpenSettings);
         SetupPuppet = new AsyncRelayCommand(SetupPuppetMaster);
+        OpenAbout = new AsyncRelayCommand(OpenAboutWindow);
 
         // === start children ====
         LeftSideBarVM = leftSideBarVM;
@@ -48,7 +49,12 @@ public partial class MainWindowViewModel : ObservableObject
 
     // ==== Commands ====
     public ICommand OpenSetting { get; }
+    public ICommand OpenAbout { get; }
 
+    private async Task OpenAboutWindow()
+    {
+        await _dialogService.About();
+    }
     private async Task OpenSettings()
     {
         var newSettings = await _dialogService.ShowSettingsDialogAsync(_settings);

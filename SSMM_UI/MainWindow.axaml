@@ -26,7 +26,7 @@
 						<MenuItem Header="Setup">
 							<MenuItem Header="PuppetMaster" Command="{Binding SetupPuppet}"/>
 						</MenuItem>
-					<MenuItem Header="About"></MenuItem>
+					<MenuItem Header="About" Command="{Binding OpenAbout}"/>
 				</Menu>
 				<Views:LeftSideBarView x:Name="LeftSideBar" DataContext="{Binding LeftSideBarVM}"/>
 			</DockPanel>

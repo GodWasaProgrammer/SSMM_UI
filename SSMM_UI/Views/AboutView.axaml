@@ -1,0 +1,23 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="SSMM_UI.Views.AboutView"
+		xmlns:local="clr-namespace:SSMM_UI.ViewModel"
+		x:DataType="local:AboutViewModel"
+        Title="About Streamer and Social Media Manager"
+		SizeToContent="Manual"
+        WindowStartupLocation="CenterOwner">
+	<Border Classes="card" Margin="20">
+	<StackPanel Spacing="15">
+		<Image Source="{Binding ProfileImage}" Width="150" Height="125"/>
+	<TextBlock HorizontalAlignment="Center" Text="{Binding AboutText}" Foreground="{DynamicResource PrimaryTextColor}"/>
+		<HyperlinkButton HorizontalAlignment="Center" Content="{Binding LinkedInLink}" NavigateUri="{Binding LinkedInLink}"/>
+		<HyperlinkButton HorizontalAlignment="Center" Content="{Binding GitLink}" NavigateUri="{Binding GitLink}"/>
+		<HyperlinkButton HorizontalAlignment="Center" Content="{Binding YoutubeLink}" NavigateUri="{Binding YoutubeLink}"/>
+		<HyperlinkButton HorizontalAlignment="Center" Content="{Binding TwitchLink}" NavigateUri="{Binding TwitchLink}"/>
+		<Button HorizontalAlignment="Center" VerticalAlignment="Bottom" Content="Okay" Command="{Binding CloseWindow}"/>
+	</StackPanel>
+	</Border>
+</Window>
