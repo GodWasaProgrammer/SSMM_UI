@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SSMM_UI.Puppeteering;
 using SSMM_UI.Services;
 using SSMM_UI.Settings;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ public partial class MainWindowViewModel : ObservableObject
         _settings = settings;
         _dialogService = dialogService;
         OpenSetting = new AsyncRelayCommand(OpenSettings);
+        SetupPuppet = new AsyncRelayCommand(SetupPuppetMaster);
 
         // === start children ====
         LeftSideBarVM = leftSideBarVM;
@@ -52,5 +54,12 @@ public partial class MainWindowViewModel : ObservableObject
         var newSettings = await _dialogService.ShowSettingsDialogAsync(_settings);
         _settings = newSettings;
         _stateService.SettingsChanged(_settings);
+    }
+
+    public ICommand SetupPuppet { get; }
+
+    private async Task SetupPuppetMaster()
+    {
+        await PuppetMaster.ProfileSetupYoutube();
     }
 }
