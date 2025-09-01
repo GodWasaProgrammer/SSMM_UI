@@ -16,6 +16,7 @@
 	</Application.Resources>
     <Application.Styles>
         <FluentTheme />
+		<StyleInclude Source="avares://IconPacks.Avalonia/Icons.axaml" />
 			<!-- Text Styles -->
 			<Style Selector="TextBlock">
 				<Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>

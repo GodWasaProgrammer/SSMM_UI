@@ -8,16 +8,36 @@
 		x:DataType="local:AboutViewModel"
         Title="About Streamer and Social Media Manager"
 		SizeToContent="Manual"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+		xmlns:iconPacks="https://github.com/MahApps/IconPacks.Avalonia">
 	<Border Classes="card" Margin="20">
 	<StackPanel Spacing="15">
 		<Image Source="{Binding ProfileImage}" Width="150" Height="125"/>
 	<TextBlock HorizontalAlignment="Center" Text="{Binding AboutText}" Foreground="{DynamicResource PrimaryTextColor}"/>
-		<HyperlinkButton HorizontalAlignment="Center" Content="{Binding LinkedInLink}" NavigateUri="{Binding LinkedInLink}"/>
+		
+		<StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Spacing="10">
+			<iconPacks:PackIconBoxIcons Kind="LogosLinkedin"
+					 Width="24"
+					 Height="24" />
+			<HyperlinkButton HorizontalAlignment="Center" Content="{Binding LinkedInLink}" NavigateUri="{Binding LinkedInLink}"/>
+		</StackPanel>
+		
+		<StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Spacing="10">
+			<iconPacks:PackIconBoxIcons Kind="LogosGithub" Width="24" Height="24"/>
 		<HyperlinkButton HorizontalAlignment="Center" Content="{Binding GitLink}" NavigateUri="{Binding GitLink}"/>
+		</StackPanel>
+
+		<StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Spacing="10">
+			<iconPacks:PackIconBoxIcons Kind="LogosYoutube" Width="24" Height="24"/>
 		<HyperlinkButton HorizontalAlignment="Center" Content="{Binding YoutubeLink}" NavigateUri="{Binding YoutubeLink}"/>
+		</StackPanel>
+
+		<StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Spacing="10">
+			<iconPacks:PackIconBoxIcons Kind="LogosTwitch" Width="24" Height="24"/>
 		<HyperlinkButton HorizontalAlignment="Center" Content="{Binding TwitchLink}" NavigateUri="{Binding TwitchLink}"/>
-		<Button HorizontalAlignment="Center" VerticalAlignment="Bottom" Content="Okay" Command="{Binding CloseWindow}"/>
+		</StackPanel>
+		
+		<Button HorizontalAlignment="Center" VerticalAlignment="Bottom" Content="Close" Command="{Binding CloseWindow}"/>
 	</StackPanel>
 	</Border>
 </Window>

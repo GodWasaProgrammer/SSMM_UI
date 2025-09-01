@@ -27,6 +27,8 @@
     <PackageReference Include="Google.Apis.Oauth2.v2" Version="1.68.0.1869" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.70.0.3847" />
     <PackageReference Include="HtmlAgilityPack" Version="1.12.2" />
+    <PackageReference Include="IconPacks.Avalonia" Version="1.2.0" />
+    <PackageReference Include="IconPacks.Avalonia.FontAwesome" Version="1.2.0" />
     <PackageReference Include="LibVLCSharp" Version="3.9.4" />
     <PackageReference Include="LibVLCSharp.Avalonia" Version="3.9.4" />
     <PackageReference Include="LiveStreamingServerNet" Version="0.31.1" />

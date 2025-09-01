@@ -7,6 +7,11 @@ namespace SSMM_UI.Views;
 
 public partial class AboutView : Window
 {
+    public AboutView()
+    {
+        InitializeComponent();
+    }
+
     public AboutView(AboutViewModel aboutVM)
     {
         InitializeComponent();
