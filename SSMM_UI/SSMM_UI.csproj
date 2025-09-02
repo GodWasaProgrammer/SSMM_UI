@@ -57,7 +57,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SocialPoster\Poster.csproj" />
+    <ProjectReference Include="..\..\..\..\Documents\GitHub\StreamerSocialMediaManager\Poster.csproj" />
   </ItemGroup>
 
 	<ItemGroup>
