@@ -202,18 +202,13 @@ public class StreamService : IDisposable
 
         return (TwitchAdress, key);
     }
-    public async Task<(string rtmpUrl, string? streamkey)> CreateKickBroadcastAsync(StreamMetadata metadata)
+    public async Task CreateKickBroadcastAsync(StreamMetadata metadata)
     {
         //TODO: There needs to be automation with for example puppeteer here to control the stream name, title etc as the Kick API does not support setting this programmatically.
 
         // kick keys remain the same unless reset
 
-
-        await PuppetMaster.SetKickGameTitle(metadata.Title);
-
-
-        string kickRtmpUrl = "rtmp://live.kick.com/kick";
-        return (kickRtmpUrl, "");
+        await PuppetMaster.SetKickGameTitle(StreamTitle: metadata.Title);
     }
     public async Task<(string rtmpUrl, string? streamKey)> CreateTrovoBroadcastAsync(StreamMetadata metadata)
     {
@@ -463,6 +458,10 @@ public class StreamService : IDisposable
                         {
                             throw new Exception($"CreateTwitchBroadcast returned a null value in either{newUrl} or {newKey}");
                         }
+                    }
+                    if (service.DisplayName.Contains("Kick", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await CreateKickBroadcastAsync(metadata);
                     }
                 }
                 catch (Exception ex)

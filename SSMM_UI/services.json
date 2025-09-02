@@ -7,10 +7,10 @@
             "common": true,
             "stream_key_link": "https://kick.com/dashboard/settings/stream",
             "servers": [
-                {
-                    "name": "Primary Server",
-                    "url": "rtmps://fa723fc1b171.global-contribute.live-video.net:443/app"
-                }
+              {
+                "name": "Primary Server",
+                "url": "rtmps://fa723fc1b171.global-contribute.live-video.net"
+              }
             ],
             "recommended": {
                 "keyint": 2,
