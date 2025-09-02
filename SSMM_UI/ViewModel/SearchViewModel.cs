@@ -17,7 +17,7 @@ namespace SSMM_UI.ViewModel;
 
 public partial class SearchViewModel : ObservableObject
 {
-    private readonly Timer _searchTimer;
+    private readonly System.Timers.Timer _searchTimer;
     private string _accessToken;
     private readonly string _clientId;
     private CentralAuthService CentAuthService;
@@ -28,7 +28,7 @@ public partial class SearchViewModel : ObservableObject
         _clientId = CentAuthService.TwitchService.GetClientId();
         CentAuthService.TwitchService.OnAccessTokenUpdated += OnTokenChange;
         // Sätt upp timer för debounce
-        _searchTimer = new Timer(300);
+        _searchTimer = new System.Timers.Timer(300);
         _searchTimer.Elapsed += async (s, e) => await PerformSearch();
         _searchTimer.AutoReset = false;
     }

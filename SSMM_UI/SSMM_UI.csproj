@@ -11,6 +11,16 @@
 	  <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <AvaloniaXaml Remove="Poster\bin\**" />
+    <AvaloniaXaml Remove="Poster\obj\**" />
+    <Compile Remove="Poster\bin\**" />
+    <Compile Remove="Poster\obj\**" />
+    <EmbeddedResource Remove="Poster\bin\**" />
+    <EmbeddedResource Remove="Poster\obj\**" />
+    <None Remove="Poster\bin\**" />
+    <None Remove="Poster\obj\**" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Assets\MainIcon.png" />
   </ItemGroup>
   <ItemGroup>
@@ -53,11 +63,8 @@
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.1" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="9.0.8" />
+    <PackageReference Include="TweetinviAPI" Version="5.0.4" />
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Documents\GitHub\StreamerSocialMediaManager\Poster.csproj" />
   </ItemGroup>
 
 	<ItemGroup>

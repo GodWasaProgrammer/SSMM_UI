@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Poster;
-
+using SSMM_UI.Poster;
 
 namespace SSMM_UI.Services;
 

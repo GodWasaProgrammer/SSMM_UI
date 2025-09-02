@@ -373,3 +373,11 @@ FodyWeavers.xsd
 /SSMM_UI/Dependencies/postproc-58.dll
 /SSMM_UI/Dependencies/swresample-5.dll
 /SSMM_UI/Dependencies/swscale-8.dll
+/SSMM_UI/API_Key_Secrets_Loader/Access_Secret.txt
+/SSMM_UI/API_Key_Secrets_Loader/Access_Token.txt
+/SSMM_UI/API_Key_Secrets_Loader/Accounts.txt
+/SSMM_UI/API_Key_Secrets_Loader/API_Keys.txt
+/SSMM_UI/API_Key_Secrets_Loader/Client_Ids.txt
+/SSMM_UI/API_Key_Secrets_Loader/Consumer_Keys.txt
+/SSMM_UI/API_Key_Secrets_Loader/Consumer_Secrets.txt
+/SSMM_UI/API_Key_Secrets_Loader/Webhooks.txt
