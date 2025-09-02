@@ -475,8 +475,22 @@ public class StreamService : IDisposable
 
             // Build FFMpeg Args
 
+            string fullUrl;
+            if (service.SelectedServer.Url.StartsWith("rtmps://"))
+            {
+                // För RTMP:S, använd vanlig sammansättning men se till att port 443 används
+
+                fullUrl = $"{service.SelectedServer.Url}:443/{service.StreamKey}";
+
+            }
+            else
+            {
+                // För vanlig RTMP
+                fullUrl = $"{service.SelectedServer.Url}/{service.StreamKey}";
+            }
+
             // endpoint to send output through
-            var fullUrl = $"{service.SelectedServer.Url}/{service.StreamKey}";
+            //var fullUrl = $"{service.SelectedServer.Url}/{service.StreamKey}";
 
             // our internal rtmp feed
             var input = RtmpAdress;
