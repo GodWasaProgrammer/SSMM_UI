@@ -480,7 +480,7 @@ public class StreamService : IDisposable
             {
                 // För RTMP:S, använd vanlig sammansättning men se till att port 443 används
 
-                fullUrl = $"{service.SelectedServer.Url}:443/{service.StreamKey}";
+                fullUrl = $"{service.SelectedServer.Url}:443/app/{service.StreamKey}";
 
             }
             else
