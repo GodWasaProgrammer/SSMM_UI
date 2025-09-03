@@ -500,15 +500,15 @@ public class StreamService : IDisposable
 
             var recommended = service.ServiceGroup.RecommendedSettings;
 
-            // Video codec
-            if (recommended?.SupportedVideoCodes?.Length > 0)
-            {
-                args.Append($"-c:v {recommended.SupportedVideoCodes[0]} ");
-            }
-            else
-            {
-                args.Append("-c:v copy "); // fallback
-            }
+            //// Video codec
+            //if (recommended?.SupportedVideoCodes?.Length > 0)
+            //{
+            //    args.Append($"-c:v {recommended.SupportedVideoCodes[0]} ");
+            //}
+            //else
+            //{
+            args.Append("-c:v copy "); // fallback
+            //}
 
             // Video bitrate
             if (recommended?.MaxVideoBitRate != null)
