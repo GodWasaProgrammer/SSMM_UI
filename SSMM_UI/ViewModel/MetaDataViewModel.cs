@@ -6,6 +6,7 @@ using SSMM_UI.MetaData;
 using SSMM_UI.Services;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -44,7 +45,10 @@ public partial class MetaDataViewModel : ObservableObject
             if (CurrentMetadata.Thumbnail != null)
                 thumbnailImage = CurrentMetadata.Thumbnail;
             if (CurrentMetadata.YouTubeCategory != null)
-                SelectedYoutubeCategory = CurrentMetadata.YouTubeCategory;
+                SelectedYoutubeCategory = YoutubeVideoCategories.FirstOrDefault(c => c.Id == CurrentMetadata.YouTubeCategory.Id);
+            // revert to keep correct ref
+            if(selectedYoutubeCategory != null)
+            CurrentMetadata.YouTubeCategory = selectedYoutubeCategory;
         }
     }
 
