@@ -34,6 +34,18 @@ public partial class MetaDataViewModel : ObservableObject
                 CurrentMetadata.TwitchCategory = SearchVM.SelectedItem;
             }
         };
+
+        // fetch saved state if there is any
+        CurrentMetadata = _stateService.GetCurrentMetaData();
+        if (CurrentMetadata != null)
+        {
+            if (CurrentMetadata.Title != null)
+                TitleText = CurrentMetadata.Title;
+            if (CurrentMetadata.Thumbnail != null)
+                thumbnailImage = CurrentMetadata.Thumbnail;
+            if (CurrentMetadata.YouTubeCategory != null)
+                SelectedYoutubeCategory = CurrentMetadata.YouTubeCategory;
+        }
     }
 
     // == Metadata Selections ==
