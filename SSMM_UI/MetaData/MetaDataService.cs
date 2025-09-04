@@ -69,7 +69,7 @@ public class MetaDataService
 
     }
 
-    private async Task<string?> GetGameIdTwitch(string categoryName, string accessToken, string clientId)
+    private static async Task<string?> GetGameIdTwitch(string categoryName, string accessToken, string clientId)
     {
         using var client = new HttpClient();
         var request = new HttpRequestMessage(HttpMethod.Get,
@@ -98,8 +98,8 @@ public class MetaDataService
     }
 
     public IReadOnlyList<VideoCategory> YouTubeCategories => _ytCategories;
-    private ILogService _logger;
-    private CentralAuthService _AuthService;
+    private readonly ILogService _logger;
+    private readonly CentralAuthService _AuthService;
     public MetaDataService(ILogService logger, CentralAuthService AuthService)
     {
         _ytCategories = [];
@@ -115,40 +115,47 @@ public class MetaDataService
     // only for making json, is stored locally
     public async Task YTCategoryFetch()
     {
-        var categoriesRequest = _youTubeService.VideoCategories.List("snippet");
-        categoriesRequest.RegionCode = "SE"; // Eller "US", "GB", etc.
-
-        try
+        VideoCategoriesResource.ListRequest? List;
+        if (_youTubeService != null)
         {
-            var result = await categoriesRequest.ExecuteAsync();
-            if (result is not null)
+            if (_youTubeService.VideoCategories != null)
             {
+                List = _youTubeService.VideoCategories.List("snippet");
+                List.RegionCode = "SE"; // Eller "US", "GB", etc.
 
-                VideoCategoryListResponse response = new();
-                response = result;
-                _ytCategories = [];
-                foreach (var item in response.Items)
+                try
                 {
-                    var category = new VideoCategory();
-                    category = item;
-                    _ytCategories.Add(category);
-                }
-                foreach (var category in _ytCategories)
-                {
-                    if (category.Snippet.Assignable == true)
+                    var result = await List.ExecuteAsync();
+                    if (result is not null)
                     {
-                        _logger.Log($"{category.Id} - {category.Snippet.Title}");
+
+                        VideoCategoryListResponse response = new();
+                        response = result;
+                        _ytCategories = [];
+                        foreach (var item in response.Items)
+                        {
+                            var category = new VideoCategory();
+                            category = item;
+                            _ytCategories.Add(category);
+                        }
+                        foreach (var category in _ytCategories)
+                        {
+                            if (category.Snippet.Assignable == true)
+                            {
+                                _logger.Log($"{category.Id} - {category.Snippet.Title}");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        throw (new Exception("API call to YT failed to fetch categories"));
                     }
                 }
+                catch (Exception ex)
+                {
+                    _logger.Log(ex.Message);
+                }
             }
-            else
-            {
-                throw (new Exception("API call to YT failed to fetch categories"));
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.Log(ex.Message);
         }
     }
 
@@ -163,7 +170,7 @@ public class MetaDataService
 
         foreach (var ch in searchChars)
         {
-            string cursor = null;
+            string? cursor = null;
 
             do
             {
@@ -252,7 +259,7 @@ public class MetaDataService
     }
 
     // TODO: Implement in Metadata UI
-    public async Task<List<TwitchCategory>> SearchTwitchCategories(string query, string accessToken, string clientId)
+    public static async Task<List<TwitchCategory>> SearchTwitchCategories(string query, string accessToken, string clientId)
     {
         using var http = new HttpClient();
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);

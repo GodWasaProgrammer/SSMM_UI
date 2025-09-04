@@ -22,7 +22,9 @@ public class StateService
     private const string YoutubeCategories = "youtube_categories.json";
     private const string _userSettings = "UserSettings.json";
     private const string _savedMetaData = "MetaData_State.json";
-    private readonly JsonSerializerOptions _jsonOptions;
+    private readonly JsonSerializerOptions _metaDataJsonOptions;
+    private readonly JsonSerializerOptions _regularJsonOptions = new() { WriteIndented = true };
+
 
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; private set; } = [];
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
@@ -43,10 +45,10 @@ public class StateService
 
     public UserSettings UserSettingsObj { get; private set; } = new UserSettings();
 
-    private ILogService _logger;
+    private readonly ILogService _logger;
     public StateService(ILogService logger)
     {
-        _jsonOptions = new JsonSerializerOptions
+        _metaDataJsonOptions = new JsonSerializerOptions
         {
             WriteIndented = true,
             PropertyNameCaseInsensitive = true,
@@ -68,13 +70,13 @@ public class StateService
 
     public void SerializeServices()
     {
-        var json = JsonSerializer.Serialize(SelectedServicesToStream, new JsonSerializerOptions { WriteIndented = true });
+        var json = JsonSerializer.Serialize(SelectedServicesToStream, _regularJsonOptions);
         File.WriteAllText(SerializedServices, json);
     }
 
     public void SerializeSettings()
     {
-        var json = JsonSerializer.Serialize(UserSettingsObj, new JsonSerializerOptions { WriteIndented = true });
+        var json = JsonSerializer.Serialize(UserSettingsObj, _regularJsonOptions);
         File.WriteAllText(_userSettings, json);
     }
 
@@ -95,7 +97,7 @@ public class StateService
     {
         try
         {
-            string json = JsonSerializer.Serialize(CurrentMetaData, _jsonOptions);
+            string json = JsonSerializer.Serialize(CurrentMetaData, _metaDataJsonOptions);
             File.WriteAllText(_savedMetaData, json);
         }
         catch (Exception ex)
@@ -109,7 +111,7 @@ public class StateService
         if (File.Exists(_savedMetaData))
         {
             var json = File.ReadAllText(_savedMetaData);
-            var deserialized = JsonSerializer.Deserialize<StreamMetadata>(json, _jsonOptions);
+            var deserialized = JsonSerializer.Deserialize<StreamMetadata>(json, _metaDataJsonOptions);
             if (deserialized != null)
             {
                 CurrentMetaData = deserialized;
@@ -217,9 +219,7 @@ public class StateService
             if (service.TryGetProperty("supported video codecs", out var codecs))
             {
                 recommended ??= new RecommendedSettings();
-                recommended.SupportedVideoCodes = codecs.EnumerateArray()
-                                                        .Select(c => c.GetString()!)
-                                                        .ToArray();
+                recommended.SupportedVideoCodes = [.. codecs.EnumerateArray().Select(c => c.GetString()!)];
             }
 
             if (rtmpServers.Count > 0)
@@ -234,6 +234,3 @@ public class StateService
         }
     }
 }
-
-
-

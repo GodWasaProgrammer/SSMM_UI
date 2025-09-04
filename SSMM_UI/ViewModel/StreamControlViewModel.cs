@@ -33,15 +33,7 @@ public partial class StreamControlViewModel : ObservableObject
         StopStreamsCommand = new RelayCommand(OnStopStreams);
 
         // Fire and forget
-        _ = Initialize();
-    }
-
-    public void fetchCurrentMetaData()
-    {
-        if (_stateService != null)
-        {
-
-        }
+        Initialize();
     }
 
     // == child models ==
@@ -54,36 +46,35 @@ public partial class StreamControlViewModel : ObservableObject
     [ObservableProperty] private string streamStatusText = "Stream status: ❌ Not Receiving";
 
     // ==== Services ====
-    ILogService _logService;
-    StreamService _streamService;
-    MetaDataService _mdService;
-    StateService _stateService;
-    BroadCastService _broadCastService;
-    PollService _pollService;
+    readonly ILogService _logService;
+    readonly StreamService _streamService;
+    readonly MetaDataService _mdService;
+    readonly StateService _stateService;
+    readonly BroadCastService _broadCastService;
+    readonly PollService _pollService;
 
 
     // Settings
-    UserSettings _settings;
+    readonly UserSettings _settings;
 
     // == bool toggler for stopping your output streams ==
     [ObservableProperty] private bool canStopStream = false;
     [ObservableProperty] private bool canStartStream = true;
 
     // === MetaData === 
-    [ObservableProperty] StreamMetadata currentMetaData;
+    [ObservableProperty] StreamMetadata? currentMetaData;
 
     // == Output Controls ==
     public ICommand StartStreamCommand { get; }
     public ICommand StopStreamsCommand { get; }
 
 
-    private async Task Initialize()
+    private void Initialize()
     {
         if (_settings.PollStream && _settings.PollServer)
         {
             SubscribeToEvents();
-            if (_pollService != null)
-                _pollService.StartPolling();
+            _pollService?.StartPolling();
         }
         else
         {
@@ -137,11 +128,20 @@ public partial class StreamControlViewModel : ObservableObject
                 _logService.Log(ex.ToString());
             }
             var bla = _streamService.ProcessInfos;
-            LogVM.StreamOutputVM.Outputs.Clear();
-            foreach (var info in bla)
+            if (LogVM != null)
             {
-                var outputview = new OutputViewModel(info.Header, info.Process);
-                LogVM.StreamOutputVM.Outputs.Add(outputview);
+                if (LogVM.StreamOutputVM != null)
+                {
+                    if (LogVM.StreamOutputVM.Outputs != null)
+                    {
+                        LogVM.StreamOutputVM.Outputs.Clear();
+                        foreach (var info in bla)
+                        {
+                            var outputview = new OutputViewModel(info.Header, info.Process);
+                            LogVM.StreamOutputVM.Outputs.Add(outputview);
+                        }
+                    }
+                }
             }
         }
     }
@@ -150,8 +150,7 @@ public partial class StreamControlViewModel : ObservableObject
     {
         try
         {
-            if (_streamService != null)
-                _streamService.StopStreams();
+            _streamService?.StopStreams();
             _logService.Log("Stopped all streams.");
             CanStartStream = true;
             CanStopStream = false;

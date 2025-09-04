@@ -37,13 +37,13 @@ public class GoogleOAuthService
     private string? _currentCodeVerifier;
     private string? _currentState;
 
-    private ILogService _logger;
+    private readonly ILogService _logger;
     public GoogleOAuthService(ILogService logger)
     {
         _logger = logger;
     }
 
-    public string GetClientId()
+    public static string GetClientId()
     {
         return ClientID;
     }

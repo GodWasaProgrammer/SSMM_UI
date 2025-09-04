@@ -9,6 +9,10 @@ namespace SSMM_UI.Views;
 
 public partial class ServerDetailsWindow : Window
 {
+    public ServerDetailsWindow()
+    {
+        InitializeComponent();
+    }
     public ServerDetailsWindow(RtmpServiceGroup serviceGroup, Action<bool, string, RtmpServerInfo, RtmpServiceGroup> callback)
     {
         InitializeComponent();

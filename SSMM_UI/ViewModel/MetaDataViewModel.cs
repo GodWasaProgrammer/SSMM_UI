@@ -47,8 +47,8 @@ public partial class MetaDataViewModel : ObservableObject
             if (CurrentMetadata.YouTubeCategory != null)
                 SelectedYoutubeCategory = YoutubeVideoCategories.FirstOrDefault(c => c.Id == CurrentMetadata.YouTubeCategory.Id);
             // revert to keep correct ref
-            if(selectedYoutubeCategory != null)
-            CurrentMetadata.YouTubeCategory = selectedYoutubeCategory;
+            if (selectedYoutubeCategory != null)
+                CurrentMetadata.YouTubeCategory = selectedYoutubeCategory;
         }
     }
 
@@ -88,9 +88,12 @@ public partial class MetaDataViewModel : ObservableObject
                 {
                     ThumbnailImage = bitmap;
                     if (path != null)
-                        CurrentMetadata.ThumbnailPath = path;
-                    CurrentMetadata.Thumbnail = ThumbnailImage;
-                    _logService.Log("Thumbnail loaded successfully");
+                        if (CurrentMetadata != null)
+                        {
+                            CurrentMetadata.ThumbnailPath = path;
+                            CurrentMetadata.Thumbnail = ThumbnailImage;
+                            _logService.Log("Thumbnail loaded successfully");
+                        }
                 }
                 else
                 {
@@ -102,14 +105,18 @@ public partial class MetaDataViewModel : ObservableObject
         {
             _logService.Log($"Error loading thumbnail: {ex.Message}");
         }
-        _stateService.UpdateCurrentMetaData(CurrentMetadata);
+        if (CurrentMetadata != null)
+            _stateService.UpdateCurrentMetaData(CurrentMetadata);
     }
 
     private void OnUpdateMetadata()
     {
-        CurrentMetadata.Title = TitleText;
-        _logService.Log($"Updated metadata: Title={TitleText}");
-        MetadataStatus = "Metadata updated successfully.";
-        _stateService.UpdateCurrentMetaData(CurrentMetadata);
+        if (CurrentMetadata != null)
+        {
+            CurrentMetadata.Title = TitleText;
+            _logService.Log($"Updated metadata: Title={TitleText}");
+            MetadataStatus = "Metadata updated successfully.";
+            _stateService.UpdateCurrentMetaData(CurrentMetadata);
+        }
     }
 }

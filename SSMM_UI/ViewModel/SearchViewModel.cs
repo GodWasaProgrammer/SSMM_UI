@@ -17,10 +17,10 @@ namespace SSMM_UI.ViewModel;
 
 public partial class SearchViewModel : ObservableObject
 {
-    private readonly System.Timers.Timer _searchTimer;
+    private readonly Timer _searchTimer;
     private string _accessToken;
     private readonly string _clientId;
-    private CentralAuthService CentAuthService;
+    private readonly CentralAuthService CentAuthService;
     public SearchViewModel(CentralAuthService authsrv)
     {
         CentAuthService = authsrv;
@@ -28,13 +28,13 @@ public partial class SearchViewModel : ObservableObject
         _clientId = CentAuthService.TwitchService.GetClientId();
         CentAuthService.TwitchService.OnAccessTokenUpdated += OnTokenChange;
         // Sätt upp timer för debounce
-        _searchTimer = new System.Timers.Timer(300);
+        _searchTimer = new Timer(300);
         _searchTimer.Elapsed += async (s, e) => await PerformSearch();
         _searchTimer.AutoReset = false;
     }
 
     [ObservableProperty]
-    TwitchCategory selectedItem;
+    TwitchCategory? selectedItem;
 
     [ObservableProperty]
     private string _searchQuery = string.Empty;
@@ -43,7 +43,7 @@ public partial class SearchViewModel : ObservableObject
     private bool _isSearching;
 
     [ObservableProperty]
-    private ObservableCollection<TwitchCategory> _searchResults = new();
+    private ObservableCollection<TwitchCategory> _searchResults = [];
 
 
     private void OnTokenChange(string accessTokenUpdated)
@@ -97,7 +97,7 @@ public partial class SearchViewModel : ObservableObject
         }
     }
 
-    public async Task<Bitmap> LoadBoxArtAsync(string BoxArtUrl)
+    public static async Task<Bitmap> LoadBoxArtAsync(string BoxArtUrl)
     {
         using var http = new HttpClient();
         
@@ -108,7 +108,7 @@ public partial class SearchViewModel : ObservableObject
         return new Bitmap(ms);
     }
 
-    public async Task<List<TwitchCategory>> SearchTwitchCategories(string query, string accessToken, string clientId)
+    public static async Task<List<TwitchCategory>> SearchTwitchCategories(string query, string accessToken, string clientId)
     {
         using var http = new HttpClient();
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
@@ -140,7 +140,7 @@ public partial class SearchViewModel : ObservableObject
 
         foreach (var item in results)
         {
-            Bitmap res = null;
+            Bitmap? res = null;
             if (item.BoxArtUrl != null)
             {
                 var pic = await LoadBoxArtAsync(item.BoxArtUrl);

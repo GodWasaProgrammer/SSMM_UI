@@ -66,7 +66,7 @@ public class StreamService
                     }
                     if (service.DisplayName.Contains("Kick", StringComparison.OrdinalIgnoreCase))
                     {
-                        await _broadCastService.CreateKickBroadcastAsync(metadata);
+                        await BroadCastService.CreateKickBroadcastAsync(metadata);
                     }
                 }
                 catch (Exception ex)

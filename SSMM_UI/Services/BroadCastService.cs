@@ -19,7 +19,7 @@ public class BroadCastService
 {
     private CentralAuthService _authService;
     private YouTubeService _youTubeService;
-    private MetaDataService MDService;
+    private readonly MetaDataService MDService;
     private const string TwitchAdress = "rtmp://live.twitch.tv/app";
     private ILogService _logger;
     private StreamInfo StreamInfo;
@@ -126,14 +126,13 @@ public class BroadCastService
                     await thumbnailRequest.UploadAsync();
                 }
 
-                int category;
                 if (metadata != null)
                 {
                     if (metadata.YouTubeCategory != null)
                     {
                         if (metadata.YouTubeCategory.Id != null)
                         {
-                            var success = int.TryParse(metadata.YouTubeCategory.Id, out category);
+                            var success = int.TryParse(metadata.YouTubeCategory.Id, out int category);
                             if (success)
                             {
                                 await MDService.SetTitleAndCategoryYoutubeAsync(insertedBroadcast.Id, null, category);
@@ -179,7 +178,20 @@ public class BroadCastService
         httpClient.DefaultRequestHeaders.Add("Client-Id", ClientId);
 
         // Title and game should be set after this
-        await MDService.SetTwitchTitleAndCategory(metadata.Title, metadata.TwitchCategory.Name);
+        if (metadata.TwitchCategory != null)
+        {
+            await MDService.SetTwitchTitleAndCategory(metadata.Title, metadata.TwitchCategory.Name);
+        }
+        if (metadata.TwitchCategory == null)
+        {
+            if (metadata != null)
+            {
+                if (metadata.Title != null)
+                {
+                    await MDService.SetTwitchTitleAndCategory(metadata.Title);
+                }
+            }
+        }
 
 
         // Twitch RTMP-info är statisk (RTMP URL och stream key)
@@ -192,7 +204,7 @@ public class BroadCastService
 
         return (TwitchAdress, key);
     }
-    public async Task CreateKickBroadcastAsync(StreamMetadata metadata)
+    public static async Task CreateKickBroadcastAsync(StreamMetadata metadata)
     {
         //TODO: There needs to be automation with for example puppeteer here to control the stream name, title etc as the Kick API does not support setting this programmatically.
 
