@@ -18,13 +18,12 @@ namespace SSMM_UI.Oauth.Kick;
 public class KickOAuthService
 {
     private const string OAuthBaseUrl = "https://id.kick.com";
-    private const string ApiBaseUrl = "https://api.kick.com";
     private const string RedirectUri = "http://localhost:12345/callback/";
     private const string TokenFilePath = "kick_token.json";
     private const string ClientID = "01K1N4MW57X4G7Q50G7ZS6CA9Y";
-    private KickAuthResult _kickAuthResult;
+    private KickAuthResult? _kickAuthResult;
 
-    public string GetClientId()
+    public static string GetClientId()
     {
         return ClientID;
     }
@@ -59,7 +58,7 @@ public class KickOAuthService
     private string? _currentCodeVerifier;
     private string? _currentState;
 
-    private ILogService _logger;
+    private readonly ILogService _logger;
 
     public KickOAuthService(ILogService logger)
     {
@@ -120,8 +119,6 @@ public class KickOAuthService
 
     private static async Task<KickAuthResult> RefreshTokenAsync(string refreshToken)
     {
-        string clientSecret = Environment.GetEnvironmentVariable("KickClientSecret")!;
-
         using var httpClient = new HttpClient();
         var content = new FormUrlEncodedContent(
         [
@@ -241,7 +238,14 @@ public class KickOAuthService
                 throw new Exception("State matchar inte - potentiell CSRF-attack");
             }
 
-            string authCode = context.Request.QueryString["code"];
+            string? authCode = context.Request.QueryString["code"];
+
+            if (string.IsNullOrEmpty(authCode))
+            {
+                // Logga fel, redirecta till felssida, eller kasta exception
+                context.Response.Redirect("/error?message=missing_code");
+                return "Error"; // Avbryt vidare processing
+            }
             await SendBrowserResponse(context.Response,
                 "<html><body>✅ Inloggning lyckades. Stäng detta fönster.</body></html>");
             if (authCode != null)
@@ -391,6 +395,8 @@ public class KickOAuthService
         }
     }
 
+    private static readonly JsonSerializerOptions _jsonoptions = new() { WriteIndented = true };
+
     private static async Task SendBrowserResponse(HttpListenerResponse response, string content)
     {
         var buffer = Encoding.UTF8.GetBytes(content);
@@ -401,7 +407,7 @@ public class KickOAuthService
 
     private static void SaveToken(KickAuthResult token)
     {
-        var json = JsonSerializer.Serialize(token, new JsonSerializerOptions { WriteIndented = true });
+        var json = JsonSerializer.Serialize(token, _jsonoptions);
         File.WriteAllText(TokenFilePath, json);
     }
 }

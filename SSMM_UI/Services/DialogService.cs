@@ -24,7 +24,7 @@ public class DialogService : IDialogService
             var aboutViewModel = new AboutViewModel();
             var aboutView = new AboutView(aboutViewModel);
 
-            await aboutView.ShowDialog(GetMainWindow());
+            await aboutView.ShowDialog(GetMainWindow()!);
         }
         catch (Exception ex)
         {
@@ -36,7 +36,7 @@ public class DialogService : IDialogService
     public async Task<bool> ShowServerDetailsAsync(RtmpServiceGroup group)
     {
         var tcs = new TaskCompletionSource<bool>();
-        SelectedService selectedService = null;
+        SelectedService? selectedService = null;
 
         var detailsWindow = new ServerDetailsWindow(group, (success, streamKey, server, serviceGroup) =>
         {
@@ -53,16 +53,19 @@ public class DialogService : IDialogService
             tcs.SetResult(success);
         });
 
-        await detailsWindow.ShowDialog(GetMainWindow());
+        await detailsWindow.ShowDialog(GetMainWindow()!);
         var result = await tcs.Task;
 
         // EFTER att dialogen stängts - lägg till i huvud-viewmodel
         if (result && selectedService != null)
         {
             var mainVM = GetMainWindow();
-            if (mainVM.DataContext is MainWindowViewModel mainVm)
+            if (mainVM != null)
             {
-                mainVm.LeftSideBarVM.SelectedServicesToStream.Add(selectedService);
+                if (mainVM.DataContext is MainWindowViewModel mainVm)
+                {
+                    mainVm.LeftSideBarVM.SelectedServicesToStream.Add(selectedService);
+                }
             }
         }
 
@@ -88,7 +91,7 @@ public class DialogService : IDialogService
         // Sätt host window-referensen i ViewModel
         viewModel.SetHostWindow(dialog);
 
-        var result = await dialog.ShowDialog<bool?>(GetMainWindow());
+        var result = await dialog.ShowDialog<bool?>(GetMainWindow()!);
 
         if (result == true)
         {
@@ -104,11 +107,15 @@ public class DialogService : IDialogService
         return currentSettings;
     }
 
-    private Window GetMainWindow()
+    private static Window? GetMainWindow()
     {
+        if(Application.Current != null)
+        {
         return Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
             ? desktop.MainWindow
             : throw new InvalidOperationException("Application is not desktop");
+        }
+        return null;
     }
 }
 public interface IDialogService

@@ -16,18 +16,12 @@ public class CentralAuthService
     private GoogleOAuthService GoogleAuthService { get; set; }
     public TwitchDCAuthService TwitchService;
     private readonly KickOAuthService? _kickOauthService;
-    private ILogService _logger;
+    private readonly ILogService _logger;
 
     public CentralAuthService(ILogService logger)
     {
         _kickOauthService = new(logger);
         GoogleAuthService = new(logger);
-        var scopes = new[]
-        {
-            TwitchScopes.UserReadEmail,
-            TwitchScopes.ChannelManageBroadcast,
-            TwitchScopes.StreamKey
-        };
         _logger = logger;
         TwitchService = new TwitchDCAuthService(_logger);
     }
@@ -73,8 +67,8 @@ public class CentralAuthService
     }
     public async Task<(string, YouTubeService? _uTube)> LoginWithYoutube()
     {
-        YouTubeService ytService = null;
-        string username = "Failed to log in";
+        YouTubeService? ytService = null;
+        string username;
         try
         {
 
@@ -85,19 +79,22 @@ public class CentralAuthService
             else
             {
                 var res = await GoogleAuthService.LoginWithYoutube();
-                username = res.Username;
-                if (res.AccessToken != null)
+                if (res != null)
                 {
-                    var credential = GoogleCredential.FromAccessToken(res.AccessToken);
-                    var YTService = new YouTubeService(new BaseClientService.Initializer
+                    username = res.Username;
+                    if (res.AccessToken != null)
                     {
-                        HttpClientInitializer = credential,
-                        ApplicationName = "Streamer & Social Media Manager"
-                    });
-                    ytService = YTService;
+                        var credential = GoogleCredential.FromAccessToken(res.AccessToken);
+                        var YTService = new YouTubeService(new BaseClientService.Initializer
+                        {
+                            HttpClientInitializer = credential,
+                            ApplicationName = "Streamer & Social Media Manager"
+                        });
+                        ytService = YTService;
 
+                    }
+                    return (username, ytService);
                 }
-                return (username, ytService);
             }
         }
         catch
@@ -141,11 +138,11 @@ public class CentralAuthService
         }
     }
 
-    public async Task<(List<AuthResult>, YouTubeService?)> TryAutoLoginAllAsync()
+    public async Task<(List<AuthResult?>, YouTubeService?)> TryAutoLoginAllAsync()
     {
         var results = new List<AuthResult>();
-        GoogleOauthResult GoogleAuthResult = new();
-        YouTubeService ytService = null;
+        GoogleOauthResult? GoogleAuthResult = new();
+        YouTubeService? ytService = null;
         try
         {
 
@@ -178,10 +175,13 @@ public class CentralAuthService
                 : new AuthResult(AuthProvider.YouTube, false, null, "Token was missing or is invalid"));
 
             // Kick
-            var kickToken = await _kickOauthService.IfTokenIsValidLoginAuto();
-            results.Add(kickToken is not null
-                ? new AuthResult(AuthProvider.Kick, true, kickToken.Username, null)
-                : new AuthResult(AuthProvider.Kick, false, null, "Token was missing or is invalid"));
+            if (_kickOauthService != null)
+            {
+                var kickToken = await _kickOauthService.IfTokenIsValidLoginAuto();
+                results.Add(kickToken is not null
+                    ? new AuthResult(AuthProvider.Kick, true, kickToken.Username, null)
+                    : new AuthResult(AuthProvider.Kick, false, null, "Token was missing or is invalid"));
+            }
 
         }
         catch (Exception ex)
@@ -203,7 +203,7 @@ public class CentralAuthService
 
             }
         }
-        return (results, ytService);
+        return (results, ytService)!;
     }
 }
 

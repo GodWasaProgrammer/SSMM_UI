@@ -24,7 +24,7 @@ public class FilePickerService : IFilePickerService
             {
             new FilePickerFileType("Image Files")
             {
-                Patterns = new[] { "*.jpg", "*.jpeg", "*.png", "*.bmp" }
+                Patterns = ["*.jpg", "*.jpeg", "*.png", "*.bmp"]
             }
         }
         };

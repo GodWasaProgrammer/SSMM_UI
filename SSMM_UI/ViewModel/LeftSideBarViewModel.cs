@@ -12,14 +12,15 @@ namespace SSMM_UI.ViewModel
 {
     public partial class LeftSideBarViewModel : ObservableObject
     {
-        public LeftSideBarViewModel(IDialogService dialogService, VideoPlayerService vidPlayer, CentralAuthService authservice, ILogService logService, StateService stateService)
+        public LeftSideBarViewModel(IDialogService dialogService, VideoPlayerService vidPlayer,
+                                    CentralAuthService authservice, ILogService logService, StateService stateService)
         {
 
             // ==== Stream Inspection window ====
             ToggleReceivingStreamCommand = new RelayCommand(ToggleReceivingStream);
 
             // ==== Selected Services controls ====
-            AddServiceCommand = new AsyncRelayCommand<RtmpServiceGroup>(OnRTMPServiceSelected);
+            AddServiceCommand = new AsyncRelayCommand<RtmpServiceGroup>(OnRTMPServiceSelected!);
             RemoveSelectedServiceCommand = new RelayCommand(RemoveSelectedService);
 
             // ==== Login ====
@@ -43,9 +44,12 @@ namespace SSMM_UI.ViewModel
 
         public async Task Initialize()
         {
-            if (_userSettings.SaveTokens)
+            if (_userSettings != null)
             {
-                await AutoLoginIfTokenized();
+                if (_userSettings.SaveTokens)
+                {
+                    await AutoLoginIfTokenized();
+                }
             }
         }
 
@@ -75,16 +79,16 @@ namespace SSMM_UI.ViewModel
         private readonly StateService _stateService;
 
         // ==== Login Status ====
-        [ObservableProperty] private string youtubeLoginStatus = "";
-        [ObservableProperty] private string kickLoginStatus = "";
-        [ObservableProperty] private string twitchLoginStatus = "";
+        [ObservableProperty] private string? youtubeLoginStatus = "";
+        [ObservableProperty] private string? kickLoginStatus = "";
+        [ObservableProperty] private string? twitchLoginStatus = "";
 
         // == bool toggler for the preview window for stream ==
         [ObservableProperty] private bool isReceivingStream;
-        [ObservableProperty] private RtmpServiceGroup selectedRtmpService;
+        [ObservableProperty] private RtmpServiceGroup? selectedRtmpService;
 
         // Settings
-        private UserSettings _userSettings;
+        private readonly UserSettings? _userSettings;
 
         // ==== Service Selections ====
         [ObservableProperty]
@@ -98,7 +102,7 @@ namespace SSMM_UI.ViewModel
                 _logService.Log($"Cancelled adding service: {group.ServiceName}\n");
         }
 
-        [ObservableProperty] private string streamButtonText = "Start Receiving";
+        [ObservableProperty] private string? streamButtonText = "Start Receiving";
         private void ToggleReceivingStream()
         {
             IsReceivingStream = !IsReceivingStream;
@@ -168,21 +172,25 @@ namespace SSMM_UI.ViewModel
             }
             foreach (var result in results)
             {
-                var message = result.Success
-                    ? $"✅ Logged in as: {result.Username}"
-                    : $"❌ {result.ErrorMessage}";
-
-                switch (result.Provider)
+                if (result != null)
                 {
-                    case AuthProvider.Twitch:
-                        TwitchLoginStatus = message;
-                        break;
-                    case AuthProvider.YouTube:
-                        YoutubeLoginStatus = message;
-                        break;
-                    case AuthProvider.Kick:
-                        KickLoginStatus = message;
-                        break;
+
+                    var message = result.Success
+                        ? $"✅ Logged in as: {result.Username}"
+                        : $"❌ {result.ErrorMessage}";
+
+                    switch (result.Provider)
+                    {
+                        case AuthProvider.Twitch:
+                            TwitchLoginStatus = message;
+                            break;
+                        case AuthProvider.YouTube:
+                            YoutubeLoginStatus = message;
+                            break;
+                        case AuthProvider.Kick:
+                            KickLoginStatus = message;
+                            break;
+                    }
                 }
             }
         }

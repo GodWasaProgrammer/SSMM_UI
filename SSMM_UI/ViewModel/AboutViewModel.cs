@@ -17,7 +17,7 @@ public partial class AboutViewModel : ObservableObject
     public static string KickLink => "https://kick.com/cybercola";
     public static string AboutText => "This software is developed and maintained by Björn Nilsson aka GodWasAProgrammer";
 
-    private static string pathtoProfilePic = "About/ProfilePic.jpeg";
+    private static readonly string pathtoProfilePic = "About/ProfilePic.jpeg";
 
     [RelayCommand]
     public void CloseWindow()
@@ -32,7 +32,6 @@ public partial class AboutViewModel : ObservableObject
 
     public AboutViewModel()
     {
-        var bla = Environment.CurrentDirectory;
         ProfileImage = new(pathtoProfilePic);
     }
 

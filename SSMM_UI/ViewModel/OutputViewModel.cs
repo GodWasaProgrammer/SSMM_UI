@@ -15,9 +15,9 @@ public partial class OutputViewModel : ObservableObject
         StartReadingOutput(process);
     }
 
-    [ObservableProperty] string header;
-    [ObservableProperty] string content;
-    [ObservableProperty] string selectedMessage;
+    [ObservableProperty] string? header;
+    [ObservableProperty] string? content;
+    [ObservableProperty] string? selectedMessage;
 
     /// Take Task of stream with the output ? 
     public ObservableCollection<string> LogMessages { get; } = new();

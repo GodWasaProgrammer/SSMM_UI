@@ -16,7 +16,7 @@ public class TwitchTokenTokenResponse
     public int ExpiresIn { get; set; }
 
     [JsonPropertyName("scope")]
-    public List<string> Scope { get; set; } = new();
+    public List<string> Scope { get; set; } = [];
 
     [JsonPropertyName("token_type")]
     public string TokenType { get; set; } = "";

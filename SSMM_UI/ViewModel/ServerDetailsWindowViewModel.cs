@@ -11,16 +11,16 @@ namespace SSMM_UI.ViewModel;
 public partial class ServerDetailsWindowViewModel : ObservableObject
 {
     private readonly Window _window;
-    private readonly Action<bool, string, RtmpServerInfo> _callback;
+    private readonly Action<bool, string?, RtmpServerInfo?> _callback;
 
-    public ServerDetailsWindowViewModel(RtmpServiceGroup serviceGroup, Window window, Action<bool, string, RtmpServerInfo> callback) 
+    public ServerDetailsWindowViewModel(RtmpServiceGroup serviceGroup, Window window, Action<bool, string?, RtmpServerInfo?> callback)
     {
         _serviceGroup = serviceGroup;
         _window = window;
         _callback = callback;
     }
-    [ObservableProperty] private RtmpServiceGroup _serviceGroup;
-    [ObservableProperty] private RtmpServerInfo _SelectedServer;
+    [ObservableProperty] private RtmpServiceGroup? _serviceGroup;
+    [ObservableProperty] private RtmpServerInfo? _SelectedServer;
 
     [RelayCommand]
     private async Task Ok()

@@ -1,5 +1,6 @@
-﻿using SSMM_UI;
-using System;
+﻿using System;
+
+namespace SSMM_UI.Services;
 
 public class VideoPlayerService : IDisposable
 {

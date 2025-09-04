@@ -17,12 +17,12 @@ namespace SSMM_UI.Services;
 
 public class BroadCastService
 {
-    private CentralAuthService _authService;
-    private YouTubeService _youTubeService;
+    private readonly CentralAuthService _authService;
+    private YouTubeService? _youTubeService;
     private readonly MetaDataService MDService;
     private const string TwitchAdress = "rtmp://live.twitch.tv/app";
-    private ILogService _logger;
-    private StreamInfo StreamInfo;
+    private readonly ILogService _logger;
+    private StreamInfo? StreamInfo;
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
 
     public void CreateYTService(YouTubeService YTService)
@@ -135,7 +135,7 @@ public class BroadCastService
                             var success = int.TryParse(metadata.YouTubeCategory.Id, out int category);
                             if (success)
                             {
-                                await MDService.SetTitleAndCategoryYoutubeAsync(insertedBroadcast.Id, null, category);
+                                await MDService.SetTitleAndCategoryYoutubeAsync(insertedBroadcast.Id, category);
 
                             }
                         }
@@ -170,39 +170,51 @@ public class BroadCastService
 
     public async Task<(string rtmpUrl, string? streamKey)> CreateTwitchBroadcastAsync(StreamMetadata metadata)
     {
-        var accessToken = _authService.TwitchService.AuthResult.AccessToken;
-        var ClientId = _authService.TwitchService._clientId;
-        var userId = _authService.TwitchService.AuthResult.UserId;
-        using var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        httpClient.DefaultRequestHeaders.Add("Client-Id", ClientId);
-
-        // Title and game should be set after this
-        if (metadata.TwitchCategory != null)
+        if (_authService != null)
         {
-            await MDService.SetTwitchTitleAndCategory(metadata.Title, metadata.TwitchCategory.Name);
-        }
-        if (metadata.TwitchCategory == null)
-        {
-            if (metadata != null)
+            if (_authService.TwitchService != null)
             {
-                if (metadata.Title != null)
+                if (_authService.TwitchService.AuthResult != null)
                 {
-                    await MDService.SetTwitchTitleAndCategory(metadata.Title);
+                    var accessToken = _authService.TwitchService.AuthResult.AccessToken;
+                    var ClientId = _authService.TwitchService._clientId;
+                    var userId = _authService.TwitchService.AuthResult.UserId;
+                    using var httpClient = new HttpClient();
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                    httpClient.DefaultRequestHeaders.Add("Client-Id", ClientId);
+
+                    // Title and game should be set after this
+                    if (metadata.TwitchCategory != null)
+                    {
+                        await MDService.SetTwitchTitleAndCategory(metadata.Title, metadata.TwitchCategory.Name);
+                    }
+                    if (metadata.TwitchCategory == null)
+                    {
+                        if (metadata != null)
+                        {
+                            if (metadata.Title != null)
+                            {
+                                await MDService.SetTwitchTitleAndCategory(metadata.Title);
+                            }
+                        }
+                    }
+
+
+                    // Twitch RTMP-info är statisk (RTMP URL och stream key)
+                    var streamKeyResponse = await httpClient.GetAsync($"https://api.twitch.tv/helix/streams/key?broadcaster_id={userId}");
+                    streamKeyResponse.EnsureSuccessStatusCode();
+
+                    var json = await streamKeyResponse.Content.ReadAsStringAsync();
+                    var doc = JsonDocument.Parse(json);
+                    var key = doc.RootElement.GetProperty("data")[0].GetProperty("stream_key").GetString();
+
+                    return (TwitchAdress, key);
                 }
             }
         }
 
+        throw new ArgumentException("Failed to create TwitchBroadCast");
 
-        // Twitch RTMP-info är statisk (RTMP URL och stream key)
-        var streamKeyResponse = await httpClient.GetAsync($"https://api.twitch.tv/helix/streams/key?broadcaster_id={userId}");
-        streamKeyResponse.EnsureSuccessStatusCode();
-
-        var json = await streamKeyResponse.Content.ReadAsStringAsync();
-        var doc = JsonDocument.Parse(json);
-        var key = doc.RootElement.GetProperty("data")[0].GetProperty("stream_key").GetString();
-
-        return (TwitchAdress, key);
     }
     public static async Task CreateKickBroadcastAsync(StreamMetadata metadata)
     {
@@ -257,10 +269,12 @@ public class BroadCastService
             throw;
         }
     }
-    public async Task<(string rtmpUrl, string? streamkey)> CreateFacebookBroadcastAsync(StreamMetadata metadata)
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+    public static async Task<(string rtmpUrl, string? streamkey)> CreateFacebookBroadcastAsync(StreamMetadata metadata)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         // TODO: implement
-        return ("", "");
+        throw new NotImplementedException();
     }
 
     public async Task<StreamInfo?> ProbeStreamAsync(string rtmpUrl)

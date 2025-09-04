@@ -19,7 +19,7 @@ public class TwitchDCAuthService
     public readonly string _clientId = "y1cd8maguk5ob1m3lwvhdtupbj6pm3";
     private const string TokenFilePath = "twitch_tokenDCF.json";
     private const string ApiBaseUrl = "https://api.twitch.tv/helix";
-    private TwitchTokenTokenResponse _authResult;
+    private TwitchTokenTokenResponse? _authResult;
     public TwitchTokenTokenResponse? AuthResult
     {
         get => _authResult;
@@ -37,15 +37,15 @@ public class TwitchDCAuthService
 
     public delegate void AccessTokenUpdatedDelegate(string token);
     // 2. Skapa en publik delegat-instans
-    public AccessTokenUpdatedDelegate OnAccessTokenUpdated;
+    public AccessTokenUpdatedDelegate? OnAccessTokenUpdated;
 
-    string[] scopes = new[]
-        {
+    readonly string[] scopes =
+        [
             TwitchScopes.UserReadEmail,
             TwitchScopes.ChannelManageBroadcast,
             TwitchScopes.StreamKey
-        };
-    private ILogService _logger;
+        ];
+    private readonly ILogService _logger;
     public TwitchDCAuthService(ILogService logger)
     {
         _logger = logger;
@@ -73,11 +73,11 @@ public class TwitchDCAuthService
     {
         var request = new HttpRequestMessage(HttpMethod.Post, DcfApiAdress);
 
-        var content = new FormUrlEncodedContent(new[]
-        {
+        var content = new FormUrlEncodedContent(
+        [
                     new KeyValuePair<string, string>("client_id", _clientId),
                     new KeyValuePair<string, string>("scope", string.Join(" ", scopes))
-                });
+                ]);
 
         request.Content = content;
 
@@ -103,8 +103,10 @@ public class TwitchDCAuthService
         if (!response.IsSuccessStatusCode)
         {
             _logger.Log($"⚠️ Refresh failed: {response.StatusCode}\n{responseBody}");
-            var errorToken = new TwitchTokenTokenResponse();
-            errorToken.ErrorMessage = $"⚠️ Refresh failed: {response.StatusCode}\n{responseBody}";
+            var errorToken = new TwitchTokenTokenResponse
+            {
+                ErrorMessage = $"⚠️ Refresh failed: {response.StatusCode}\n{responseBody}"
+            };
             // since the refresh failed, the token nor its refreshtoken is no longer valid, delete local token to force full relog
             File.Delete(TokenFilePath);
             return errorToken;
@@ -138,13 +140,16 @@ public class TwitchDCAuthService
         {
             _logger.Log("🔁 Försöker förnya åtkomsttoken med refresh_token...");
             var res = await RefreshAccessTokenAsync(token.RefreshToken);
-            if (res.ErrorMessage == null)
+            if (res is not null)
             {
-                token.UserName = await GetUsernameAsync(token.AccessToken);
-            }
-            else
-            {
-                token.ErrorMessage = res.ErrorMessage;
+                if (res.ErrorMessage == null)
+                {
+                    token.UserName = await GetUsernameAsync(token.AccessToken);
+                }
+                else
+                {
+                    token.ErrorMessage = res.ErrorMessage;
+                }
             }
             return token;
         }
@@ -261,7 +266,7 @@ public class TwitchDCAuthService
         return null;
     }
 
-    public async Task<string> FetchUserId()
+    public string FetchUserId()
     {
         if (AuthResult != null)
         {
@@ -273,6 +278,7 @@ public class TwitchDCAuthService
             {
                 var userId = GetUserIdAsync(AuthResult.AccessToken);
                 AuthResult.UserId = userId.Result;
+                if(AuthResult.UserId != null)
                 return AuthResult.UserId;
             }
         }
@@ -283,7 +289,7 @@ public class TwitchDCAuthService
         return "Failure";
     }
 
-    private async Task<string> GetUserIdAsync(string accessToken)
+    private async Task<string?> GetUserIdAsync(string accessToken)
     {
         using var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
@@ -305,10 +311,10 @@ public class TwitchDCAuthService
             ? userIdElement.GetString()
             : throw new Exception("Could not find 'id' in user response.");
     }
-
+    private static readonly JsonSerializerOptions _jsonoptions = new() { WriteIndented = true };
     public static void SaveToken(TwitchTokenTokenResponse token)
     {
-        var json = JsonSerializer.Serialize(token, new JsonSerializerOptions { WriteIndented = true });
+        var json = JsonSerializer.Serialize(token, _jsonoptions);
         File.WriteAllText(TokenFilePath, json);
     }
 

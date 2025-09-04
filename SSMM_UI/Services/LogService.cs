@@ -14,7 +14,7 @@ public interface ILogService
 // 2. Implementera
 public class LogService : ILogService
 {
-    public ObservableCollection<string> Messages { get; } = new();
+    public ObservableCollection<string> Messages { get; } = [];
     public Action? OnLogAdded { get; set; }
 
     public void Log(string message)

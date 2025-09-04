@@ -31,7 +31,19 @@ namespace SSMM_UI.Dialogs
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
-            Close(this.FindControl<TextBox>("InputTextBox").Text);
+            var textBox = this.FindControl<TextBox>("InputTextBox");
+            if (textBox != null)
+            {
+                Close(textBox.Text);
+            }
+            else
+            {
+                // Hantera fallet när TextBox inte hittas
+                Close(string.Empty);
+
+                // Alternativt: logga ett fel eller kasta exception
+                // throw new InvalidOperationException("InputTextBox not found");
+            }
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)

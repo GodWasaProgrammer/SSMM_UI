@@ -20,7 +20,7 @@ public class StreamService
     public List<StreamProcessInfo> ProcessInfos { get; private set; } = new List<StreamProcessInfo>();
     public StreamService(ILogService logger, BroadCastService broadCastService)
     {
-        Server.StartSrv();
+        RTMPServer.StartSrv();
         _logger = logger;
         _broadCastService = broadCastService;
     }
@@ -36,37 +36,51 @@ public class StreamService
         foreach (var service in SelectedServicesToStream)
         {
             // Kolla om metadata finns satt (titel eller thumbnail-path)
-            if (!string.IsNullOrWhiteSpace(metadata?.Title) ||
-                !string.IsNullOrWhiteSpace(metadata?.ThumbnailPath))
+            if (metadata != null || !string.IsNullOrWhiteSpace(metadata?.Title) ||
+                !string.IsNullOrWhiteSpace(metadata?.ThumbnailPath) || service.SelectedServer != null)
             {
                 try
                 {
                     if (service.DisplayName.Contains("Youtube", StringComparison.OrdinalIgnoreCase))
                     {
                         // Skapa ny Youtube broadcast med metadata
-                        var (newUrl, newKey) = await _broadCastService.CreateYouTubeBroadcastAsync(metadata);
-
-                        // Uppdatera service med nya värden så vi kör rätt stream
-                        service.SelectedServer.Url = newUrl;
-                        service.StreamKey = newKey;
-                    }
-                    if (service.DisplayName.Contains("Twitch", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var (newUrl, newKey) = await _broadCastService.CreateTwitchBroadcastAsync(metadata);
-
-                        if (newUrl != null && newKey != null)
+                        if (metadata != null)
                         {
-                            service.SelectedServer.Url = newUrl;
-                            service.StreamKey = newKey;
+
+                            var (newUrl, newKey) = await _broadCastService.CreateYouTubeBroadcastAsync(metadata);
+
+                            // Uppdatera service med nya värden så vi kör rätt stream
+                            if (service.SelectedServer != null)
+                            {
+                                service.SelectedServer.Url = newUrl;
+                                service.StreamKey = newKey;
+                            }
                         }
-                        else
+                        if (service.DisplayName.Contains("Twitch", StringComparison.OrdinalIgnoreCase))
                         {
-                            throw new Exception($"CreateTwitchBroadcast returned a null value in either{newUrl} or {newKey}");
+                            if (metadata != null)
+                            {
+                                var (newUrl, newKey) = await _broadCastService.CreateTwitchBroadcastAsync(metadata);
+
+                                if (newUrl != null && newKey != null)
+                                {
+                                    if (service.SelectedServer != null)
+                                        service.SelectedServer.Url = newUrl;
+                                    service.StreamKey = newKey;
+                                }
+                                else
+                                {
+                                    throw new Exception($"CreateTwitchBroadcast returned a null value in either{newUrl} or {newKey}");
+                                }
+                            }
                         }
-                    }
-                    if (service.DisplayName.Contains("Kick", StringComparison.OrdinalIgnoreCase))
-                    {
-                        await BroadCastService.CreateKickBroadcastAsync(metadata);
+                        if (service.DisplayName.Contains("Kick", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (metadata != null)
+                            {
+                                await BroadCastService.CreateKickBroadcastAsync(metadata);
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -81,84 +95,95 @@ public class StreamService
             // Build FFMpeg Args
 
             string fullUrl;
-            if (service.SelectedServer.Url.StartsWith("rtmps://"))
+            if (service.SelectedServer != null)
             {
-                // För RTMP:S, använd vanlig sammansättning men se till att port 443 används
 
-                fullUrl = $"{service.SelectedServer.Url}:443/app/{service.StreamKey}";
+                if (service.SelectedServer.Url.StartsWith("rtmps://"))
+                {
+                    // För RTMP:S, använd vanlig sammansättning men se till att port 443 används
 
-            }
-            else
-            {
-                // För vanlig RTMP
-                fullUrl = $"{service.SelectedServer.Url}/{service.StreamKey}";
-            }
+                    fullUrl = $"{service.SelectedServer.Url}:443/app/{service.StreamKey}";
 
-            // endpoint to send output through
-            //var fullUrl = $"{service.SelectedServer.Url}/{service.StreamKey}";
+                }
+                else
+                {
+                    // För vanlig RTMP
+                    fullUrl = $"{service.SelectedServer.Url}/{service.StreamKey}";
+                }
 
-            // our internal rtmp feed
-            var input = RtmpAdress;
+                // endpoint to send output through
+                //var fullUrl = $"{service.SelectedServer.Url}/{service.StreamKey}";
 
-            // create our stringbuilder
-            var args = new StringBuilder($"-i \"{input}\" ");
+                // our internal rtmp feed
+                var input = RtmpAdress;
 
-            var recommended = service.ServiceGroup.RecommendedSettings;
+                // create our stringbuilder
+                var args = new StringBuilder($"-i \"{input}\" ");
 
-            //// Video codec
-            //if (recommended?.SupportedVideoCodes?.Length > 0)
-            //{
-            //    args.Append($"-c:v {recommended.SupportedVideoCodes[0]} ");
-            //}
-            //else
-            //{
-            args.Append("-c:v copy "); // fallback
-            //}
+                if (service.ServiceGroup != null)
+                {
 
-            // Video bitrate
-            if (recommended?.MaxVideoBitRate != null)
-            {
-                args.Append($"-b:v {recommended.MaxVideoBitRate}k ");
-            }
+                    if (service.ServiceGroup.RecommendedSettings != null)
+                    {
+                        var recommended = service.ServiceGroup.RecommendedSettings;
 
-            // Keyint (nyckelframe interval)
-            if (recommended?.KeyInt != null)
-            {
-                args.Append($"-g {recommended.KeyInt} ");
-            }
 
-            // Audio bitrate
-            if (recommended?.MaxAudioBitRate != null)
-            {
-                args.Append($"-b:a {recommended.MaxAudioBitRate}k ");
-            }
+                        //// Video codec
+                        //if (recommended?.SupportedVideoCodes?.Length > 0)
+                        //{
+                        //    args.Append($"-c:v {recommended.SupportedVideoCodes[0]} ");
+                        //}
+                        //else
+                        //{
+                        args.Append("-c:v copy "); // fallback
+                                                   //}
 
-            args.Append($"-f flv \"{fullUrl}\"");
+                        // Video bitrate
+                        if (recommended?.MaxVideoBitRate != null)
+                        {
+                            args.Append($"-b:v {recommended.MaxVideoBitRate}k ");
+                        }
 
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = path,
-                Arguments = args.ToString(),
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
+                        // Keyint (nyckelframe interval)
+                        if (recommended?.KeyInt != null)
+                        {
+                            args.Append($"-g {recommended.KeyInt} ");
+                        }
 
-            try
-            {
-                var process = new Process { StartInfo = startInfo };
-                var processinfo = new StreamProcessInfo { Header = service.DisplayName, Process = process };
-                ProcessInfos.Add(processinfo);
-                ffmpegProcess?.Add(process);
-                process.Start();
+                        // Audio bitrate
+                        if (recommended?.MaxAudioBitRate != null)
+                        {
+                            args.Append($"-b:a {recommended.MaxAudioBitRate}k ");
+                        }
 
-            }
-            catch (Exception ex)
-            {
-                _logger.Log($"FFmpeg start failed: {ex.Message}\n");
+                        args.Append($"-f flv \"{fullUrl}\"");
+
+                        var startInfo = new ProcessStartInfo
+                        {
+                            FileName = path,
+                            Arguments = args.ToString(),
+                            RedirectStandardError = true,
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        };
+
+                        try
+                        {
+                            var process = new Process { StartInfo = startInfo };
+                            var processinfo = new StreamProcessInfo { Header = service.DisplayName, Process = process };
+                            ProcessInfos.Add(processinfo);
+                            ffmpegProcess?.Add(process);
+                            process.Start();
+
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Log($"FFmpeg start failed: {ex.Message}\n");
+                        }
+                    }
+                }
             }
         }
-        //ReadOutPut();
     }
 
     public void StopStreams()

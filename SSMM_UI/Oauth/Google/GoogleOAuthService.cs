@@ -36,6 +36,7 @@ public class GoogleOAuthService
     ];
     private string? _currentCodeVerifier;
     private string? _currentState;
+    private static readonly JsonSerializerOptions _jsonoptions = new() { WriteIndented = true };
 
     private readonly ILogService _logger;
     public GoogleOAuthService(ILogService logger)
@@ -60,7 +61,7 @@ public class GoogleOAuthService
         }
     }
 
-    public async Task<GoogleOauthResult> LoginAutoIfTokenized()
+    public async Task<GoogleOauthResult?> LoginAutoIfTokenized()
     {
         try
         {
@@ -91,7 +92,7 @@ public class GoogleOAuthService
         return _oauthResult;
     }
 
-    public async Task<GoogleOauthResult> LoginWithYoutube()
+    public async Task<GoogleOauthResult?> LoginWithYoutube()
     {
         if (File.Exists(_tokenPath))
         {
@@ -149,13 +150,12 @@ public class GoogleOAuthService
     private static async Task<GoogleOauthResult> RefreshTokenAsync(string refreshToken)
     {
         using var httpClient = new HttpClient();
-        var content = new FormUrlEncodedContent(new[]
-        {
-        new KeyValuePair<string, string>("grant_type", "refresh_token"),
-        new KeyValuePair<string, string>("refresh_token", refreshToken),
-        new KeyValuePair<string, string>("client_id", ClientID),
-
-    });
+        var content = new FormUrlEncodedContent(
+            [
+            new KeyValuePair<string, string>("grant_type", "refresh_token"),
+            new KeyValuePair<string, string>("refresh_token", refreshToken),
+            new KeyValuePair<string, string>("client_id", ClientID),
+        ]);
 
         var response = await httpClient.PostAsync("https://oauth2.googleapis.com/token", content);
         var responseData = await response.Content.ReadAsStringAsync();
@@ -376,7 +376,7 @@ public class GoogleOAuthService
                 throw new Exception("State matchar inte - potentiell CSRF-attack");
             }
 
-            string authCode = context.Request.QueryString["code"];
+            string authCode = context.Request.QueryString["code"]!;
             await SendBrowserResponse(context.Response,
                 "<html><body>✅ Inloggning lyckades. Stäng detta fönster.</body></html>");
             if (authCode != null)
@@ -424,11 +424,11 @@ public class GoogleOAuthService
 
     public static void SaveToken(GoogleOauthResult token)
     {
-        var json = JsonSerializer.Serialize(token, new JsonSerializerOptions { WriteIndented = true });
+        var json = JsonSerializer.Serialize(token, _jsonoptions);
         File.WriteAllText(_tokenPath, json);
     }
 
-    public static GoogleOauthResult LoadSavedToken()
+    public static GoogleOauthResult? LoadSavedToken()
     {
         if (!File.Exists(_tokenPath)) return null;
 

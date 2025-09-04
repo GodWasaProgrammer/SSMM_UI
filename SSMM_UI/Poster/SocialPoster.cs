@@ -1,13 +1,13 @@
 ﻿using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using System.Text.Json;
-using API_Key_Secrets_Loader;
 using Tweetinvi;
 using Tweetinvi.Core.Web;
 using System.Threading.Tasks;
 using System;
 using System.Net.Http;
 using System.Collections.Generic;
+using SSMM_UI.API_Key_Secrets_Loader;
 
 namespace SSMM_UI.Poster;
 
@@ -40,6 +40,8 @@ public static class SocialPoster
         //if (true || isLive.Result && LiveYT.Result)
         //{
 
+        if (XPost)
+        {
 
             var client = new TwitterClient(
                     kl.CONSUMER_Keys["X"],
@@ -62,12 +64,18 @@ public static class SocialPoster
             {
                 Console.WriteLine("Error when posting tweet: " + Environment.NewLine + result.Content);
             }
-
-            //await FacebookPoster.Post("Testing Graph API", kl);
-            //await DiscordPoster.PostToDiscord(kl.Webhooks["DGeneral"], "Testing API Webhooks - hello from cybercola!");
-            //await DiscordPoster.PostToDiscord(kl.Webhooks["DLive"], "Testing API Webhooks! - hello from cybercola!");
         }
-    //}
+
+        if (FBpost)
+        {
+            await FacebookPoster.Post("Testing Graph API", kl);
+        }
+        if (DiscordPost)
+        {
+            await DiscordPoster.PostToDiscord(kl.Webhooks["DGeneral"], "Testing API Webhooks - hello from cybercola!");
+            await DiscordPoster.PostToDiscord(kl.Webhooks["DLive"], "Testing API Webhooks! - hello from cybercola!");
+        }
+    }
 
     public static async Task<string> GetAccessTokenTwitch(string clientId, string clientSecret)
     {

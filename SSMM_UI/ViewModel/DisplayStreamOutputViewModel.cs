@@ -8,6 +8,6 @@ public class DisplayStreamOutputViewModel
 
     public DisplayStreamOutputViewModel()
     {
-        Outputs = new ObservableCollection<OutputViewModel>();
+        Outputs = [];
     }
 }

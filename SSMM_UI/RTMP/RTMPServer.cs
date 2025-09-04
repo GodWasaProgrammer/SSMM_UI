@@ -23,7 +23,7 @@ public class RTMPServer
 
     //    await server.RunAsync(new IPEndPoint(IPAddress.Any, 1935));
     //}
-    public void SetupServerAsync()
+    public static void SetupServerAsync()
     {
         Task.Run(() =>
         {
@@ -33,7 +33,7 @@ public class RTMPServer
     private const bool UseHttpFlvPreview = true;
     private const bool UseHlsPreview = true;
 
-    public async void StartSrv()
+    public static async void StartSrv()
     {
         var builder = WebApplication.CreateBuilder();
 

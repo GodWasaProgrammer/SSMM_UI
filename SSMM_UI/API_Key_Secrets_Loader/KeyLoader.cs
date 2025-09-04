@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace API_Key_Secrets_Loader;
+namespace SSMM_UI.API_Key_Secrets_Loader;
 
 public sealed class KeyLoader
 {

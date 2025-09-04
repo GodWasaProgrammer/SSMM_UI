@@ -137,8 +137,17 @@ public partial class StreamControlViewModel : ObservableObject
                         LogVM.StreamOutputVM.Outputs.Clear();
                         foreach (var info in bla)
                         {
-                            var outputview = new OutputViewModel(info.Header, info.Process);
-                            LogVM.StreamOutputVM.Outputs.Add(outputview);
+                            if (info != null)
+                            {
+                                if (info.Header != null)
+                                {
+                                    if (info.Process != null)
+                                    {
+                                        var outputview = new OutputViewModel(info.Header, info.Process);
+                                        LogVM.StreamOutputVM.Outputs.Add(outputview);
+                                    }
+                                }
+                            }
                         }
                     }
                 }

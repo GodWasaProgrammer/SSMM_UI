@@ -15,6 +15,12 @@ public class MetaDataService
 {
     private YouTubeService? _youTubeService;
     private List<VideoCategory> _ytCategories;
+    public MetaDataService(ILogService logger, CentralAuthService AuthService)
+    {
+        _ytCategories = [];
+        _AuthService = AuthService;
+        _logger = logger;
+    }
 
     // redundant as we jsonize the list and load it in stateservice
     public List<VideoCategory> GetCategoriesYoutube()
@@ -51,7 +57,7 @@ public class MetaDataService
         }
 
         var request = new HttpRequestMessage(HttpMethod.Patch,
-            $"https://api.twitch.tv/helix/channels?broadcaster_id={userId.Result}");
+            $"https://api.twitch.tv/helix/channels?broadcaster_id={userId}");
 
         // build headers
         request.Headers.Add("Authorization", $"Bearer {Accesstoken}");
@@ -100,12 +106,7 @@ public class MetaDataService
     public IReadOnlyList<VideoCategory> YouTubeCategories => _ytCategories;
     private readonly ILogService _logger;
     private readonly CentralAuthService _AuthService;
-    public MetaDataService(ILogService logger, CentralAuthService AuthService)
-    {
-        _ytCategories = [];
-        _AuthService = AuthService;
-        _logger = logger;
-    }
+    
 
     public void Initialize(string accessToken, string clientId)
     {
@@ -189,8 +190,8 @@ public class MetaDataService
                         var name = item.GetProperty("name").GetString();
                         var boxArtUrl = item.GetProperty("box_art_url").GetString();
 
-                        if (!categories.ContainsKey(id))
-                            categories[id] = (name, boxArtUrl);
+                        if (!categories.ContainsKey(id!))
+                            categories[id!] = (name, boxArtUrl)!;
                     }
                 }
 
@@ -211,7 +212,7 @@ public class MetaDataService
         }
     }
 
-    public async Task<bool> SetTitleAndCategoryYoutubeAsync(string videoId, string title, int categoryId)
+    public async Task<bool> SetTitleAndCategoryYoutubeAsync(string videoId, int categoryId)
     {
         try
         {
@@ -232,12 +233,6 @@ public class MetaDataService
             }
 
             var video = videosListResponse.Items[0];
-
-            // Uppdatera metadata
-            if (title != null)
-            {
-                video.Snippet.Title = title;
-            }
 
             // TODO: Should we have a -1 param to avoid doing this if its not set?
             video.Snippet.CategoryId = categoryId.ToString();
