@@ -50,6 +50,8 @@ public partial class App : Application
                 .AddSingleton<SocialPosterViewModel>()
                 .AddSingleton<StreamControlViewModel>()
                 .AddSingleton<MetaDataViewModel>()
+                .AddSingleton<BroadCastService>()
+                .AddSingleton<PollService>()
                 .BuildServiceProvider();
 
 

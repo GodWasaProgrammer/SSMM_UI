@@ -1,18 +1,17 @@
-﻿using System.Threading.Tasks;
-using System;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SSMM_UI.MetaData;
 using SSMM_UI.Services;
-using System.Windows.Input;
-using System.Runtime;
 using SSMM_UI.Settings;
+using System;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace SSMM_UI.ViewModel;
 
 public partial class StreamControlViewModel : ObservableObject
 {
-    public StreamControlViewModel(LogViewModel logVM, ILogService logger, LeftSideBarViewModel leftSideBarViewModel, StreamService streamservice, MetaDataService mdService, StateService stateservice)
+    public StreamControlViewModel(LogViewModel logVM, ILogService logger, LeftSideBarViewModel leftSideBarViewModel, StreamService streamservice, MetaDataService mdService, StateService stateservice, BroadCastService broadCastService, PollService pollService)
     {
         // set Viewmodels
         LogVM = logVM;
@@ -24,9 +23,10 @@ public partial class StreamControlViewModel : ObservableObject
         _streamService = streamservice;
         _mdService = mdService;
         _stateService = stateservice;
-        
+        _broadCastService = broadCastService;
         // init our settings
         _settings = _stateService.UserSettingsObj;
+        _pollService = pollService;
 
         // ==== OutPut Streams ====
         StartStreamCommand = new AsyncRelayCommand(StartStream);
@@ -46,7 +46,7 @@ public partial class StreamControlViewModel : ObservableObject
 
     // == child models ==
     readonly LogViewModel LogVM;
-    public LeftSideBarViewModel LeftSideBarViewModel {  get; }
+    public LeftSideBarViewModel LeftSideBarViewModel { get; }
 
     // ==== RTMP Server and internal RTMP feed from OBS Status ====
     [ObservableProperty] private string serverStatusText = "Stream status: ❌ Not Receiving";
@@ -58,6 +58,8 @@ public partial class StreamControlViewModel : ObservableObject
     StreamService _streamService;
     MetaDataService _mdService;
     StateService _stateService;
+    BroadCastService _broadCastService;
+    PollService _pollService;
 
 
     // Settings
@@ -80,8 +82,8 @@ public partial class StreamControlViewModel : ObservableObject
         if (_settings.PollStream && _settings.PollServer)
         {
             SubscribeToEvents();
-            if (_streamService != null)
-                _streamService.StartPolling();
+            if (_pollService != null)
+                _pollService.StartPolling();
         }
         else
         {
@@ -94,12 +96,12 @@ public partial class StreamControlViewModel : ObservableObject
     {
         try
         {
-            if (_streamService != null)
+            if (_pollService != null)
             {
-                _streamService.ServerStatusChanged += isAlive =>
+                _pollService.ServerStatusChanged += isAlive =>
                     ServerStatusText = isAlive ? "RTMP-server: ✅ Running" : "RTMP-server: ❌ Not Running";
 
-                _streamService.StreamStatusChanged += isAlive =>
+                _pollService.StreamStatusChanged += isAlive =>
                     StreamStatusText = isAlive ? "Stream status: ✅ Live" : "Stream status: ❌ Not Receiving";
             }
             else
@@ -123,11 +125,11 @@ public partial class StreamControlViewModel : ObservableObject
             {
                 if (LeftSideBarViewModel.YTService != null)
                 {
-                    _streamService.CreateYTService(LeftSideBarViewModel.YTService);
+                    _broadCastService.CreateYTService(LeftSideBarViewModel.YTService);
                     _mdService.CreateYouTubeService(LeftSideBarViewModel.YTService);
                 }
                 CurrentMetaData = _stateService.GetCurrentMetaData();
-               await _streamService.StartStream(CurrentMetaData, LeftSideBarViewModel.SelectedServicesToStream);
+                await _streamService.StartStream(CurrentMetaData, LeftSideBarViewModel.SelectedServicesToStream);
                 _logService.Log("Started streaming...");
             }
             catch (Exception ex)
