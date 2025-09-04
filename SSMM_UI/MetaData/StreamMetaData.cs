@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Google.Apis.YouTube.v3.Data;
-using SSMM_UI.Services;
+using SSMM_UI.Converters;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace SSMM_UI.MetaData;
 [JsonConverter(typeof(StreamMetadataConverter))]
 public partial class StreamMetadata : ObservableObject
 {
-    public StreamMetadata() 
+    public StreamMetadata()
     {
 
     }
@@ -18,7 +18,7 @@ public partial class StreamMetadata : ObservableObject
     [ObservableProperty] public string? title;
 
     // Primary Youtube might be relevant for others
-    [ObservableProperty] 
+    [ObservableProperty]
     [JsonIgnore]
     public Bitmap? thumbnail;
     // optional
