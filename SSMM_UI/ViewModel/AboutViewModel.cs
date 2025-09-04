@@ -1,9 +1,9 @@
-﻿using System;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using SSMM_UI.Messenger;
+using System;
 
 namespace SSMM_UI.ViewModel;
 
@@ -17,7 +17,7 @@ public partial class AboutViewModel : ObservableObject
     public static string KickLink => "https://kick.com/cybercola";
     public static string AboutText => "This software is developed and maintained by Björn Nilsson aka GodWasAProgrammer";
 
-    private static string pathtoProfilePic = "../../../../About/ProfilePic.jpeg";
+    private static string pathtoProfilePic = "About/ProfilePic.jpeg";
 
     [RelayCommand]
     public void CloseWindow()
@@ -28,10 +28,11 @@ public partial class AboutViewModel : ObservableObject
         });
     }
 
-    public Bitmap ProfileImage {  get; set; }
+    public Bitmap ProfileImage { get; set; }
 
-    public AboutViewModel() 
+    public AboutViewModel()
     {
+        var bla = Environment.CurrentDirectory;
         ProfileImage = new(pathtoProfilePic);
     }
 

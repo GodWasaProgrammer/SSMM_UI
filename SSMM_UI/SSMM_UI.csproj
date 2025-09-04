@@ -68,6 +68,9 @@
   </ItemGroup>
 
 	<ItemGroup>
+		<None Update="About\ProfilePic.jpeg">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<None Update="Dependencies\avcodec-61.dll">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
