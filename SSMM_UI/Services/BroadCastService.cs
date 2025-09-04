@@ -31,10 +31,11 @@ public class BroadCastService
     }
 
 
-    public BroadCastService(CentralAuthService authService, ILogService logger)
+    public BroadCastService(CentralAuthService authService, ILogService logger, MetaDataService mdservice)
     {
         _authService = authService;
         _logger = logger;
+        MDService = mdservice;
     }
 
     public async Task<(string rtmpUrl, string streamKey)> CreateYouTubeBroadcastAsync(StreamMetadata metadata)
