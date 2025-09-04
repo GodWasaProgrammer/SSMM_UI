@@ -13,11 +13,10 @@ public class StreamService
 {
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
 
-    private RTMPServer Server { get; set; } = new();
     private readonly List<Process>? ffmpegProcess = [];
     private readonly BroadCastService _broadCastService;
     private readonly ILogService _logger;
-    public List<StreamProcessInfo> ProcessInfos { get; private set; } = new List<StreamProcessInfo>();
+    public List<StreamProcessInfo> ProcessInfos { get; private set; } = [];
     public StreamService(ILogService logger, BroadCastService broadCastService)
     {
         RTMPServer.StartSrv();
