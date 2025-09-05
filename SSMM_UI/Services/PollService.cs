@@ -20,10 +20,13 @@ public class PollService
 
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
 
-    // TODO: to reflect user settings this needs to be called individually
-    public void StartPolling()
+    public void StartStreamPolling()
     {
         _ = StartStreamStatusPolling();
+    }
+
+    public void StartServerPolling()
+    {
         _ = StartServerStatusPolling();
     }
 

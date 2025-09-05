@@ -71,15 +71,22 @@ public partial class StreamControlViewModel : ObservableObject
 
     private void Initialize()
     {
-        if (_settings.PollStream && _settings.PollServer)
+        SubscribeToEvents();
+        if (_settings.PollStream)
         {
-            SubscribeToEvents();
-            _pollService?.StartPolling();
+            _pollService?.StartStreamPolling();
+        }
+        else
+        {
+            StreamStatusText = "Polling is turned off for incoming Stream";
+        }
+        if (_settings.PollServer)
+        {
+            _pollService?.StartServerPolling();
         }
         else
         {
             ServerStatusText = "Polling is turned off for RTMP Server";
-            StreamStatusText = "Polling is turned off for incoming Stream";
         }
     }
 
