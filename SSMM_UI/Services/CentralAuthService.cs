@@ -17,13 +17,15 @@ public class CentralAuthService
     public TwitchDCAuthService TwitchService;
     private readonly KickOAuthService? _kickOauthService;
     private readonly ILogService _logger;
+    private readonly StateService _stateService;
 
-    public CentralAuthService(ILogService logger)
+    public CentralAuthService(ILogService logger, StateService stateService)
     {
-        _kickOauthService = new(logger);
-        GoogleAuthService = new(logger);
+        _stateService = stateService;
         _logger = logger;
-        TwitchService = new TwitchDCAuthService(_logger);
+        _kickOauthService = new(_logger, _stateService);
+        GoogleAuthService = new(_logger, _stateService);
+        TwitchService = new TwitchDCAuthService(_logger, _stateService);
     }
 
     public async Task<string> LoginWithTwitch()

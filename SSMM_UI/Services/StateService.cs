@@ -1,5 +1,6 @@
 ﻿using Avalonia.Media.Imaging;
 using Google.Apis.YouTube.v3.Data;
+using SSMM_UI.Enums;
 using SSMM_UI.MetaData;
 using SSMM_UI.RTMP;
 using SSMM_UI.Settings;
@@ -12,11 +13,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace SSMM_UI.Services;
-
 public class StateService
 {
-    //TODO: Centralize auth token serialization to here
-
     private const string SerializedServices = "Serialized_Services.json";
     private const string _obsServices = "services.json";
     private const string YoutubeCategories = "youtube_categories.json";
@@ -30,7 +28,48 @@ public class StateService
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
     public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; private set; } = [];
 
-    public StreamMetadata CurrentMetaData { get; private set; } = new StreamMetadata();
+    private StreamMetadata CurrentMetaData { get; set; } = new StreamMetadata();
+
+    private const string _tokenPath = "Tokens";
+    public void SerializeToken<T>(OAuthServices service, T token) where T : class
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNull(token);
+
+            var json = JsonSerializer.Serialize(token, _regularJsonOptions);
+
+            var path = Path.Combine(_tokenPath, $"{service}Token.json");
+            if (!Path.Exists(_tokenPath)) 
+            {
+                Directory.CreateDirectory(path);
+            }
+            File.WriteAllText(path, json);
+        }
+        catch (Exception ex)
+        {
+            _logger.Log($"{ex.Message} Failed to Serialize Token for:{service}");
+        }
+    }
+
+    public T DeserializeToken<T>(OAuthServices service) where T : class
+    {
+        try
+        {
+            string filePath = Path.Combine(_tokenPath, $"{service}Token.json");
+            if (!File.Exists(filePath))
+            {
+                return null!;
+            }
+            var json = File.ReadAllText(filePath);
+            return JsonSerializer.Deserialize<T>(json, _regularJsonOptions)!;
+        }
+        catch (Exception ex)
+        {
+            _logger.Log($"{ex.Message} Failed to Deserialize token for:{service}");
+            return null!;
+        }
+    }
 
     public StreamMetadata GetCurrentMetaData()
     {

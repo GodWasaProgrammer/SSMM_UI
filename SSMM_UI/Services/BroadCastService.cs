@@ -218,10 +218,7 @@ public class BroadCastService
     }
     public static async Task CreateKickBroadcastAsync(StreamMetadata metadata)
     {
-        //TODO: There needs to be automation with for example puppeteer here to control the stream name, title etc as the Kick API does not support setting this programmatically.
-
-        // kick keys remain the same unless reset
-
+        // kick keys remain the same unless reset so there is no need to return them as they should be set by user.
         await PuppetMaster.SetKickGameTitle(StreamTitle: metadata.Title);
     }
     public async Task<(string rtmpUrl, string? streamKey)> CreateTrovoBroadcastAsync(StreamMetadata metadata)

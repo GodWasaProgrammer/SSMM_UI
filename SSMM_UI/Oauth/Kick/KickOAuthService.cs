@@ -1,8 +1,8 @@
-﻿using SSMM_UI.Services;
+﻿using SSMM_UI.Enums;
+using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -19,9 +19,9 @@ public class KickOAuthService
 {
     private const string OAuthBaseUrl = "https://id.kick.com";
     private const string RedirectUri = "http://localhost:12345/callback/";
-    private const string TokenFilePath = "kick_token.json";
     private const string ClientID = "01K1N4MW57X4G7Q50G7ZS6CA9Y";
     private KickAuthResult? _kickAuthResult;
+    private readonly StateService _stateService;
 
     public static string GetClientId()
     {
@@ -30,9 +30,9 @@ public class KickOAuthService
 
     public string GetAccessToken()
     {
-        if(_kickAuthResult != null)
+        if (_kickAuthResult != null)
         {
-        return _kickAuthResult.AccessToken;
+            return _kickAuthResult.AccessToken;
         }
         else
         {
@@ -60,9 +60,10 @@ public class KickOAuthService
 
     private readonly ILogService _logger;
 
-    public KickOAuthService(ILogService logger)
+    public KickOAuthService(ILogService logger, StateService stateService)
     {
         _logger = logger;
+        _stateService = stateService;
     }
 
     public async Task<KickAuthResult> AuthenticateUserAsync(string[] requestedScopes)
@@ -104,7 +105,7 @@ public class KickOAuthService
             tokenResult.Username = await GetUsernameAsync(tokenResult.AccessToken);
 
             // 7. Spara token
-            SaveToken(tokenResult);
+            _stateService.SerializeToken(OAuthServices.Kick, tokenResult);
 
             _kickAuthResult = tokenResult;
             return tokenResult;
@@ -117,7 +118,7 @@ public class KickOAuthService
         }
     }
 
-    private static async Task<KickAuthResult> RefreshTokenAsync(string refreshToken)
+    private async Task<KickAuthResult> RefreshTokenAsync(string refreshToken)
     {
         using var httpClient = new HttpClient();
         var content = new FormUrlEncodedContent(
@@ -144,22 +145,15 @@ public class KickOAuthService
             Scope = tokenData.GetProperty("scope").GetString() ?? ""
         };
 
-        SaveToken(newToken);
+        _stateService.SerializeToken(OAuthServices.Kick, newToken);
         return newToken;
     }
 
     public async Task<KickAuthResult?> IfTokenIsValidLoginAuto()
     {
-        if (!File.Exists(TokenFilePath))
-        {
-            return null;
-        }
-
         try
         {
-            var json = await File.ReadAllTextAsync(TokenFilePath);
-            var token = JsonSerializer.Deserialize<KickAuthResult>(json);
-
+            var token = _stateService.DeserializeToken<KickAuthResult>(OAuthServices.Kick);
             if (token == null)
             {
                 return null;
@@ -188,32 +182,26 @@ public class KickOAuthService
 
     public async Task<KickAuthResult> AuthenticateOrRefreshAsync(string[] scopes)
     {
-        if (File.Exists(TokenFilePath))
+        var token = _stateService.DeserializeToken<KickAuthResult>(OAuthServices.Kick);
+        if (token != null)
         {
-            var json = File.ReadAllText(TokenFilePath);
-            var token = JsonSerializer.Deserialize<KickAuthResult>(json);
-
-            if (token != null)
+            if (DateTime.UtcNow > token.ExpiresAt)
             {
-                if (DateTime.UtcNow > token.ExpiresAt)
-                {
-                    return await AuthenticateUserAsync(scopes);
-                }
-                var res = await GetUsernameAsync(token.AccessToken);
-                token.Username = res;
+                return await AuthenticateUserAsync(scopes);
             }
-
-            if (token != null && token.ExpiresAt > DateTime.UtcNow)
-            {
-
-                return token; // Token fortfarande giltig
-            }
-            else if (token?.RefreshToken != null)
-            {
-                return await RefreshTokenAsync(token.RefreshToken); // Förnya token
-            }
+            var res = await GetUsernameAsync(token.AccessToken);
+            token.Username = res;
         }
 
+        if (token != null && token.ExpiresAt > DateTime.UtcNow)
+        {
+
+            return token; // Token fortfarande giltig
+        }
+        else if (token?.RefreshToken != null)
+        {
+            return await RefreshTokenAsync(token.RefreshToken); // Förnya token
+        }
         return await AuthenticateUserAsync(scopes); // Full login om inget funkar
     }
 
@@ -272,7 +260,7 @@ public class KickOAuthService
         if (_currentCodeVerifier != null)
         {
 
-            
+
             string clientSecret = Environment.GetEnvironmentVariable("KickClientSecret") ??
                                throw new Exception("ClientSecret not set");
 
@@ -403,11 +391,5 @@ public class KickOAuthService
         response.ContentLength64 = buffer.Length;
         await response.OutputStream.WriteAsync(buffer);
         response.Close();
-    }
-
-    private static void SaveToken(KickAuthResult token)
-    {
-        var json = JsonSerializer.Serialize(token, _jsonoptions);
-        File.WriteAllText(TokenFilePath, json);
     }
 }

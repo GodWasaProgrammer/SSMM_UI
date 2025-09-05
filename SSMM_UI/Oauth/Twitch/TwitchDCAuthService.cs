@@ -1,4 +1,5 @@
-﻿using SSMM_UI.Services;
+﻿using SSMM_UI.Enums;
+using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +8,6 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
-using static Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp;
 
 namespace SSMM_UI.Oauth.Twitch;
 
@@ -17,17 +17,22 @@ public class TwitchDCAuthService
     private const string DcfApiAdress = "https://id.twitch.tv/oauth2/device";
     private const string TokenAdress = "https://id.twitch.tv/oauth2/token";
     public readonly string _clientId = "y1cd8maguk5ob1m3lwvhdtupbj6pm3";
-    private const string TokenFilePath = "twitch_tokenDCF.json";
     private const string ApiBaseUrl = "https://api.twitch.tv/helix";
     private TwitchTokenTokenResponse? _authResult;
+    private readonly ILogService _logger;
+    private readonly StateService _stateService;
+    public TwitchDCAuthService(ILogService logger, StateService stateService)
+    {
+        _logger = logger;
+        _httpClient = new HttpClient();
+        _stateService = stateService;
+    }
     public TwitchTokenTokenResponse? AuthResult
     {
         get => _authResult;
         set
         {
             _authResult = value;
-
-            // 4. Invoka delegaten när propertyn uppdateras
             if (OnAccessTokenUpdated != null && value != null)
             {
                 OnAccessTokenUpdated.Invoke(value.AccessToken);
@@ -36,7 +41,6 @@ public class TwitchDCAuthService
     }
 
     public delegate void AccessTokenUpdatedDelegate(string token);
-    // 2. Skapa en publik delegat-instans
     public AccessTokenUpdatedDelegate? OnAccessTokenUpdated;
 
     readonly string[] scopes =
@@ -45,12 +49,8 @@ public class TwitchDCAuthService
             TwitchScopes.ChannelManageBroadcast,
             TwitchScopes.StreamKey
         ];
-    private readonly ILogService _logger;
-    public TwitchDCAuthService(ILogService logger)
-    {
-        _logger = logger;
-        _httpClient = new HttpClient();
-    }
+    
+    
 
     public string GetClientId()
     {
@@ -108,7 +108,8 @@ public class TwitchDCAuthService
                 ErrorMessage = $"⚠️ Refresh failed: {response.StatusCode}\n{responseBody}"
             };
             // since the refresh failed, the token nor its refreshtoken is no longer valid, delete local token to force full relog
-            File.Delete(TokenFilePath);
+
+            // TODO : This seems like a shitty designchoice, need to revisit
             return errorToken;
         }
 
@@ -118,7 +119,7 @@ public class TwitchDCAuthService
             token.ExpiresAt = DateTime.UtcNow.AddSeconds(token.ExpiresIn);
             token.UserName = await GetUsernameAsync(token.AccessToken);
             token.UserId = await GetUserIdAsync(token.AccessToken);
-            SaveToken(token);
+            _stateService.SerializeToken(OAuthServices.Twitch, token);
         }
 
         return token!;
@@ -126,7 +127,7 @@ public class TwitchDCAuthService
 
     public async Task<TwitchTokenTokenResponse?> TryLoadValidOrRefreshTokenAsync()
     {
-        var token = LoadSavedToken();
+        var token = _stateService.DeserializeToken<TwitchTokenTokenResponse>(OAuthServices.Twitch);
         if (token is not null)
         {
             AuthResult = token;
@@ -187,7 +188,7 @@ public class TwitchDCAuthService
                     token.UserName = await GetUsernameAsync(token.AccessToken);
                     token.UserId = await GetUserIdAsync(token.AccessToken);
                     AuthResult = token;
-                    SaveToken(token);
+                    _stateService.SerializeToken(OAuthServices.Twitch, token);
                     return token;
                 }
             }
@@ -312,24 +313,4 @@ public class TwitchDCAuthService
             : throw new Exception("Could not find 'id' in user response.");
     }
     private static readonly JsonSerializerOptions _jsonoptions = new() { WriteIndented = true };
-    public static void SaveToken(TwitchTokenTokenResponse token)
-    {
-        var json = JsonSerializer.Serialize(token, _jsonoptions);
-        File.WriteAllText(TokenFilePath, json);
-    }
-
-    public static TwitchTokenTokenResponse? LoadSavedToken()
-    {
-        if (!File.Exists(TokenFilePath)) return null;
-
-        try
-        {
-            var json = File.ReadAllText(TokenFilePath);
-            return JsonSerializer.Deserialize<TwitchTokenTokenResponse>(json);
-        }
-        catch
-        {
-            return null;
-        }
-    }
 }

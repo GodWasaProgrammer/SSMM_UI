@@ -14,12 +14,12 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using SSMM_UI.Enums;
 
 namespace SSMM_UI.Oauth.Google;
 
 public class GoogleOAuthService
 {
-    private const string _tokenPath = "Google_token.json";
     private const string RedirectUri = "http://localhost:12347/";
     private const string ClientID = "376695458347-d9ieprrigebp9dptdm9asbl33vgg137o.apps.googleusercontent.com";
     private const string OAuthBaseUrl = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -39,9 +39,11 @@ public class GoogleOAuthService
     private static readonly JsonSerializerOptions _jsonoptions = new() { WriteIndented = true };
 
     private readonly ILogService _logger;
-    public GoogleOAuthService(ILogService logger)
+    private readonly StateService _stateService;
+    public GoogleOAuthService(ILogService logger, StateService stateservice)
     {
         _logger = logger;
+        _stateService = stateservice;
     }
 
     public static string GetClientId()
@@ -65,24 +67,20 @@ public class GoogleOAuthService
     {
         try
         {
-
-            if (File.Exists(_tokenPath))
+            _oauthResult = _stateService.DeserializeToken<GoogleOauthResult>(OAuthServices.Google);
+            if (_oauthResult != null)
             {
-                _oauthResult = LoadSavedToken();
-                if (_oauthResult != null)
+                if (DateTime.UtcNow > _oauthResult.ExpiresAt)
                 {
-                    if (DateTime.UtcNow > _oauthResult.ExpiresAt)
-                    {
-                        // token has passed check if we can refresh
-                        await RefreshTokenAsync(_oauthResult.RefreshToken);
-                    }
-                    var username = await GetUsernameAsync(_oauthResult.AccessToken);
-                    if (username != null)
-                    {
-                        _oauthResult.Username = username;
-                    }
-                    return _oauthResult;
+                    // token has passed check if we can refresh
+                    await RefreshTokenAsync(_oauthResult.RefreshToken);
                 }
+                var username = await GetUsernameAsync(_oauthResult.AccessToken);
+                if (username != null)
+                {
+                    _oauthResult.Username = username;
+                }
+                return _oauthResult;
             }
         }
         catch (Exception ex)
@@ -94,20 +92,19 @@ public class GoogleOAuthService
 
     public async Task<GoogleOauthResult?> LoginWithYoutube()
     {
-        if (File.Exists(_tokenPath))
+
+        _oauthResult = _stateService.DeserializeToken<GoogleOauthResult>(OAuthServices.Google);
+        if (_oauthResult != null)
         {
-            _oauthResult = LoadSavedToken();
-            if (_oauthResult != null)
+            if (DateTime.UtcNow > _oauthResult.ExpiresAt)
             {
-                if (DateTime.UtcNow > _oauthResult.ExpiresAt)
-                {
-                    // token has passed check if we can refresh
-                    await RefreshTokenAsync(_oauthResult.RefreshToken);
-                }
-                _oauthResult.Username = await GetUsernameAsync(_oauthResult.AccessToken);
-                return _oauthResult;
+                // token has passed check if we can refresh
+                await RefreshTokenAsync(_oauthResult.RefreshToken);
             }
+            _oauthResult.Username = await GetUsernameAsync(_oauthResult.AccessToken);
+            return _oauthResult;
         }
+
 
         var (codeVerifier, codeChallenge) = GeneratePkceParameters();
         _currentCodeVerifier = codeVerifier;
@@ -163,7 +160,6 @@ public class GoogleOAuthService
         if (!response.IsSuccessStatusCode)
         {
             // we have failed to refresh token, do full login
-            File.Delete(_tokenPath);
             throw new Exception($"Google refresh-token misslyckades: {response.StatusCode}\n{responseData}");
         }
 
@@ -180,7 +176,8 @@ public class GoogleOAuthService
             Scope = tokenData.GetProperty("scope").GetString() ?? string.Empty
         };
 
-        SaveToken(newToken);
+        //SaveToken(newToken);
+
         return newToken;
     }
 
@@ -294,8 +291,7 @@ public class GoogleOAuthService
             }
 
             // Spara token lokalt
-            SaveToken(result);
-
+            _stateService.SerializeToken<GoogleOauthResult>(OAuthServices.Google, result);
             // Rensa temporära värden så de inte återanvänds
             _currentCodeVerifier = null;
             _currentState = null;
@@ -419,27 +415,6 @@ public class GoogleOAuthService
         catch (Exception ex)
         {
             throw new Exception($"Kunde inte öppna webbläsare: {ex.Message}");
-        }
-    }
-
-    public static void SaveToken(GoogleOauthResult token)
-    {
-        var json = JsonSerializer.Serialize(token, _jsonoptions);
-        File.WriteAllText(_tokenPath, json);
-    }
-
-    public static GoogleOauthResult? LoadSavedToken()
-    {
-        if (!File.Exists(_tokenPath)) return null;
-
-        try
-        {
-            var json = File.ReadAllText(_tokenPath);
-            return JsonSerializer.Deserialize<GoogleOauthResult>(json);
-        }
-        catch
-        {
-            return null;
         }
     }
 
