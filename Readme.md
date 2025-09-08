@@ -54,7 +54,10 @@ It runs with a local RTMP server and can automatically publish to multiple platf
       dotnet build
       ```
 
-4. Run the application:
+4. Download : https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full-shared.7z <---- required
+copy the contents of the extracted "bin" dir into "dependencies".
+
+5. Run the application:
     ```bash
     dotnet run --project SSMM_UI
     ```
@@ -64,9 +67,13 @@ It runs with a local RTMP server and can automatically publish to multiple platf
 ## Usage
 
 1. Start the application.  
-2. Configure the RTMP server, e.g., `rtmp://localhost:1935/live`.  
-3. Connect your streaming client (OBS, ffmpeg, etc.).  
-4. Select the target platform(s) and posting method.  
+
+3. Connect your streaming client (OBS, or equivalent).
+  
+4. Select the target platform(s) and posting method. 
+
+**Not implemented fully yet**
+ 
 5. Start streaming – the app will handle the rest.  
 
 *(Add screenshots, step-by-step UI flows, and examples here.)*
