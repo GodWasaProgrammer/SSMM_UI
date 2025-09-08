@@ -52,6 +52,7 @@ public partial class App : Application
                 .AddSingleton<MetaDataViewModel>()
                 .AddSingleton<BroadCastService>()
                 .AddSingleton<PollService>()
+                .AddSingleton<SocialPosterService>()
                 .BuildServiceProvider();
 
 

@@ -10,4 +10,8 @@ public partial class SocialPosterView : UserControl
     {
         InitializeComponent();
     }
+
+    private void Binding(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+    }
 }

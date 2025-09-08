@@ -15,6 +15,7 @@ public static class SocialPoster
 {
     public static async Task RunPoster(bool XPost = false, bool DiscordPost = false, bool FBpost = false)
     {
+
         // Använd Singleton-instansen
         var kl = KeyLoader.Instance;
         // establish webhooks to deduce if live or not
@@ -24,14 +25,14 @@ public static class SocialPoster
         // post on relevant media platforms with said links
 
         // generate tokens
-        var TwitchToken = GetAccessTokenTwitch(kl.CLIENT_Ids["Twitch"], kl.API_Keys["Twitch"]);
+        var TwitchToken = await GetAccessTokenTwitch(kl.CLIENT_Ids["Twitch"], kl.API_Keys["Twitch"]);
 
-        var isLive = IsStreamerLiveTwitch(kl.CLIENT_Ids["Twitch"], TwitchToken.Result, kl.ACCOUNT_Names["Twitch"]);
+        var isLive = await IsStreamerLiveTwitch(kl.CLIENT_Ids["Twitch"], TwitchToken, kl.ACCOUNT_Names["Twitch"]);
 
-        Console.WriteLine(isLive.Result ? $"{kl.ACCOUNT_Names["Twitch"]} is live!" : $"{kl.ACCOUNT_Names["Twitch"]} is not live.");
+        Console.WriteLine(isLive ? $"{kl.ACCOUNT_Names["Twitch"]} is live!" : $"{kl.ACCOUNT_Names["Twitch"]} is not live.");
 
-        var LiveYT = IsLiveYoutube(kl.API_Keys["Google"], kl.CLIENT_Ids["Youtube"]);
-        Console.WriteLine(LiveYT.Result ? $"{kl.ACCOUNT_Names["Youtube"]}is live" : $"{kl.ACCOUNT_Names["Youtube"]} is not live");
+        var LiveYT = await IsLiveYoutube(kl.API_Keys["Google"], kl.CLIENT_Ids["Youtube"]);
+        Console.WriteLine(LiveYT ? $"{kl.ACCOUNT_Names["Youtube"]}is live" : $"{kl.ACCOUNT_Names["Youtube"]} is not live");
 
         //isLive = IsStreamerLive(twitchClientId, TwitchToken.Result, currentLivePerson);
         //Console.WriteLine(isLive.Result ? $"{currentLivePerson} is live!" : $"{currentLivePerson} is not live.");

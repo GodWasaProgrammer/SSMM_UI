@@ -15,6 +15,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using SSMM_UI.Enums;
+using Avalonia.Media.TextFormatting.Unicode;
 
 namespace SSMM_UI.Oauth.Google;
 
@@ -96,13 +97,14 @@ public class GoogleOAuthService
         _oauthResult = _stateService.DeserializeToken<GoogleOauthResult>(OAuthServices.Google);
         if (_oauthResult != null)
         {
-            if (DateTime.UtcNow > _oauthResult.ExpiresAt)
+            if (_oauthResult.ExpiresAt > DateTime.UtcNow)
             {
                 // token has passed check if we can refresh
                 await RefreshTokenAsync(_oauthResult.RefreshToken);
+                _oauthResult.Username = await GetUsernameAsync(_oauthResult.AccessToken);
+                return _oauthResult;
             }
-            _oauthResult.Username = await GetUsernameAsync(_oauthResult.AccessToken);
-            return _oauthResult;
+
         }
 
 

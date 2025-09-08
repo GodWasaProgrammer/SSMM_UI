@@ -32,12 +32,19 @@ public sealed class KeyLoader
     {
         var apiKeys = new Dictionary<string, string>();
 
-        if (!File.Exists(filePath))
+        var baseDir = AppContext.BaseDirectory;
+        var projectRoot = Directory.GetParent(baseDir)?.Parent?.Parent?.Parent?.Parent?.FullName;
+        var targetPath = Path.Combine(projectRoot, "API_Key_Secrets_Loader");
+        var combinedpath = Path.Combine(targetPath, filePath);
+
+        var exists = Directory.Exists(targetPath);
+   
+        if (!File.Exists(combinedpath))
         {
-            throw new FileNotFoundException($"Key file not found: {filePath}");
+            throw new FileNotFoundException($"Key file not found: {combinedpath}");
         }
 
-        foreach (var line in File.ReadLines(filePath))
+        foreach (var line in File.ReadLines(combinedpath))
         {
             if (string.IsNullOrWhiteSpace(line) || !line.Contains("=")) continue;
 

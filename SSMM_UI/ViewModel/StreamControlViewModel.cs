@@ -11,7 +11,7 @@ namespace SSMM_UI.ViewModel;
 
 public partial class StreamControlViewModel : ObservableObject
 {
-    public StreamControlViewModel(LogViewModel logVM, ILogService logger, LeftSideBarViewModel leftSideBarViewModel, StreamService streamservice, MetaDataService mdService, StateService stateservice, BroadCastService broadCastService, PollService pollService)
+    public StreamControlViewModel(LogViewModel logVM, ILogService logger, LeftSideBarViewModel leftSideBarViewModel, StreamService streamservice, MetaDataService mdService, StateService stateservice, BroadCastService broadCastService, PollService pollService, SocialPosterService socialposterservice)
     {
         // set Viewmodels
         LogVM = logVM;
@@ -24,6 +24,7 @@ public partial class StreamControlViewModel : ObservableObject
         _mdService = mdService;
         _stateService = stateservice;
         _broadCastService = broadCastService;
+        _socialposterservice = socialposterservice;
         // init our settings
         _settings = _stateService.UserSettingsObj;
         _pollService = pollService;
@@ -52,7 +53,7 @@ public partial class StreamControlViewModel : ObservableObject
     readonly StateService _stateService;
     readonly BroadCastService _broadCastService;
     readonly PollService _pollService;
-
+    readonly SocialPosterService _socialposterservice;
 
     // Settings
     readonly UserSettings _settings;
@@ -129,6 +130,9 @@ public partial class StreamControlViewModel : ObservableObject
                 CurrentMetaData = _stateService.GetCurrentMetaData();
                 await _streamService.StartStream(CurrentMetaData, LeftSideBarViewModel.SelectedServicesToStream);
                 _logService.Log("Started streaming...");
+
+
+
             }
             catch (Exception ex)
             {
@@ -160,6 +164,19 @@ public partial class StreamControlViewModel : ObservableObject
                 }
             }
         }
+        //_logService.Log("Attempting to post to social medias");
+        //if(_settings.PostToDiscord)
+        //{
+        //    await SocialPosterService.Discord();
+        //}
+        //if(_settings.PostToFB)
+        //{
+        //    await SocialPosterService.Facebook();
+        //}
+        //if(_settings.PostToX)
+        //{
+        //    await SocialPosterService.X();
+        //}
     }
 
     private void OnStopStreams()
