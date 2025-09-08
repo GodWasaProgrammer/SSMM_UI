@@ -253,7 +253,6 @@ public class MetaDataService
         }
     }
 
-    // TODO: Implement in Metadata UI
     public static async Task<List<TwitchCategory>> SearchTwitchCategories(string query, string accessToken, string clientId)
     {
         using var http = new HttpClient();
