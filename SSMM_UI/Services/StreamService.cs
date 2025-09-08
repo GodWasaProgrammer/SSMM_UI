@@ -55,30 +55,31 @@ public class StreamService
                                 service.StreamKey = newKey;
                             }
                         }
-                        if (service.DisplayName.Contains("Twitch", StringComparison.OrdinalIgnoreCase))
+                        
+                    }
+                    if (service.DisplayName.Contains("Twitch", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (metadata != null)
                         {
-                            if (metadata != null)
-                            {
-                                var (newUrl, newKey) = await _broadCastService.CreateTwitchBroadcastAsync(metadata);
+                            var (newUrl, newKey) = await _broadCastService.CreateTwitchBroadcastAsync(metadata);
 
-                                if (newUrl != null && newKey != null)
-                                {
-                                    if (service.SelectedServer != null)
-                                        service.SelectedServer.Url = newUrl;
-                                    service.StreamKey = newKey;
-                                }
-                                else
-                                {
-                                    throw new Exception($"CreateTwitchBroadcast returned a null value in either{newUrl} or {newKey}");
-                                }
+                            if (newUrl != null && newKey != null)
+                            {
+                                if (service.SelectedServer != null)
+                                    service.SelectedServer.Url = newUrl;
+                                service.StreamKey = newKey;
+                            }
+                            else
+                            {
+                                throw new Exception($"CreateTwitchBroadcast returned a null value in either{newUrl} or {newKey}");
                             }
                         }
-                        if (service.DisplayName.Contains("Kick", StringComparison.OrdinalIgnoreCase))
+                    }
+                    if (service.DisplayName.Contains("Kick", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (metadata != null)
                         {
-                            if (metadata != null)
-                            {
-                                await BroadCastService.CreateKickBroadcastAsync(metadata);
-                            }
+                            await BroadCastService.CreateKickBroadcastAsync(metadata);
                         }
                     }
                 }
