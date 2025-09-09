@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using Avalonia.Media.Imaging;
+using System.Collections.Generic;
 
 namespace SSMM_UI.Poster;
 
 public class SocialPostTemplate
 {
-    private string prefix = string.Empty;
+    private string Title = string.Empty;
+    private string description = string.Empty;
+    private Bitmap Thumbnail;
+    private string UserName = string.Empty;
     private string suffix = string.Empty;
     private List<string> LinksToStreams = new List<string>();
     private string isLive = "Is Now LIVE";
@@ -15,7 +19,7 @@ public class SocialPostTemplate
     {
         string platformsText = string.Join(" ", Platforms);
         string linksText = string.Join("\n", LinksToStreams);
-        string.Concat(prefix, isLive, platformsText, linksText, suffix);
+        string.Concat(UserName, isLive, platformsText, linksText, suffix);
     }
 
     private void AddPlatform(string platform)
