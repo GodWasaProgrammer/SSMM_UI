@@ -13,7 +13,9 @@ public class SocialPostTemplate
 
     private void BuildPost()
     {
-        string.Concat(prefix, LinksToStreams, suffix);
+        string platformsText = string.Join(" ", Platforms);
+        string linksText = string.Join("\n", LinksToStreams);
+        string.Concat(prefix, isLive, platformsText, linksText, suffix);
     }
 
     private void AddPlatform(string platform)
