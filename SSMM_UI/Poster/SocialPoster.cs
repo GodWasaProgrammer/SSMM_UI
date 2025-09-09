@@ -41,6 +41,18 @@ public static class SocialPoster
         //if (true || isLive.Result && LiveYT.Result)
         //{
 
+
+        List<string> streamlinks = new List<string>();
+        streamlinks.Add("https://www.youtube.com/watch?v=P2XNX3MLEdY");
+        streamlinks.Add("https://www.youtube.com/watch?v=P2XNX3MLEdY");
+
+        List<string> platforms = new List<string>();
+        platforms.Add("Twitch");
+        platforms.Add("Youtube");
+
+        var template = new SocialPostTemplate("cybercola", streamlinks, platforms);
+        var stringtoPost = template.Post;
+
         if (XPost)
         {
 

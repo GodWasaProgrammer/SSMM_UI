@@ -13,6 +13,7 @@
 					<CheckBox Content="X(Twitter)" IsChecked="{Binding PostToX}"/>
 					<CheckBox Content="Facebook" IsChecked="{Binding PostToFB}"/>
 					<CheckBox Content="Discord" IsChecked="{Binding PostToDiscord}"/>
+					<Button Command="{Binding TestClick}" Content="Test"/>
 				</StackPanel>
 			</Border>
 		</StackPanel>
