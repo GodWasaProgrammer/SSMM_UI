@@ -32,7 +32,7 @@ public static class SocialPoster
         Console.WriteLine(isLive ? $"{kl.ACCOUNT_Names["Twitch"]} is live!" : $"{kl.ACCOUNT_Names["Twitch"]} is not live.");
 
         var LiveYT = await IsLiveYoutube(kl.API_Keys["Google"], kl.CLIENT_Ids["Youtube"]);
-        Console.WriteLine(LiveYT ? $"{kl.ACCOUNT_Names["Youtube"]}is live" : $"{kl.ACCOUNT_Names["Youtube"]} is not live");
+        Console.WriteLine(LiveYT.Item1 ? $"{kl.ACCOUNT_Names["Youtube"]}is live" : $"{kl.ACCOUNT_Names["Youtube"]} is not live");
 
         //isLive = IsStreamerLive(twitchClientId, TwitchToken.Result, currentLivePerson);
         //Console.WriteLine(isLive.Result ? $"{currentLivePerson} is live!" : $"{currentLivePerson} is not live.");
@@ -43,12 +43,29 @@ public static class SocialPoster
 
 
         List<string> streamlinks = new List<string>();
-        streamlinks.Add("https://www.youtube.com/watch?v=P2XNX3MLEdY");
-        streamlinks.Add("https://www.youtube.com/watch?v=P2XNX3MLEdY");
-
         List<string> platforms = new List<string>();
+
+
+        // testing
+        streamlinks.Add("https://www.twitch.tv/cybercolagaming");
+        streamlinks.Add("https://www.youtube.com/cyberscorner");
         platforms.Add("Twitch");
         platforms.Add("Youtube");
+        // shenanigans end
+
+        if (isLive)
+        {
+            platforms.Add("Twitch");
+            streamlinks.Add("https://www.twitch.tv/cybercolagaming");
+        }
+        if (LiveYT.Item1)
+        {
+            platforms.Add("Youtube");
+            if (LiveYT.LiveUrl != null)
+            {
+                streamlinks.Add(LiveYT.LiveUrl);
+            }
+        }
 
         var template = new SocialPostTemplate("cybercola", streamlinks, platforms);
         var stringtoPost = template.Post;
@@ -69,7 +86,7 @@ public static class SocialPoster
                 (
                 new TweetV2PostRequest
                 {
-                    Text = "API test beep boop"
+                    Text = stringtoPost,
                 }
                 );
 
@@ -81,12 +98,12 @@ public static class SocialPoster
 
         if (FBpost)
         {
-            await FacebookPoster.Post("Testing Graph API", kl);
+            await FacebookPoster.Post(stringtoPost, kl);
         }
         if (DiscordPost)
         {
-            await DiscordPoster.PostToDiscord(kl.Webhooks["DGeneral"], "Testing API Webhooks - hello from cybercola!");
-            await DiscordPoster.PostToDiscord(kl.Webhooks["DLive"], "Testing API Webhooks! - hello from cybercola!");
+            await DiscordPoster.PostToDiscord(kl.Webhooks["DGeneral"], stringtoPost);
+            await DiscordPoster.PostToDiscord(kl.Webhooks["DLive"], stringtoPost);
         }
     }
 
@@ -133,7 +150,7 @@ public static class SocialPoster
         return ((JsonElement)json["data"]).GetArrayLength() > 0;
     }
 
-    public static async Task<bool> IsLiveYoutube(string apiKey, string channelId)
+    public static async Task<(bool, string? LiveUrl, string? VideoTitle)> IsLiveYoutube(string apiKey, string channelId)
     {
         try
         {
@@ -153,13 +170,30 @@ public static class SocialPoster
             // Skicka förfrågan
             var searchResponse = await searchRequest.ExecuteAsync();
 
+            if (searchResponse.Items.Count > 0)
+            {
+                // Hämta den första live-videon
+                var liveVideo = searchResponse.Items[0];
+                string videoId = liveVideo.Id.VideoId;
+                string videoTitle = liveVideo.Snippet.Title;
+
+                // Bygg den exakta live-URL:en
+                string liveUrl = $"https://www.youtube.com/watch?v={videoId}";
+                // Alternativt: https://www.youtube.com/live/{videoId}
+
+                return (true, liveUrl, videoTitle);
+            }
+            else
+            {
+                return (false, null, null);
+            }
             // Kontrollera om det finns några live-videor
-            return searchResponse.Items.Count > 0;
+            //return searchResponse.Items.Count > 0;
         }
         catch (Exception ex)
         {
             Console.WriteLine("Ett fel inträffade: " + ex.Message);
-            return false;
+            return (false, null, null);
         }
     }
 

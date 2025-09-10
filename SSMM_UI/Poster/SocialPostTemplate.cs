@@ -8,18 +8,18 @@ public class SocialPostTemplate
     private string Title = string.Empty;
     private string description = string.Empty;
     private Bitmap? Thumbnail;
-    private readonly string  _userName = string.Empty;
+    private readonly string _userName = string.Empty;
     private string suffix = string.Empty;
     private List<string> LinksToStreams = [];
     private string isLive = "Is Now LIVE";
+    private string _githubLink = "https://github.com/GodWasaProgrammer/SSMM_UI";
 
-    public string Post {  get; set; }
+    public string Post { get; set; } = string.Empty;
 
     private List<string> Platforms = new List<string>();
 
     private void BuildPost()
     {
-        // Bygg plattformsdelen med checkmarks och länkar
         var platformLines = new List<string>();
         for (int i = 0; i < Platforms.Count && i < LinksToStreams.Count; i++)
         {
@@ -28,17 +28,16 @@ public class SocialPostTemplate
 
         string platformsText = string.Join("\n", platformLines);
 
-        // Bygg hela inlägget med proper formatering
-        Post = $"{_userName} is now LIVE on:\n{platformsText}";
+        suffix = "\nThis was generated using Streamer & Social Media Manager," +
+            "\nA MultiStreaming Desktop Application Developed and maintained by cybercola!" +
+            $"\n{_githubLink}";
+
+        Post = $"{_userName} is now LIVE on:\n{platformsText}{suffix}";
+
+
     }
 
-    private void AddPlatform(string platform)
-    {
-        string add = $"On:{platform}";
-        Platforms.Add(add);
-    }
-
-    public SocialPostTemplate(string username, List<string> linkstostreams, List<string> platforms) 
+    public SocialPostTemplate(string username, List<string> linkstostreams, List<string> platforms)
     {
         LinksToStreams = linkstostreams;
         Platforms = platforms;

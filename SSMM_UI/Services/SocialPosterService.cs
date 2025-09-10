@@ -5,18 +5,8 @@ namespace SSMM_UI.Services;
 
 public class SocialPosterService
 {
-    public async Task Discord()
+    public async Task RunPoster(bool Discord, bool Facebook, bool X)
     {
-        await SocialPoster.RunPoster(DiscordPost:true);
-    }
-
-    public async Task Facebook()
-    {
-        await SocialPoster.RunPoster(FBpost:true);
-    }
-
-    public async Task X()
-    {
-        await SocialPoster.RunPoster(XPost:true);
+        await SocialPoster.RunPoster(Discord, Facebook, X);
     }
 }
