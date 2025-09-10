@@ -19,9 +19,17 @@ public class SocialPostTemplate
 
     private void BuildPost()
     {
-        string platformsText = string.Join(" ", Platforms);
-        string linksText = string.Join("\n", LinksToStreams);
-        Post = string.Concat(_userName, isLive, platformsText, linksText, suffix);
+        // Bygg plattformsdelen med checkmarks och länkar
+        var platformLines = new List<string>();
+        for (int i = 0; i < Platforms.Count && i < LinksToStreams.Count; i++)
+        {
+            platformLines.Add($"{Platforms[i]} ✅ {LinksToStreams[i]}");
+        }
+
+        string platformsText = string.Join("\n", platformLines);
+
+        // Bygg hela inlägget med proper formatering
+        Post = $"{_userName} is now LIVE on:\n{platformsText}";
     }
 
     private void AddPlatform(string platform)
