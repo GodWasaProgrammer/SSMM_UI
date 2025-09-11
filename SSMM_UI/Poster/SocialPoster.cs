@@ -45,13 +45,7 @@ public static class SocialPoster
         List<string> streamlinks = new List<string>();
         List<string> platforms = new List<string>();
 
-
-        // testing
-        streamlinks.Add("https://www.twitch.tv/cybercolagaming");
-        streamlinks.Add("https://www.youtube.com/cyberscorner");
-        platforms.Add("Twitch");
-        platforms.Add("Youtube");
-        // shenanigans end
+        
 
         if (isLive)
         {

@@ -9,4 +9,15 @@ public class SocialPosterService
     {
         await SocialPoster.RunPoster(Discord, Facebook, X);
     }
+
+
+    private StateService _stateService;
+    private ILogService _logService;
+    private PostMaster _postMaster;
+    public SocialPosterService(StateService stateService, ILogService logger)
+    {
+        _stateService = stateService;
+        _logService = logger;
+        _postMaster = new(_stateService, _logService);
+    }
 }

@@ -41,7 +41,7 @@ public class CentralAuthService
         {
             if (IsTokenValid.Result != null)
             {
-                LoginResult = ($"✅ Inloggad som: {IsTokenValid.Result.UserName}");
+                LoginResult = ($"✅ Inloggad som: {IsTokenValid.Result.Username}");
             }
         }
         else
@@ -58,7 +58,7 @@ public class CentralAuthService
 
             if (token != null)
             {
-                LoginResult = ($"✅ Inloggad som: {token.UserName}");
+                LoginResult = ($"✅ Inloggad som: {token.Username}");
             }
             else
             {
@@ -157,7 +157,7 @@ public class CentralAuthService
                 if (twitchToken.ErrorMessage == null)
                 {
                     results.Add(twitchToken is not null
-                        ? new AuthResult(AuthProvider.Twitch, true, twitchToken.UserName, null)
+                        ? new AuthResult(AuthProvider.Twitch, true, twitchToken.Username, null)
                         : new AuthResult(AuthProvider.Twitch, false, null, "Token was missing or is invalid"));
                 }
                 else

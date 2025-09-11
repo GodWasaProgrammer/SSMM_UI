@@ -117,7 +117,7 @@ public class TwitchDCAuthService
         if (token is not null)
         {
             token.ExpiresAt = DateTime.UtcNow.AddSeconds(token.ExpiresIn);
-            token.UserName = await GetUsernameAsync(token.AccessToken);
+            token.Username = await GetUsernameAsync(token.AccessToken);
             token.UserId = await GetUserIdAsync(token.AccessToken);
             _stateService.SerializeToken(OAuthServices.Twitch, token);
         }
@@ -145,7 +145,7 @@ public class TwitchDCAuthService
             {
                 if (res.ErrorMessage == null)
                 {
-                    token.UserName = await GetUsernameAsync(token.AccessToken);
+                    token.Username = await GetUsernameAsync(token.AccessToken);
                 }
                 else
                 {
@@ -185,7 +185,7 @@ public class TwitchDCAuthService
                 if (token != null)
                 {
                     token.ExpiresAt = DateTime.UtcNow.AddSeconds(token.ExpiresIn);
-                    token.UserName = await GetUsernameAsync(token.AccessToken);
+                    token.Username = await GetUsernameAsync(token.AccessToken);
                     token.UserId = await GetUserIdAsync(token.AccessToken);
                     AuthResult = token;
                     _stateService.SerializeToken(OAuthServices.Twitch, token);

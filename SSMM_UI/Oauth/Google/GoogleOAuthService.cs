@@ -16,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using SSMM_UI.Enums;
 using Avalonia.Media.TextFormatting.Unicode;
+using SSMM_UI.Interfaces;
 
 namespace SSMM_UI.Oauth.Google;
 
@@ -68,7 +69,7 @@ public class GoogleOAuthService
     {
         try
         {
-            _oauthResult = _stateService.DeserializeToken<GoogleOauthResult>(OAuthServices.Google);
+            _oauthResult = _stateService.DeserializeToken<GoogleOauthResult>(OAuthServices.Youtube);
             if (_oauthResult != null)
             {
                 if (DateTime.UtcNow > _oauthResult.ExpiresAt)
@@ -94,7 +95,7 @@ public class GoogleOAuthService
     public async Task<GoogleOauthResult?> LoginWithYoutube()
     {
 
-        _oauthResult = _stateService.DeserializeToken<GoogleOauthResult>(OAuthServices.Google);
+        _oauthResult = _stateService.DeserializeToken<GoogleOauthResult>(OAuthServices.Youtube);
         if (_oauthResult != null)
         {
             if (_oauthResult.ExpiresAt > DateTime.UtcNow)
@@ -293,7 +294,7 @@ public class GoogleOAuthService
             }
 
             // Spara token lokalt
-            _stateService.SerializeToken<GoogleOauthResult>(OAuthServices.Google, result);
+            _stateService.SerializeToken<GoogleOauthResult>(OAuthServices.Youtube, result);
             // Rensa temporära värden så de inte återanvänds
             _currentCodeVerifier = null;
             _currentState = null;
@@ -435,7 +436,7 @@ public class GoogleOAuthService
     }
 }
 
-public class GoogleOauthResult
+public class GoogleOauthResult : IAuthToken
 {
     public string AccessToken { get; set; } = string.Empty;
     public string RefreshToken { get; set; } = string.Empty;
@@ -445,4 +446,6 @@ public class GoogleOauthResult
     public string Username { get; set; } = string.Empty;
 
     public bool IsValid => !string.IsNullOrEmpty(AccessToken) && ExpiresAt > DateTime.UtcNow.AddMinutes(5);
+
+    public string? ErrorMessage { get; }
 }

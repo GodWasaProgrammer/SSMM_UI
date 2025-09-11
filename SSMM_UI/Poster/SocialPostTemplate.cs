@@ -11,7 +11,6 @@ public class SocialPostTemplate
     private readonly string _userName = string.Empty;
     private string suffix = string.Empty;
     private List<string> LinksToStreams = [];
-    private string isLive = "Is Now LIVE";
     private string _githubLink = "https://github.com/GodWasaProgrammer/SSMM_UI";
 
     public string Post { get; set; } = string.Empty;

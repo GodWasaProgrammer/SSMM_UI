@@ -1,6 +1,7 @@
 ﻿using Avalonia.Media.Imaging;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.Enums;
+using SSMM_UI.Interfaces;
 using SSMM_UI.MetaData;
 using SSMM_UI.RTMP;
 using SSMM_UI.Settings;
@@ -22,8 +23,9 @@ public class StateService
     private const string _savedMetaData = "MetaData_State.json";
     private readonly JsonSerializerOptions _metaDataJsonOptions;
     private readonly JsonSerializerOptions _regularJsonOptions = new() { WriteIndented = true };
-
-
+    private Dictionary<OAuthServices, IAuthToken> _authObjects = new();
+    public event Action? OnAuthObjectsUpdated;
+    public Dictionary<OAuthServices, IAuthToken> AuthObjects { get { return _authObjects; } }
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; private set; } = [];
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
     public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; private set; } = [];
@@ -31,7 +33,7 @@ public class StateService
     private StreamMetadata CurrentMetaData { get; set; } = new StreamMetadata();
 
     private const string _tokenPath = "Tokens";
-    public void SerializeToken<T>(OAuthServices service, T token) where T : class
+    public void SerializeToken<T>(OAuthServices service, T token) where T : class, IAuthToken
     {
         try
         {
@@ -40,11 +42,17 @@ public class StateService
             var json = JsonSerializer.Serialize(token, _regularJsonOptions);
 
             var path = Path.Combine(_tokenPath, $"{service}Token.json");
-            if (!Path.Exists(_tokenPath)) 
+            if (!Path.Exists(_tokenPath))
             {
                 Directory.CreateDirectory(path);
             }
             File.WriteAllText(path, json);
+
+            // CA1853 says you dont need to guard against if it contains it, its built in
+            _authObjects.Remove(service);
+            _authObjects.Add(service, token);
+            OnAuthObjectsUpdated?.Invoke();
+
         }
         catch (Exception ex)
         {
@@ -52,7 +60,7 @@ public class StateService
         }
     }
 
-    public T DeserializeToken<T>(OAuthServices service) where T : class
+    public T DeserializeToken<T>(OAuthServices service) where T : class, IAuthToken
     {
         try
         {
@@ -62,6 +70,15 @@ public class StateService
                 return null!;
             }
             var json = File.ReadAllText(filePath);
+            var deserializedobj = JsonSerializer.Deserialize<T>(json, _regularJsonOptions);
+
+            //CA1853 claims you dont need to guard against removing something as it ignores if its not contained within
+            _authObjects.Remove(service);
+            if (deserializedobj != null)
+            {
+                _authObjects.Add(service, deserializedobj);
+                OnAuthObjectsUpdated?.Invoke();
+            }
             return JsonSerializer.Deserialize<T>(json, _regularJsonOptions)!;
         }
         catch (Exception ex)

@@ -3,7 +3,7 @@
 public enum OAuthServices
 {
     Twitch,
-    Google,
+    Youtube,
     Kick
 }
 

@@ -1,8 +1,9 @@
 ﻿using System;
+using SSMM_UI.Interfaces;
 
 namespace SSMM_UI.Oauth.Kick;
 
-public class KickAuthResult
+public class KickAuthResult : IAuthToken
 {
     public string AccessToken { get; set; } = string.Empty;
     public string RefreshToken { get; set; } = string.Empty;
@@ -12,4 +13,6 @@ public class KickAuthResult
     public string Username { get; set; } = string.Empty;
 
     public bool IsValid => !string.IsNullOrEmpty(AccessToken) && ExpiresAt > DateTime.UtcNow.AddMinutes(5);
+
+    public string? ErrorMessage { get; }
 }
