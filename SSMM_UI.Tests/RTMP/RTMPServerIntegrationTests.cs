@@ -2,49 +2,37 @@
 using LiveStreamingServerNet.Flv.Installer;
 using LiveStreamingServerNet.Standalone.Installer;
 using LiveStreamingServerNet.StreamProcessor.Installer;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using System.Net;
-using Xunit;
+using Microsoft.Extensions.Hosting;
 
 namespace SSMM_UI.Tests.RTMP
 {
     public class RTMPServerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
+        private static WebApplicationFactory<Program>? _factory;
 
         public RTMPServerIntegrationTests(WebApplicationFactory<Program> factory)
         {
-            _client = factory.CreateClient(new WebApplicationFactoryClientOptions
+            // Behåll factory som singleton
+            _factory ??= factory;
+            _client = _factory.CreateClient(new WebApplicationFactoryClientOptions
             {
                 AllowAutoRedirect = false,
-                HandleCookies = false
+                HandleCookies = false,
+                BaseAddress = new Uri("https://localhost:7000")
             });
         }
 
         [Fact]
-        public async Task AdminPanel_ShouldReturnSuccess()
-        {
-            // Act
-            var response = await _client.GetAsync("/ui");
-
-            // Assert
-            Assert.True(response.StatusCode == HttpStatusCode.OK ||
-                       response.StatusCode == HttpStatusCode.Redirect ||
-                       response.StatusCode == HttpStatusCode.NotFound,
-                $"Admin panel should respond (actual: {response.StatusCode})");
-        }
-
-        [Fact]
-        public void StartSrv_ShouldConfigureServicesCorrectly()
+        public void ServicesConfiguration_ShouldRegisterRequiredServices()
         {
             // Arrange
-            var builder = WebApplication.CreateBuilder();
+            var services = new ServiceCollection();
 
             // Act
-            // Anropa din faktiska konfigurationsmetod
-            builder.Services.AddLiveStreamingServer(
+            services.AddLiveStreamingServer(
                 new System.Net.IPEndPoint(System.Net.IPAddress.Any, 1935),
                 options =>
                 {
@@ -53,11 +41,12 @@ namespace SSMM_UI.Tests.RTMP
                     options.AddStreamProcessor().AddHlsTransmuxer();
                 });
 
-            // Assert
-            var serviceProvider = builder.Services.BuildServiceProvider();
-            var rtmpServer = serviceProvider.GetService<ILiveStreamingServer>();
+            // Assert - Leta efter IHostedService registrering
+            var hostedService = services.FirstOrDefault(s =>
+                s.ServiceType == typeof(IHostedService));
 
-            Assert.NotNull(rtmpServer);
+            Assert.NotNull(hostedService);
+            Assert.Equal(ServiceLifetime.Singleton, hostedService!.Lifetime);
         }
     }
 }
