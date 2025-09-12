@@ -1,7 +1,5 @@
 ﻿using SSMM_UI.Enums;
 using SSMM_UI.Interfaces;
-using SSMM_UI.Oauth.Google;
-using SSMM_UI.Oauth.Kick;
 using SSMM_UI.RTMP;
 using SSMM_UI.Services;
 using System;
@@ -14,7 +12,7 @@ namespace SSMM_UI.Poster;
 public class PostMaster
 {
     private ObservableCollection<SelectedService>? _selectedServices;
-    private Dictionary<OAuthServices, IAuthToken> _authobjects;
+    private Dictionary<OAuthServices, IAuthToken>? _authobjects;
     private StateService _stateservice;
     private Dictionary<string, OAuthServices>? _usernameAndService;
     private ILogService _logService;
@@ -44,21 +42,23 @@ public class PostMaster
                 selectedoutputs.Add(srv.DisplayName);
             }
         }
-
-        foreach (var obj in _authobjects)
+        if (_authobjects != null)
         {
-            var service = obj.Key;
-            var username = obj.Value.Username;
-
-            bool isServiceSelected = selectedoutputs.Any(output => output.Contains(service.ToString(), StringComparison.OrdinalIgnoreCase));
-
-            if (username != null && isServiceSelected)
+            foreach (var obj in _authobjects)
             {
-                _usernameAndService.Add(username, service);
-            }
-            else
-            {
-                _logService.Log($"Username was missing for:{service}");
+                var service = obj.Key;
+                var username = obj.Value.Username;
+
+                bool isServiceSelected = selectedoutputs.Any(output => output.Contains(service.ToString(), StringComparison.OrdinalIgnoreCase));
+
+                if (username != null && isServiceSelected)
+                {
+                    _usernameAndService.Add(username, service);
+                }
+                else
+                {
+                    _logService.Log($"Username was missing for:{service}");
+                }
             }
         }
     }

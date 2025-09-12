@@ -36,8 +36,6 @@ public sealed class KeyLoader
         var projectRoot = Directory.GetParent(baseDir)?.Parent?.Parent?.Parent?.Parent?.FullName;
         var targetPath = Path.Combine(projectRoot, "API_Key_Secrets_Loader");
         var combinedpath = Path.Combine(targetPath, filePath);
-
-        var exists = Directory.Exists(targetPath);
    
         if (!File.Exists(combinedpath))
         {
