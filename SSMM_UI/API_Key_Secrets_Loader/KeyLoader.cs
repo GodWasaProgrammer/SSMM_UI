@@ -28,7 +28,14 @@ public sealed class KeyLoader
         Webhooks = LoadApiKeys("Webhooks.txt");
     }
 
-    private static Dictionary<string, string> LoadApiKeys(string filePath)
+    /// <summary>
+    /// Should NOT be called directly. Use the singleton instance instead. 
+    /// Only available for unit testing purposes.
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns></returns>
+    /// <exception cref="FileNotFoundException"></exception>
+    public static Dictionary<string, string> LoadApiKeys(string filePath)
     {
         var apiKeys = new Dictionary<string, string>();
 
@@ -61,4 +68,7 @@ public sealed class KeyLoader
 
         return apiKeys;
     }
+
+
+    
 }
