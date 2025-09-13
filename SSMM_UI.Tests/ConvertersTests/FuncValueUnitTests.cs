@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace SSMM_UI.Tests.ConvertersTests;
 
-public class ConvertersUnitTests
+public class FuncValueUnitTests
 {
 #pragma warning disable CS8605 // Unboxing a possibly null value.
     [Fact]
