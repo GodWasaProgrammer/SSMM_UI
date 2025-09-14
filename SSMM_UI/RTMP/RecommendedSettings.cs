@@ -1,7 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
 namespace SSMM_UI.RTMP;
-
+/// <summary>
+/// This class represents the recommended settings for streaming, for a specific output
+/// </summary>
 public class RecommendedSettings
 {
     [JsonPropertyName("keyint")]
