@@ -43,7 +43,7 @@ public sealed class KeyLoader
         var projectRoot = Directory.GetParent(baseDir)?.Parent?.Parent?.Parent?.Parent?.FullName;
         var targetPath = Path.Combine(projectRoot, "API_Key_Secrets_Loader");
         var combinedpath = Path.Combine(targetPath, filePath);
-   
+
         if (!File.Exists(combinedpath))
         {
             throw new FileNotFoundException($"Key file not found: {combinedpath}");
@@ -65,10 +65,6 @@ public sealed class KeyLoader
                 }
             }
         }
-
         return apiKeys;
     }
-
-
-    
 }

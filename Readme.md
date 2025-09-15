@@ -71,7 +71,8 @@ copy the contents of the extracted "bin" dir into "dependencies".
 3. Connect your streaming client (OBS, or equivalent).
 
 ** Go to OBS(or other RTMP-viable streaming software) **
-** Go into Settings -> Stream -> "Custom" set server to : "rtmp://localhost:1935/live/"; **
+Go into Settings -> Stream -> "Custom" set server to : "rtmp://localhost:1935/live/"
+streamkey: demo
   
 4. Select the target platform(s) and posting method. 
 
