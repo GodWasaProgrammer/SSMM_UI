@@ -7,7 +7,7 @@ public class SocialPosterService
 {
     public async Task RunPoster(bool Discord, bool Facebook, bool X)
     {
-        await SocialPoster.RunPoster(Discord, Facebook, X);
+        await SocialPoster.RunPoster(_postMaster, Discord, Facebook, X);
     }
 
 

@@ -8,12 +8,13 @@ using System;
 using System.Net.Http;
 using System.Collections.Generic;
 using SSMM_UI.API_Key_Secrets_Loader;
+using SSMM_UI.DTO;
 
 namespace SSMM_UI.Poster;
 
 public static class SocialPoster
 {
-    public static async Task RunPoster(bool XPost = false, bool DiscordPost = false, bool FBpost = false)
+    public static async Task RunPoster(PostMaster postmaster, bool XPost = false, bool DiscordPost = false, bool FBpost = false)
     {
 
         // Använd Singleton-instansen
@@ -32,7 +33,7 @@ public static class SocialPoster
         Console.WriteLine(isLive ? $"{kl.ACCOUNT_Names["Twitch"]} is live!" : $"{kl.ACCOUNT_Names["Twitch"]} is not live.");
 
         var LiveYT = await IsLiveYoutube(kl.API_Keys["Google"], kl.CLIENT_Ids["Youtube"]);
-        Console.WriteLine(LiveYT.Item1 ? $"{kl.ACCOUNT_Names["Youtube"]}is live" : $"{kl.ACCOUNT_Names["Youtube"]} is not live");
+        Console.WriteLine(LiveYT.IsLive ? $"{kl.ACCOUNT_Names["Youtube"]}is live" : $"{kl.ACCOUNT_Names["Youtube"]} is not live");
 
         //isLive = IsStreamerLive(twitchClientId, TwitchToken.Result, currentLivePerson);
         //Console.WriteLine(isLive.Result ? $"{currentLivePerson} is live!" : $"{currentLivePerson} is not live.");
@@ -45,14 +46,14 @@ public static class SocialPoster
         List<string> streamlinks = new List<string>();
         List<string> platforms = new List<string>();
 
-        
+
 
         if (isLive)
         {
             platforms.Add("Twitch");
             streamlinks.Add("https://www.twitch.tv/cybercolagaming");
         }
-        if (LiveYT.Item1)
+        if (LiveYT.IsLive)
         {
             platforms.Add("Youtube");
             if (LiveYT.LiveUrl != null)
@@ -144,8 +145,9 @@ public static class SocialPoster
         return ((JsonElement)json["data"]).GetArrayLength() > 0;
     }
 
-    public static async Task<(bool, string? LiveUrl, string? VideoTitle)> IsLiveYoutube(string apiKey, string channelId)
+    public static async Task<IsLiveDto> IsLiveYoutube(string apiKey, string channelId)
     {
+        var islive = new IsLiveDto();
         try
         {
             // Skapa YouTube Service
@@ -175,11 +177,18 @@ public static class SocialPoster
                 string liveUrl = $"https://www.youtube.com/watch?v={videoId}";
                 // Alternativt: https://www.youtube.com/live/{videoId}
 
-                return (true, liveUrl, videoTitle);
+                islive.IsLive = true;
+                islive.LiveUrl = liveUrl;
+                islive.VideoTitle = videoTitle;
+                return islive;
             }
             else
             {
-                return (false, null, null);
+                //return (false, null, null);
+                islive.IsLive = false;
+                islive.LiveUrl = null;
+                islive.VideoTitle = null;
+                return islive;
             }
             // Kontrollera om det finns några live-videor
             //return searchResponse.Items.Count > 0;
@@ -187,7 +196,11 @@ public static class SocialPoster
         catch (Exception ex)
         {
             Console.WriteLine("Ett fel inträffade: " + ex.Message);
-            return (false, null, null);
+            //return (false, null, null);
+            islive.IsLive = false;
+            islive.LiveUrl = null;
+            islive.VideoTitle = null;
+            return islive;
         }
     }
 
