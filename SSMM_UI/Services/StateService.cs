@@ -102,6 +102,8 @@ public class StateService
     public UserSettings UserSettingsObj { get; private set; } = new UserSettings();
 
     private readonly ILogService _logger;
+
+    //TODO: When running initially, check what boxart we have available, build a list, supply list to VM's
     public StateService(ILogService logger)
     {
         _metaDataJsonOptions = new JsonSerializerOptions

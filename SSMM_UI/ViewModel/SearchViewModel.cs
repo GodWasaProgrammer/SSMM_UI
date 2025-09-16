@@ -97,6 +97,7 @@ public partial class SearchViewModel : ObservableObject
         }
     }
 
+    //TODO: Cache boxart, load from disk if available, if not, load from interwebz
     public static async Task<Bitmap> LoadBoxArtAsync(string BoxArtUrl)
     {
         using var http = new HttpClient();
@@ -108,6 +109,7 @@ public partial class SearchViewModel : ObservableObject
         return new Bitmap(ms);
     }
 
+    // TODO: Implement caching, save to disk, if not on disk, load from web
     public static async Task<List<TwitchCategory>> SearchTwitchCategories(string query, string accessToken, string clientId)
     {
         using var http = new HttpClient();

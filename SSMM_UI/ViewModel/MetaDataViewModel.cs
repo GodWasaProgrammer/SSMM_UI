@@ -49,6 +49,27 @@ public partial class MetaDataViewModel : ObservableObject
             // revert to keep correct ref
             if (selectedYoutubeCategory != null)
                 CurrentMetadata.YouTubeCategory = selectedYoutubeCategory;
+            _ = LoadMetaDataBoxArt();
+        }
+    }
+
+    public async Task LoadMetaDataBoxArt()
+    {
+        if (CurrentMetadata != null)
+        {
+            if (CurrentMetadata.TwitchCategory != null)
+            {
+                if (SearchVM != null)
+                {
+                    SearchVM.SelectedItem = CurrentMetadata.TwitchCategory;
+                }
+                if (CurrentMetadata.TwitchCategory.BoxArtUrl != null)
+                {
+                    var bla = await SearchViewModel.LoadBoxArtAsync(CurrentMetadata.TwitchCategory.BoxArtUrl);
+
+                    CurrentMetadata.TwitchCategory.BoxArt = bla;
+                }
+            }
         }
     }
 
