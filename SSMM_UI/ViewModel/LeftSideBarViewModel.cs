@@ -87,6 +87,12 @@ namespace SSMM_UI.ViewModel
         [ObservableProperty] private bool isReceivingStream;
         [ObservableProperty] private RtmpServiceGroup? selectedRtmpService;
 
+        async partial void OnSelectedRtmpServiceChanged(RtmpServiceGroup? value)
+        {
+            if(value != null)
+            await OnRTMPServiceSelected(value);
+        }
+
         // Settings
         private readonly UserSettings? _userSettings;
 

@@ -32,11 +32,7 @@
 								 BorderBrush="{DynamicResource BorderColor}">
 							<ListBox.ItemTemplate>
 								<DataTemplate x:DataType="rtmp:RtmpServiceGroup">
-									<Button Command="{Binding DataContext.AddServiceCommand, ElementName=Root}"
-											CommandParameter="{Binding}"
-											Classes="listItemButton">
-										<TextBlock Text="{Binding ServiceName}" Padding="5 3" FontSize="14"/>
-									</Button>
+									<TextBlock Text="{Binding ServiceName}" Padding="5 3" FontSize="14"/>
 								</DataTemplate>
 							</ListBox.ItemTemplate>
 						</ListBox>
