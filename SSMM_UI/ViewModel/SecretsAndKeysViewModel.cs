@@ -8,7 +8,7 @@ public class SecretsAndKeysViewModel
 {
     public SecretsAndKeysViewModel()
     {
-        Api_Keys = new ObservableCollection<KeyValueItem>(
+        ApiKeys = new ObservableCollection<KeyValueItem>(
             KeyLoader.Instance.API_Keys.Select(kvp => new KeyValueItem { Key = kvp.Key, Value = kvp.Value }));
 
         Consumer_Keys = new ObservableCollection<KeyValueItem>(
@@ -32,7 +32,7 @@ public class SecretsAndKeysViewModel
         Webhooks = new ObservableCollection<KeyValueItem>(
             KeyLoader.Instance.Webhooks.Select(kvp => new KeyValueItem { Key = kvp.Key, Value = kvp.Value }));
     }
-    public ObservableCollection<KeyValueItem> Api_Keys { get; } = new();
+    public ObservableCollection<KeyValueItem> ApiKeys { get; } = new();
     public ObservableCollection<KeyValueItem> Consumer_Keys { get; } = new();
     public ObservableCollection<KeyValueItem> Consumer_Secrets { get; } = new();
     public ObservableCollection<KeyValueItem> Access_Tokens { get; } = new();

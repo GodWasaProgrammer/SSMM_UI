@@ -54,6 +54,7 @@ public partial class App : Application
                 .AddSingleton<BroadCastService>()
                 .AddSingleton<PollService>()
                 .AddSingleton<SocialPosterService>()
+                .AddSingleton<SecretsAndKeysViewModel>()
                 .BuildServiceProvider();
 
 
