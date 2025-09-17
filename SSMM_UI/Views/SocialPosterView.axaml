@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
 			 xmlns:local="clr-namespace:SSMM_UI.ViewModel"
+			 xmlns:views="clr-namespace:SSMM_UI.Views"
              x:Class="SSMM_UI.Views.SocialPosterView"
 			 x:DataType="local:SocialPosterViewModel">
 	<ScrollViewer>
@@ -16,6 +17,10 @@
 					<Button Command="{Binding TestClick}" Content="Test"/>
 				</StackPanel>
 			</Border>
+			<StackPanel>
+				<views:SecretsAndKeysView/>
+			</StackPanel>
 		</StackPanel>
+		
 	</ScrollViewer>
 </UserControl>
