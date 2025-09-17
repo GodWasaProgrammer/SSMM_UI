@@ -12,13 +12,13 @@ public partial class SocialPosterViewModel : ObservableObject
 {
     private readonly UserSettings _settings;
     private readonly SocialPosterService _poster;
-    private SecretsAndKeysViewModel _secretsAndKeysViewModel;
+    public SecretsAndKeysViewModel SecretsVM { get; }
     public SocialPosterViewModel(UserSettings settings, SocialPosterService poster, SecretsAndKeysViewModel secretsandkeysVM) 
     {
         _settings = settings;
         _poster = poster;
         TestClick = new AsyncRelayCommand(Test);
-        _secretsAndKeysViewModel = secretsandkeysVM;
+        SecretsVM = secretsandkeysVM;
     }
 
     

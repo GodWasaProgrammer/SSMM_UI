@@ -44,26 +44,34 @@ public sealed class KeyLoader
         var targetPath = Path.Combine(projectRoot, "API_Key_Secrets_Loader");
         var combinedpath = Path.Combine(targetPath, filePath);
 
-        if (!File.Exists(combinedpath))
+        try
         {
-            throw new FileNotFoundException($"Key file not found: {combinedpath}");
-        }
-
-        foreach (var line in File.ReadLines(combinedpath))
-        {
-            if (string.IsNullOrWhiteSpace(line) || !line.Contains("=")) continue;
-
-            var parts = line.Split('=', 2);
-            if (parts.Length == 2)
+            if (!File.Exists(combinedpath))
             {
-                string key = parts[0].Trim();
-                string value = parts[1].Trim();
+                throw new FileNotFoundException($"Key file not found: {combinedpath}");
+            }
 
-                if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value))
+            foreach (var line in File.ReadLines(combinedpath))
+            {
+                if (string.IsNullOrWhiteSpace(line) || !line.Contains("=")) continue;
+
+                var parts = line.Split('=', 2);
+                if (parts.Length == 2)
                 {
-                    apiKeys[key] = value;
+                    string key = parts[0].Trim();
+                    string value = parts[1].Trim();
+
+                    if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value))
+                    {
+                        apiKeys[key] = value;
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            //($"Error loading API keys from file: {combinedpath}", ex);
+            Console.WriteLine(ex.Message);
         }
         return apiKeys;
     }

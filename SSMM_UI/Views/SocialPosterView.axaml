@@ -18,7 +18,7 @@
 				</StackPanel>
 			</Border>
 			<StackPanel>
-				<views:SecretsAndKeysView/>
+				<views:SecretsAndKeysView DataContext="{Binding SecretsVM}"/>
 			</StackPanel>
 		</StackPanel>
 		
