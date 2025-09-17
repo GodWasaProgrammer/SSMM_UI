@@ -67,6 +67,12 @@
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Views\SecretsAndKeysView.axaml.cs">
+      <DependentUpon>SecretsAndKeysView.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 	<ItemGroup>
 		<None Update="About\ProfilePic.jpeg">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
