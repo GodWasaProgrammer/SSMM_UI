@@ -11,34 +11,34 @@ public class SecretsAndKeysViewModel
         ApiKeys = new ObservableCollection<KeyValueItem>(
             KeyLoader.Instance.API_Keys.Select(kvp => new KeyValueItem { Key = kvp.Key, Value = kvp.Value }));
 
-        Consumer_Keys = new ObservableCollection<KeyValueItem>(
+        ConsumerKeys = new ObservableCollection<KeyValueItem>(
             KeyLoader.Instance.CONSUMER_Keys.Select(kvp => new KeyValueItem { Key = kvp.Key, Value = kvp.Value }));
 
-        Consumer_Secrets = new ObservableCollection<KeyValueItem>(
+        ConsumerSecrets = new ObservableCollection<KeyValueItem>(
             KeyLoader.Instance.CONSUMER_Secrets.Select(kvp => new KeyValueItem { Key = kvp.Key, Value = kvp.Value }));
 
-        Access_Tokens = new ObservableCollection<KeyValueItem>(
+        AccessTokens = new ObservableCollection<KeyValueItem>(
             KeyLoader.Instance.ACCESS_Tokens.Select(kvp => new KeyValueItem { Key = kvp.Key, Value = kvp.Value }));
 
-        Access_Secrets = new ObservableCollection<KeyValueItem>(
+        AccessSecrets = new ObservableCollection<KeyValueItem>(
             KeyLoader.Instance.ACCESS_Secrets.Select(kvp => new KeyValueItem { Key = kvp.Key, Value = kvp.Value }));
 
-        Client_Ids = new ObservableCollection<KeyValueItem>(
+        ClientIds = new ObservableCollection<KeyValueItem>(
             KeyLoader.Instance.CLIENT_Ids.Select(kvp => new KeyValueItem { Key = kvp.Key, Value = kvp.Value }));
 
-        Account_Names = new ObservableCollection<KeyValueItem>(
+        AccountNames = new ObservableCollection<KeyValueItem>(
             KeyLoader.Instance.ACCOUNT_Names.Select(kvp => new KeyValueItem { Key = kvp.Key, Value = kvp.Value }));
 
         Webhooks = new ObservableCollection<KeyValueItem>(
             KeyLoader.Instance.Webhooks.Select(kvp => new KeyValueItem { Key = kvp.Key, Value = kvp.Value }));
     }
     public ObservableCollection<KeyValueItem> ApiKeys { get; } = new();
-    public ObservableCollection<KeyValueItem> Consumer_Keys { get; } = new();
-    public ObservableCollection<KeyValueItem> Consumer_Secrets { get; } = new();
-    public ObservableCollection<KeyValueItem> Access_Tokens { get; } = new();
-    public ObservableCollection<KeyValueItem> Access_Secrets { get; } = new();
-    public ObservableCollection<KeyValueItem> Client_Ids { get; } = new();
-    public ObservableCollection<KeyValueItem> Account_Names { get; } = new();
+    public ObservableCollection<KeyValueItem> ConsumerKeys { get; } = new();
+    public ObservableCollection<KeyValueItem> ConsumerSecrets { get; } = new();
+    public ObservableCollection<KeyValueItem> AccessTokens { get; } = new();
+    public ObservableCollection<KeyValueItem> AccessSecrets { get; } = new();
+    public ObservableCollection<KeyValueItem> ClientIds { get; } = new();
+    public ObservableCollection<KeyValueItem> AccountNames { get; } = new();
     public ObservableCollection<KeyValueItem> Webhooks { get; } = new();
 }
 
