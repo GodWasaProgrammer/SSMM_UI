@@ -7,6 +7,7 @@ using SSMM_UI.ViewModel;
 using System;
 using System.Threading.Tasks;
 using SSMM_UI.Views;
+using SSMM_UI.Interfaces;
 
 namespace SSMM_UI.Services;
 
@@ -117,10 +118,4 @@ public class DialogService : IDialogService
         }
         return null;
     }
-}
-public interface IDialogService
-{
-    Task<bool> ShowServerDetailsAsync(RtmpServiceGroup group);
-    Task<UserSettings> ShowSettingsDialogAsync(UserSettings currentSettings);
-    Task About();
 }
