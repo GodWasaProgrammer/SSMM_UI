@@ -55,9 +55,13 @@
 		<Setter Property="Margin" Value="0 0 0 15"/>
 	</Style>
 
-	<!-- Primär knapp -->
+	<!-- Buttons -->
 	<Style Selector="Button.primary">
-		<Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
+		<Setter Property="Background">
+			<Setter.Value>
+				<SolidColorBrush Color="{DynamicResource PrimaryButtonColor}"/>
+			</Setter.Value>
+		</Setter>
 		<Setter Property="Foreground" Value="White"/>
 		<Setter Property="FontWeight" Value="Bold"/>
 		<Setter Property="CornerRadius" Value="4"/>
@@ -65,25 +69,58 @@
 		<Setter Property="Height" Value="40"/>
 	</Style>
 	<Style Selector="Button.primary:pointerover">
-		<Setter Property="Background" Value="{DynamicResource PrimaryButtonHoverColor}"/>
+		<Setter Property="Background">
+			<Setter.Value>
+				<SolidColorBrush Color="{DynamicResource PrimaryButtonHoverColor}"/>
+			</Setter.Value>
+		</Setter>
 	</Style>
 
-	<!-- Success knapp -->
 	<Style Selector="Button.success">
-		<Setter Property="Background" Value="{DynamicResource SuccessColor}"/>
+		<Setter Property="Background">
+			<Setter.Value>
+				<SolidColorBrush Color="{DynamicResource SuccessColor}"/>
+			</Setter.Value>
+		</Setter>
 		<Setter Property="Foreground" Value="White"/>
 	</Style>
 	<Style Selector="Button.success:pointerover">
-		<Setter Property="Background" Value="{DynamicResource SuccessHoverColor}"/>
+		<Setter Property="Background">
+			<Setter.Value>
+				<SolidColorBrush Color="{DynamicResource SuccessHoverColor}"/>
+			</Setter.Value>
+		</Setter>
 	</Style>
 
-	<!-- Danger knapp -->
 	<Style Selector="Button.danger">
-		<Setter Property="Background" Value="{DynamicResource DangerColor}"/>
+		<Setter Property="Background">
+			<Setter.Value>
+				<SolidColorBrush Color="{DynamicResource DangerColor}"/>
+			</Setter.Value>
+		</Setter>
 		<Setter Property="Foreground" Value="White"/>
 	</Style>
 	<Style Selector="Button.danger:pointerover">
-		<Setter Property="Background" Value="{DynamicResource DangerHoverColor}"/>
+		<Setter Property="Background">
+			<Setter.Value>
+				<SolidColorBrush Color="{DynamicResource DangerHoverColor}"/>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style Selector="Button.listItemButton">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderThickness" Value="0"/>
+		<Setter Property="Padding" Value="0"/>
+		<Setter Property="HorizontalContentAlignment" Value="Left"/>
+		<Setter Property="HorizontalAlignment" Value="Stretch"/>
+	</Style>
+	<Style Selector="Button.listItemButton:pointerover">
+		<Setter Property="Background">
+			<Setter.Value>
+				<SolidColorBrush Color="{DynamicResource ButtonHoverOverlay}"/>
+			</Setter.Value>
+		</Setter>
 	</Style>
 
 	<!-- ListBoxItem hover -->
@@ -95,18 +132,24 @@
 		</Setter>
 	</Style>
 
-	<!-- ListItemButton hover -->
-	<Style Selector="Button.listItemButton">
-		<Setter Property="Background" Value="Transparent"/>
-		<Setter Property="BorderThickness" Value="0"/>
-		<Setter Property="Padding" Value="0"/>
-		<Setter Property="HorizontalContentAlignment" Value="Left"/>
-		<Setter Property="HorizontalAlignment" Value="Stretch"/>
+	<!-- TabItems -->
+	<Style Selector="TabItem">
+		<Setter Property="Background" Value="{DynamicResource CardColor}"/>
+		<Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
 	</Style>
-	<Style Selector="Button.listItemButton:pointerover">
-		<Setter Property="Background" Value="{DynamicResource ButtonHoverOverlay}"/>
+	<Style Selector="TabItem:pointerover">
+		<Setter Property="Background" Value="{DynamicResource HoverOverlayColor}"/>
+	</Style>
+	<Style Selector="TabItem:selected">
+		<Setter Property="Background">
+			<Setter.Value>
+				<SolidColorBrush Color="{DynamicResource PrimaryButtonColor}"/>
+			</Setter.Value>
+		</Setter>
+		<Setter Property="Foreground" Value="White"/>
 	</Style>
 
 </Styles>
+
 
 
