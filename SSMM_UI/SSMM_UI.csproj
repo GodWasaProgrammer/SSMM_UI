@@ -21,12 +21,18 @@
     <None Remove="Poster\obj\**" />
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaXaml Remove="Resources\DarkTheme.axaml" />
+    <AvaloniaXaml Remove="Resources\LightTheme.axaml" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Assets\MainIcon.png" />
   </ItemGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\MainIcon.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </AvaloniaResource>
+    <AvaloniaResource Include="Resources\DarkTheme.axaml" />
+    <AvaloniaResource Include="Resources\LightTheme.axaml" />
   </ItemGroup>
 
   <ItemGroup>

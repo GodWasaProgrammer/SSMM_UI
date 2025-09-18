@@ -12,7 +12,7 @@ namespace SSMM_UI.ViewModel;
 public partial class MainWindowViewModel : ObservableObject
 {
     public MainWindowViewModel(StateService stateService, LeftSideBarViewModel leftSideBarVM, UserSettings settings, IDialogService
-        dialogService, LogViewModel logVM, SocialPosterViewModel socialposterVM, StreamControlViewModel streamControlVM, MetaDataViewModel metadataVM)
+        dialogService, LogViewModel logVM, SocialPosterViewModel socialposterVM, StreamControlViewModel streamControlVM, MetaDataViewModel metadataVM, IThemeService themeService)
     {
         //Settings 
         _settings = settings;
@@ -28,6 +28,10 @@ public partial class MainWindowViewModel : ObservableObject
         StreamControlVM = streamControlVM;
         MetaDataVM = metadataVM;
 
+        // theme
+        _themeService = themeService;
+        IsDarkMode = _themeService.IsDark;
+
         // services
         _stateService = stateService;
         // state
@@ -35,6 +39,10 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     private UserSettings _settings = new();
+
+    // ==== Theme ====
+    private IThemeService _themeService;
+    [ObservableProperty] bool isDarkMode;
 
     // ==== Child Models ====
     public LeftSideBarViewModel LeftSideBarVM { get; }
@@ -51,6 +59,14 @@ public partial class MainWindowViewModel : ObservableObject
     // ==== Commands ====
     public ICommand OpenSetting { get; }
     public ICommand OpenAbout { get; }
+
+    public ICommand ToggleThemes => new RelayCommand(ToggleTheme);
+
+    private void ToggleTheme()
+    {
+        _themeService.ToggleTheme();
+        IsDarkMode = _themeService.IsDark;
+    }
 
     private async Task OpenAboutWindow()
     {

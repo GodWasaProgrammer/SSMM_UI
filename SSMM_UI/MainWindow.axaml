@@ -7,49 +7,51 @@
         Title="SSMM_UI" Width="1920" Height="1080"
         Background="{DynamicResource BackgroundColor}"
 		Icon="avares://SSMM_UI/Assets/MainIcon.png">
-	
-	<Grid>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="250"/>
-			<ColumnDefinition Width="*"/>
-		</Grid.ColumnDefinitions>
-		<Grid>
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="250"/>
-				<ColumnDefinition Width="*"/>
-			</Grid.ColumnDefinitions>
 
-			<!-- Left sidebar + menu -->
-			<DockPanel Grid.Column="0">
-				<Menu DockPanel.Dock="Top">
-					<MenuItem Header="Settings" Command="{Binding OpenSetting}">
-					</MenuItem>
-						<MenuItem Header="Setup">
-							<MenuItem Header="PuppetMaster" Command="{Binding SetupPuppet}"/>
-						</MenuItem>
-					<MenuItem Header="About" Command="{Binding OpenAbout}"/>
-				</Menu>
-				<Views:LeftSideBarView x:Name="LeftSideBar" DataContext="{Binding LeftSideBarVM}"/>
-			</DockPanel>
+	<Grid RowDefinitions="Auto,*">
+
+		<!-- Menyn högst upp -->
+		<Menu Grid.Row="0">
+			<MenuItem Header="Settings" Command="{Binding OpenSetting}" />
+			<MenuItem Header="Setup">
+				<MenuItem Header="PuppetMaster" Command="{Binding SetupPuppet}" />
+			</MenuItem>
+			<MenuItem Header="About" Command="{Binding OpenAbout}" />
+			<MenuItem Header="Theme" Command="{Binding ToggleThemes}" />
+		</Menu>
+
+		<!-- Huvudinnehåll: sidebar + main -->
+		<Grid Grid.Row="1" ColumnDefinitions="250,*">
+
+			<!-- Sidebar till vänster -->
+			<Views:LeftSideBarView Grid.Column="0"
+                                   x:Name="LeftSideBar"
+                                   DataContext="{Binding LeftSideBarVM}" />
+
+			<!-- Main content -->
+			<TabControl Grid.Column="1"
+                        Background="Transparent"
+                        BorderThickness="0">
+
+				<TabItem Header="Stream">
+					<StackPanel>
+						<Views:StreamControlView DataContext="{Binding StreamControlVM}" />
+						<Views:LogView DataContext="{Binding LogVM}" />
+					</StackPanel>
+				</TabItem>
+
+				<TabItem Header="Stream Metadata">
+					<Views:MetaDataView DataContext="{Binding MetaDataVM}" />
+				</TabItem>
+
+				<TabItem Header="Social Media AutoPoster">
+					<Views:SocialPosterView DataContext="{Binding SocialPosterVM}" />
+				</TabItem>
+
+			</TabControl>
 		</Grid>
-		<!-- Main Content Area -->
-		<TabControl Grid.Column="1" Background="Transparent" BorderThickness="0">
-			<TabItem Header="Stream">
-				<StackPanel>
-					<Views:StreamControlView DataContext="{Binding StreamControlVM} "></Views:StreamControlView>
-						<Views:LogView DataContext="{Binding LogVM}"></Views:LogView>
-				</StackPanel>
-			</TabItem>
-
-			<TabItem Header="Stream Metadata">
-				<Views:MetaDataView DataContext="{Binding MetaDataVM}"/>
-			</TabItem>
-
-			<TabItem Header="Social Media AutoPoster">
-				<Views:SocialPosterView DataContext="{Binding SocialPosterVM}"></Views:SocialPosterView>
-			</TabItem>
-		</TabControl>
 	</Grid>
+	
 </Window>
 
 <!--<TabItem Header="#DEBUG">

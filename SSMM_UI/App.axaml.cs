@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 using LibVLCSharp.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using SSMM_UI.Interfaces;
@@ -24,6 +25,9 @@ public partial class App : Application
     {
         AvaloniaXamlLoader.Load(this);
         SharedLibVLC = new LibVLC();
+        var isdark = true;
+        var themeService = new ThemeService();
+        themeService.ApplyTheme(isdark);
     }
 
     public override void OnFrameworkInitializationCompleted()
@@ -55,6 +59,7 @@ public partial class App : Application
                 .AddSingleton<PollService>()
                 .AddSingleton<SocialPosterService>()
                 .AddSingleton<SecretsAndKeysViewModel>()
+                .AddSingleton<IThemeService, ThemeService>()
                 .BuildServiceProvider();
 
 

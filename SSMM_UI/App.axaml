@@ -7,8 +7,8 @@
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
 				<!-- Lägg till teman här -->
-				<ResourceInclude Source="avares://SSMM_UI/Resources/LightTheme.axaml"/>
-				<ResourceInclude Source="avares://SSMM_UI/Resources/DarkTheme.axaml"/>
+				<!--<ResourceInclude Source="avares://SSMM_UI/Resources/LightTheme.axaml"/>-->
+				<!--<ResourceInclude Source="avares://SSMM_UI/Resources/DarkTheme.axaml"/>-->
 			</ResourceDictionary.MergedDictionaries>
 
 			<!-- Globala stilar skulle komma här -->
