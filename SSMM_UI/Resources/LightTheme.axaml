@@ -1,16 +1,112 @@
 <Styles xmlns="https://github.com/avaloniaui"
-                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
 	<Styles.Resources>
 		<ResourceDictionary>
-			<Color x:Key="BackgroundColor">#F0F2F5</Color>
+			<!-- Bakgrunder -->
+			<Color x:Key="BackgroundColor">#FDFDFD</Color>
 			<Color x:Key="CardColor">#FFFFFF</Color>
-			<Color x:Key="PrimaryTextColor">#000000</Color>
-			<Color x:Key="SecondaryTextColor">#64748B</Color>
-			<Color x:Key="BorderColor">#E1E5EB</Color>
-			<Color x:Key="SuccessColor">#10B981</Color>
-			<Color x:Key="DangerColor">#EF4444</Color>
-			<Color x:Key="PrimaryButtonColor">#3B82F6</Color>
+			<Color x:Key="BorderColor">#CBD5E1</Color>
+
+			<!-- Text -->
+			<Color x:Key="PrimaryTextColor">#0F172A</Color>
+			<Color x:Key="SecondaryTextColor">#475569</Color>
+			<Color x:Key="PlaceholderTextColor">#94A3B8</Color>
+
+			<!-- Buttons -->
+			<Color x:Key="PrimaryButtonColor">#1D4ED8</Color>
+			<Color x:Key="PrimaryButtonHoverColor">#2563EB</Color>
+			<Color x:Key="SuccessColor">#059669</Color>
+			<Color x:Key="SuccessHoverColor">#10B981</Color>
+			<Color x:Key="DangerColor">#B91C1C</Color>
+			<Color x:Key="DangerHoverColor">#DC2626</Color>
+
+			<!-- Hover / overlays -->
+			<Color x:Key="HoverOverlayColor">#E2E8F0</Color>
+			<Color x:Key="ButtonHoverOverlay">#F0F9FF</Color>
 		</ResourceDictionary>
 	</Styles.Resources>
+
+	<!-- Text -->
+	<Style Selector="TextBlock">
+		<Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+	</Style>
+
+	<Style Selector="TextBlock.secondary">
+		<Setter Property="Foreground" Value="{DynamicResource SecondaryTextColor}"/>
+		<Setter Property="FontSize" Value="12"/>
+	</Style>
+
+	<!-- Menu -->
+	<Style Selector="MenuItem">
+		<Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+	</Style>
+	<Style Selector="MenuItem:pointerover">
+		<Setter Property="Background" Value="{DynamicResource HoverOverlayColor}"/>
+	</Style>
+
+	<!-- Kort -->
+	<Style Selector="Border.card">
+		<Setter Property="Background" Value="{DynamicResource CardColor}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="CornerRadius" Value="6"/>
+		<Setter Property="Padding" Value="15"/>
+		<Setter Property="Margin" Value="0 0 0 15"/>
+	</Style>
+
+	<!-- Primär knapp -->
+	<Style Selector="Button.primary">
+		<Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
+		<Setter Property="Foreground" Value="White"/>
+		<Setter Property="FontWeight" Value="Bold"/>
+		<Setter Property="CornerRadius" Value="4"/>
+		<Setter Property="Width" Value="180"/>
+		<Setter Property="Height" Value="40"/>
+	</Style>
+	<Style Selector="Button.primary:pointerover">
+		<Setter Property="Background" Value="{DynamicResource PrimaryButtonHoverColor}"/>
+	</Style>
+
+	<!-- Success knapp -->
+	<Style Selector="Button.success">
+		<Setter Property="Background" Value="{DynamicResource SuccessColor}"/>
+		<Setter Property="Foreground" Value="White"/>
+	</Style>
+	<Style Selector="Button.success:pointerover">
+		<Setter Property="Background" Value="{DynamicResource SuccessHoverColor}"/>
+	</Style>
+
+	<!-- Danger knapp -->
+	<Style Selector="Button.danger">
+		<Setter Property="Background" Value="{DynamicResource DangerColor}"/>
+		<Setter Property="Foreground" Value="White"/>
+	</Style>
+	<Style Selector="Button.danger:pointerover">
+		<Setter Property="Background" Value="{DynamicResource DangerHoverColor}"/>
+	</Style>
+
+	<!-- ListBoxItem hover -->
+	<Style Selector="ListBoxItem:pointerover">
+		<Setter Property="Background">
+			<Setter.Value>
+				<SolidColorBrush Color="{DynamicResource HoverOverlayColor}"/>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<!-- ListItemButton hover -->
+	<Style Selector="Button.listItemButton">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderThickness" Value="0"/>
+		<Setter Property="Padding" Value="0"/>
+		<Setter Property="HorizontalContentAlignment" Value="Left"/>
+		<Setter Property="HorizontalAlignment" Value="Stretch"/>
+	</Style>
+	<Style Selector="Button.listItemButton:pointerover">
+		<Setter Property="Background" Value="{DynamicResource ButtonHoverOverlay}"/>
+	</Style>
+
 </Styles>
+
+
