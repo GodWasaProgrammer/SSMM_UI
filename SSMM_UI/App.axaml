@@ -4,15 +4,20 @@
              RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 	<Application.Resources>
-		<ResourceDictionary>
-			<ResourceDictionary.MergedDictionaries>
-				<!-- Lägg till teman här -->
-				<!--<ResourceInclude Source="avares://SSMM_UI/Resources/LightTheme.axaml"/>-->
-				<!--<ResourceInclude Source="avares://SSMM_UI/Resources/DarkTheme.axaml"/>-->
-			</ResourceDictionary.MergedDictionaries>
+		<!-- Definiera BÅDE Color och SolidColorBrush -->
+		<Color x:Key="CardColor">#FFFFFF</Color>
+		<Color x:Key="BorderColor">#E1E5EB</Color>
+		<Color x:Key="PrimaryButtonColor">#3B82F6</Color>
+		<Color x:Key="SuccessColor">#10B981</Color>
+		<Color x:Key="DangerColor">#EF4444</Color>
+		<Color x:Key="WhiteColor">#FFFFFF</Color>
 
-			<!-- Globala stilar skulle komma här -->
-		</ResourceDictionary>
+		<SolidColorBrush x:Key="CardBrush" Color="{DynamicResource CardColor}"/>
+		<SolidColorBrush x:Key="BorderBrush" Color="{DynamicResource BorderColor}"/>
+		<SolidColorBrush x:Key="PrimaryButtonBrush" Color="{DynamicResource PrimaryButtonColor}"/>
+		<SolidColorBrush x:Key="SuccessBrush" Color="{DynamicResource SuccessColor}"/>
+		<SolidColorBrush x:Key="DangerBrush" Color="{DynamicResource DangerColor}"/>
+		<SolidColorBrush x:Key="WhiteBrush" Color="{DynamicResource WhiteColor}"/>
 	</Application.Resources>
     <Application.Styles>
         <FluentTheme />
@@ -122,6 +127,53 @@
 				<Setter Property="HorizontalAlignment" Value="Stretch"/>
 			</Style>-->
 		</FluentTheme>
+			<StyleInclude Source="avares://IconPacks.Avalonia/Icons.axaml" />
 
-	</Application.Styles>
+			<!-- Använd Brush-resurserna för Background/BorderBrush -->
+			<Style Selector="Border.card">
+				<Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+				<Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+				<Setter Property="BorderThickness" Value="1"/>
+				<Setter Property="CornerRadius" Value="6"/>
+				<Setter Property="Padding" Value="15"/>
+				<Setter Property="Margin" Value="0 0 0 15"/>
+			</Style>
+
+			<!-- Använd Brush-resurserna för Background och Color-resursen för Foreground -->
+			<Style Selector="Button.primary">
+				<Setter Property="Background" Value="{DynamicResource PrimaryButtonBrush}"/>
+				<Setter Property="Foreground" Value="{DynamicResource WhiteColor}"/>
+				<Setter Property="FontWeight" Value="Bold"/>
+				<Setter Property="CornerRadius" Value="4"/>
+				<Setter Property="Width" Value="180"/>
+				<Setter Property="Height" Value="40"/>
+			</Style>
+
+			<Style Selector="Button.success">
+				<Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+				<Setter Property="Foreground" Value="{DynamicResource WhiteColor}"/>
+			</Style>
+
+			<Style Selector="Button.danger">
+				<Setter Property="Background" Value="{DynamicResource DangerBrush}"/>
+				<Setter Property="Foreground" Value="{DynamicResource WhiteColor}"/>
+			</Style>
+
+			<!-- Använd Color-resursen direkt -->
+			<Style Selector="ListBoxItem:pointerover">
+				<Setter Property="Background">
+					<Setter.Value>
+						<SolidColorBrush Color="{DynamicResource BorderColor}" Opacity="0.3"/>
+					</Setter.Value>
+				</Setter>
+			</Style>
+
+			<Style Selector="Button.listItemButton">
+				<Setter Property="Background" Value="Transparent"/>
+				<Setter Property="BorderThickness" Value="0"/>
+				<Setter Property="Padding" Value="0"/>
+				<Setter Property="HorizontalContentAlignment" Value="Left"/>
+				<Setter Property="HorizontalAlignment" Value="Stretch"/>
+			</Style>
+		</Application.Styles>
 </Application>
