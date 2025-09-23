@@ -25,9 +25,6 @@ public partial class App : Application
     {
         AvaloniaXamlLoader.Load(this);
         SharedLibVLC = new LibVLC();
-        var isdark = true;
-        var themeService = new ThemeService();
-        themeService.ApplyTheme(isdark);
     }
 
     public override void OnFrameworkInitializationCompleted()

@@ -17,17 +17,68 @@
     <Application.Styles>
         <FluentTheme />
 		<StyleInclude Source="avares://IconPacks.Avalonia/Icons.axaml" />
-			<!-- Text Styles -->
-			<Style Selector="TextBlock">
-				<Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
-			</Style>
-			<Style Selector="TextBlock.secondary">
-				<Setter Property="Foreground" Value="{DynamicResource SecondaryTextColor}"/>
-				<Setter Property="FontSize" Value="12"/>
-			</Style>
-
-			<!-- Card Style -->
-			<Style Selector="Border.card">
+		<FluentTheme>
+			<FluentTheme.Palettes>
+				<ColorPaletteResources x:Key="Light" 
+									   Accent="#ff0073cf" 
+									   AltHigh="White" 
+									   AltLow="White" 
+									   AltMedium="White"
+									   AltMediumHigh="White" 
+									   AltMediumLow="White" 
+									   BaseHigh="Black" 
+									   BaseLow="#ffcccccc" 
+									   BaseMedium="#ff898989" 
+									   BaseMediumHigh="#ff5d5d5d" 
+									   BaseMediumLow="#ff737373" 
+									   ChromeAltLow="#ff5d5d5d" 
+									   ChromeBlackHigh="Black" 
+									   ChromeBlackLow="#ffcccccc" 
+									   ChromeBlackMedium="#ff5d5d5d" 
+									   ChromeBlackMediumLow="#ff898989" 
+									   ChromeDisabledHigh="#ffcccccc" 
+									   ChromeDisabledLow="#ff898989" 
+									   ChromeGray="#ff737373" 
+									   ChromeHigh="#ffcccccc" 
+									   ChromeLow="#ffececec" 
+									   ChromeMedium="#ffe6e6e6" 
+									   ChromeMediumLow="#ffececec" 
+									   ChromeWhite="White" 
+									   ListLow="#ffe6e6e6" 
+									   ListMedium="#ffcccccc" 
+									   RegionColor="White" />
+				<ColorPaletteResources x:Key="Dark" 
+									   Accent="#ff0073cf" 
+								       AltHigh="Black" 
+								       AltLow="Black" 
+								       AltMedium="Black" 
+								       AltMediumHigh="Black" 
+								       AltMediumLow="Black" 
+								       BaseHigh="White" 
+								       BaseLow="#ff333333" 
+								       BaseMedium="#ff9a9a9a" 
+								       BaseMediumHigh="#ffb4b4b4" 
+								       BaseMediumLow="#ff676767" 
+								       ChromeAltLow="#ffb4b4b4" 
+								       ChromeBlackHigh="Black" 
+								       ChromeBlackLow="#ffb4b4b4" 
+								       ChromeBlackMedium="Black" 
+								       ChromeBlackMediumLow="Black" 
+								       ChromeDisabledHigh="#ff333333" 
+								       ChromeDisabledLow="#ff9a9a9a" 
+								       ChromeGray="Gray" 
+								       ChromeHigh="Gray" 
+								       ChromeLow="#ff151515" 
+								       ChromeMedium="#ff1d1d1d" 
+								       ChromeMediumLow="#ff2c2c2c" 
+								       ChromeWhite="White" 
+								       ListLow="#ff1d1d1d" 
+								       ListMedium="#ff333333" 
+								       RegionColor="Black" />
+			</FluentTheme.Palettes>
+		
+			
+			<!--<Style Selector="Border.card">
 				<Setter Property="Background" Value="{DynamicResource CardColor}"/>
 				<Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
 				<Setter Property="BorderThickness" Value="1"/>
@@ -36,7 +87,6 @@
 				<Setter Property="Margin" Value="0 0 0 15"/>
 			</Style>
 
-			<!-- Button Styles -->
 			<Style Selector="Button.primary">
 				<Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
 				<Setter Property="Foreground" Value="White"/>
@@ -45,16 +95,17 @@
 				<Setter Property="Width" Value="180"/>
 				<Setter Property="Height" Value="40"/>
 			</Style>
+
 			<Style Selector="Button.success">
 				<Setter Property="Background" Value="{DynamicResource SuccessColor}"/>
 				<Setter Property="Foreground" Value="White"/>
 			</Style>
+
 			<Style Selector="Button.danger">
 				<Setter Property="Background" Value="{DynamicResource DangerColor}"/>
 				<Setter Property="Foreground" Value="White"/>
 			</Style>
 
-			<!-- ListBoxItem hover style -->
 			<Style Selector="ListBoxItem:pointerover">
 				<Setter Property="Background">
 					<Setter.Value>
@@ -62,12 +113,15 @@
 					</Setter.Value>
 				</Setter>
 			</Style>
+
 			<Style Selector="Button.listItemButton">
 				<Setter Property="Background" Value="Transparent"/>
 				<Setter Property="BorderThickness" Value="0"/>
 				<Setter Property="Padding" Value="0"/>
 				<Setter Property="HorizontalContentAlignment" Value="Left"/>
 				<Setter Property="HorizontalAlignment" Value="Stretch"/>
-			</Style>
-    </Application.Styles>
+			</Style>-->
+		</FluentTheme>
+
+	</Application.Styles>
 </Application>
