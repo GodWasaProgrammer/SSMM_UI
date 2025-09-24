@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="SSMM_UI.App"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+	<!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 	<Application.Resources>
 		<!-- Definiera BÅDE Color och SolidColorBrush -->
 		<Color x:Key="CardColor">#FFFFFF</Color>
@@ -19,161 +19,139 @@
 		<SolidColorBrush x:Key="DangerBrush" Color="{DynamicResource DangerColor}"/>
 		<SolidColorBrush x:Key="WhiteBrush" Color="{DynamicResource WhiteColor}"/>
 	</Application.Resources>
-    <Application.Styles>
-        <FluentTheme />
+	<Application.Styles>
+		<FluentTheme />
 		<StyleInclude Source="avares://IconPacks.Avalonia/Icons.axaml" />
 		<FluentTheme>
 			<FluentTheme.Palettes>
-				<ColorPaletteResources x:Key="Light" 
-									   Accent="#ff0073cf" 
-									   AltHigh="White" 
-									   AltLow="White" 
+				<ColorPaletteResources x:Key="Light"
+									   Accent="#ff0073cf"
+									   AltHigh="White"
+									   AltLow="White"
 									   AltMedium="White"
-									   AltMediumHigh="White" 
-									   AltMediumLow="White" 
-									   BaseHigh="Black" 
-									   BaseLow="#ffcccccc" 
-									   BaseMedium="#ff898989" 
-									   BaseMediumHigh="#ff5d5d5d" 
-									   BaseMediumLow="#ff737373" 
-									   ChromeAltLow="#ff5d5d5d" 
-									   ChromeBlackHigh="Black" 
-									   ChromeBlackLow="#ffcccccc" 
-									   ChromeBlackMedium="#ff5d5d5d" 
-									   ChromeBlackMediumLow="#ff898989" 
-									   ChromeDisabledHigh="#ffcccccc" 
-									   ChromeDisabledLow="#ff898989" 
-									   ChromeGray="#ff737373" 
-									   ChromeHigh="#ffcccccc" 
-									   ChromeLow="#ffececec" 
-									   ChromeMedium="#ffe6e6e6" 
-									   ChromeMediumLow="#ffececec" 
-									   ChromeWhite="White" 
-									   ListLow="#ffe6e6e6" 
-									   ListMedium="#ffcccccc" 
+									   AltMediumHigh="White"
+									   AltMediumLow="White"
+									   BaseHigh="Black"
+									   BaseLow="#ffcccccc"
+									   BaseMedium="#ff898989"
+									   BaseMediumHigh="#ff5d5d5d"
+									   BaseMediumLow="#ff737373"
+									   ChromeAltLow="#ff5d5d5d"
+									   ChromeBlackHigh="Black"
+									   ChromeBlackLow="#ffcccccc"
+									   ChromeBlackMedium="#ff5d5d5d"
+									   ChromeBlackMediumLow="#ff898989"
+									   ChromeDisabledHigh="#ffcccccc"
+									   ChromeDisabledLow="#ff898989"
+									   ChromeGray="#ff737373"
+									   ChromeHigh="#ffcccccc"
+									   ChromeLow="#ffececec"
+									   ChromeMedium="#ffe6e6e6"
+									   ChromeMediumLow="#ffececec"
+									   ChromeWhite="White"
+									   ListLow="#ffe6e6e6"
+									   ListMedium="#ffcccccc"
 									   RegionColor="White" />
-				<ColorPaletteResources x:Key="Dark" 
-									   Accent="#ff0073cf" 
-								       AltHigh="Black" 
-								       AltLow="Black" 
-								       AltMedium="Black" 
-								       AltMediumHigh="Black" 
-								       AltMediumLow="Black" 
-								       BaseHigh="White" 
-								       BaseLow="#ff333333" 
-								       BaseMedium="#ff9a9a9a" 
-								       BaseMediumHigh="#ffb4b4b4" 
-								       BaseMediumLow="#ff676767" 
-								       ChromeAltLow="#ffb4b4b4" 
-								       ChromeBlackHigh="Black" 
-								       ChromeBlackLow="#ffb4b4b4" 
-								       ChromeBlackMedium="Black" 
-								       ChromeBlackMediumLow="Black" 
-								       ChromeDisabledHigh="#ff333333" 
-								       ChromeDisabledLow="#ff9a9a9a" 
-								       ChromeGray="Gray" 
-								       ChromeHigh="Gray" 
-								       ChromeLow="#ff151515" 
-								       ChromeMedium="#ff1d1d1d" 
-								       ChromeMediumLow="#ff2c2c2c" 
-								       ChromeWhite="White" 
-								       ListLow="#ff1d1d1d" 
-								       ListMedium="#ff333333" 
+				<ColorPaletteResources x:Key="Dark"
+									   Accent="#ff0073cf"
+								       AltHigh="Black"
+								       AltLow="Black"
+								       AltMedium="Black"
+								       AltMediumHigh="Black"
+								       AltMediumLow="Black"
+								       BaseHigh="White"
+								       BaseLow="#ff333333"
+								       BaseMedium="#ff9a9a9a"
+								       BaseMediumHigh="#ffb4b4b4"
+								       BaseMediumLow="#ff676767"
+								       ChromeAltLow="#ffb4b4b4"
+								       ChromeBlackHigh="Black"
+								       ChromeBlackLow="#ffb4b4b4"
+								       ChromeBlackMedium="Black"
+								       ChromeBlackMediumLow="Black"
+								       ChromeDisabledHigh="#ff333333"
+								       ChromeDisabledLow="#ff9a9a9a"
+								       ChromeGray="Gray"
+								       ChromeHigh="Gray"
+								       ChromeLow="#ff151515"
+								       ChromeMedium="#ff1d1d1d"
+								       ChromeMediumLow="#ff2c2c2c"
+								       ChromeWhite="White"
+								       ListLow="#ff1d1d1d"
+								       ListMedium="#ff333333"
 								       RegionColor="Black" />
 			</FluentTheme.Palettes>
-		
-			
-			<!--<Style Selector="Border.card">
-				<Setter Property="Background" Value="{DynamicResource CardColor}"/>
-				<Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
-				<Setter Property="BorderThickness" Value="1"/>
-				<Setter Property="CornerRadius" Value="6"/>
-				<Setter Property="Padding" Value="15"/>
-				<Setter Property="Margin" Value="0 0 0 15"/>
-			</Style>
-
-			<Style Selector="Button.primary">
-				<Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
-				<Setter Property="Foreground" Value="White"/>
-				<Setter Property="FontWeight" Value="Bold"/>
-				<Setter Property="CornerRadius" Value="4"/>
-				<Setter Property="Width" Value="180"/>
-				<Setter Property="Height" Value="40"/>
-			</Style>
-
-			<Style Selector="Button.success">
-				<Setter Property="Background" Value="{DynamicResource SuccessColor}"/>
-				<Setter Property="Foreground" Value="White"/>
-			</Style>
-
-			<Style Selector="Button.danger">
-				<Setter Property="Background" Value="{DynamicResource DangerColor}"/>
-				<Setter Property="Foreground" Value="White"/>
-			</Style>
-
-			<Style Selector="ListBoxItem:pointerover">
-				<Setter Property="Background">
-					<Setter.Value>
-						<SolidColorBrush Color="{DynamicResource BorderColor}" Opacity="0.3"/>
-					</Setter.Value>
-				</Setter>
-			</Style>
-
-			<Style Selector="Button.listItemButton">
-				<Setter Property="Background" Value="Transparent"/>
-				<Setter Property="BorderThickness" Value="0"/>
-				<Setter Property="Padding" Value="0"/>
-				<Setter Property="HorizontalContentAlignment" Value="Left"/>
-				<Setter Property="HorizontalAlignment" Value="Stretch"/>
-			</Style>-->
 		</FluentTheme>
-			<StyleInclude Source="avares://IconPacks.Avalonia/Icons.axaml" />
+		<StyleInclude Source="avares://IconPacks.Avalonia/Icons.axaml" />
 
-			<!-- Använd Brush-resurserna för Background/BorderBrush -->
-			<Style Selector="Border.card">
-				<Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
-				<Setter Property="BorderBrush" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}"/>
-				<Setter Property="BorderThickness" Value="1"/>
-				<Setter Property="CornerRadius" Value="6"/>
-				<Setter Property="Padding" Value="15"/>
-				<Setter Property="Margin" Value="0 0 0 15"/>
-			</Style>
+		<!-- Använd Brush-resurserna för Background/BorderBrush -->
+		<Style Selector="Border.card">
+			<Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}"/>
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="CornerRadius" Value="6"/>
+			<Setter Property="Padding" Value="15"/>
+			<Setter Property="Margin" Value="0 0 0 15"/>
+			<Setter Property="BoxShadow" Value="none"/>
+		</Style>
 
-			<!-- Använd Brush-resurserna för Background och Color-resursen för Foreground -->
-			<Style Selector="Button.primary">
-				<Setter Property="Background" Value="{DynamicResource SystemAccentColor}"/>
-				<Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundAltHighBrush}"/>
-				<Setter Property="FontWeight" Value="Bold"/>
-				<Setter Property="CornerRadius" Value="4"/>
-				<Setter Property="Width" Value="180"/>
-				<Setter Property="Height" Value="40"/>
-			</Style>
+		<!-- Använd Brush-resurserna för Background och Color-resursen för Foreground -->
+		<Style Selector="Button.primary">
+			<Setter Property="Background" Value="{DynamicResource SystemAccentColor}"/>
+			<Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundAltHighBrush}"/>
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="CornerRadius" Value="4"/>
+			<Setter Property="Width" Value="180"/>
+			<Setter Property="Height" Value="40"/>
+		</Style>
 
-			<Style Selector="Button.success">
-				<Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
-				<Setter Property="Foreground" Value="{DynamicResource WhiteColor}"/>
-			</Style>
+		<Style Selector="Button.success">
+			<Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+			<Setter Property="Foreground" Value="{DynamicResource WhiteColor}"/>
+		</Style>
 
-			<Style Selector="Button.danger">
-				<Setter Property="Background" Value="{DynamicResource DangerBrush}"/>
-				<Setter Property="Foreground" Value="{DynamicResource WhiteColor}"/>
-			</Style>
+		<Style Selector="Button.danger">
+			<Setter Property="Background" Value="{DynamicResource DangerBrush}"/>
+			<Setter Property="Foreground" Value="{DynamicResource WhiteColor}"/>
+		</Style>
 
-			<!-- Använd Color-resursen direkt -->
-			<Style Selector="ListBoxItem:pointerover">
-				<Setter Property="Background">
-					<Setter.Value>
-						<SolidColorBrush Color="{DynamicResource BorderColor}" Opacity="0.3"/>
-					</Setter.Value>
-				</Setter>
-			</Style>
+		<Style Selector="ItemsControl /template/ ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
 
-			<Style Selector="Button.listItemButton">
-				<Setter Property="Background" Value="Transparent"/>
-				<Setter Property="BorderThickness" Value="0"/>
-				<Setter Property="Padding" Value="0"/>
-				<Setter Property="HorizontalContentAlignment" Value="Left"/>
-				<Setter Property="HorizontalAlignment" Value="Stretch"/>
-			</Style>
-		</Application.Styles>
+		<Style Selector="Panel">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+
+		<!-- Fixa potentiell vit bakgrund på ListBox/ItemsControl -->
+		<Style Selector="ListBox">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+
+		<Style Selector="ItemsControl">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+
+		<Style Selector="ScrollViewer">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+
+		<!-- Om korten är i en StackPanel eller Grid -->
+		<Style Selector="StackPanel">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+
+		<Style Selector="Grid">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+
+		<!-- Använd Color-resursen direkt -->
+		<Style Selector="ListBoxItem:pointerover">
+			<Setter Property="Background">
+				<Setter.Value>
+					<SolidColorBrush Color="{DynamicResource BorderColor}" Opacity="0.3"/>
+				</Setter.Value>
+			</Setter>
+		</Style>
+	</Application.Styles>
 </Application>

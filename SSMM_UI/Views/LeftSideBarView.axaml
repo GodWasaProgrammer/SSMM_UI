@@ -12,7 +12,7 @@
 			 x:Name="Root">
 
 	<!-- Left Sidebar -->
-	<Border Grid.Column="0" Background="{DynamicResource CardColor}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0 0 1 0">
+	<Border Grid.Column="0" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}" BorderThickness="0 0 1 0">
 		<ScrollViewer>
 			<StackPanel Margin="15">
 

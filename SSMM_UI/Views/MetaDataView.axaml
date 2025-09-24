@@ -21,8 +21,8 @@
 						<TextBlock Text="STREAM METADATA" Classes="secondary"/>
 						<TextBlock Text="Title" FontWeight="SemiBold"/>
 						<TextBox Text="{Binding TitleText}" FontSize="14" Padding="10"
-								 BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-								 CornerRadius="4" Background="{DynamicResource CardColor}"
+								 BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}" BorderThickness="1"
+								 CornerRadius="4" Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
 								 Foreground="{DynamicResource PrimaryTextColor}"/>
 						<StackPanel>
 							<TextBlock FontWeight="SemiBold">Category (Youtube)</TextBlock>
