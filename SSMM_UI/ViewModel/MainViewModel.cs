@@ -11,8 +11,16 @@ namespace SSMM_UI.ViewModel;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    public MainWindowViewModel(StateService stateService, LeftSideBarViewModel leftSideBarVM, UserSettings settings, IDialogService
-        dialogService, LogViewModel logVM, SocialPosterViewModel socialposterVM, StreamControlViewModel streamControlVM, MetaDataViewModel metadataVM, IThemeService themeService)
+    public MainWindowViewModel(StateService stateService, 
+                               LeftSideBarViewModel leftSideBarVM, 
+                               UserSettings settings, 
+                               IDialogService dialogService, 
+                               LogViewModel logVM, 
+                               SocialPosterViewModel socialposterVM, 
+                               StreamControlViewModel streamControlVM, 
+                               MetaDataViewModel metadataVM, 
+                               IThemeService themeService,
+                               LoginViewModel loginVM)
     {
         //Settings 
         _settings = settings;
@@ -27,6 +35,7 @@ public partial class MainWindowViewModel : ObservableObject
         SocialPosterVM = socialposterVM;
         StreamControlVM = streamControlVM;
         MetaDataVM = metadataVM;
+        LoginVM = loginVM;
 
         // theme
         _themeService = themeService;
@@ -50,6 +59,7 @@ public partial class MainWindowViewModel : ObservableObject
     public SocialPosterViewModel SocialPosterVM { get; }
     public StreamControlViewModel StreamControlVM { get; }
     public MetaDataViewModel MetaDataVM { get; }
+    public LoginViewModel LoginVM { get; }
 
 
     // ==== Services =====

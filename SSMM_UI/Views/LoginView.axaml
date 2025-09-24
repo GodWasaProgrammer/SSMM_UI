@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 xmlns:vm="clr-namespace:SSMM_UI.ViewModel"
+			 x:DataType="vm:LoginViewModel"
+             x:Class="SSMM_UI.Views.LoginView">
+	<StackPanel>
+		<Border Classes="card">
+			<StackPanel>
+				<TextBlock Text="Logins" HorizontalAlignment="Center" Classes="secondary" Margin="0 0 0 5"/>
+				<Button Content="Youtube" Classes="primary" HorizontalAlignment="Center"
+						Command="{Binding LoginWithGoogleCommand}"/>
+				<TextBlock Text="{Binding YoutubeLoginStatus}" Classes="secondary" Margin="0 10 0 0"/>
+				<Button Content="Kick" Classes="primary" HorizontalAlignment="Center"
+						Command="{Binding LoginWithKickCommand}"/>
+				<TextBlock Text="{Binding KickLoginStatus}" Classes="secondary" Margin="0 10 0 0"/>
+				<Button Content="Twitch" Classes="primary" HorizontalAlignment="Center"
+						Command="{Binding LoginWithTwitchCommand}"/>
+				<TextBlock Text="{Binding TwitchLoginStatus}" Classes="secondary" Margin="0 10 0 0"/>
+			</StackPanel>
+		</Border>
+	</StackPanel>
+</UserControl>

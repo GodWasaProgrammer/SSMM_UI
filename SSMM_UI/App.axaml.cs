@@ -57,6 +57,7 @@ public partial class App : Application
                 .AddSingleton<SocialPosterService>()
                 .AddSingleton<SecretsAndKeysViewModel>()
                 .AddSingleton<IThemeService, ThemeService>()
+                .AddSingleton<LoginViewModel>()
                 .BuildServiceProvider();
 
 

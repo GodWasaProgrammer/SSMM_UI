@@ -8,9 +8,9 @@
         Background="{DynamicResource BackgroundColor}"
 		Icon="avares://SSMM_UI/Assets/MainIcon.png">
 
-	<Grid RowDefinitions="Auto,*">
+	<Grid RowDefinitions="Auto,*,Auto">
 
-		<!-- Menyn högst upp -->
+		<!-- Menyn hÃ¶gst upp -->
 		<Menu Grid.Row="0">
 			<MenuItem Header="Settings" Command="{Binding OpenSetting}" />
 			<MenuItem Header="Setup">
@@ -20,10 +20,10 @@
 			<MenuItem Header="Theme" Command="{Binding ToggleThemes}" />
 		</Menu>
 
-		<!-- Huvudinnehåll: sidebar + main -->
-		<Grid Grid.Row="1" ColumnDefinitions="250,*">
+		<!-- HuvudinnehÃ¥ll: sidebar + main -->
+		<Grid Grid.Row="1" ColumnDefinitions="250,*,Auto">
 
-			<!-- Sidebar till vänster -->
+			<!-- Sidebar till vÃ¤nster -->
 			<Views:LeftSideBarView Grid.Column="0"
                                    x:Name="LeftSideBar"
                                    DataContext="{Binding LeftSideBarVM}" />
@@ -49,6 +49,7 @@
 				</TabItem>
 
 			</TabControl>
+			<Views:LoginView Grid.Column="2" DataContext="{Binding LoginVM}" />
 		</Grid>
 	</Grid>
 	
