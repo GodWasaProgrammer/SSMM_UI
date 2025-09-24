@@ -45,7 +45,7 @@ public class SecretsAndKeysViewModel
 // just a simple key-value pair class for binding purposes
 public class KeyValueItem
 {
-    public string Key { get; set; }
-    public string Value { get; set; }
+    public string? Key { get; set; }
+    public string? Value { get; set; }
 }
 

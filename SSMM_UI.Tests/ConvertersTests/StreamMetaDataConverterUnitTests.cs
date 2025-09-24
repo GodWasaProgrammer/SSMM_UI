@@ -26,8 +26,10 @@ public class StreamMetaDataConverterUnitTests
         });
 
         // Assert
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         Assert.Equal("Test Stream", metadata.Title);
         Assert.Equal("/path/to/thumb.jpg", metadata.ThumbnailPath);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
     }
 
     [Theory]
@@ -46,7 +48,9 @@ public class StreamMetaDataConverterUnitTests
         });
 
         // Assert
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         Assert.Equal(expectedValue, metadata.Title);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
     }
 
     [Fact]
@@ -64,7 +68,9 @@ public class StreamMetaDataConverterUnitTests
         });
 
         // Assert
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         Assert.Equal(new List<string> { "gaming", "live", "fun" }, metadata.Tags);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
     }
 
     // TODO: Fix
@@ -94,9 +100,11 @@ public class StreamMetaDataConverterUnitTests
         var metadata = JsonSerializer.Deserialize<StreamMetadata>(json, _metaDataJsonOptions);
 
         // Assert
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         Assert.NotNull(metadata.YouTubeCategory);
         Assert.Equal("20", metadata.YouTubeCategory.Id);
         Assert.Equal("Gaming", metadata.YouTubeCategory.Snippet.Title);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
     }
 
     [Fact]

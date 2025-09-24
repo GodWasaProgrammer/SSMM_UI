@@ -13,7 +13,9 @@ public class FuncValueUnitTests
         var converter = new FuncValueConverter<string, int>((value, param) => value.Length);
 
         // Act
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         var result = converter.Convert("test", null, null, CultureInfo.InvariantCulture);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
         // Assert
         Assert.Equal(4, result);
@@ -39,7 +41,9 @@ public class FuncValueUnitTests
         var converter = new FuncValueConverter<string, int>((value, param) => value.Length);
 
         // Act 
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         var result = converter.Convert(123, null, null, CultureInfo.InvariantCulture);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
         // Assert
         Assert.Equal(0, result); 
@@ -52,7 +56,9 @@ public class FuncValueUnitTests
         var converter = new FuncValueConverter<string, bool>((value, param) => value == "test");
 
         // Act
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         var result = converter.Convert(null, null, null, CultureInfo.InvariantCulture);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
         // Assert
         Assert.False((bool)result); 
@@ -65,8 +71,10 @@ public class FuncValueUnitTests
         var converter = new FuncValueConverter<string, int>((value, param) => value.Length);
 
         // Act & Assert
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         Assert.Throws<NotSupportedException>(() =>
             converter.ConvertBack(123, null, null, CultureInfo.InvariantCulture));
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
     }
 
     [Fact]
@@ -76,12 +84,14 @@ public class FuncValueUnitTests
         var converter = StringConverters.IsNullOrEmpty;
 
         // Act & Assert
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         Assert.True((bool)converter.Convert("", null, null, CultureInfo.InvariantCulture));
 
         // Testa med en tom string istället för null
         Assert.True((bool)converter.Convert("", null, null, CultureInfo.InvariantCulture));
 
         Assert.False((bool)converter.Convert("test", null, null, CultureInfo.InvariantCulture));
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
     }
 
     [Theory]
@@ -93,7 +103,9 @@ public class FuncValueUnitTests
         var converter = new FuncValueConverter<double, int>((value, param) => (int)(value * 2));
 
         // Act
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         var result = converter.Convert(input, null, null, CultureInfo.InvariantCulture);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
         // Assert
         Assert.Equal(expected, result);
@@ -106,7 +118,9 @@ public class FuncValueUnitTests
         var converter = new FuncValueConverter<double, int>((value, param) => (int)(value * 2));
 
         // Act - Skicka string istället för double
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         var result = converter.Convert("hello", null, null, CultureInfo.InvariantCulture);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
         // Assert - Borde returnera default(int) = 0
         Assert.Equal(0, result);
