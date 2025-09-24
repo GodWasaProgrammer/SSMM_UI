@@ -5,15 +5,11 @@
 	<!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 	<Application.Resources>
 		<!-- Definiera BÅDE Color och SolidColorBrush -->
-		<Color x:Key="CardColor">#FFFFFF</Color>
-		<Color x:Key="BorderColor">#E1E5EB</Color>
 		<Color x:Key="PrimaryButtonColor">#3B82F6</Color>
 		<Color x:Key="SuccessColor">#10B981</Color>
 		<Color x:Key="DangerColor">#EF4444</Color>
 		<Color x:Key="WhiteColor">#FFFFFF</Color>
 
-		<SolidColorBrush x:Key="CardBrush" Color="{DynamicResource CardColor}"/>
-		<SolidColorBrush x:Key="BorderBrush" Color="{DynamicResource BorderColor}"/>
 		<SolidColorBrush x:Key="PrimaryButtonBrush" Color="{DynamicResource PrimaryButtonColor}"/>
 		<SolidColorBrush x:Key="SuccessBrush" Color="{DynamicResource SuccessColor}"/>
 		<SolidColorBrush x:Key="DangerBrush" Color="{DynamicResource DangerColor}"/>
@@ -123,7 +119,7 @@
 			<Setter Property="Background" Value="Transparent"/>
 		</Style>
 
-		<!-- Fixa potentiell vit bakgrund på ListBox/ItemsControl -->
+		<!-- Fixa potentiell vit bakgrund på ListBox/ItemsControl --><!--
 		<Style Selector="ListBox">
 			<Setter Property="Background" Value="Transparent"/>
 		</Style>
@@ -134,7 +130,7 @@
 
 		<Style Selector="ScrollViewer">
 			<Setter Property="Background" Value="Transparent"/>
-		</Style>
+		</Style>-->
 
 		<!-- Om korten är i en StackPanel eller Grid -->
 		<Style Selector="StackPanel">

@@ -14,8 +14,8 @@
 			<ListBox ItemsSource="{Binding LogMessages}" Height="300"
                      SelectedItem="{Binding SelectedLogItem}"
                      FontFamily="Consolas, Courier New" BorderThickness="0"
-                     Background="{DynamicResource BorderColor}" Opacity="0.2"
-                     Foreground="{DynamicResource PrimaryTextColor}" Padding="10"/>
+                     Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                     Foreground="{DynamicResource AltHigh}" Padding="10"/>
 
 			<!-- OUTPUT DISPLAY - den hör hemma här! -->
 			<views:OutputDisplayView DataContext="{Binding StreamOutputVM}"
