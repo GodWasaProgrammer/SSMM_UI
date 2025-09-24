@@ -80,6 +80,12 @@ public class GoogleOAuthService
                 var username = await GetUsernameAsync(_oauthResult.AccessToken);
                 if (username != null)
                 {
+                    if(username.Contains("Failed", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _oauthResult = null;
+                        return _oauthResult;
+                    }
+
                     _oauthResult.Username = username;
                 }
                 return _oauthResult;
