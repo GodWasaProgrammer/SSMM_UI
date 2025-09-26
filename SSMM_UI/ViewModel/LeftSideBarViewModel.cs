@@ -99,19 +99,19 @@ public partial class LeftSideBarViewModel : ObservableObject
     {
         if (SelectedService == null)
         {
-            _logService.Log("Ingen tjänst vald att ta bort");
+            _logService.Log("No Service selected for removal");
             return;
         }
 
         if (!SelectedServicesToStream.Contains(SelectedService))
         {
-            _logService.Log("Den valda tjänsten finns inte i listan");
+            _logService.Log("The selected service doesnt exist in the list");
             return;
         }
 
         var serviceName = SelectedService.DisplayName;
         SelectedServicesToStream.Remove(SelectedService);
-        _logService.Log($"Tog bort tjänst: {serviceName}");
+        _logService.Log($"Removed Service: {serviceName}");
         SelectedService = null;
     }
 }
