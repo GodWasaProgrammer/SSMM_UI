@@ -95,11 +95,11 @@ public class KickOAuthService
             string authCode = await ListenForAuthCodeAsync();
             if (string.IsNullOrEmpty(authCode))
             {
-                throw new Exception("Ingen auktoriseringskod mottagen");
+                throw new Exception("No authorization code received");
             }
 
             // 5. Utför tokenutbyte
-            var tokenResult = await ExchangeCodeForTokenAsync(authCode) ?? throw new Exception("Tokenutbyte misslyckades");
+            var tokenResult = await ExchangeCodeForTokenAsync(authCode) ?? throw new Exception("Token exchange failed");
 
             // 6. Hämta användarinformation
             tokenResult.Username = await GetUsernameAsync(tokenResult.AccessToken);
@@ -222,8 +222,8 @@ public class KickOAuthService
             if (receivedState != _currentState)
             {
                 await SendBrowserResponse(context.Response,
-                    "<html><body>❌ Ogiltig state-parameter</body></html>");
-                throw new Exception("State matchar inte - potentiell CSRF-attack");
+                    "<html><body>❌ Invalid state-parameter</body></html>");
+                throw new Exception("State doesnt match - potential CSRF-attack");
             }
 
             string? authCode = context.Request.QueryString["code"];
@@ -235,7 +235,7 @@ public class KickOAuthService
                 return "Error"; // Avbryt vidare processing
             }
             await SendBrowserResponse(context.Response,
-                "<html><body>✅ Inloggning lyckades. Stäng detta fönster.</body></html>");
+                "<html><body>✅ Login Successful. Close this window.</body></html>");
             if (authCode != null)
             {
                 return authCode;
@@ -247,7 +247,7 @@ public class KickOAuthService
         }
         catch (OperationCanceledException)
         {
-            throw new Exception("Inloggningstiden utgick");
+            throw new Exception("Login timed out.");
         }
         finally
         {
@@ -282,7 +282,7 @@ public class KickOAuthService
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new Exception($"Tokenförfrågan misslyckades: {response.StatusCode}\n{responseData}");
+                    throw new Exception($"Token request failed: {response.StatusCode}\n{responseData}");
                 }
 
                 var tokenData = JsonDocument.Parse(responseData).RootElement;
@@ -299,7 +299,7 @@ public class KickOAuthService
             }
             catch (Exception ex)
             {
-                throw new Exception($"Fel vid tokenutbyte: {ex.Message}");
+                throw new Exception($"Error during token exchange: {ex.Message}");
             }
         }
         else
@@ -379,7 +379,7 @@ public class KickOAuthService
         }
         catch (Exception ex)
         {
-            throw new Exception($"Kunde inte öppna webbläsare: {ex.Message}");
+            throw new Exception($"Failed to open browser: {ex.Message}");
         }
     }
 
