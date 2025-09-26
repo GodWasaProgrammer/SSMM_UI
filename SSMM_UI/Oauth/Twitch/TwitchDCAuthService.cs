@@ -139,7 +139,7 @@ public class TwitchDCAuthService
 
         if (!string.IsNullOrWhiteSpace(token.RefreshToken))
         {
-            _logger.Log("🔁 Försöker förnya åtkomsttoken med refresh_token...");
+            _logger.Log("🔁 Attempting to refresh token with refresh_token...");
             var res = await RefreshAccessTokenAsync(token.RefreshToken);
             if (res is not null)
             {
@@ -214,26 +214,26 @@ public class TwitchDCAuthService
                         continue;
 
                     case "access_denied":
-                        _logger.Log("Användaren nekade åtkomst.");
+                        _logger.Log("User was denied access.");
                         return null;
 
                     case "expired_token":
-                        _logger.Log("Device code har gått ut. Timeout.");
+                        _logger.Log("Device code is old. Timeout.");
                         return null;
 
                     case "":
                         return null;
                     default:
-                        throw new Exception($"Okänt OAuth-fel: {error?.Error}");
+                        throw new Exception($"Unknown OAuth-fel: {error?.Error}");
                 }
             }
             catch (JsonException)
             {
-                throw new Exception($"Misslyckades tolka felmeddelande från Twitch: {errorBody}");
+                throw new Exception($"Failed to parse error message from Twitch: {errorBody}");
             }
         }
 
-        _logger.Log("Polling avbröts efter max väntetid utan godkännande.");
+        _logger.Log("Pollingwas cancelled after max timeout window with no approval.");
         return null;
     }
 
