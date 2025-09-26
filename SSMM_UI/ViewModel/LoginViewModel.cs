@@ -55,7 +55,7 @@ public partial class LoginViewModel: ObservableObject
     private async Task OnLoginWithGoogleClicked()
     {
 
-        YoutubeLoginStatus = "Loggar in...";
+        YoutubeLoginStatus = "Logging in...";
 
         var (userName, ytservice) = await _centralAuthService.LoginWithYoutube();
         if (ytservice != null)
@@ -64,11 +64,11 @@ public partial class LoginViewModel: ObservableObject
         }
         if (userName != null)
         {
-            YoutubeLoginStatus = $"✅ Inloggad som {userName}";
+            YoutubeLoginStatus = $"✅ Logged in as {userName}";
         }
         else
         {
-            YoutubeLoginStatus = "Inloggning misslyckades";
+            YoutubeLoginStatus = "Login failed";
         }
     }
 
