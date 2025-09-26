@@ -127,7 +127,7 @@ public class GoogleOAuthService
         string authCode = await ListenForAuthCodeAsync();
         if (string.IsNullOrEmpty(authCode))
         {
-            throw new Exception("Ingen auktoriseringskod mottagen");
+            throw new Exception("No authorization code received!");
         }
 
         if (authCode != null)
@@ -169,14 +169,14 @@ public class GoogleOAuthService
         if (!response.IsSuccessStatusCode)
         {
             // we have failed to refresh token, do full login
-            throw new Exception($"Google refresh-token misslyckades: {response.StatusCode}\n{responseData}");
+            throw new Exception($"Google refresh-token failed: {response.StatusCode}\n{responseData}");
         }
 
         var tokenData = JsonDocument.Parse(responseData).RootElement;
         var newToken = new GoogleOauthResult
         {
             AccessToken = tokenData.GetProperty("access_token").GetString()
-                ?? throw new Exception("access_token saknas i Google-svar"),
+                ?? throw new Exception("access_token missing in Googles reply"),
             RefreshToken = tokenData.TryGetProperty("refresh_token", out var refreshProp)
                 ? refreshProp.GetString() ?? refreshToken // fallback till gamla om null
                 : refreshToken,
@@ -440,18 +440,4 @@ public class GoogleOAuthService
             .Replace('+', '-')
             .Replace('/', '_');
     }
-}
-
-public class GoogleOauthResult : IAuthToken
-{
-    public string AccessToken { get; set; } = string.Empty;
-    public string RefreshToken { get; set; } = string.Empty;
-    public string TokenType { get; set; } = string.Empty;
-    public string Scope { get; set; } = string.Empty;
-    public DateTime ExpiresAt { get; set; }
-    public string Username { get; set; } = string.Empty;
-
-    public bool IsValid => !string.IsNullOrEmpty(AccessToken) && ExpiresAt > DateTime.UtcNow.AddMinutes(5);
-
-    public string? ErrorMessage { get; }
 }
