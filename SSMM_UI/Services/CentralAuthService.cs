@@ -41,7 +41,7 @@ public class CentralAuthService
         {
             if (IsTokenValid.Result != null)
             {
-                LoginResult = ($"✅ Inloggad som: {IsTokenValid.Result.Username}");
+                LoginResult = ($"✅ Logged in as: {IsTokenValid.Result.Username}");
             }
         }
         else
@@ -58,11 +58,11 @@ public class CentralAuthService
 
             if (token != null)
             {
-                LoginResult = ($"✅ Inloggad som: {token.Username}");
+                LoginResult = ($"✅ Logged in as: {token.Username}");
             }
             else
             {
-                _logger.Log("Timeout - användaren loggade inte in.");
+                _logger.Log("Timeout - user did not log in");
             }
         }
         return LoginResult;
@@ -117,7 +117,7 @@ public class CentralAuthService
     };
 
         if (_kickOauthService == null)
-            return "❌ KickAuthService är inte initialiserad.";
+            return "❌ KickAuthService is not initialized.";
 
         try
         {
@@ -125,18 +125,18 @@ public class CentralAuthService
 
             if (result != null)
             {
-                return $"✅ Inloggad som {result.Username}";
+                return $"✅ logged in as: {result.Username}";
             }
             else
             {
-                return "❌ Inloggning misslyckades – token saknas eller ogiltig.";
+                return "❌ login failed – token missing or is invalid.";
             }
         }
         catch (Exception ex)
         {
             // Logga för felsökning
             _logger.Log($"❌ Kick-login error: {ex.Message}");
-            return $"❌ Fel vid inloggning: {ex.Message}";
+            return $"❌ error logging in: {ex.Message}";
         }
     }
 
