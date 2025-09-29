@@ -15,8 +15,6 @@
 		<Border CornerRadius="5"
             Margin="0,2"
             Padding="10"
-            Background="{DynamicResource CardBackground}"
-            BorderBrush="{DynamicResource BorderColor}"
             BorderThickness="1">
 			<StackPanel Orientation="Horizontal" Spacing="10">
 
@@ -32,7 +30,7 @@
 		
 		<!-- Sökruta -->
 		<TextBox Text="{Binding SearchQuery, Mode=TwoWay}"
-                 Watermark="Sök efter Twitch kategorier..."
+                 Watermark="Search for Twitch Categories..."
                  FontSize="14"
                  Padding="10" />
 		<!-- Meddelanden -->
