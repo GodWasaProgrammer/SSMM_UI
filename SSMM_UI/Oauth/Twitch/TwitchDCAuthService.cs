@@ -210,7 +210,7 @@ public class TwitchDCAuthService
                     case "slow_down":
                         // Twitch säger att vi pollar för snabbt – öka intervallet
                         intervalSeconds += 5;
-                        _logger.Log("Twitch säger att vi pollar för snabbt, ökar väntetiden...");
+                        _logger.Log("Twitch says we are polling too quick, raising interval...");
                         continue;
 
                     case "access_denied":
@@ -224,7 +224,7 @@ public class TwitchDCAuthService
                     case "":
                         return null;
                     default:
-                        throw new Exception($"Unknown OAuth-fel: {error?.Error}");
+                        throw new Exception($"Unknown OAuth-error: {error?.Error}");
                 }
             }
             catch (JsonException)
@@ -233,7 +233,7 @@ public class TwitchDCAuthService
             }
         }
 
-        _logger.Log("Pollingwas cancelled after max timeout window with no approval.");
+        _logger.Log("Polling was cancelled after max timeout window with no approval.");
         return null;
     }
 
