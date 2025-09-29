@@ -13,7 +13,7 @@
 	<Border Classes="card" Margin="20">
 	<StackPanel Spacing="15">
 		<Image Source="{Binding ProfileImage}" Width="150" Height="125"/>
-	<TextBlock HorizontalAlignment="Center" Text="{Binding AboutText}" Foreground="{DynamicResource PrimaryTextColor}"/>
+	<TextBlock HorizontalAlignment="Center" Text="{Binding AboutText}"/>
 		
 		<StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Spacing="10">
 			<iconPacks:PackIconBoxIcons Kind="LogosLinkedin"
