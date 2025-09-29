@@ -378,12 +378,12 @@ public class GoogleOAuthService
             {
                 await SendBrowserResponse(context.Response,
                     "<html><body>❌ Ogiltig state-parameter</body></html>");
-                throw new Exception("State matchar inte - potentiell CSRF-attack");
+                throw new Exception("State doesnt match - potential CSRF-attack");
             }
 
             string authCode = context.Request.QueryString["code"]!;
             await SendBrowserResponse(context.Response,
-                "<html><body>✅ Inloggning lyckades. Stäng detta fönster.</body></html>");
+                "<html><body> Login successful. You may close this window.</body></html>");
             if (authCode != null)
             {
                 return authCode;
@@ -395,7 +395,7 @@ public class GoogleOAuthService
         }
         catch (OperationCanceledException)
         {
-            throw new Exception("Inloggningstiden utgick");
+            throw new Exception("Login timed out");
         }
         finally
         {
@@ -423,7 +423,7 @@ public class GoogleOAuthService
         }
         catch (Exception ex)
         {
-            throw new Exception($"Kunde inte öppna webbläsare: {ex.Message}");
+            throw new Exception($"Failed to open browser: {ex.Message}");
         }
     }
 
