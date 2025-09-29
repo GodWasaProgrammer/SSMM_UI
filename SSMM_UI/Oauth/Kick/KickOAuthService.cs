@@ -86,7 +86,7 @@ public class KickOAuthService
                            $"code_challenge_method=S256&" +
                            $"state={_currentState}";
 
-            _logger.Log($"Öppnar auktoriserings-URL: {authUrl}");
+            _logger.Log($"Opening Authorization-URL: {authUrl}");
 
             // 3. Öppna webbläsare
             OpenBrowser(authUrl);
@@ -133,7 +133,7 @@ public class KickOAuthService
         var responseData = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
-            throw new Exception($"Refresh-token misslyckades: {response.StatusCode}\n{responseData}");
+            throw new Exception($"Refresh-token failed: {response.StatusCode}\n{responseData}");
 
         var tokenData = JsonDocument.Parse(responseData).RootElement;
         var newToken = new KickAuthResult
@@ -175,7 +175,7 @@ public class KickOAuthService
         catch (Exception ex)
         {
             // Logga eller hantera fel (t.ex. korrupt fil)
-            _logger.Log($"❌ Fel vid autologin: {ex.Message}");
+            _logger.Log($"❌ Error during autologin: {ex.Message}");
             return null;
         }
     }
@@ -289,9 +289,9 @@ public class KickOAuthService
                 return new KickAuthResult
                 {
                     AccessToken = tokenData.GetProperty("access_token").GetString() ??
-                                throw new Exception("Saknar access_token i svar"),
+                                throw new Exception("Missing access_token in response"),
                     RefreshToken = tokenData.GetProperty("refresh_token").GetString() ??
-                                 throw new Exception("Saknar refresh_token i svar"),
+                                 throw new Exception("Missing refresh_token in response"),
                     TokenType = tokenData.GetProperty("token_type").GetString() ?? "Bearer",
                     ExpiresAt = DateTime.UtcNow.AddSeconds(tokenData.GetProperty("expires_in").GetInt32()),
                     Scope = tokenData.GetProperty("scope").GetString() ?? string.Empty
