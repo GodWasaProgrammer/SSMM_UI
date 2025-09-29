@@ -28,8 +28,7 @@
 						<ListBox ItemsSource="{Binding RtmpServiceGroups}"
 								 SelectedItem="{Binding SelectedRtmpService, Mode=TwoWay}"
 								 Height="250" Width="220"
-								 Background="Transparent"
-								 BorderBrush="{DynamicResource BorderColor}">
+								 Background="Transparent">
 							<ListBox.ItemTemplate>
 								<DataTemplate x:DataType="rtmp:RtmpServiceGroup">
 									<TextBlock Text="{Binding ServiceName}" Padding="5 3" FontSize="14"/>
@@ -42,7 +41,7 @@
 				<Border Classes="card">
 					<StackPanel>
 						<TextBlock Text="SELECTED SERVICES" Classes="secondary" Margin="0 0 0 5"/>
-						<Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" CornerRadius="4" Margin="0 0 0 5" Padding="1">
+						<Border BorderThickness="1" CornerRadius="4" Margin="0 0 0 5" Padding="1">
 							<ListBox SelectedItem="{Binding SelectedService, Mode=TwoWay}" ItemsSource="{Binding SelectedServicesToStream}" Height="250" Background="Transparent" BorderThickness="0" Padding="5">
 								<ListBox.ItemTemplate>
 									<DataTemplate>
