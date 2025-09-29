@@ -9,20 +9,17 @@
     <Border Classes="card" Margin="20">
         <StackPanel Spacing="15">
             <!-- Header -->
-            <TextBlock Text="Settings" FontSize="16" FontWeight="Bold" 
-                       Foreground="{DynamicResource PrimaryTextColor}"/>
+            <TextBlock Text="Settings" FontSize="16" FontWeight="Bold"/>
             
             <!-- Settings Options -->
-            <CheckBox IsChecked="{Binding SaveTokens}" Content="Save Tokens (Turn off if you dont want to have autologin )" x:Name="tokens"
-                      Foreground="{DynamicResource PrimaryTextColor}"/>
+            <CheckBox IsChecked="{Binding SaveTokens}" Content="Save Tokens (Turn off if you dont want to have autologin )" x:Name="tokens"/>
             
-            <CheckBox IsChecked="{Binding SaveServices}" Content="Save Services ( Turn off if you dont want streamkeys to be saved )" x:Name="services"
-                      Foreground="{DynamicResource PrimaryTextColor}"/>
+            <CheckBox IsChecked="{Binding SaveServices}" Content="Save Services ( Turn off if you dont want streamkeys to be saved )" x:Name="services"/>
             
             <CheckBox IsChecked="{Binding SaveMetaData}" Content="Save MetaData ( Turn this off if you dont want Metadata saved )"
                       Foreground="{DynamicResource PrimaryTextColor}"/>
-			<CheckBox IsChecked="{Binding ServerPolling}" Content="Poll Server (turn this off to save CPU power )" Foreground="{DynamicResource PrimaryTextColor}"/>
-			<CheckBox IsChecked="{Binding StreamFeedPolling}" Content="Poll Stream (turn this off to save CPU power )" Foreground="{DynamicResource PrimaryTextColor}"/>
+			<CheckBox IsChecked="{Binding ServerPolling}" Content="Poll Server (turn this off to save CPU power )"/>
+			<CheckBox IsChecked="{Binding StreamFeedPolling}" Content="Poll Stream (turn this off to save CPU power )"/>
             <!-- Action Buttons -->
             <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
                 <Button Command="{Binding SaveSettingsCommand}" Content="Save" Classes="success" Width="100"/>

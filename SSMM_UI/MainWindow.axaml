@@ -51,13 +51,4 @@
 			<Views:LoginView Grid.Column="2" DataContext="{Binding LoginVM}" />
 		</Grid>
 	</Grid>
-	
 </Window>
-
-<!--<TabItem Header="#DEBUG">
-				<StackPanel>
-					<Button Click="ClearGoogleOAuthTokens">Clear Tokens</Button>
-				</StackPanel>
-			</TabItem>-->
-
-
