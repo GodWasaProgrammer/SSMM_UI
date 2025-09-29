@@ -309,7 +309,7 @@ public class GoogleOAuthService
         }
         catch (Exception ex)
         {
-            throw new Exception($"Fel vid tokenutbyte: {ex.Message}", ex);
+            throw new Exception($"Error on token exchange: {ex.Message}", ex);
         }
     }
 
@@ -377,7 +377,7 @@ public class GoogleOAuthService
             if (receivedState != _currentState)
             {
                 await SendBrowserResponse(context.Response,
-                    "<html><body>❌ Ogiltig state-parameter</body></html>");
+                    "<html><body>Invalid state-parameter</body></html>");
                 throw new Exception("State doesnt match - potential CSRF-attack");
             }
 
