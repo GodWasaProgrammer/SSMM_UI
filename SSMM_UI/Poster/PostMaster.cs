@@ -57,7 +57,8 @@ public class PostMaster
                 }
                 else
                 {
-                    _logService.Log($"Username was missing for:{service}");
+                    
+                   // _logService.Log($"Username was missing for:{service}");
                 }
             }
         }
