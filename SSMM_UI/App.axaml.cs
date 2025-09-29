@@ -33,7 +33,6 @@ public partial class App : Application
         {
             var mainWindow = new MainWindow();
 
-
             Services = new ServiceCollection()
                 .AddSingleton<IFilePickerService>(_ => new FilePickerService(mainWindow))
                 .AddSingleton<VideoPlayerService>()

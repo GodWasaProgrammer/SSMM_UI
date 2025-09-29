@@ -23,7 +23,7 @@ public class StateService
     private const string _savedMetaData = "MetaData_State.json";
     private readonly JsonSerializerOptions _metaDataJsonOptions;
     private readonly JsonSerializerOptions _regularJsonOptions = new() { WriteIndented = true };
-    private Dictionary<OAuthServices, IAuthToken> _authObjects = new();
+    private Dictionary<OAuthServices, IAuthToken> _authObjects = [];
     public event Action? OnAuthObjectsUpdated;
     public Dictionary<OAuthServices, IAuthToken> AuthObjects { get { return _authObjects; } }
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; private set; } = [];
@@ -204,7 +204,7 @@ public class StateService
         }
         catch (Exception ex)
         {
-            _logger.Log($"❌ Kunde inte läsa in tjänster: {ex.Message}");
+            _logger.Log($"❌ Failed to load RTMP services: {ex.Message}");
         }
     }
 
