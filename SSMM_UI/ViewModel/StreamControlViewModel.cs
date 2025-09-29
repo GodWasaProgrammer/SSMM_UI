@@ -11,11 +11,21 @@ namespace SSMM_UI.ViewModel;
 
 public partial class StreamControlViewModel : ObservableObject
 {
-    public StreamControlViewModel(LogViewModel logVM, ILogService logger, LeftSideBarViewModel leftSideBarViewModel, StreamService streamservice, MetaDataService mdService, StateService stateservice, BroadCastService broadCastService, PollService pollService, SocialPosterService socialposterservice)
+    public StreamControlViewModel(LogViewModel logVM, 
+                                  ILogService logger, 
+                                  LeftSideBarViewModel leftSideBarViewModel, 
+                                  StreamService streamservice, 
+                                  MetaDataService mdService, 
+                                  StateService stateservice, 
+                                  BroadCastService broadCastService, 
+                                  PollService pollService, 
+                                  SocialPosterService socialposterservice,
+                                  LoginViewModel loginVM)
     {
         // set Viewmodels
         LogVM = logVM;
         LeftSideBarViewModel = leftSideBarViewModel;
+        LoginVM = loginVM;
 
 
         // Services
@@ -40,6 +50,7 @@ public partial class StreamControlViewModel : ObservableObject
     // == child models ==
     readonly LogViewModel LogVM;
     public LeftSideBarViewModel LeftSideBarViewModel { get; }
+    public LoginViewModel LoginVM { get; }
 
     // ==== RTMP Server and internal RTMP feed from OBS Status ====
     [ObservableProperty] private string serverStatusText = "Stream status: ❌ Not Receiving";
@@ -122,10 +133,10 @@ public partial class StreamControlViewModel : ObservableObject
         {
             try
             {
-                if (LeftSideBarViewModel.YTService != null)
+                if (LoginVM.YTService != null)
                 {
-                    _broadCastService.CreateYTService(LeftSideBarViewModel.YTService);
-                    _mdService.CreateYouTubeService(LeftSideBarViewModel.YTService);
+                    _broadCastService.CreateYTService(LoginVM.YTService);
+                    _mdService.CreateYouTubeService(LoginVM.YTService);
                 }
                 CurrentMetaData = _stateService.GetCurrentMetaData();
                 await _streamService.StartStream(CurrentMetaData, LeftSideBarViewModel.SelectedServicesToStream);

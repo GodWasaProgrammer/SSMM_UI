@@ -6,8 +6,7 @@
 	         xmlns:local="clr-namespace:SSMM_UI.ViewModel"
 	         xmlns:Views="clr-namespace:SSMM_UI.Views"
 			 x:DataType="local:OutputViewModel"
-             x:Class="SSMM_UI.Views.OutPutView"
-			 Background="{DynamicResource BackGroundColor}">
+             x:Class="SSMM_UI.Views.OutPutView">
 
 		<Border Classes="card">
 			<Grid>
@@ -18,8 +17,6 @@
 						 Width="400"
 						 FontFamily="Consolas, Courier New"
 						 BorderThickness="0"
-						 Background="{DynamicResource BorderColor}"
-						 Foreground="{DynamicResource PrimaryTextColor}"
 						 Padding="10"
 						 Margin="0,30,0,0"
 				Opacity="1"/>

@@ -54,7 +54,6 @@ public partial class LeftSideBarViewModel : ObservableObject
     private readonly VideoPlayerService _videoPlayerService;
     private readonly IDialogService _dialogService;
     private readonly ILogService _logService;
-    public YouTubeService? YTService;
     private readonly StateService _stateService;
 
     // ==== Login Status ====

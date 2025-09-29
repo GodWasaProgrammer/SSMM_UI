@@ -10,7 +10,8 @@ namespace SSMM_UI.ViewModel;
 
 public partial class LoginViewModel: ObservableObject
 {
-    public LoginViewModel(CentralAuthService centralAuthService, StateService stateService)
+    public LoginViewModel(CentralAuthService centralAuthService, 
+                          StateService stateService)
     {
         _centralAuthService = centralAuthService;
         _stateService = stateService;

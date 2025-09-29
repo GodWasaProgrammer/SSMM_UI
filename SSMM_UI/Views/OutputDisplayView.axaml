@@ -8,8 +8,6 @@
              x:DataType="local:DisplayStreamOutputViewModel"
              x:Class="SSMM_UI.Views.OutputDisplayView"
              Background="{DynamicResource BackGroundColor}">
-
-	<!-- Använd en ItemsControl för att visa samlingen -->
 	<ItemsControl ItemsSource="{Binding Outputs}">
 		<ItemsControl.ItemsPanel>
 			<ItemsPanelTemplate>
