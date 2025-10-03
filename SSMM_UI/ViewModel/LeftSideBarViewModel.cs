@@ -6,6 +6,7 @@ using SSMM_UI.RTMP;
 using SSMM_UI.Services;
 using SSMM_UI.Settings;
 using System.Collections.ObjectModel;
+using System.Security;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -56,19 +57,15 @@ public partial class LeftSideBarViewModel : ObservableObject
     private readonly ILogService _logService;
     private readonly StateService _stateService;
 
-    // ==== Login Status ====
-    [ObservableProperty] private string? youtubeLoginStatus = "";
-    [ObservableProperty] private string? kickLoginStatus = "";
-    [ObservableProperty] private string? twitchLoginStatus = "";
-
     // == bool toggler for the preview window for stream ==
     [ObservableProperty] private bool isReceivingStream;
-    [ObservableProperty] private RtmpServiceGroup? selectedRtmpService;
 
+    [ObservableProperty] private RtmpServiceGroup? selectedRtmpService;
     async partial void OnSelectedRtmpServiceChanged(RtmpServiceGroup? value)
     {
         if(value != null)
         await OnRTMPServiceSelected(value);
+        SelectedRtmpService = null;
     }
 
     // Settings
@@ -92,6 +89,15 @@ public partial class LeftSideBarViewModel : ObservableObject
         IsReceivingStream = !IsReceivingStream;
         _videoPlayerService.ToggleVisibility(IsReceivingStream);
         StreamButtonText = IsReceivingStream ? "Stop Receiving" : "Start Receiving";
+    }
+
+    async partial void OnSelectedServiceChanged(SelectedService? value)
+    {
+        if (value is null)
+            return;
+
+        await _dialogService.InspectSelectedService(value);
+        SelectedService = null;
     }
 
     private void RemoveSelectedService()

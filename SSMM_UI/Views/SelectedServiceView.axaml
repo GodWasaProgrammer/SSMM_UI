@@ -1,0 +1,31 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="250"
+        x:Class="SSMM_UI.Views.SelectedServiceView"
+		xmlns:local="clr-namespace:SSMM_UI.ViewModel"
+		x:DataType="local:SelectedServiceViewModel"
+        Title="{Binding ViewedService.DisplayName}">
+	<StackPanel Margin="10" Spacing="8">
+
+		<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+
+			<TextBlock Grid.Row="0" Grid.Column="0"
+					   Text="Server:"
+					   VerticalAlignment="Center" Margin="0,0,8,0"/>
+			<TextBlock Grid.Row="0" Grid.Column="1"
+					   Text="{Binding ViewedService.SelectedServer.ServerName}"
+					   VerticalAlignment="Center"/>
+
+			<TextBlock Grid.Row="1" Grid.Column="0"
+					   Text="StreamKey:"
+					   VerticalAlignment="Center" Margin="0,0,8,0"/>
+			<TextBox Grid.Row="1" Grid.Column="1"
+					 Text="{Binding ViewedService.StreamKey}"
+					 Width="200"/>
+		</Grid>
+
+		<CheckBox Content="Enable"/>
+	</StackPanel>
+</Window>

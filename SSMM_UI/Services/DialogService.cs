@@ -18,6 +18,21 @@ public class DialogService : IDialogService
 
     }
 
+    public async Task InspectSelectedService(SelectedService selection)
+    {
+        if (selection == null) 
+        {
+            return;
+        }
+
+        var selectionVM = new SelectedServiceViewModel(selection);
+        var selectionView = new SelectedServiceView
+        {
+            DataContext = selectionVM
+        };
+        await selectionView.ShowDialog(GetMainWindow()!);
+    }
+
     public async Task About()
     {
         try

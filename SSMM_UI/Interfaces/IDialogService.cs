@@ -9,4 +9,5 @@ public interface IDialogService
     Task<bool> ShowServerDetailsAsync(RtmpServiceGroup group);
     Task<UserSettings> ShowSettingsDialogAsync(UserSettings currentSettings);
     Task About();
+    Task InspectSelectedService(SelectedService value);
 }
