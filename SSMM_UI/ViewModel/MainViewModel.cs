@@ -26,7 +26,8 @@ public partial class MainWindowViewModel : ObservableObject
         _settings = settings;
         _dialogService = dialogService;
         OpenSetting = new AsyncRelayCommand(OpenSettings);
-        SetupPuppet = new AsyncRelayCommand(SetupPuppetMaster);
+        SetupPuppetYT = new AsyncRelayCommand(SetupPuppetMasterYoutube);
+        SetupPuppetKick = new AsyncRelayCommand(SetupPuppetMasterKick);
         OpenAbout = new AsyncRelayCommand(OpenAboutWindow);
 
         // === start children ====
@@ -89,10 +90,16 @@ public partial class MainWindowViewModel : ObservableObject
         _stateService.SettingsChanged(_settings);
     }
 
-    public ICommand SetupPuppet { get; }
+    public ICommand SetupPuppetYT { get; }
+    public ICommand SetupPuppetKick {  get; }
 
-    private async Task SetupPuppetMaster()
+    private async Task SetupPuppetMasterYoutube()
     {
         await PuppetMaster.ProfileSetupYoutube();
+    }
+
+    private async Task SetupPuppetMasterKick()
+    {
+        await PuppetMaster.ProfileSetupKick();
     }
 }

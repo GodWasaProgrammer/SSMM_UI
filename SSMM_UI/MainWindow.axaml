@@ -13,7 +13,8 @@
 		<Menu Grid.Row="0">
 			<MenuItem Header="Settings" Command="{Binding OpenSetting}" />
 			<MenuItem Header="Setup">
-				<MenuItem Header="PuppetMaster" Command="{Binding SetupPuppet}" />
+				<MenuItem Header="Setup Youtube with PuppetMaster" Command="{Binding SetupPuppetYT}" />
+				<MenuItem Header="Setup Kick with PuppetMaster" Command="{Binding SetupPuppetKick}"/>
 			</MenuItem>
 			<MenuItem Header="About" Command="{Binding OpenAbout}" />
 			<MenuItem Header="Theme" Command="{Binding ToggleThemes}" />

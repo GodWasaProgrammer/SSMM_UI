@@ -1,9 +1,7 @@
 ﻿using PuppeteerSharp;
 using PuppeteerSharp.Input;
-using SSMM_UI.Services;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SSMM_UI.Puppeteering;
@@ -18,7 +16,6 @@ public static class PuppetMaster
     {
         try
         {
-
             var options = GetLaunchOptions();
 
             using var browser = await Puppeteer.LaunchAsync(options);
