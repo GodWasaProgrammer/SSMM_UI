@@ -1,5 +1,6 @@
 ﻿using PuppeteerSharp;
 using PuppeteerSharp.Input;
+using SSMM_UI.Services;
 using System;
 using System.IO;
 using System.Linq;
@@ -15,35 +16,51 @@ public static class PuppetMaster
 
     public static async Task ProfileSetupKick()
     {
-        var options = GetLaunchOptions();
-
-        using var browser = await Puppeteer.LaunchAsync(options);
-
-        var page = await browser.NewPageAsync();
-
-        await page.GoToAsync(KickUrl, WaitUntilNavigation.Networkidle2);
-
-        // Vänta tills browser är stängd
-        while (!browser.IsClosed)
+        try
         {
-            await Task.Delay(1000); // Kolla varje sekund
+
+            var options = GetLaunchOptions();
+
+            using var browser = await Puppeteer.LaunchAsync(options);
+
+            var page = await browser.NewPageAsync();
+
+            await page.GoToAsync(KickUrl, WaitUntilNavigation.Networkidle2);
+
+            // Vänta tills browser är stängd
+            while (!browser.IsClosed)
+            {
+                await Task.Delay(1000); // Kolla varje sekund
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"FEL: {ex.Message}");
         }
     }
 
     public static async Task ProfileSetupYoutube()
     {
-        var options = GetLaunchOptions();
-
-        using var browser = await Puppeteer.LaunchAsync(options);
-
-        var page = await browser.NewPageAsync();
-
-        await page.GoToAsync(StudioUrl, WaitUntilNavigation.Networkidle2);
-
-        // Vänta tills browser är stängd
-        while (!browser.IsClosed)
+        try
         {
-            await Task.Delay(1000); // Kolla varje sekund
+
+            var options = GetLaunchOptions();
+
+            using var browser = await Puppeteer.LaunchAsync(options);
+
+            var page = await browser.NewPageAsync();
+
+            await page.GoToAsync(StudioUrl, WaitUntilNavigation.Networkidle2);
+
+            // Vänta tills browser är stängd
+            while (!browser.IsClosed)
+            {
+                await Task.Delay(1000); // Kolla varje sekund
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"FEL: {ex.Message}");
         }
     }
 
