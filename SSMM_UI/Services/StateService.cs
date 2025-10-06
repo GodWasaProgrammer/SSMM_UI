@@ -1,4 +1,7 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Media.Imaging;
+using Avalonia.Media.TextFormatting.Unicode;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.Enums;
 using SSMM_UI.Interfaces;
@@ -21,6 +24,7 @@ public class StateService
     private const string YoutubeCategories = "youtube_categories.json";
     private const string _userSettings = "UserSettings.json";
     private const string _savedMetaData = "MetaData_State.json";
+    private const string _windowSettings = "WindowSettings.json";
     private readonly JsonSerializerOptions _metaDataJsonOptions;
     private readonly JsonSerializerOptions _regularJsonOptions = new() { WriteIndented = true };
     private Dictionary<OAuthServices, IAuthToken> _authObjects = [];
@@ -33,6 +37,42 @@ public class StateService
     private StreamMetadata CurrentMetaData { get; set; } = new StreamMetadata();
 
     private const string _tokenPath = "Tokens";
+
+    public void SaveWindowPosition(double Height, double Width, PixelPoint Position, WindowState windowState)
+    {
+        var windowstate = new WindowSettings
+        {
+            Width = Width,
+            Height = Height,
+            Pos = Position,
+            WindowState = windowState
+        };
+        var json = JsonSerializer.Serialize(windowstate, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(_windowSettings, json);
+    }
+
+    public WindowSettings? LoadWindowPosition()
+    {
+        if (File.Exists(_windowSettings))
+        {
+            var json = File.ReadAllText(_windowSettings);
+            var res = JsonSerializer.Deserialize<WindowSettings>(json);
+            if(res != null)
+            {
+                return res;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        else
+        {
+            return null;
+        }
+        
+    }
+
     public void SerializeToken<T>(OAuthServices service, T token) where T : class, IAuthToken
     {
         try

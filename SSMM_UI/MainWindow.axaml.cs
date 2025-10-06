@@ -16,36 +16,7 @@ public partial class MainWindow : Window
         {
             App.Services?.GetRequiredService<StateService>().SerializeServices();
             App.Services?.GetRequiredService<StateService>().SerializeSettings();
+            App.Services?.GetRequiredService<StateService>().SaveWindowPosition(this.Height,this.Width,this.Position,this.WindowState);
         };
-    }
-
-    private static void DetectSystemTheme()
-    {
-        if (Application.Current != null)
-        {
-            if (Application.Current.ActualThemeVariant != null)
-            {
-
-                var isDark = Application.Current.ActualThemeVariant == ThemeVariant.Dark;
-
-                // Ladda rätt tema
-                var theme = isDark ? "Dark" : "Light";
-                Application.Current.RequestedThemeVariant = isDark ? ThemeVariant.Dark : ThemeVariant.Light;
-
-                // Rensa befintliga resurser
-                Application.Current.Resources.MergedDictionaries.Clear();
-
-                // Lägg till det nya temat
-                var themeResource = new ResourceInclude(new Uri($"avares://SSMM_UI/Resources/{theme}Theme.axaml"))
-                {
-                    Source = new Uri($"avares://SSMM_UI/Resources/{theme}Theme.axaml")
-                };
-                Application.Current.Resources.MergedDictionaries.Add(themeResource);
-            }
-        }
-        else
-        {
-            throw new Exception("Our Application.Current was null. Major error");
-        }
     }
 }

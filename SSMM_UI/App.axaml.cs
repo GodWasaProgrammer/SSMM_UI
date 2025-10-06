@@ -69,7 +69,18 @@ public partial class App : Application
             }
 
             mainWindow.DataContext = Services.GetRequiredService<MainWindowViewModel>();
+            var getState = Services.GetRequiredService<StateService>();
+            var windowPosition = getState.LoadWindowPosition();
+            if (windowPosition != null)
+            {
+                mainWindow.Height = windowPosition.Height;
+                mainWindow.Width = windowPosition.Width;
+                mainWindow.Position = windowPosition.Pos;
+                mainWindow.WindowState = windowPosition.WindowState;
+            }
+
             desktop.MainWindow = mainWindow;
+
         }
 
         base.OnFrameworkInitializationCompleted();
