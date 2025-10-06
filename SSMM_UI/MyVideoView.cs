@@ -56,6 +56,7 @@ public class MyVideoView : NativeControlHost
         _media = new Media(_libVLC, url, FromType.FromLocation);
 
         _mediaPlayer.Play(_media);
+        _mediaPlayer.Volume = 0;
     }
 
     public void Stop()
