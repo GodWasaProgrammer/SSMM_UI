@@ -27,9 +27,6 @@ public partial class LeftSideBarViewModel : ObservableObject
         _stateService = stateService;
         RtmpServiceGroups = _stateService.RtmpServiceGroups;
         SelectedServicesToStream = _stateService.SelectedServicesToStream;
-
-        // Get State
-        _userSettings = _stateService.UserSettingsObj;
     }
 
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
@@ -53,11 +50,6 @@ public partial class LeftSideBarViewModel : ObservableObject
         await OnRTMPServiceSelected(value);
         SelectedRtmpService = null;
     }
-
-    // Settings
-    private readonly UserSettings? _userSettings;
-
-
     private async Task OnRTMPServiceSelected(RtmpServiceGroup group)
     {
         var result = await _dialogService.ShowServerDetailsAsync(group);
