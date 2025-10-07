@@ -13,10 +13,13 @@ namespace SSMM_UI.Services;
 
 public class DialogService : IDialogService
 {
-    public DialogService()
+    public DialogService(ILogService logService, StateService stateservice)
     {
-
+        _logService = logService;
+        _stateservice = stateservice;
     }
+    ILogService _logService;
+    StateService _stateservice;
 
     public async Task InspectSelectedService(SelectedService selection)
     {
@@ -25,7 +28,7 @@ public class DialogService : IDialogService
             return;
         }
 
-        var selectionVM = new SelectedServiceViewModel(selection);
+        var selectionVM = new SelectedServiceViewModel(selection, _logService, _stateservice);
         var selectionView = new SelectedServiceView
         {
             DataContext = selectionVM

@@ -56,9 +56,6 @@
 						</Border>
 					</StackPanel>
 				</Border>
-
-				<Button Content="Remove Selected" Width="180" HorizontalAlignment="Center" Classes="danger" Margin="0 5 0 0"
-						Command="{Binding RemoveSelectedServiceCommand}"/>
 			</StackPanel>
 		</ScrollViewer>
 	</Border>

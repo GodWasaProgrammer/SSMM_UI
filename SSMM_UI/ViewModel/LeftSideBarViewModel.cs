@@ -20,7 +20,6 @@ public partial class LeftSideBarViewModel : ObservableObject
     {
         // ==== Selected Services controls ====
         AddServiceCommand = new AsyncRelayCommand<RtmpServiceGroup>(OnRTMPServiceSelected!);
-        RemoveSelectedServiceCommand = new RelayCommand(RemoveSelectedService);
 
         // ==== Service assignment ====
         _dialogService = dialogService;
@@ -38,9 +37,7 @@ public partial class LeftSideBarViewModel : ObservableObject
 
     // == Service Selections ==
     public IAsyncRelayCommand<RtmpServiceGroup> AddServiceCommand { get; }
-    public ICommand RemoveSelectedServiceCommand { get; }
-
-
+    
     // ==== Services ====
     private readonly IDialogService _dialogService;
     private readonly ILogService _logService;
@@ -60,8 +57,6 @@ public partial class LeftSideBarViewModel : ObservableObject
     // Settings
     private readonly UserSettings? _userSettings;
 
-    // ==== Service Selections ====
-    [ObservableProperty] private SelectedService? _selectedService;
 
     private async Task OnRTMPServiceSelected(RtmpServiceGroup group)
     {
@@ -70,33 +65,13 @@ public partial class LeftSideBarViewModel : ObservableObject
         if (!result)
             _logService.Log($"Cancelled adding service: {group.ServiceName}\n");
     }
-
+    [ObservableProperty] SelectedService? _selectedService;
     async partial void OnSelectedServiceChanged(SelectedService? value)
     {
         if (value is null)
             return;
 
         await _dialogService.InspectSelectedService(value);
-        SelectedService = null;
-    }
-
-    private void RemoveSelectedService()
-    {
-        if (SelectedService == null)
-        {
-            _logService.Log("No Service selected for removal");
-            return;
-        }
-
-        if (!SelectedServicesToStream.Contains(SelectedService))
-        {
-            _logService.Log("The selected service doesnt exist in the list");
-            return;
-        }
-
-        var serviceName = SelectedService.DisplayName;
-        SelectedServicesToStream.Remove(SelectedService);
-        _logService.Log($"Removed Service: {serviceName}");
         SelectedService = null;
     }
 }

@@ -45,6 +45,11 @@
 		<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" HorizontalAlignment="Center">
 		<Button Command="{Binding SaveCMD}" Grid.Row="0" Grid.Column="0" Classes="success" Content="Save"/>
 		<Button Command="{Binding CancelCMD}" Grid.Row="0" Grid.Column="1" Classes="danger" Content="Cancel"/>
+
+			<Button VerticalAlignment="Bottom" Grid.Row="1" Content="Remove Selected" Width="180" HorizontalAlignment="Center" Classes="danger" Margin="0 5 0 0"
+						Command="{Binding RemoveSelectedServiceCommand}"/>
+		
 		</Grid>
+		
 	</StackPanel>
 </Window>

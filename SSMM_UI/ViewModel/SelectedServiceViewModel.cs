@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using SSMM_UI.Messenger;
 using SSMM_UI.RTMP;
+using SSMM_UI.Services;
 using System;
 using System.Windows.Input;
 
@@ -18,10 +19,14 @@ public partial class SelectedServiceViewModel : ObservableObject
     [ObservableProperty] RtmpServerInfo? _selectedServer;
     [ObservableProperty] bool _showServerList = false;
     [ObservableProperty] bool isActive;
+    ILogService _logService;
+    StateService _stateservice;
 
-    public SelectedServiceViewModel(SelectedService selection)
+    public SelectedServiceViewModel(SelectedService selection, ILogService logservice, StateService stateservice)
     {
         _original = selection;
+        _logService = logservice;
+        _stateservice = stateservice;
 
         if(_original != null)
         {
@@ -34,6 +39,7 @@ public partial class SelectedServiceViewModel : ObservableObject
         SaveCMD = new RelayCommand(Save);
         ShowServers = new RelayCommand(() => ShowServerList = !ShowServerList);
         CancelCMD = new RelayCommand(Cancel);
+        RemoveSelectedServiceCommand = new RelayCommand(RemoveSelectedService);
     }
 
     // commands
@@ -56,6 +62,35 @@ public partial class SelectedServiceViewModel : ObservableObject
 
     public void Cancel()
     {
+        WeakReferenceMessenger.Default.Send(new CloseWindowMessage
+        {
+            Sender = new WeakReference(this)
+        });
+    }
+
+
+    // ==== Service Selections ====
+    [ObservableProperty] private SelectedService? _selectedService;
+    public ICommand RemoveSelectedServiceCommand { get; }
+    private void RemoveSelectedService()
+    {
+        SelectedService = _original;
+        if (SelectedService == null)
+        {
+            _logService.Log("No Service selected for removal");
+            return;
+        }
+
+        if (!_stateservice.SelectedServicesToStream.Contains(SelectedService))
+        {
+            _logService.Log("The selected service doesnt exist in the list");
+            return;
+        }
+
+        var serviceName = SelectedService.DisplayName;
+        _stateservice.SelectedServicesToStream.Remove(SelectedService);
+        _logService.Log($"Removed Service: {serviceName}");
+        SelectedService = null;
         WeakReferenceMessenger.Default.Send(new CloseWindowMessage
         {
             Sender = new WeakReference(this)
