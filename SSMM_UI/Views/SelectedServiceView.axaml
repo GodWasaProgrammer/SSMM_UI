@@ -1,15 +1,15 @@
 <Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="400"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="400"
 		Width="450"
 		Height="550"
-        x:Class="SSMM_UI.Views.SelectedServiceView"
+		x:Class="SSMM_UI.Views.SelectedServiceView"
 		xmlns:local="clr-namespace:SSMM_UI.ViewModel"
 		xmlns:rtmp="clr-namespace:SSMM_UI.RTMP" 
 		x:DataType="local:SelectedServiceViewModel"
-        Title="{Binding ViewedService.DisplayName}">
+		Title="{Binding ViewedService.DisplayName}">
 	<StackPanel Margin="10" Spacing="8">
 
 		<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto">
@@ -31,10 +31,10 @@
 		</Grid>
 		<Button Command="{Binding ShowServers}" Content="Change Server"/>
 		<ListBox x:Name="RTMPServerList"
-                 ItemsSource="{Binding ServiceGroup.Servers}"
-                 SelectedItem="{Binding SelectedServer, Mode=TwoWay}"
+				 ItemsSource="{Binding ServiceGroup.Servers}"
+				 SelectedItem="{Binding SelectedServer, Mode=TwoWay}"
 				 IsVisible="{Binding ShowServerList}"
-                 Margin="10" Height="300">
+				 Margin="10" Height="300">
 			<ListBox.ItemTemplate>
 				<DataTemplate x:DataType="rtmp:RtmpServerInfo">
 					<TextBlock Text="{Binding ServerName}"/>
@@ -45,11 +45,9 @@
 		<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" HorizontalAlignment="Center">
 		<Button Command="{Binding SaveCMD}" Grid.Row="0" Grid.Column="0" Classes="success" Content="Save"/>
 		<Button Command="{Binding CancelCMD}" Grid.Row="0" Grid.Column="1" Classes="danger" Content="Cancel"/>
-
-			<Button VerticalAlignment="Bottom" Grid.Row="1" Content="Remove Selected" Width="180" HorizontalAlignment="Center" Classes="danger" Margin="0 5 0 0"
-						Command="{Binding RemoveSelectedServiceCommand}"/>
-		
 		</Grid>
+			<Button DockPanel.Dock="Bottom" Content="Delete" Width="180" HorizontalAlignment="Center" Classes="danger" Margin="0 5 0 0"
+						Command="{Binding RemoveSelectedServiceCommand}"/>
 		
 	</StackPanel>
 </Window>
