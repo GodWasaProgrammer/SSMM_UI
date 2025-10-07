@@ -57,12 +57,13 @@ public partial class App : Application
                 .AddSingleton<SecretsAndKeysViewModel>()
                 .AddSingleton<IThemeService, ThemeService>()
                 .AddSingleton<LoginViewModel>()
+                .AddSingleton<InspectionViewModel>()
                 .BuildServiceProvider();
 
 
-            if (mainWindow.FindControl<LeftSideBarView>("LeftSideBar") is { } leftSideBar)
+            if (mainWindow.FindControl<InspectionView>("Preview") is { } preview)
             {
-                if (leftSideBar.FindControl<MyVideoView>("RtmpIncoming") is { } videoView)
+                if (preview.FindControl<MyVideoView>("RtmpIncoming") is { } videoView)
                 {
                     Services.GetRequiredService<VideoPlayerService>().RegisterVideoView(videoView);
                 }

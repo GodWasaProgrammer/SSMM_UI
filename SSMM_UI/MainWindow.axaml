@@ -49,7 +49,11 @@
 				</TabItem>
 
 			</TabControl>
-			<Views:LoginView Grid.Column="2" DataContext="{Binding LoginVM}" />
+			<Grid Grid.Column="2" RowDefinitions="Auto,*">
+			<Views:LoginView Grid.Row="0" DataContext="{Binding LoginVM}" />
+			<Views:InspectionView Grid.Row="1" x:Name="Preview" DataContext="{Binding InspectionVM}"/>
+			</Grid>
+			
 		</Grid>
 	</Grid>
 </Window>

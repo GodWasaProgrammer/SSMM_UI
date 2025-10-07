@@ -20,7 +20,8 @@ public partial class MainWindowViewModel : ObservableObject
                                StreamControlViewModel streamControlVM, 
                                MetaDataViewModel metadataVM, 
                                IThemeService themeService,
-                               LoginViewModel loginVM)
+                               LoginViewModel loginVM,
+                               InspectionViewModel inspectionVM)
     {
         //Settings 
         _settings = settings;
@@ -37,6 +38,7 @@ public partial class MainWindowViewModel : ObservableObject
         StreamControlVM = streamControlVM;
         MetaDataVM = metadataVM;
         LoginVM = loginVM;
+        InspectionVM = inspectionVM;
 
         // theme
         _themeService = themeService;
@@ -61,6 +63,7 @@ public partial class MainWindowViewModel : ObservableObject
     public StreamControlViewModel StreamControlVM { get; }
     public MetaDataViewModel MetaDataVM { get; }
     public LoginViewModel LoginVM { get; }
+    public InspectionViewModel InspectionVM { get; }
 
 
     // ==== Services =====

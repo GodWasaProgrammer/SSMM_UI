@@ -141,9 +141,6 @@ public partial class StreamControlViewModel : ObservableObject
                 CurrentMetaData = _stateService.GetCurrentMetaData();
                 await _streamService.StartStream(CurrentMetaData, LeftSideBarViewModel.SelectedServicesToStream);
                 _logService.Log("Started streaming...");
-
-
-
             }
             catch (Exception ex)
             {
