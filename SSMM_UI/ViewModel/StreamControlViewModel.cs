@@ -1,9 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SSMM_UI.MetaData;
+using SSMM_UI.RTMP;
 using SSMM_UI.Services;
 using SSMM_UI.Settings;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -139,7 +143,12 @@ public partial class StreamControlViewModel : ObservableObject
                     _mdService.CreateYouTubeService(LoginVM.YTService);
                 }
                 CurrentMetaData = _stateService.GetCurrentMetaData();
-                await _streamService.StartStream(CurrentMetaData, LeftSideBarViewModel.SelectedServicesToStream);
+
+                // deduce which we should start
+
+                var ActiveServices = new ObservableCollection<SelectedService>(LeftSideBarViewModel.SelectedServicesToStream.Where(x => x.IsActive).ToList());
+
+                await _streamService.StartStream(CurrentMetaData, ActiveServices);
                 _logService.Log("Started streaming...");
             }
             catch (Exception ex)
