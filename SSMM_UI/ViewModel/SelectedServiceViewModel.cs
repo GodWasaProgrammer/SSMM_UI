@@ -1,8 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SSMM_UI.RTMP;
-using System.ComponentModel;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace SSMM_UI.ViewModel;
@@ -16,6 +14,7 @@ public partial class SelectedServiceViewModel : ObservableObject
     [ObservableProperty] RtmpServiceGroup? _serviceGroup;
     [ObservableProperty] RtmpServerInfo? _selectedServer;
     [ObservableProperty] bool _showServerList = false;
+    [ObservableProperty] bool isActive;
 
     public SelectedServiceViewModel(SelectedService selection)
     {
@@ -25,6 +24,7 @@ public partial class SelectedServiceViewModel : ObservableObject
         {
             DisplayName = selection.DisplayName;
             StreamKey = selection.StreamKey;
+            IsActive = selection.IsActive; 
 
             _serviceGroup = selection.ServiceGroup?.Clone();
         }
@@ -40,6 +40,7 @@ public partial class SelectedServiceViewModel : ObservableObject
         if(_original == null) return;
         _original.StreamKey = StreamKey;
         _original.SelectedServer = SelectedServer;
+        _original.IsActive = IsActive;
     }
 
     public void Cancel()

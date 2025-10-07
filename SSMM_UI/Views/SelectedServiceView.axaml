@@ -12,7 +12,7 @@
         Title="{Binding ViewedService.DisplayName}">
 	<StackPanel Margin="10" Spacing="8">
 
-		<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+		<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto">
 
 			<TextBlock Grid.Row="0" Grid.Column="0"
 					   Text="Server:"
@@ -27,6 +27,7 @@
 			<TextBox Grid.Row="1" Grid.Column="1"
 					 Text="{Binding StreamKey}"
 					 Width="200"/>
+			<CheckBox  Grid.Row="3" Content="Enabled" IsChecked="{Binding IsActive}"/>
 		</Grid>
 		<Button Command="{Binding ShowServers}" Content="Change Server"/>
 		<ListBox x:Name="RTMPServerList"
@@ -41,7 +42,6 @@
 			</ListBox.ItemTemplate>
 		</ListBox>
 
-		<CheckBox Content="Enable"/>
 		<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" HorizontalAlignment="Center">
 		<Button Command="{Binding SaveCMD}" Grid.Row="0" Grid.Column="0" Classes="success" Content="Save"/>
 		<Button Grid.Row="0" Grid.Column="1" Classes="danger" Content="Cancel"/>

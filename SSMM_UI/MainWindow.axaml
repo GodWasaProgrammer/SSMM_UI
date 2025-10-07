@@ -1,10 +1,10 @@
 <Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="SSMM_UI.MainWindow"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		x:Class="SSMM_UI.MainWindow"
 		xmlns:local="clr-namespace:SSMM_UI.ViewModel" 
 		xmlns:Views="clr-namespace:SSMM_UI.Views"
-        x:DataType="local:MainWindowViewModel"
-        Title="SSMM_UI" Width="1920" Height="1080"
+		x:DataType="local:MainWindowViewModel"
+		Title="SSMM_UI" Width="1920" Height="1080"
 		Icon="avares://SSMM_UI/Assets/MainIcon.png">
 
 	<Grid RowDefinitions="Auto,*,Auto">
@@ -25,13 +25,13 @@
 
 			<!-- Sidebar till vänster -->
 			<Views:LeftSideBarView Grid.Column="0"
-                                   x:Name="LeftSideBar"
-                                   DataContext="{Binding LeftSideBarVM}" />
+								   x:Name="LeftSideBar"
+								   DataContext="{Binding LeftSideBarVM}" />
 
 			<!-- Main content -->
 			<TabControl Grid.Column="1"
-                        Background="Transparent"
-                        BorderThickness="0">
+						Background="Transparent"
+						BorderThickness="0">
 
 				<TabItem Header="Stream">
 					<StackPanel>
