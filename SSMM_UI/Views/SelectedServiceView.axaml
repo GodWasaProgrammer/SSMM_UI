@@ -44,7 +44,7 @@
 
 		<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" HorizontalAlignment="Center">
 		<Button Command="{Binding SaveCMD}" Grid.Row="0" Grid.Column="0" Classes="success" Content="Save"/>
-		<Button Grid.Row="0" Grid.Column="1" Classes="danger" Content="Cancel"/>
+		<Button Command="{Binding CancelCMD}" Grid.Row="0" Grid.Column="1" Classes="danger" Content="Cancel"/>
 		</Grid>
 	</StackPanel>
 </Window>
