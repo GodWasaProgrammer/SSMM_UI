@@ -14,22 +14,16 @@ namespace SSMM_UI.ViewModel;
 
 public partial class LeftSideBarViewModel : ObservableObject
 {
-    public LeftSideBarViewModel(IDialogService dialogService, 
-                                VideoPlayerService vidPlayer,
+    public LeftSideBarViewModel(IDialogService dialogService,
                                 ILogService logService, 
                                 StateService stateService)
     {
-
-        // ==== Stream Inspection window ====
-        ToggleReceivingStreamCommand = new RelayCommand(ToggleReceivingStream);
-
         // ==== Selected Services controls ====
         AddServiceCommand = new AsyncRelayCommand<RtmpServiceGroup>(OnRTMPServiceSelected!);
         RemoveSelectedServiceCommand = new RelayCommand(RemoveSelectedService);
 
         // ==== Service assignment ====
         _dialogService = dialogService;
-        _videoPlayerService = vidPlayer;
         _logService = logService;
         _stateService = stateService;
         RtmpServiceGroups = _stateService.RtmpServiceGroups;
@@ -39,20 +33,15 @@ public partial class LeftSideBarViewModel : ObservableObject
         _userSettings = _stateService.UserSettingsObj;
     }
 
-
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; } = [];
 
-
-    // == Internal stream inspection toggle ==
-    public ICommand ToggleReceivingStreamCommand { get; }
     // == Service Selections ==
     public IAsyncRelayCommand<RtmpServiceGroup> AddServiceCommand { get; }
     public ICommand RemoveSelectedServiceCommand { get; }
 
 
     // ==== Services ====
-    private readonly VideoPlayerService _videoPlayerService;
     private readonly IDialogService _dialogService;
     private readonly ILogService _logService;
     private readonly StateService _stateService;
@@ -72,8 +61,7 @@ public partial class LeftSideBarViewModel : ObservableObject
     private readonly UserSettings? _userSettings;
 
     // ==== Service Selections ====
-    [ObservableProperty]
-    private SelectedService? _selectedService;
+    [ObservableProperty] private SelectedService? _selectedService;
 
     private async Task OnRTMPServiceSelected(RtmpServiceGroup group)
     {
@@ -81,14 +69,6 @@ public partial class LeftSideBarViewModel : ObservableObject
 
         if (!result)
             _logService.Log($"Cancelled adding service: {group.ServiceName}\n");
-    }
-
-    [ObservableProperty] private string? streamButtonText = "Start Receiving";
-    private void ToggleReceivingStream()
-    {
-        IsReceivingStream = !IsReceivingStream;
-        _videoPlayerService.ToggleVisibility(IsReceivingStream);
-        StreamButtonText = IsReceivingStream ? "Stop Receiving" : "Start Receiving";
     }
 
     async partial void OnSelectedServiceChanged(SelectedService? value)

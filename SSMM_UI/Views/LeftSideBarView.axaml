@@ -16,10 +16,10 @@
 		<ScrollViewer>
 			<StackPanel Margin="15">
 
-				<!-- Video Preview -->
+				<!-- Video Preview --><!--
 				<Border Classes="card">
 					<local:MyVideoView x:Name="RtmpIncoming" Width="220" Height="124" IsVisible="{Binding IsReceivingStream}"/>
-				</Border>
+				</Border>-->
 
 				<!-- Services Section -->
 				<Border Classes="card">

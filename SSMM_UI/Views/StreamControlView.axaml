@@ -16,8 +16,8 @@
 								Command="{Binding StartStreamCommand}" IsEnabled="{Binding CanStartStream}"/>
 						<Button Content="Stop Streams" Classes="danger" Margin="0 0 15 0"
 								Command="{Binding StopStreamsCommand}" IsEnabled="{Binding CanStopStream}"/>
-						<Button Content="Start Receiving" Classes="danger" Margin="0 0 15 0"
-								Command="{Binding LeftSideBarViewModel.ToggleReceivingStreamCommand }"/>
+						<!--<Button Content="Start Receiving" Classes="danger" Margin="0 0 15 0"
+								Command="{Binding LeftSideBarViewModel.ToggleReceivingStreamCommand }"/>-->
 					</WrapPanel>
 
 					<StackPanel Margin="0 10 0 0">

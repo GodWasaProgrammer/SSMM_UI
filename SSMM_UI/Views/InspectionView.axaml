@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 xmlns:local="clr-namespace:SSMM_UI.ViewModel;assembly=SSMM_UI"
+			 xmlns:local2="clr-namespace:SSMM_UI"
+			 x:DataType="local:InspectionViewModel"
+             x:Class="SSMM_UI.Views.InspectionView">
+	<StackPanel HorizontalAlignment="Center">
+		<!-- Video Preview -->
+		<Border Classes="card">
+			<local2:MyVideoView x:Name="RtmpIncoming" Width="220" Height="124" IsVisible="{Binding IsReceivingStream}"/>
+		</Border>
+		<Button Content="Start Receiving" Classes="danger" Margin="0 0 15 0"
+								Command="{Binding ToggleReceivingStreamCommand }"/>
+	</StackPanel>
+</UserControl>
