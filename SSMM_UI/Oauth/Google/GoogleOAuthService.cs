@@ -94,6 +94,7 @@ public class GoogleOAuthService
         catch (Exception ex)
         {
             _logger.Log(ex.Message);
+            return null;
         }
         return _oauthResult;
     }

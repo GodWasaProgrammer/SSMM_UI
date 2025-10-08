@@ -167,7 +167,7 @@ public class CentralAuthService
             }
             else
             {
-                results.Add(new AuthResult(AuthProvider.Twitch, false, null, "Failed to Log in"));
+                results.Add(new AuthResult(AuthProvider.Twitch, false, null, "Token was missing or is invalid"));
             }
 
             // Google/YouTube

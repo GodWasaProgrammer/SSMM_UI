@@ -49,8 +49,8 @@ public class TwitchDCAuthService
             TwitchScopes.ChannelManageBroadcast,
             TwitchScopes.StreamKey
         ];
-    
-    
+
+
 
     public string GetClientId()
     {
@@ -130,7 +130,16 @@ public class TwitchDCAuthService
         var token = _stateService.DeserializeToken<TwitchTokenTokenResponse>(OAuthServices.Twitch);
         if (token is not null)
         {
-            AuthResult = token;
+            // if internet is missing this needs to fail
+            var CheckInterWebz = await GetUsernameAsync(token.AccessToken);
+            if (CheckInterWebz != null)
+            {
+                AuthResult = token;
+            }
+            else
+            {
+                return null;
+            }
         }
         if (token == null) return null;
 
@@ -279,8 +288,8 @@ public class TwitchDCAuthService
             {
                 var userId = GetUserIdAsync(AuthResult.AccessToken);
                 AuthResult.UserId = userId.Result;
-                if(AuthResult.UserId != null)
-                return AuthResult.UserId;
+                if (AuthResult.UserId != null)
+                    return AuthResult.UserId;
             }
         }
         else
