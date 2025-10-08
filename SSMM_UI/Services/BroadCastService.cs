@@ -24,18 +24,19 @@ public class BroadCastService
     private readonly ILogService _logger;
     private StreamInfo? StreamInfo;
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
-
+    private PuppetMaster _puppeteer;
     public void CreateYTService(YouTubeService YTService)
     {
         _youTubeService = YTService;
     }
 
 
-    public BroadCastService(CentralAuthService authService, ILogService logger, MetaDataService mdservice)
+    public BroadCastService(CentralAuthService authService, ILogService logger, MetaDataService mdservice, PuppetMaster puppeteer)
     {
         _authService = authService;
         _logger = logger;
         MDService = mdservice;
+        _puppeteer = puppeteer;
     }
 
     public async Task<(string rtmpUrl, string streamKey)> CreateYouTubeBroadcastAsync(StreamMetadata metadata)
@@ -142,7 +143,8 @@ public class BroadCastService
                     }
                 }
 
-                await PuppetMaster.ChangeGameTitleYoutube(insertedBroadcast.Id, "Hearts Of Iron IV");
+                
+                await _puppeteer.ChangeGameTitleYoutube(insertedBroadcast.Id, metadata.TwitchCategory.Name);
 
                 // 5. Returnera RTMP-url + streamkey
                 var ingestionInfo = insertedStream.Cdn.IngestionInfo;
@@ -216,10 +218,10 @@ public class BroadCastService
         throw new ArgumentException("Failed to create TwitchBroadCast");
 
     }
-    public static async Task CreateKickBroadcastAsync(StreamMetadata metadata)
+    public async Task CreateKickBroadcastAsync(StreamMetadata metadata)
     {
         // kick keys remain the same unless reset so there is no need to return them as they should be set by user.
-        await PuppetMaster.SetKickGameTitle(StreamTitle: metadata.Title);
+        await _puppeteer.SetKickGameTitle(StreamTitle: metadata.Title);
     }
     public async Task<(string rtmpUrl, string? streamKey)> CreateTrovoBroadcastAsync(StreamMetadata metadata)
     {

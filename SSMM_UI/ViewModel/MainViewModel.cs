@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PuppeteerSharp;
 using SSMM_UI.Interfaces;
 using SSMM_UI.Puppeteering;
 using SSMM_UI.Services;
@@ -21,7 +22,8 @@ public partial class MainWindowViewModel : ObservableObject
                                MetaDataViewModel metadataVM, 
                                IThemeService themeService,
                                LoginViewModel loginVM,
-                               InspectionViewModel inspectionVM)
+                               InspectionViewModel inspectionVM,
+                               PuppetMaster puppeteer)
     {
         //Settings 
         _settings = settings;
@@ -46,11 +48,14 @@ public partial class MainWindowViewModel : ObservableObject
 
         // services
         _stateService = stateService;
+        _puppeteer = puppeteer;
         // state
         _settings = _stateService.UserSettingsObj;
+        //_puppeteer = new(log)
     }
 
     private UserSettings _settings = new();
+    private PuppetMaster _puppeteer;
 
     // ==== Theme ====
     private IThemeService _themeService;
@@ -98,11 +103,11 @@ public partial class MainWindowViewModel : ObservableObject
 
     private async Task SetupPuppetMasterYoutube()
     {
-        await PuppetMaster.ProfileSetupYoutube();
+        await _puppeteer.ProfileSetupYoutube();
     }
 
     private async Task SetupPuppetMasterKick()
     {
-        await PuppetMaster.ProfileSetupKick();
+        await _puppeteer.ProfileSetupKick();
     }
 }

@@ -7,6 +7,7 @@ using LibVLCSharp.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using SSMM_UI.Interfaces;
 using SSMM_UI.MetaData;
+using SSMM_UI.Puppeteering;
 using SSMM_UI.Services;
 using SSMM_UI.Settings;
 using SSMM_UI.ViewModel;
@@ -58,6 +59,7 @@ public partial class App : Application
                 .AddSingleton<IThemeService, ThemeService>()
                 .AddSingleton<LoginViewModel>()
                 .AddSingleton<InspectionViewModel>()
+                .AddSingleton<PuppetMaster>()
                 .BuildServiceProvider();
 
 

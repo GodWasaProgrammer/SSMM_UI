@@ -1,4 +1,5 @@
 ﻿using SSMM_UI.MetaData;
+using SSMM_UI.Puppeteering;
 using SSMM_UI.RTMP;
 using System;
 using System.Collections.Generic;
@@ -16,12 +17,14 @@ public class StreamService
     private readonly List<Process>? ffmpegProcess = [];
     private readonly BroadCastService _broadCastService;
     private readonly ILogService _logger;
+    private readonly PuppetMaster puppetMaster;
     public List<StreamProcessInfo> ProcessInfos { get; private set; } = [];
-    public StreamService(ILogService logger, BroadCastService broadCastService)
+    public StreamService(ILogService logger, BroadCastService broadCastService, PuppetMaster puppeteer)
     {
         RTMPServer.StartSrv();
         _logger = logger;
         _broadCastService = broadCastService;
+        puppetMaster = puppeteer;
     }
 
     // TODO: needs to indicate success
@@ -79,7 +82,7 @@ public class StreamService
                     {
                         if (metadata != null)
                         {
-                            await BroadCastService.CreateKickBroadcastAsync(metadata);
+                            await _broadCastService.CreateKickBroadcastAsync(metadata);
                         }
                     }
                 }

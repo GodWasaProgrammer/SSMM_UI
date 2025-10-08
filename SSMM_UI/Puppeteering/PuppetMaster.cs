@@ -1,18 +1,24 @@
 ﻿using PuppeteerSharp;
 using PuppeteerSharp.Input;
+using SSMM_UI.Services;
 using System;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace SSMM_UI.Puppeteering;
 
-public static class PuppetMaster
+public class PuppetMaster
 {
     private const string KickUrl = "https://dashboard.kick.com/stream";
     private const string StudioUrl = "https://studio.youtube.com/";
     private const string ChromePath = @"C:\Program Files\Google\Chrome\Application\chrome.exe";
+    private ILogService _logService;
+    public PuppetMaster(ILogService logservice)
+    {
+        _logService = logservice;
+    }
 
-    public static async Task ProfileSetupKick()
+    public async Task ProfileSetupKick()
     {
         try
         {
@@ -32,11 +38,11 @@ public static class PuppetMaster
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"FEL: {ex.Message}");
+            _logService.Log($"Error in PuppetMaster: {ex.Message}");
         }
     }
 
-    public static async Task ProfileSetupYoutube()
+    public async Task ProfileSetupYoutube()
     {
         try
         {
@@ -57,7 +63,7 @@ public static class PuppetMaster
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"FEL: {ex.Message}");
+            _logService.Log($"Error in PuppetMaster: {ex.Message}");
         }
     }
 
@@ -90,7 +96,7 @@ public static class PuppetMaster
         return launchOptions;
     }
 
-    public static async Task<bool> SetKickGameTitle(string? GameTitle = null, string? StreamTitle = null)
+    public async Task<bool> SetKickGameTitle(string? GameTitle = null, string? StreamTitle = null)
     {
         var options = GetLaunchOptions();
 
@@ -115,7 +121,7 @@ public static class PuppetMaster
 
             if (!editClicked)
             {
-                Console.WriteLine("EDIT-KNAPPEN HITTADES INTE");
+                _logService.Log("Edit-button was not found on Kick");
                 return false;
             }
 
@@ -125,7 +131,7 @@ public static class PuppetMaster
                 var titleTextarea = await page.QuerySelectorAsync("textarea[name='title']");
                 if (titleTextarea == null)
                 {
-                    Console.WriteLine("TITEL-TEXTAREA HITTADES INTE");
+                    _logService.Log("Title-text area was not found in Kick");
                     return false;
                 }
 
@@ -144,7 +150,7 @@ public static class PuppetMaster
                 var dropdownButton = await page.QuerySelectorAsync("button[aria-haspopup='dialog'][type='button']:has(svg.lucide-chevrons-up-down)");
                 if (dropdownButton == null)
                 {
-                    Console.WriteLine("DROPDOWN-KNAPPEN HITTADES INTE");
+                    _logService.Log("Dropdown-button Was not found in Kick");
                     return false;
                 }
 
@@ -179,7 +185,7 @@ public static class PuppetMaster
 
                 if (!clicked)
                 {
-                    Console.WriteLine($"Kunde inte klicka på '{GameTitle}' efter 3 försök");
+                    _logService.Log($"Failed to click '{GameTitle}' after 3 attempts in Kick");
                     return false;
                 }
             }
@@ -199,24 +205,24 @@ public static class PuppetMaster
 
             if (!saveClicked)
             {
-                Console.WriteLine("SPARA-KNAPPEN HITTADES INTE");
+                _logService.Log("Save button was not found on Kick");
                 return false;
             }
 
             await Task.Delay(500);
             await browser.CloseAsync();
 
-            Console.WriteLine("KICK-STREAM UPPDATERAD FRAMGÅNGSRIKT");
+            _logService.Log("Kick-Stream Updated Successfully");
             return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"FEL: {ex.Message}");
+            _logService.Log($"Exception in Kick PuppetMaster: {ex.Message}");
             return false;
         }
     }
 
-    public static async Task<bool> ChangeGameTitleYoutube(string videoId, string title)
+    public async Task<bool> ChangeGameTitleYoutube(string videoId, string title)
     {
         try
         {
@@ -233,7 +239,7 @@ public static class PuppetMaster
             var editButton = await page.QuerySelectorAsync("#edit-button > ytcp-button-shape > button");
             if (editButton == null)
             {
-                Console.WriteLine("EDIT-KNAPPEN HITTADES INTE");
+                _logService.Log("Edit-button was not found in Youtube");
                 return false;
             }
             await page.ClickAsync("#edit-button > ytcp-button-shape > button");
@@ -244,7 +250,7 @@ public static class PuppetMaster
             var categoryInput = await page.QuerySelectorAsync("#category-container > ytcp-form-gaming > ytcp-form-autocomplete > ytcp-dropdown-trigger > div > div.left-container.style-scope.ytcp-dropdown-trigger > input");
             if (categoryInput == null)
             {
-                Console.WriteLine("KATEGORIFÄLTET HITTADES INTE");
+                _logService.Log("Category field was not found in Youtube");
                 return false;
             }
             await page.ClickAsync("#category-container > ytcp-form-gaming > ytcp-form-autocomplete > ytcp-dropdown-trigger > div > div.left-container.style-scope.ytcp-dropdown-trigger > input");
@@ -277,7 +283,7 @@ public static class PuppetMaster
 
             if (!clickResult)
             {
-                Console.WriteLine($"KUNDE INTE HITTA SPELET: {title}");
+                _logService.Log($"Game could not be found:{title} on Youtube");
                 return false;
             }
 
@@ -285,7 +291,7 @@ public static class PuppetMaster
             var saveButton = await page.QuerySelectorAsync("#save-button > ytcp-button-shape > button");
             if (saveButton == null)
             {
-                Console.WriteLine("SPARA-KNAPPEN HITTADES INTE");
+                _logService.Log("Save Button wasnt found on Youtube");
                 return false;
             }
             await page.ClickAsync("#save-button > ytcp-button-shape > button");
@@ -293,12 +299,12 @@ public static class PuppetMaster
             await Task.Delay(500);
             await browser.CloseAsync();
 
-            Console.WriteLine("TITEL ÄNDRAD FRAMGÅNGSRIKT");
+            _logService.Log("Title on Youtube Changed Successfully");
             return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"FEL: {ex.Message}");
+            _logService.Log($"Exception on Youtube:{ex.Message}");
             return false;
         }
     }
