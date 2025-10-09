@@ -57,7 +57,6 @@ public class DialogService : IDialogService
         }
         catch (Exception ex)
         {
-            // Hantera fel här, t.ex. visa ett meddelande
             _logService.Log($"Error showing about dialog: {ex.Message}");
         }
     }
@@ -85,7 +84,6 @@ public class DialogService : IDialogService
         await detailsWindow.ShowDialog(GetMainWindow()!);
         var result = await tcs.Task;
 
-        // EFTER att dialogen stängts - lägg till i huvud-viewmodel
         if (result && selectedService != null)
         {
             var mainVM = GetMainWindow();
