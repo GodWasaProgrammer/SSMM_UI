@@ -15,6 +15,7 @@
 			<MenuItem Header="Setup">
 				<MenuItem Header="Setup Youtube with PuppetMaster" Command="{Binding SetupPuppetYT}" />
 				<MenuItem Header="Setup Kick with PuppetMaster" Command="{Binding SetupPuppetKick}"/>
+				<MenuItem Header="Setup Secrets And Keys for SocialPoster" Command="{Binding ShowSecretsAndKeys}"/>
 			</MenuItem>
 			<MenuItem Header="About" Command="{Binding OpenAbout}" />
 			<MenuItem Header="Theme" Command="{Binding ToggleThemes}" />

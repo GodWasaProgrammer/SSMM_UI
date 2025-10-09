@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SSMM_UI.Services;
 using SSMM_UI.Settings;
-using Tweetinvi.Core.Models;
 
 namespace SSMM_UI.ViewModel;
 
@@ -12,16 +11,13 @@ public partial class SocialPosterViewModel : ObservableObject
 {
     private readonly UserSettings _settings;
     private readonly SocialPosterService _poster;
-    public SecretsAndKeysViewModel SecretsVM { get; }
-    public SocialPosterViewModel(UserSettings settings, SocialPosterService poster, SecretsAndKeysViewModel secretsandkeysVM) 
+    public SocialPosterViewModel(UserSettings settings, SocialPosterService poster) 
     {
         _settings = settings;
         _poster = poster;
         TestClick = new AsyncRelayCommand(Test);
-        SecretsVM = secretsandkeysVM;
     }
 
-    
     [ObservableProperty] bool postToX;
     [ObservableProperty] bool postToFB;
     [ObservableProperty] bool postToDiscord;

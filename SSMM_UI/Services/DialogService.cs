@@ -21,6 +21,16 @@ public class DialogService : IDialogService
     ILogService _logService;
     StateService _stateservice;
 
+    public async Task OpenSecretsAndKeys()
+    {
+        var secretsAndKeysVM = new SecretsAndKeysViewModel();
+        var secretsandKeysView = new SecretsAndKeysView()
+        {
+            DataContext = secretsAndKeysVM,
+        };
+        await secretsandKeysView.ShowDialog(GetMainWindow()!);
+    }
+
     public async Task InspectSelectedService(SelectedService selection)
     {
         if (selection == null) 
@@ -48,7 +58,7 @@ public class DialogService : IDialogService
         catch (Exception ex)
         {
             // Hantera fel här, t.ex. visa ett meddelande
-            Console.WriteLine($"Error showing about dialog: {ex.Message}");
+            _logService.Log($"Error showing about dialog: {ex.Message}");
         }
     }
 

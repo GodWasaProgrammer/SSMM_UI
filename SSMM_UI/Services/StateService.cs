@@ -200,7 +200,7 @@ public class StateService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Failed to serialize metadata: {ex.Message}");
+            _logger.Log($"Failed to serialize metadata: {ex.Message}");
         }
     }
 

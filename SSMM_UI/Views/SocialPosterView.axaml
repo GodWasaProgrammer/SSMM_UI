@@ -17,9 +17,9 @@
 					<Button Command="{Binding TestClick}" Content="Test"/>
 				</StackPanel>
 			</Border>
-			<StackPanel>
+			<!--<StackPanel>
 				<views:SecretsAndKeysView DataContext="{Binding SecretsVM}"/>
-			</StackPanel>
+			</StackPanel>-->
 		</StackPanel>
 		
 	</ScrollViewer>

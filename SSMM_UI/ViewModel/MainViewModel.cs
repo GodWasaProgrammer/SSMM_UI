@@ -32,6 +32,7 @@ public partial class MainWindowViewModel : ObservableObject
         SetupPuppetYT = new AsyncRelayCommand(SetupPuppetMasterYoutube);
         SetupPuppetKick = new AsyncRelayCommand(SetupPuppetMasterKick);
         OpenAbout = new AsyncRelayCommand(OpenAboutWindow);
+        ShowSecretsAndKeys = new AsyncRelayCommand(ShowSecretsAndKeysDialog);
 
         // === start children ====
         LeftSideBarVM = leftSideBarVM;
@@ -78,8 +79,13 @@ public partial class MainWindowViewModel : ObservableObject
     // ==== Commands ====
     public ICommand OpenSetting { get; }
     public ICommand OpenAbout { get; }
-
     public ICommand ToggleThemes => new RelayCommand(ToggleTheme);
+    public ICommand ShowSecretsAndKeys {  get; }
+
+    private async Task ShowSecretsAndKeysDialog()
+    {
+        await _dialogService.OpenSecretsAndKeys();
+    }
 
     private void ToggleTheme()
     {
