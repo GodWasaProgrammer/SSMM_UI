@@ -53,6 +53,7 @@
 			<Grid Grid.Column="2" RowDefinitions="Auto,*">
 			<Views:LoginView Grid.Row="0" DataContext="{Binding LoginVM}" />
 			<Views:InspectionView Grid.Row="1" x:Name="Preview" DataContext="{Binding InspectionVM}"/>
+				<Views:SocialPosterLoginView Grid.Row="2" DataContext="{Binding SocialPosterLoginVM}"/>
 			</Grid>
 			
 		</Grid>

@@ -4,6 +4,7 @@ using Google.Apis.YouTube.v3;
 using SSMM_UI.Oauth.Google;
 using SSMM_UI.Oauth.Kick;
 using SSMM_UI.Oauth.Twitch;
+using SSMM_UI.Oauth.X;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,6 +17,7 @@ public class CentralAuthService
     private GoogleOAuthService GoogleAuthService { get; set; }
     public TwitchDCAuthService TwitchService;
     private readonly KickOAuthService? _kickOauthService;
+    private XOAuth XOAuth { get; set; }
     private readonly ILogService _logger;
     private readonly StateService _stateService;
 
@@ -25,7 +27,32 @@ public class CentralAuthService
         _logger = logger;
         _kickOauthService = new(_logger, _stateService);
         GoogleAuthService = new(_logger, _stateService);
+        XOAuth = new(_logger, _stateService);
         TwitchService = new TwitchDCAuthService(_logger, _stateService);
+    }
+
+    public async Task<string> LoginWithX()
+    {
+        if (XOAuth == null)
+        {
+            throw new Exception("XOAuth was null!");
+        }
+        var scopes = new[] {
+        "tweet.read",
+        "tweet.write",   // ← krävs för POST /2/tweets och DELETE /2/tweets/:id
+        "users.read",
+        "offline.access" // ← (valfritt) för att få en refresh_token
+        };
+        var loginResult = await XOAuth.AuthenticateOrRefreshAsync();
+
+        if (loginResult != null)
+        {
+            return $"✅ Logged in as: {loginResult.Username}";
+        }
+        else
+        {
+            return "❌ Login failed.";
+        }
     }
 
     public async Task<string> LoginWithTwitch()

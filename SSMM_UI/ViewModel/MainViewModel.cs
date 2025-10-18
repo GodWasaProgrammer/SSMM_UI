@@ -23,7 +23,8 @@ public partial class MainWindowViewModel : ObservableObject
                                IThemeService themeService,
                                LoginViewModel loginVM,
                                InspectionViewModel inspectionVM,
-                               PuppetMaster puppeteer)
+                               PuppetMaster puppeteer,
+                               SocialPosterLoginViewModel socialposterLoginVM)
     {
         //Settings 
         _settings = settings;
@@ -42,6 +43,7 @@ public partial class MainWindowViewModel : ObservableObject
         MetaDataVM = metadataVM;
         LoginVM = loginVM;
         InspectionVM = inspectionVM;
+        SocialPosterLoginVM = socialposterLoginVM;
 
         // theme
         _themeService = themeService;
@@ -70,6 +72,7 @@ public partial class MainWindowViewModel : ObservableObject
     public MetaDataViewModel MetaDataVM { get; }
     public LoginViewModel LoginVM { get; }
     public InspectionViewModel InspectionVM { get; }
+    public SocialPosterLoginViewModel SocialPosterLoginVM { get; }
 
 
     // ==== Services =====

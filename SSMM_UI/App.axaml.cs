@@ -60,6 +60,7 @@ public partial class App : Application
                 .AddSingleton<LoginViewModel>()
                 .AddSingleton<InspectionViewModel>()
                 .AddSingleton<PuppetMaster>()
+                .AddSingleton<SocialPosterLoginViewModel>()
                 .BuildServiceProvider();
 
 
