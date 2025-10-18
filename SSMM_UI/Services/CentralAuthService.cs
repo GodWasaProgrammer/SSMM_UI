@@ -1,6 +1,7 @@
 ﻿using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
+using SSMM_UI.Enums;
 using SSMM_UI.Oauth.Google;
 using SSMM_UI.Oauth.Kick;
 using SSMM_UI.Oauth.Twitch;
@@ -167,7 +168,24 @@ public class CentralAuthService
         }
     }
 
-    public async Task<(List<AuthResult?>, YouTubeService?)> TryAutoLoginAllAsync()
+    public async Task<List<AuthResult>> TryAutoLoginXAsync()
+    {
+        var results = new List<AuthResult>();
+        try
+        {
+            var xToken = await XOAuth.AuthenticateOrRefreshAsync();
+            results.Add(xToken is not null
+                ? new AuthResult(AuthProvider.X, true, xToken.Username, null)
+                : new AuthResult(AuthProvider.X, false, null, "Token was missing or is invalid"));
+        }
+        catch (Exception ex)
+        {
+            results.Add(new AuthResult(AuthProvider.X, false, null, ex.Message));
+        }
+        return results;
+    }
+
+    public async Task<(List<AuthResult?>, YouTubeService?)> TryAutoLoginStreamServicesAsync()
     {
         var results = new List<AuthResult>();
         GoogleOauthResult? GoogleAuthResult = new();
@@ -235,12 +253,4 @@ public class CentralAuthService
         return (results, ytService)!;
     }
 }
-
-public enum AuthProvider
-{
-    Twitch,
-    YouTube,
-    Kick
-}
-
 public record AuthResult(AuthProvider Provider, bool Success, string? Username, string? ErrorMessage);

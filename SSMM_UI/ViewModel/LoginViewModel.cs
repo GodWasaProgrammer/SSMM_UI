@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Google.Apis.YouTube.v3;
+using SSMM_UI.Enums;
 using SSMM_UI.Services;
 using SSMM_UI.Settings;
 using System.Threading.Tasks;
@@ -87,7 +88,7 @@ public partial class LoginViewModel: ObservableObject
 
     private async Task AutoLoginIfTokenized()
     {
-        var (results, ytService) = await _centralAuthService.TryAutoLoginAllAsync();
+        var (results, ytService) = await _centralAuthService.TryAutoLoginStreamServicesAsync();
 
         if (ytService != null)
         {

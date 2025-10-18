@@ -1,5 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Autofac.Core;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SSMM_UI.Enums;
 using SSMM_UI.Services;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -11,6 +13,7 @@ public partial class SocialPosterLoginViewModel : ObservableObject
     public SocialPosterLoginViewModel(CentralAuthService authService)
     {
         _AuthService = authService;
+        _ = AutoLoginIfTokenized();
     }
     CentralAuthService _AuthService;
 
@@ -22,5 +25,28 @@ public partial class SocialPosterLoginViewModel : ObservableObject
         // Handle result (e.g., update UI or log)
     }
     [ObservableProperty] string xLoginStatus = "Not logged in.";
+
+    private async Task AutoLoginIfTokenized()
+    {
+        var results = await _AuthService.TryAutoLoginXAsync();
+
+        foreach (var result in results)
+        {
+            if (result != null)
+            {
+
+                var message = result.Success
+                    ? $"✅ Logged in as: {result.Username}"
+                    : $"❌ {result.ErrorMessage}";
+
+                switch (result.Provider)
+                {
+                    case AuthProvider.X:
+                        XLoginStatus = message;
+                        break;
+                }
+            }
+        }
+    }
 
 }

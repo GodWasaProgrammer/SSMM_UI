@@ -1,9 +1,9 @@
 ﻿namespace SSMM_UI.Enums;
 
-public enum OAuthServices
+public enum AuthProvider
 {
     Twitch,
-    Youtube,
+    YouTube,
     Kick,
     X
 }
