@@ -1,4 +1,7 @@
-﻿using SSMM_UI.Interfaces;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using SSMM_UI.Interfaces;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
@@ -16,8 +19,8 @@ namespace SSMM_UI.Oauth.Facebook;
 public class FacebookOAuth
 {
     private readonly HttpClient _http = new();
-    private readonly string _clientId = "";
-    private readonly string _redirectUri = "http://127.0.0.1:7891/callback";
+    private readonly string _clientId = "3789025674735518";
+    private readonly string _redirectUri = "http://localhost:7891/callback";
 
     private const string AuthEndpoint = "https://www.facebook.com/v21.0/dialog/oauth";
     private const string TokenEndpoint = "https://graph.facebook.com/v21.0/oauth/access_token";
@@ -27,12 +30,8 @@ public class FacebookOAuth
 
     private static readonly string[] _scopes =
     {
-            "public_profile",
-            "email",
-            "pages_show_list",
-            "pages_manage_posts",
-            "offline_access"
-        };
+        "public_profile",
+    };
 
     public FacebookOAuth(ILogService logger, StateService stateservice)
     {
@@ -50,7 +49,7 @@ public class FacebookOAuth
         // Inget token sparat → starta full login
         if (token == null)
         {
-            _logger.Log("No existing Facebook token, starting authorization...");
+            _logger?.Log("No existing Facebook token, starting authorization...");
 
             // 1️⃣ Skapa code verifier/challenge
             var codeVerifier = GenerateCodeVerifier();
@@ -61,7 +60,7 @@ public class FacebookOAuth
             OpenBrowser(authUrl);
 
             // 3️⃣ Vänta på redirect med code (t.ex. lokal HTTP listener)
-            var code = await WaitForCodeAsync(_redirectUri);
+            var code = await WaitForCodeAsync();
 
             // 4️⃣ Byt code mot token
             token = await ExchangeCodeForTokenAsync(code, codeVerifier);
@@ -73,14 +72,19 @@ public class FacebookOAuth
         // Token finns → kolla giltighet
         if (!token.IsExpired)
         {
-            _logger.Log("Existing Facebook token is still valid.");
+            _logger?.Log("Existing Facebook token is still valid.");
+            var res = await GetCurrentUserAsync(token); // validera token
+            if(res != null)
+            {
+                token.Username = res.Name;
+            }
             return token;
         }
 
         // Token gått ut → refresh
         if (!string.IsNullOrEmpty(token.AccessToken))
         {
-            _logger.Log("Refreshing Facebook token...");
+            _logger?.Log("Refreshing Facebook token...");
             var refreshed = await RefreshTokenAsync(token);
             _stateService.SerializeToken(Enums.OAuthServices.Facebook, refreshed);
             return refreshed;
@@ -92,35 +96,63 @@ public class FacebookOAuth
     /// <summary>
     /// Startar en enkel HTTP listener på redirectUri och väntar på "code" i querystring
     /// </summary>
-    public static Task<string> WaitForCodeAsync(string redirectUri)
+    /// <summary>
+    /// Startar en minimal Kestrel-server på localhost för att lyssna på OAuth-redirect.
+    /// Returnerar koden från query-parametern "code".
+    /// </summary>
+    public static Task<string> WaitForCodeAsync(int port = 7891, string callbackPath = "/callback")
     {
         var tcs = new TaskCompletionSource<string>();
-        var uri = new Uri(redirectUri);
-        var listener = new HttpListener();
-        listener.Prefixes.Add($"{uri.Scheme}://{uri.Host}:{uri.Port}/");
-        listener.Start();
 
-        _ = Task.Run(async () =>
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseUrls($"http://localhost:{port}");
+
+        var app = builder.Build();
+
+        app.MapGet(callbackPath, async (context) =>
         {
             try
             {
-                var context = await listener.GetContextAsync();
-                var req = context.Request;
-                var res = context.Response;
+                var query = context.Request.Query;
+                if (!query.ContainsKey("code"))
+                {
+                    context.Response.StatusCode = 400;
+                    await context.Response.WriteAsync("Missing code in query string");
+                    return;
+                }
 
-                var code = req.QueryString["code"];
-                var responseString = "<html><body><h2>You may now close this window</h2></body></html>";
-                var buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
-                res.ContentLength64 = buffer.Length;
-                await res.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-                res.OutputStream.Close();
+                var code = query["code"];
+                var responseHtml = "<html><body><h2>You may now close this window</h2></body></html>";
 
-                listener.Stop();
-                tcs.SetResult(code ?? throw new Exception("Missing code in redirect"));
+                context.Response.ContentType = "text/html";
+                await context.Response.WriteAsync(responseHtml);
+
+                tcs.TrySetResult(code);
             }
             catch (Exception ex)
             {
-                tcs.SetException(ex);
+                tcs.TrySetException(ex);
+            }
+            finally
+            {
+                // Stäng ner servern efter första request
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(100); // kort delay så response hinner skickas
+                    await app.StopAsync();
+                });
+            }
+        });
+
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                app.Run();
+            }
+            catch (Exception ex)
+            {
+                tcs.TrySetException(ex);
             }
         });
 

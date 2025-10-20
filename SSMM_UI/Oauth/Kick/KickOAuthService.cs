@@ -175,7 +175,7 @@ public class KickOAuthService
         catch (Exception ex)
         {
             // Logga eller hantera fel (t.ex. korrupt fil)
-            //_logger.Log($"❌ Error during Kick autologin: {ex.Message}");
+            _logger.Log($"❌ Error during Kick autologin: {ex.Message}");
             return null;
         }
     }

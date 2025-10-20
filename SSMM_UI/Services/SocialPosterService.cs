@@ -10,7 +10,6 @@ public class SocialPosterService
         await SocialPoster.RunPoster(_postMaster, Discord, Facebook, X);
     }
 
-
     private StateService _stateService;
     private ILogService _logService;
     private PostMaster _postMaster;

@@ -9,7 +9,7 @@
 	<StackPanel>
 		<Border Classes="card">
 			<StackPanel>
-				<TextBlock Text="Logins" HorizontalAlignment="Center" Classes="secondary" Margin="0 0 0 5"/>
+				<TextBlock Text="Social Media Logins" HorizontalAlignment="Center" Classes="secondary" Margin="0 0 0 5"/>
 				<Button Content="X" Classes="primary" HorizontalAlignment="Center"
 						Command="{Binding LoginWithXCommand}"/>
 				<TextBlock Text="{Binding XLoginStatus}" Classes="secondary" Margin="0 10 0 0"/>

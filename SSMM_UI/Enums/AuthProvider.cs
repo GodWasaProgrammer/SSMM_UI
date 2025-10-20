@@ -5,5 +5,6 @@ public enum AuthProvider
     Twitch,
     YouTube,
     Kick,
-    X
+    X,
+    Facebook
 }

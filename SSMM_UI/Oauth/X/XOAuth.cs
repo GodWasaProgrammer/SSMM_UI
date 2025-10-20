@@ -1,4 +1,8 @@
-﻿using SSMM_UI.API_Key_Secrets_Loader;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
+using SSMM_UI.API_Key_Secrets_Loader;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
@@ -18,7 +22,7 @@ namespace SSMM_UI.Oauth.X;
 public class XOAuth
 {
     private readonly string _clientId;       // Client ID / API Key
-    private readonly string _redirectUri = "http://127.0.0.1:7890/callback";
+    private readonly string _redirectUri = "http://localhost:7890/callback";
     private readonly HttpClient _http = new();
     private StateService _stateService;
     private ILogService _logger;
@@ -214,59 +218,83 @@ public class XOAuth
     // -------------------------
     // Helper: Launch browser + local HTTP listener for redirect
     // -------------------------
-    private async Task<UriQuery?> LaunchBrowserAndWaitForCallbackAsync(string url, string? expectedState, CancellationToken ct)
+    public async Task<UriQuery?> LaunchBrowserAndWaitForCallbackAsync(string url, string? expectedState, CancellationToken ct)
     {
-        // Starta enkel HttpListener
+        var tcs = new TaskCompletionSource<UriQuery?>();
         var uri = new Uri(_redirectUri);
-        var prefix = $"{uri.Scheme}://{uri.Host}:{uri.Port}/";
-        using var listener = new HttpListener();
-        listener.Prefixes.Add(prefix);
-        listener.Start();
+        var port = uri.Port;
+        var callbackPath = uri.AbsolutePath; // "/callback"
 
-        // öppna webbläsare
-        OpenBrowser(url);
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseUrls($"http://localhost:{port}");
 
-        try
+        var app = builder.Build();
+
+        app.MapGet(callbackPath, async context =>
         {
-            var contextTask = listener.GetContextAsync();
-            using (ct.Register(() => listener.Stop()))
+            try
             {
-                var context = await contextTask.ConfigureAwait(false); // may throw if stopped
-                var req = context.Request;
-                var resp = context.Response;
-
-                // skriv enkel HTML-sida till användaren
-                var responseString = "<html><body><h2>Du kan nu stänga detta fönster.</h2></body></html>";
-                var buffer = Encoding.UTF8.GetBytes(responseString);
-                resp.ContentLength64 = buffer.Length;
-                resp.OutputStream.Write(buffer, 0, buffer.Length);
-                resp.OutputStream.Close();
-
-                // kontrollera state om angivet
-                var q = HttpUtility.ParseQueryString(req.Url.Query);
+                var query = context.Request.Query;
                 var queryDict = new Dictionary<string, string?>();
-                foreach (var k in q.AllKeys)
-                    if (k != null) queryDict[k] = q[k];
+                foreach (var kv in query)
+                {
+                    queryDict[kv.Key] = kv.Value;
+                }
 
                 if (expectedState != null)
                 {
                     if (!queryDict.TryGetValue("state", out var returnedState) || returnedState != expectedState)
                     {
-                        throw new Exception("State mismatch in OAuth callback");
+                        context.Response.StatusCode = 400;
+                        await context.Response.WriteAsync("State mismatch");
+                        tcs.TrySetException(new Exception("State mismatch in OAuth callback"));
+                        return;
                     }
                 }
 
-                return new UriQuery(req.Url, queryDict);
+                // Skriv enkel HTML till användaren
+                var responseHtml = "<html><body><h2>Du kan nu stänga detta fönster.</h2></body></html>";
+                context.Response.ContentType = "text/html";
+                await context.Response.WriteAsync(responseHtml);
+
+                var result = new UriQuery(new Uri(context.Request.GetEncodedUrl()), queryDict);
+                tcs.TrySetResult(result);
             }
-        }
-        catch (HttpListenerException)
+            catch (Exception ex)
+            {
+                tcs.TrySetException(ex);
+            }
+            finally
+            {
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(100); // ge webbläsaren tid att rendera
+                    await app.StopAsync();
+                });
+            }
+        });
+
+        // Öppna webbläsaren
+        OpenBrowser(url);
+
+        // Kör Kestrel i bakgrund
+        _ = Task.Run(async () =>
         {
-            return null;
-        }
-        finally
-        {
-            if (listener.IsListening) listener.Stop();
-        }
+            try
+            {
+                await app.RunAsync();
+            }
+            catch (OperationCanceledException)
+            {
+                tcs.TrySetResult(null);
+            }
+            catch (Exception ex)
+            {
+                tcs.TrySetException(ex);
+            }
+        });
+
+        return await tcs.Task;
     }
 
     // -------------------------
@@ -369,7 +397,7 @@ public class XOAuth
     // -------------------------
     // Inner helper classes
     // -------------------------
-    private class UriQuery
+    public class UriQuery
     {
         public Uri Url { get; }
         public IReadOnlyDictionary<string, string?> Query { get; }

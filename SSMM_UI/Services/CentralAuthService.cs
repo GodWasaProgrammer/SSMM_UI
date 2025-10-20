@@ -31,14 +31,14 @@ public class CentralAuthService
         _kickOauthService = new(_logger, _stateService);
         GoogleAuthService = new(_logger, _stateService);
         XOAuth = new(_logger, _stateService);
-        TwitchService = new (_logger, _stateService);
-        fbAuth = new (_logger, _stateService);
+        TwitchService = new(_logger, _stateService);
+        fbAuth = new(_logger, _stateService);
     }
 
     public async Task<string> FacebookLogin()
     {
         var res = await fbAuth.AuthenticateOrRefreshAsync();
-        if (res!= null)
+        if (res != null)
         {
             return $"✅ Logged in as: {res.Username}";
         }
@@ -184,7 +184,7 @@ public class CentralAuthService
         }
     }
 
-    public async Task<List<AuthResult>> TryAutoLoginXAsync()
+    public async Task<List<AuthResult>> TryAutoLoginSocialMediaAsync()
     {
         var results = new List<AuthResult>();
         try
@@ -193,10 +193,24 @@ public class CentralAuthService
             results.Add(xToken is not null
                 ? new AuthResult(AuthProvider.X, true, xToken.Username, null)
                 : new AuthResult(AuthProvider.X, false, null, "Token was missing or is invalid"));
+            var fbToken = await fbAuth.AuthenticateOrRefreshAsync();
+            results.Add(fbToken is not null
+                ? new AuthResult(AuthProvider.Facebook, true, fbToken.Username, null)
+                : new AuthResult(AuthProvider.Facebook, false, null, "Token was missing or is invalid"));
         }
         catch (Exception ex)
         {
-            results.Add(new AuthResult(AuthProvider.X, false, null, ex.Message));
+            var xResult = results.Find(r => r.Provider == AuthProvider.X);
+            if (xResult == null)
+            {
+                results.Add(new AuthResult(AuthProvider.X, false, null, ex.Message));
+            }
+
+            var fbResult = results.Find(r => r.Provider == AuthProvider.Facebook);
+            if (fbResult == null)
+            {
+                results.Add(new AuthResult(AuthProvider.Facebook, false, null, ex.Message));
+            }
         }
         return results;
     }
