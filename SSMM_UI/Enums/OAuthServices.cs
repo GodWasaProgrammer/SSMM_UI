@@ -5,5 +5,6 @@ public enum OAuthServices
     Twitch,
     Youtube,
     Kick,
-    X
+    X,
+    Facebook
 }

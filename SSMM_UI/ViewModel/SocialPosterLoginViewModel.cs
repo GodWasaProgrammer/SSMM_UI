@@ -18,6 +18,12 @@ public partial class SocialPosterLoginViewModel : ObservableObject
     CentralAuthService _AuthService;
 
     public ICommand LoginWithXCommand => new AsyncRelayCommand(LoginWithX);
+    public ICommand LoginWithFacebook => new AsyncRelayCommand(FacebookLogin);
+
+    public async Task FacebookLogin()
+    {
+        await _AuthService.FacebookLogin();
+    }
     private async Task LoginWithX()
     {
         var result = await _AuthService.LoginWithX();
@@ -25,6 +31,8 @@ public partial class SocialPosterLoginViewModel : ObservableObject
         // Handle result (e.g., update UI or log)
     }
     [ObservableProperty] string xLoginStatus = "Not logged in.";
+    [ObservableProperty] string facebookLoginStatus = "Not logged in.";
+
 
     private async Task AutoLoginIfTokenized()
     {

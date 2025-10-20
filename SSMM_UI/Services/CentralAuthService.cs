@@ -2,6 +2,7 @@
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using SSMM_UI.Enums;
+using SSMM_UI.Oauth.Facebook;
 using SSMM_UI.Oauth.Google;
 using SSMM_UI.Oauth.Kick;
 using SSMM_UI.Oauth.Twitch;
@@ -19,6 +20,7 @@ public class CentralAuthService
     public TwitchDCAuthService TwitchService;
     private readonly KickOAuthService? _kickOauthService;
     private XOAuth XOAuth { get; set; }
+    private FacebookOAuth fbAuth;
     private readonly ILogService _logger;
     private readonly StateService _stateService;
 
@@ -29,7 +31,21 @@ public class CentralAuthService
         _kickOauthService = new(_logger, _stateService);
         GoogleAuthService = new(_logger, _stateService);
         XOAuth = new(_logger, _stateService);
-        TwitchService = new TwitchDCAuthService(_logger, _stateService);
+        TwitchService = new (_logger, _stateService);
+        fbAuth = new (_logger, _stateService);
+    }
+
+    public async Task<string> FacebookLogin()
+    {
+        var res = await fbAuth.AuthenticateOrRefreshAsync();
+        if (res!= null)
+        {
+            return $"✅ Logged in as: {res.Username}";
+        }
+        else
+        {
+            return "❌ Login failed.";
+        }
     }
 
     public async Task<string> LoginWithX()
