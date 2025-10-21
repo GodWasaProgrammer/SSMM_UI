@@ -2,13 +2,10 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
-using SSMM_UI.API_Key_Secrets_Loader;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
@@ -37,6 +34,12 @@ public class XOAuth
     public async Task<XToken> AuthenticateOrRefreshAsync()
     {
         var token = _stateService.DeserializeToken<XToken>(Enums.OAuthServices.X);
+        if(token.IsValid)
+        {
+            _logger.Log("Existing X token is valid.");
+            return token;
+        }
+
         if (token == null)
         {
             _logger.Log("No existing X token found, starting authorization...");

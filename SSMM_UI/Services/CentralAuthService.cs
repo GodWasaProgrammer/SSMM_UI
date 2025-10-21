@@ -54,12 +54,6 @@ public class CentralAuthService
         {
             throw new Exception("XOAuth was null!");
         }
-        var scopes = new[] {
-        "tweet.read",
-        "tweet.write",   // ← krävs för POST /2/tweets och DELETE /2/tweets/:id
-        "users.read",
-        "offline.access" // ← (valfritt) för att få en refresh_token
-        };
         var loginResult = await XOAuth.AuthenticateOrRefreshAsync();
 
         if (loginResult != null)

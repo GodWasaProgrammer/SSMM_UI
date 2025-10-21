@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Text;
 using Tweetinvi.Core.Web;
-using Tweetinvi.Models;
 using Tweetinvi;
 using System.Threading.Tasks;
 using System.Net.Http;

@@ -128,17 +128,20 @@ public class TwitchDCAuthService
     public async Task<TwitchTokenTokenResponse?> TryLoadValidOrRefreshTokenAsync()
     {
         var token = _stateService.DeserializeToken<TwitchTokenTokenResponse>(OAuthServices.Twitch);
-        if (token is not null)
+        if (token.IsValid)
         {
-            // if internet is missing this needs to fail
-            var CheckInterWebz = await GetUsernameAsync(token.AccessToken);
-            if (CheckInterWebz != null)
+            if (token is not null)
             {
-                AuthResult = token;
-            }
-            else
-            {
-                return null;
+                // if internet is missing this needs to fail
+                var CheckInterWebz = await GetUsernameAsync(token.AccessToken);
+                if (CheckInterWebz != null)
+                {
+                    AuthResult = token;
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
         if (token == null) return null;

@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using SSMM_UI.Interfaces;
+using SSMM_UI.Poster;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -19,7 +21,7 @@ namespace SSMM_UI.Oauth.Facebook;
 public class FacebookOAuth
 {
     private readonly HttpClient _http = new();
-    private readonly string _clientId = "3789025674735518";
+    private readonly string _clientId = "1684960759068438";
     private readonly string _redirectUri = "http://localhost:7891/callback";
 
     private const string AuthEndpoint = "https://www.facebook.com/v21.0/dialog/oauth";
@@ -31,6 +33,9 @@ public class FacebookOAuth
     private static readonly string[] _scopes =
     {
         "public_profile",
+        "pages_show_list",
+        "pages_read_engagement",
+        "pages_manage_posts"
     };
 
     public FacebookOAuth(ILogService logger, StateService stateservice)
@@ -39,13 +44,60 @@ public class FacebookOAuth
         _stateService = stateservice;
     }
 
+    public async Task<List<FacebookPage>> RequestPagesAsync(FacebookToken userToken)
+    {
+        var pages = new List<FacebookPage>();
+
+        try
+        {
+            if (string.IsNullOrEmpty(userToken.AccessToken))
+                throw new Exception("Missing user access token.");
+
+            using var http = new HttpClient();
+            var url = $"https://graph.facebook.com/v21.0/me/accounts?access_token={userToken.AccessToken}";
+
+            var resp = await http.GetAsync(url);
+            var body = await resp.Content.ReadAsStringAsync();
+
+            if (!resp.IsSuccessStatusCode)
+                throw new Exception($"Facebook /me/accounts failed: {resp.StatusCode}\n{body}");
+
+            using var doc = JsonDocument.Parse(body);
+            var data = doc.RootElement.GetProperty("data");
+
+            foreach (var page in data.EnumerateArray())
+            {
+                var pageInfo = new FacebookPage
+                {
+                    Id = page.GetProperty("id").GetString() ?? "",
+                    Name = page.GetProperty("name").GetString() ?? "",
+                    AccessToken = page.GetProperty("access_token").GetString() ?? ""
+                };
+
+                pages.Add(pageInfo);
+
+                Console.WriteLine($"✅ Page: {pageInfo.Name} ({pageInfo.Id})");
+            }
+
+            if (pages.Count == 0)
+                Console.WriteLine("⚠️ No Facebook pages found for this user. Make sure they are an admin.");
+
+            return pages;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ RequestPagesAsync failed: {ex.Message}");
+            return pages;
+        }
+    }
+
     /// <summary>
     /// Hög nivå login/metod: authenticate eller refresh token automatiskt.
     /// </summary>
     public async Task<FacebookToken> AuthenticateOrRefreshAsync()
     {
         var token = _stateService.DeserializeToken<FacebookToken>(Enums.OAuthServices.Facebook);
-
+        
         // Inget token sparat → starta full login
         if (token == null)
         {
@@ -74,7 +126,7 @@ public class FacebookOAuth
         {
             _logger?.Log("Existing Facebook token is still valid.");
             var res = await GetCurrentUserAsync(token); // validera token
-            if(res != null)
+            if (res != null)
             {
                 token.Username = res.Name;
             }
@@ -310,4 +362,11 @@ public class FacebookOAuth
 
         return JsonSerializer.Deserialize<FacebookUser>(body);
     }
+}
+
+public class FacebookPage
+{
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string AccessToken { get; set; } = "";
 }
