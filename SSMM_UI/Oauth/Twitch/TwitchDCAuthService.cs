@@ -18,7 +18,7 @@ public class TwitchDCAuthService
     private const string TokenAdress = "https://id.twitch.tv/oauth2/token";
     public readonly string _clientId = "y1cd8maguk5ob1m3lwvhdtupbj6pm3";
     private const string ApiBaseUrl = "https://api.twitch.tv/helix";
-    private TwitchTokenTokenResponse? _authResult;
+    private TwitchTokenToken? _authResult;
     private readonly ILogService _logger;
     private readonly StateService _stateService;
     public TwitchDCAuthService(ILogService logger, StateService stateService)
@@ -27,7 +27,7 @@ public class TwitchDCAuthService
         _httpClient = new HttpClient();
         _stateService = stateService;
     }
-    public TwitchTokenTokenResponse? AuthResult
+    public TwitchTokenToken? AuthResult
     {
         get => _authResult;
         set
@@ -88,7 +88,7 @@ public class TwitchDCAuthService
         return result!;
     }
 
-    public async Task<TwitchTokenTokenResponse?> RefreshAccessTokenAsync(string refreshToken)
+    public async Task<TwitchTokenToken?> RefreshAccessTokenAsync(string refreshToken)
     {
         var content = new FormUrlEncodedContent(
         [
@@ -103,7 +103,7 @@ public class TwitchDCAuthService
         if (!response.IsSuccessStatusCode)
         {
             _logger.Log($"⚠️ Refresh failed: {response.StatusCode}\n{responseBody}");
-            var errorToken = new TwitchTokenTokenResponse
+            var errorToken = new TwitchTokenToken
             {
                 ErrorMessage = $"⚠️ Refresh failed: {response.StatusCode}\n{responseBody}"
             };
@@ -113,7 +113,7 @@ public class TwitchDCAuthService
             return errorToken;
         }
 
-        var token = JsonSerializer.Deserialize<TwitchTokenTokenResponse>(responseBody);
+        var token = JsonSerializer.Deserialize<TwitchTokenToken>(responseBody);
         if (token is not null)
         {
             token.ExpiresAt = DateTime.UtcNow.AddSeconds(token.ExpiresIn);
@@ -125,9 +125,9 @@ public class TwitchDCAuthService
         return token!;
     }
 
-    public async Task<TwitchTokenTokenResponse?> TryLoadValidOrRefreshTokenAsync()
+    public async Task<TwitchTokenToken?> TryLoadValidOrRefreshTokenAsync()
     {
-        var token = _stateService.DeserializeToken<TwitchTokenTokenResponse>(OAuthServices.Twitch);
+        var token = _stateService.DeserializeToken<TwitchTokenToken>(OAuthServices.Twitch);
         if (token.IsValid)
         {
             if (token is not null)
@@ -171,7 +171,7 @@ public class TwitchDCAuthService
     }
 
 
-    public async Task<TwitchTokenTokenResponse?> PollForTokenAsync(string deviceCode, int intervalSeconds, int maxWaitSeconds = 300)
+    public async Task<TwitchTokenToken?> PollForTokenAsync(string deviceCode, int intervalSeconds, int maxWaitSeconds = 300)
     {
         int elapsed = 0;
 
@@ -192,7 +192,7 @@ public class TwitchDCAuthService
 
             if (response.IsSuccessStatusCode)
             {
-                var token = await response.Content.ReadFromJsonAsync<TwitchTokenTokenResponse>();
+                var token = await response.Content.ReadFromJsonAsync<TwitchTokenToken>();
 
                 if (token != null)
                 {

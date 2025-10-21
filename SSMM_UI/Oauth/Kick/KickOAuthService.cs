@@ -20,7 +20,7 @@ public class KickOAuthService
     private const string OAuthBaseUrl = "https://id.kick.com";
     private const string RedirectUri = "http://localhost:12345/callback/";
     private const string ClientID = "01K1N4MW57X4G7Q50G7ZS6CA9Y";
-    private KickAuthResult? _kickAuthResult;
+    private KickToken? _kickAuthResult;
     private readonly StateService _stateService;
 
     public static string GetClientId()
@@ -66,7 +66,7 @@ public class KickOAuthService
         _stateService = stateService;
     }
 
-    public async Task<KickAuthResult> AuthenticateUserAsync(string[] requestedScopes)
+    public async Task<KickToken> AuthenticateUserAsync(string[] requestedScopes)
     {
         try
         {
@@ -118,7 +118,7 @@ public class KickOAuthService
         }
     }
 
-    private async Task<KickAuthResult> RefreshTokenAsync(string refreshToken)
+    private async Task<KickToken> RefreshTokenAsync(string refreshToken)
     {
         using var httpClient = new HttpClient();
         var content = new FormUrlEncodedContent(
@@ -136,7 +136,7 @@ public class KickOAuthService
             throw new Exception($"Refresh-token failed: {response.StatusCode}\n{responseData}");
 
         var tokenData = JsonDocument.Parse(responseData).RootElement;
-        var newToken = new KickAuthResult
+        var newToken = new KickToken
         {
             AccessToken = tokenData.GetProperty("access_token").GetString()!,
             RefreshToken = tokenData.GetProperty("refresh_token").GetString()!,
@@ -149,11 +149,11 @@ public class KickOAuthService
         return newToken;
     }
 
-    public async Task<KickAuthResult?> IfTokenIsValidLoginAuto()
+    public async Task<KickToken?> IfTokenIsValidLoginAuto()
     {
         try
         {
-            var token = _stateService.DeserializeToken<KickAuthResult>(OAuthServices.Kick);
+            var token = _stateService.DeserializeToken<KickToken>(OAuthServices.Kick);
             if (token == null)
             {
                 return null;
@@ -180,9 +180,9 @@ public class KickOAuthService
         }
     }
 
-    public async Task<KickAuthResult> AuthenticateOrRefreshAsync(string[] scopes)
+    public async Task<KickToken> AuthenticateOrRefreshAsync(string[] scopes)
     {
-        var token = _stateService.DeserializeToken<KickAuthResult>(OAuthServices.Kick);
+        var token = _stateService.DeserializeToken<KickToken>(OAuthServices.Kick);
         if (token != null)
         {
             if (DateTime.UtcNow > token.ExpiresAt)
@@ -255,7 +255,7 @@ public class KickOAuthService
         }
     }
 
-    private async Task<KickAuthResult> ExchangeCodeForTokenAsync(string authCode)
+    private async Task<KickToken> ExchangeCodeForTokenAsync(string authCode)
     {
         if (_currentCodeVerifier != null)
         {
@@ -286,7 +286,7 @@ public class KickOAuthService
                 }
 
                 var tokenData = JsonDocument.Parse(responseData).RootElement;
-                return new KickAuthResult
+                return new KickToken
                 {
                     AccessToken = tokenData.GetProperty("access_token").GetString() ??
                                 throw new Exception("Missing access_token in response"),

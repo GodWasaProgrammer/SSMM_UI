@@ -3,7 +3,7 @@ using SSMM_UI.Interfaces;
 
 namespace SSMM_UI.Oauth.Kick;
 
-public class KickAuthResult : IAuthToken
+public class KickToken : IAuthToken
 {
     public string AccessToken { get; set; } = string.Empty;
     public string RefreshToken { get; set; } = string.Empty;

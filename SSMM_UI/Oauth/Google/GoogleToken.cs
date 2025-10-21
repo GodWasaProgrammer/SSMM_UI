@@ -3,7 +3,7 @@ using System;
 
 namespace SSMM_UI.Oauth.Google;
 
-public class GoogleOauthResult : IAuthToken
+public class GoogleToken : IAuthToken
 {
     public string AccessToken { get; set; } = string.Empty;
     public string RefreshToken { get; set; } = string.Empty;

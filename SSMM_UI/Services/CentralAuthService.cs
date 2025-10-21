@@ -16,11 +16,11 @@ namespace SSMM_UI.Services;
 
 public class CentralAuthService
 {
-    private GoogleOAuthService GoogleAuthService { get; set; }
+    private GoogleAuthService GoogleAuthService { get; set; }
     public TwitchDCAuthService TwitchService;
     private readonly KickOAuthService? _kickOauthService;
-    private XOAuth XOAuth { get; set; }
-    private FacebookOAuth fbAuth;
+    private XAuthService XOAuth { get; set; }
+    private FacebookAuthService fbAuth;
     private readonly ILogService _logger;
     private readonly StateService _stateService;
 
@@ -197,7 +197,7 @@ public class CentralAuthService
     public async Task<(List<AuthResult?>, YouTubeService?)> TryAutoLoginStreamServicesAsync()
     {
         var results = new List<AuthResult>();
-        GoogleOauthResult? GoogleAuthResult = new();
+        GoogleToken? GoogleAuthResult = new();
         YouTubeService? ytService = null;
         try
         {

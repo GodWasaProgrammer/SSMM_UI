@@ -19,7 +19,7 @@ using System.Web;
 
 namespace SSMM_UI.Oauth.Facebook;
 
-public class FacebookOAuth
+public class FacebookAuthService
 {
     private readonly HttpClient _http = new();
     private readonly string _clientId = "1684960759068438";
@@ -39,7 +39,7 @@ public class FacebookOAuth
         "pages_manage_posts"
     };
 
-    public FacebookOAuth(ILogService logger, StateService stateservice)
+    public FacebookAuthService(ILogService logger, StateService stateservice)
     {
         _logger = logger;
         _stateService = stateservice;
@@ -108,7 +108,7 @@ public class FacebookOAuth
         {
             try
             {
-                _logger?.Log("Refreshing X access token");
+                //_logger?.Log("Refreshing X access token");
                 var refreshed = await RefreshTokenAsync(token);
                 if (refreshed != null)
                 {

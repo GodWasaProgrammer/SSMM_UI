@@ -18,7 +18,7 @@ using System.Web;
 
 namespace SSMM_UI.Oauth.X;
 
-public class XOAuth
+public class XAuthService
 {
     private readonly string _clientId;       // Client ID / API Key
     private readonly string _redirectUri = "http://localhost:7890/callback";
@@ -26,7 +26,7 @@ public class XOAuth
     private StateService _stateService;
     private ILogService _logger;
 
-    public XOAuth(ILogService logger, StateService stateservice)
+    public XAuthService(ILogService logger, StateService stateservice)
     {
         _clientId = "TGVNbDAzN0hOY1JLNlBSeVg3ZmU6MTpjaQ";
         _stateService = stateservice;

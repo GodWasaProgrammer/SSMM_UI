@@ -20,7 +20,7 @@ using SSMM_UI.Interfaces;
 
 namespace SSMM_UI.Oauth.Google;
 
-public class GoogleOAuthService
+public class GoogleAuthService
 {
     private const string RedirectUri = "http://localhost:12347/";
     private const string ClientID = "376695458347-d9ieprrigebp9dptdm9asbl33vgg137o.apps.googleusercontent.com";
@@ -28,7 +28,7 @@ public class GoogleOAuthService
     private const string TokenEndpoint = "https://oauth2.googleapis.com/token";
     private const string UserinfoEndpoint = "https://openidconnect.googleapis.com/v1/userinfo";
     private const string _userInfoUrl = "https://openidconnect.googleapis.com/v1/userinfo";
-    private GoogleOauthResult? _oauthResult;
+    private GoogleToken? _oauthResult;
     private static readonly string[] Scopes =
     [
     Oauth2Service.Scope.UserinfoProfile,
@@ -42,7 +42,7 @@ public class GoogleOAuthService
 
     private readonly ILogService _logger;
     private readonly StateService _stateService;
-    public GoogleOAuthService(ILogService logger, StateService stateservice)
+    public GoogleAuthService(ILogService logger, StateService stateservice)
     {
         _logger = logger;
         _stateService = stateservice;
@@ -65,11 +65,11 @@ public class GoogleOAuthService
         }
     }
 
-    public async Task<GoogleOauthResult?> LoginAutoIfTokenized()
+    public async Task<GoogleToken?> LoginAutoIfTokenized()
     {
         try
         {
-            _oauthResult = _stateService.DeserializeToken<GoogleOauthResult>(OAuthServices.Youtube);
+            _oauthResult = _stateService.DeserializeToken<GoogleToken>(OAuthServices.Youtube);
             if (_oauthResult != null)
             {
                 if (DateTime.UtcNow > _oauthResult.ExpiresAt)
@@ -99,10 +99,10 @@ public class GoogleOAuthService
         return _oauthResult;
     }
 
-    public async Task<GoogleOauthResult?> LoginWithYoutube()
+    public async Task<GoogleToken?> LoginWithYoutube()
     {
 
-        _oauthResult = _stateService.DeserializeToken<GoogleOauthResult>(OAuthServices.Youtube);
+        _oauthResult = _stateService.DeserializeToken<GoogleToken>(OAuthServices.Youtube);
         if (_oauthResult != null)
         {
             if (_oauthResult.ExpiresAt > DateTime.UtcNow)
@@ -154,7 +154,7 @@ public class GoogleOAuthService
 
     }
 
-    private static async Task<GoogleOauthResult> RefreshTokenAsync(string refreshToken)
+    private static async Task<GoogleToken> RefreshTokenAsync(string refreshToken)
     {
         using var httpClient = new HttpClient();
         var content = new FormUrlEncodedContent(
@@ -174,7 +174,7 @@ public class GoogleOAuthService
         }
 
         var tokenData = JsonDocument.Parse(responseData).RootElement;
-        var newToken = new GoogleOauthResult
+        var newToken = new GoogleToken
         {
             AccessToken = tokenData.GetProperty("access_token").GetString()
                 ?? throw new Exception("access_token missing in Googles reply"),
@@ -215,7 +215,7 @@ public class GoogleOAuthService
         return $"{OAuthBaseUrl}?{queryString}";
     }
 
-    private async Task<GoogleOauthResult> ExchangeCodeForTokenAsync(string authCode)
+    private async Task<GoogleToken> ExchangeCodeForTokenAsync(string authCode)
     {
         if (string.IsNullOrEmpty(_currentCodeVerifier))
             throw new InvalidOperationException("Code verifier was null. Start auth flow first.");
@@ -265,7 +265,7 @@ public class GoogleOAuthService
             string tokenType = root.TryGetProperty("token_type", out var ttEl) ? ttEl.GetString() ?? "Bearer" : "Bearer";
             string scope = root.TryGetProperty("scope", out var sEl) ? sEl.GetString() ?? string.Empty : string.Empty;
 
-            var result = new GoogleOauthResult
+            var result = new GoogleToken
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
@@ -301,7 +301,7 @@ public class GoogleOAuthService
             }
 
             // Spara token lokalt
-            _stateService.SerializeToken<GoogleOauthResult>(OAuthServices.Youtube, result);
+            _stateService.SerializeToken<GoogleToken>(OAuthServices.Youtube, result);
             // Rensa temporära värden så de inte återanvänds
             _currentCodeVerifier = null;
             _currentState = null;
