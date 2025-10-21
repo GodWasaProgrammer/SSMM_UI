@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -45,19 +46,13 @@ public class XOAuth
         }
         if (!string.IsNullOrEmpty(token.RefreshToken))
         {
-            try
+            _logger.Log("Refreshing X access token");
+            var refreshed = await RefreshTokenAsync(token.RefreshToken, _clientId);
+            if (refreshed != null)
             {
-                _logger.Log("Refreshing X access token");
-                var refreshed = await RefreshTokenAsync(token.RefreshToken, _clientId);
-                if (refreshed != null)
-                {
-                    _stateService.SerializeToken(Enums.OAuthServices.X, refreshed);
-                    return refreshed;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Log($"Refresh Failed{ex.Message}");
+                _stateService.SerializeToken(Enums.OAuthServices.X, refreshed);
+                return refreshed;
+
             }
         }
         return null;
@@ -69,15 +64,15 @@ public class XOAuth
     public async Task<XToken?> AuthenticateOrRefreshAsync()
     {
         var token = _stateService.DeserializeToken<XToken>(Enums.OAuthServices.X);
-        if (token.IsValid)
-        {
-            _logger.Log("Existing X token is valid.");
-            return token;
-        }
+        
         if (!string.IsNullOrEmpty(token.RefreshToken))
         {
-            var refreshed = await RefreshTokenAsync(token.RefreshToken,_clientId);
-            return refreshed ?? null;
+            var refreshed = await RefreshTokenAsync(token.RefreshToken, _clientId);
+            if (refreshed != null)
+            {
+                _stateService.SerializeToken(Enums.OAuthServices.X, refreshed);
+                return refreshed;
+            }
         }
 
         _logger.Log("No existing X token found, starting authorization...");
@@ -116,13 +111,14 @@ public class XOAuth
         {
             Content = new FormUrlEncodedContent(form)
         };
+        req.Content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
         req.Headers.Accept.ParseAdd("application/json");
 
         using var resp = await _http.SendAsync(req);
         var body = await resp.Content.ReadAsStringAsync();
 
         if (!resp.IsSuccessStatusCode)
-            throw new Exception($"Token refresh failed: {resp.StatusCode}\n{body}");
+            return null;
 
         try
         {
@@ -139,7 +135,7 @@ public class XOAuth
 
             return refreshedToken;
         }
-        catch (Exception ex) 
+        catch (Exception ex)
         {
             _logger.Log($"Exception in Token refresh for X:{ex.Message}");
         }
