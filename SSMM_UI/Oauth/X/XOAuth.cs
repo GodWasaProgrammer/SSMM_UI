@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using mtanksl.ActionMessageFormat;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
@@ -30,43 +31,64 @@ public class XOAuth
         _stateService = stateservice;
         _logger = logger;
     }
-
-    public async Task<XToken> AuthenticateOrRefreshAsync()
+    /// <summary>
+    /// auto login only
+    /// </summary>
+    /// <returns>valid token if success, otherwise null</returns>
+    public async Task<XToken?> TryUseExistingTokenAsync()
     {
         var token = _stateService.DeserializeToken<XToken>(Enums.OAuthServices.X);
-        if(token.IsValid)
+
+        if (token == null)
+        {
+            return null;
+        }
+        if (!string.IsNullOrEmpty(token.RefreshToken))
+        {
+            try
+            {
+                _logger.Log("Refreshing X access token");
+                var refreshed = await RefreshTokenAsync(token.RefreshToken, _clientId);
+                if (refreshed != null)
+                {
+                    _stateService.SerializeToken(Enums.OAuthServices.X, refreshed);
+                    return refreshed;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log($"Refresh Failed{ex.Message}");
+            }
+        }
+        return null;
+    }
+    /// <summary>
+    /// Refreshes or starts the PKCE auth flow
+    /// </summary>
+    /// <returns>The PKCE result in token form, null if refresh failed</returns>
+    public async Task<XToken?> AuthenticateOrRefreshAsync()
+    {
+        var token = _stateService.DeserializeToken<XToken>(Enums.OAuthServices.X);
+        if (token.IsValid)
         {
             _logger.Log("Existing X token is valid.");
             return token;
         }
-
-        if (token == null)
+        if (!string.IsNullOrEmpty(token.RefreshToken))
         {
-            _logger.Log("No existing X token found, starting authorization...");
-            var scopes = new[] {
+            var refreshed = await RefreshTokenAsync(token.RefreshToken,_clientId);
+            return refreshed ?? null;
+        }
+
+        _logger.Log("No existing X token found, starting authorization...");
+        var scopes = new[] {
                 "tweet.read",
                 "tweet.write",   // ← krävs för POST /2/tweets och DELETE /2/tweets/:id
                 "users.read",
                 "offline.access" // ← (valfritt) för att få en refresh_token
             };
-            token = await AuthorizeWithPkceAsync(scopes, 60);
-            if (token == null)
-            {
-                throw new Exception("X OAuth authorization failed.");
-            }
-            return token;
-        }
-        else if (!string.IsNullOrEmpty(token.RefreshToken))
-        {
-            _logger.Log("Refreshing X access token...");
-            token = await RefreshTokenAsync(token.RefreshToken, _clientId);
-            _stateService.SerializeToken(Enums.OAuthServices.X, token);
-            return token;
-        }
-        else
-        {
-            throw new Exception("X OAuth token expired and no refresh token available.");
-        }
+        token = await AuthorizeWithPkceAsync(scopes, 60);
+        return token;
     }
 
     /// <summary>
@@ -75,7 +97,7 @@ public class XOAuth
     /// <param name="refreshToken">Refresh token som du tidigare fått från X.</param>
     /// <param name="clientId">Din OAuth 2.0 Client ID.</param>
     /// <returns>Ny XToken med uppdaterad access-token och expiry.</returns>
-    public async Task<XToken> RefreshTokenAsync(string refreshToken, string clientId)
+    public async Task<XToken?> RefreshTokenAsync(string refreshToken, string clientId)
     {
         if (string.IsNullOrWhiteSpace(refreshToken))
             throw new ArgumentException("Refresh token is required.", nameof(refreshToken));
@@ -102,18 +124,26 @@ public class XOAuth
         if (!resp.IsSuccessStatusCode)
             throw new Exception($"Token refresh failed: {resp.StatusCode}\n{body}");
 
-        // Deserialisera till XToken
-        var refreshedToken = JsonSerializer.Deserialize<XToken>(body);
-        if (refreshedToken == null)
-            throw new Exception("Failed to deserialize refreshed token.");
+        try
+        {
+            // Deserialisera till XToken
+            var refreshedToken = JsonSerializer.Deserialize<XToken>(body);
+            if (refreshedToken == null)
+                throw new Exception("Failed to deserialize refreshed token.");
 
-        refreshedToken.CreatedAt = DateTimeOffset.UtcNow;
+            refreshedToken.CreatedAt = DateTimeOffset.UtcNow;
 
-        // Hämta användarinformation direkt efter refresh
-        var user = await GetCurrentUserAsync(refreshedToken);
-        refreshedToken.Username = user?.Username;
+            // Hämta användarinformation direkt efter refresh
+            var user = await GetCurrentUserAsync(refreshedToken);
+            refreshedToken.Username = user?.Username;
 
-        return refreshedToken;
+            return refreshedToken;
+        }
+        catch (Exception ex) 
+        {
+            _logger.Log($"Exception in Token refresh for X:{ex.Message}");
+        }
+        return null;
     }
 
     // -------------------------

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using SSMM_UI.Interfaces;
+using SSMM_UI.Oauth.X;
 using SSMM_UI.Poster;
 using SSMM_UI.Services;
 using System;
@@ -92,57 +93,94 @@ public class FacebookOAuth
     }
 
     /// <summary>
+    /// Only For Auto Login
+    /// </summary>
+    /// <returns></returns>
+    public async Task<FacebookToken?> TryUseExistingTokenAsync()
+    {
+        var token = _stateService.DeserializeToken<FacebookToken>(Enums.OAuthServices.Facebook);
+
+        if (token == null)
+        {
+            return null;
+        }
+        if (!string.IsNullOrEmpty(token.RefreshToken))
+        {
+            try
+            {
+                _logger?.Log("Refreshing X access token");
+                var refreshed = await RefreshTokenAsync(token);
+                if (refreshed != null)
+                {
+                    _stateService.SerializeToken(Enums.OAuthServices.X, refreshed);
+
+                    return refreshed;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.Log($"Refresh Failed{ex.Message}");
+            }
+        }
+        var fbuser = await GetCurrentUserAsync(token);
+        if (fbuser != null)
+        {
+            token.Username = fbuser.Name;
+            return token;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Hög nivå login/metod: authenticate eller refresh token automatiskt.
     /// </summary>
     public async Task<FacebookToken> AuthenticateOrRefreshAsync()
     {
         var token = _stateService.DeserializeToken<FacebookToken>(Enums.OAuthServices.Facebook);
-        
-        // Inget token sparat → starta full login
-        if (token == null)
+
+        if (token != null)
         {
-            _logger?.Log("No existing Facebook token, starting authorization...");
-
-            // 1️⃣ Skapa code verifier/challenge
-            var codeVerifier = GenerateCodeVerifier();
-            var codeChallenge = GenerateCodeChallenge(codeVerifier);
-
-            // 2️⃣ Generera auth-url
-            var authUrl = GetAuthorizationUrl(codeChallenge);
-            OpenBrowser(authUrl);
-
-            // 3️⃣ Vänta på redirect med code (t.ex. lokal HTTP listener)
-            var code = await WaitForCodeAsync();
-
-            // 4️⃣ Byt code mot token
-            token = await ExchangeCodeForTokenAsync(code, codeVerifier);
-            _stateService.SerializeToken(Enums.OAuthServices.Facebook, token);
-
-            return token;
-        }
-
-        // Token finns → kolla giltighet
-        if (!token.IsExpired)
-        {
-            _logger?.Log("Existing Facebook token is still valid.");
-            var res = await GetCurrentUserAsync(token); // validera token
-            if (res != null)
+            // Token finns → kolla giltighet
+            if (!token.IsExpired)
             {
-                token.Username = res.Name;
+                _logger?.Log("Existing Facebook token is still valid.");
+                var res = await GetCurrentUserAsync(token); // validera token
+                if (res != null)
+                {
+                    token.Username = res.Name;
+                }
+                return token;
             }
-            return token;
+            // Token gått ut → refresh
+            if (!string.IsNullOrEmpty(token.AccessToken))
+            {
+                _logger?.Log("Refreshing Facebook token...");
+                var refreshed = await RefreshTokenAsync(token);
+                _stateService.SerializeToken(Enums.OAuthServices.Facebook, refreshed);
+                return refreshed;
+            }
         }
+        _logger?.Log("No existing Facebook token, starting authorization...");
 
-        // Token gått ut → refresh
-        if (!string.IsNullOrEmpty(token.AccessToken))
-        {
-            _logger?.Log("Refreshing Facebook token...");
-            var refreshed = await RefreshTokenAsync(token);
-            _stateService.SerializeToken(Enums.OAuthServices.Facebook, refreshed);
-            return refreshed;
-        }
+        // 1️⃣ Skapa code verifier/challenge
+        var codeVerifier = GenerateCodeVerifier();
+        var codeChallenge = GenerateCodeChallenge(codeVerifier);
 
-        throw new Exception("Facebook token expired and cannot be refreshed.");
+        // 2️⃣ Generera auth-url
+        var authUrl = GetAuthorizationUrl(codeChallenge);
+        OpenBrowser(authUrl);
+
+        // 3️⃣ Vänta på redirect med code (t.ex. lokal HTTP listener)
+        var code = await WaitForCodeAsync();
+
+        // 4️⃣ Byt code mot token
+        token = await ExchangeCodeForTokenAsync(code, codeVerifier);
+        _stateService.SerializeToken(Enums.OAuthServices.Facebook, token);
+
+        return token;
     }
 
     /// <summary>

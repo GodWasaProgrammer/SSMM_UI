@@ -181,31 +181,16 @@ public class CentralAuthService
     public async Task<List<AuthResult>> TryAutoLoginSocialMediaAsync()
     {
         var results = new List<AuthResult>();
-        try
-        {
-            var xToken = await XOAuth.AuthenticateOrRefreshAsync();
-            results.Add(xToken is not null
-                ? new AuthResult(AuthProvider.X, true, xToken.Username, null)
-                : new AuthResult(AuthProvider.X, false, null, "Token was missing or is invalid"));
-            var fbToken = await fbAuth.AuthenticateOrRefreshAsync();
-            results.Add(fbToken is not null
-                ? new AuthResult(AuthProvider.Facebook, true, fbToken.Username, null)
-                : new AuthResult(AuthProvider.Facebook, false, null, "Token was missing or is invalid"));
-        }
-        catch (Exception ex)
-        {
-            var xResult = results.Find(r => r.Provider == AuthProvider.X);
-            if (xResult == null)
-            {
-                results.Add(new AuthResult(AuthProvider.X, false, null, ex.Message));
-            }
 
-            var fbResult = results.Find(r => r.Provider == AuthProvider.Facebook);
-            if (fbResult == null)
-            {
-                results.Add(new AuthResult(AuthProvider.Facebook, false, null, ex.Message));
-            }
-        }
+        var xToken = await XOAuth.TryUseExistingTokenAsync();
+        results.Add(xToken is not null
+            ? new AuthResult(AuthProvider.X, true, xToken.Username, null)
+            : new AuthResult(AuthProvider.X, false, null, "Token was missing or is invalid"));
+        var fbToken = await fbAuth.TryUseExistingTokenAsync();
+        results.Add(fbToken is not null
+            ? new AuthResult(AuthProvider.Facebook, true, fbToken.Username, null)
+            : new AuthResult(AuthProvider.Facebook, false, null, "Token was missing or is invalid"));
+
         return results;
     }
 
