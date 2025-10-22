@@ -128,20 +128,12 @@ public class CentralAuthService
     }
     public async Task<string> LoginWithKick()
     {
-        // Ange vilka scopes du behöver
-        var requestedScopes = new[]
-        {
-        KickOAuthService.Scopes.ChannelWrite,
-        KickOAuthService.Scopes.ChannelRead,
-        KickOAuthService.Scopes.UserRead
-    };
-
         if (_kickOauthService == null)
             return "❌ KickAuthService is not initialized.";
 
         try
         {
-            var result = await _kickOauthService.AuthenticateOrRefreshAsync(requestedScopes);
+            var result = await _kickOauthService.LoginAsync();
 
             if (result != null)
             {
@@ -215,7 +207,7 @@ public class CentralAuthService
             // Kick
             if (_kickOauthService != null)
             {
-                var kickToken = await _kickOauthService.IfTokenIsValidLoginAuto();
+                var kickToken = await _kickOauthService.TryUseExistingTokenAsync();
                 results.Add(kickToken is not null
                     ? new AuthResult(AuthProvider.Kick, true, kickToken.Username, null)
                     : new AuthResult(AuthProvider.Kick, false, null, "Token was missing or is invalid"));
@@ -224,7 +216,7 @@ public class CentralAuthService
         }
         catch (Exception ex)
         {
-            results.Add(new AuthResult(AuthProvider.YouTube, false, null, ex.Message));
+            _logger.Log($"AutoLoginStreamServicesAsync failed: {ex.Message}");
         }
         if (GoogleAuthResult != null)
         {

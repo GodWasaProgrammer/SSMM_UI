@@ -1,4 +1,6 @@
-﻿using SSMM_UI.Enums;
+﻿using HtmlAgilityPack;
+using SSMM_UI.Enums;
+using SSMM_UI.Interfaces;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
@@ -13,9 +15,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-
 namespace SSMM_UI.Oauth.Kick;
-public class KickOAuthService
+public class KickOAuthService : IOAuthService<KickToken>
 {
     private const string OAuthBaseUrl = "https://id.kick.com";
     private const string RedirectUri = "http://localhost:12345/callback/";
@@ -23,38 +24,22 @@ public class KickOAuthService
     private KickToken? _kickAuthResult;
     private readonly StateService _stateService;
 
-    public static string GetClientId()
+    public static string GetClientId() => ClientID;
+    public string GetAccessToken() => _kickAuthResult?.AccessToken ?? string.Empty;
+
+    private static readonly string[] DefaultScopes = new[]
     {
-        return ClientID;
-    }
+        "user:read",
+        "channel:read",
+        "channel:write",
+        "chat:write"
+    };
 
-    public string GetAccessToken()
+    public static string Combine(params string[] scopes)
     {
-        if (_kickAuthResult != null)
-        {
-            return _kickAuthResult.AccessToken;
-        }
-        else
-        {
-            return string.Empty;
-        }
+        return string.Join(" ", scopes);
     }
-
-
-    // Klass för scope-hantering
-    public static class Scopes
-    {
-        public const string UserRead = "user:read";
-        public const string ChannelRead = "channel:read";
-        public const string ChannelWrite = "channel:write";
-        public const string ChatWrite = "chat:write";
-
-        public static string Combine(params string[] scopes)
-        {
-            return string.Join(" ", scopes);
-        }
-    }
-
+    
     private string? _currentCodeVerifier;
     private string? _currentState;
 
@@ -66,8 +51,14 @@ public class KickOAuthService
         _stateService = stateService;
     }
 
-    public async Task<KickToken> AuthenticateUserAsync(string[] requestedScopes)
+    public async Task<KickToken?> LoginAsync()
     {
+        var token = await TryUseExistingTokenAsync();
+        if (token != null)
+        {
+            _kickAuthResult = token;
+            return token;
+        }
         try
         {
             // 1. Generera PKCE-parametrar
@@ -76,7 +67,7 @@ public class KickOAuthService
             _currentState = GenerateRandomString(32);
 
             // 2. Bygg auktoriserings-URL
-            string scope = Scopes.Combine(requestedScopes);
+            string scope = Combine(DefaultScopes);
             string authUrl = $"{OAuthBaseUrl}/oauth/authorize?" +
                            $"response_type=code&" +
                            $"client_id={Uri.EscapeDataString(ClientID)}&" +
@@ -118,7 +109,7 @@ public class KickOAuthService
         }
     }
 
-    private async Task<KickToken> RefreshTokenAsync(string refreshToken)
+    public async Task<KickToken?> RefreshTokenAsync(string refreshToken)
     {
         using var httpClient = new HttpClient();
         var content = new FormUrlEncodedContent(
@@ -148,46 +139,14 @@ public class KickOAuthService
         _stateService.SerializeToken(OAuthServices.Kick, newToken);
         return newToken;
     }
-
-    public async Task<KickToken?> IfTokenIsValidLoginAuto()
-    {
-        try
-        {
-            var token = _stateService.DeserializeToken<KickToken>(OAuthServices.Kick);
-            if (token == null)
-            {
-                return null;
-            }
-
-            if (DateTime.UtcNow > token.ExpiresAt)
-            {
-                // Token har gått ut, försök förnya
-                await RefreshTokenAsync(token.RefreshToken);
-                token.Username = await GetUsernameAsync(token.AccessToken);
-                _kickAuthResult = token;
-                return token;
-            }
-
-            // Token är fortfarande giltig
-            token.Username = await GetUsernameAsync(token.AccessToken);
-            return token;
-        }
-        catch (Exception ex)
-        {
-            // Logga eller hantera fel (t.ex. korrupt fil)
-            _logger.Log($"❌ Error during Kick autologin: {ex.Message}");
-            return null;
-        }
-    }
-
-    public async Task<KickToken> AuthenticateOrRefreshAsync(string[] scopes)
+    public async Task<KickToken?> TryUseExistingTokenAsync()
     {
         var token = _stateService.DeserializeToken<KickToken>(OAuthServices.Kick);
         if (token != null)
         {
             if (DateTime.UtcNow > token.ExpiresAt)
             {
-                return await AuthenticateUserAsync(scopes);
+                return await LoginAsync();
             }
             var res = await GetUsernameAsync(token.AccessToken);
             token.Username = res;
@@ -202,7 +161,7 @@ public class KickOAuthService
         {
             return await RefreshTokenAsync(token.RefreshToken); // Förnya token
         }
-        return await AuthenticateUserAsync(scopes); // Full login om inget funkar
+        return null; // Full login om inget funkar
     }
 
     private async Task<string> ListenForAuthCodeAsync()
@@ -382,9 +341,6 @@ public class KickOAuthService
             throw new Exception($"Failed to open browser: {ex.Message}");
         }
     }
-
-    private static readonly JsonSerializerOptions _jsonoptions = new() { WriteIndented = true };
-
     private static async Task SendBrowserResponse(HttpListenerResponse response, string content)
     {
         var buffer = Encoding.UTF8.GetBytes(content);

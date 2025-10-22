@@ -57,23 +57,15 @@ public class XAuthService : IOAuthService<XToken>
                 return token;
             }
         }
-        
+
         return null;
     }
 
     public async Task<XToken?> LoginAsync()
     {
-        var token = _stateService.DeserializeToken<XToken>(Enums.OAuthServices.X);
-
-        if (!string.IsNullOrEmpty(token.RefreshToken))
-        {
-            var refreshed = await RefreshTokenAsync(token.RefreshToken);
-            if (refreshed != null)
-            {
-                _stateService.SerializeToken(Enums.OAuthServices.X, refreshed);
-                return refreshed;
-            }
-        }
+        var token = await TryUseExistingTokenAsync();
+        if (token != null)
+            return token;
 
         _logger.Log("No existing X token found, starting authorization...");
 

@@ -21,7 +21,6 @@ public class XToken : IAuthToken
     [JsonPropertyName("scope")]
     public string Scope { get; set; } = string.Empty;
 
-    [JsonIgnore]
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
     [JsonIgnore]
