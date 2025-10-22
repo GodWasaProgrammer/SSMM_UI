@@ -4,7 +4,6 @@ using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -15,7 +14,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using SSMM_UI.Enums;
-using Avalonia.Media.TextFormatting.Unicode;
 using SSMM_UI.Interfaces;
 
 namespace SSMM_UI.Oauth.Google;

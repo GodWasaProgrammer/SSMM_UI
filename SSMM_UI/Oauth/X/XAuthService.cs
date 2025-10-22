@@ -206,16 +206,6 @@ public class XAuthService
             Name = user.GetProperty("name").GetString()!
         };
     }
-
-    public class XUser
-    {
-        public string Id { get; set; } = string.Empty;
-        public string Username { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-
-        public override string ToString() => $"{Name} (@{Username})";
-    }
-
     private async Task<JsonDocument?> ExchangePkceCodeForTokenAsync(string code, string codeVerifier)
     {
         var tokenEndpoint = "https://api.twitter.com/2/oauth2/token";
