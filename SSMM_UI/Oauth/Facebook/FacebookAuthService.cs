@@ -1,19 +1,13 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using SSMM_UI.Interfaces;
-using SSMM_UI.Oauth.X;
-using SSMM_UI.Poster;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -400,11 +394,4 @@ public class FacebookAuthService
 
         return JsonSerializer.Deserialize<FacebookUser>(body);
     }
-}
-
-public class FacebookPage
-{
-    public string Id { get; set; } = "";
-    public string Name { get; set; } = "";
-    public string AccessToken { get; set; } = "";
 }

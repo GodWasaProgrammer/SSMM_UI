@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
-using mtanksl.ActionMessageFormat;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
@@ -189,7 +188,7 @@ public class XAuthService
     {
         using var http = new HttpClient();
         http.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.AccessToken);
+            new AuthenticationHeaderValue("Bearer", token.AccessToken);
 
         var resp = await http.GetAsync("https://api.x.com/2/users/me");
         var body = await resp.Content.ReadAsStringAsync();
@@ -197,7 +196,7 @@ public class XAuthService
         if (!resp.IsSuccessStatusCode)
             throw new Exception($"Failed to fetch user info: {resp.StatusCode} - {body}");
 
-        var json = System.Text.Json.JsonDocument.Parse(body);
+        var json = JsonDocument.Parse(body);
         var user = json.RootElement.GetProperty("data");
 
         return new XUser
