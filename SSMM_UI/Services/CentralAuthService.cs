@@ -66,13 +66,13 @@ public class CentralAuthService
         }
     }
 
-    public async Task<string> LoginWithTwitch()
+    public async Task<string?> LoginWithTwitch()
     {
         if (TwitchService == null)
         {
             throw new Exception("TwitchService was null!");
         }
-        var IsTokenValid = TwitchService.TryLoadValidOrRefreshTokenAsync();
+        var IsTokenValid = TwitchService.TryUseExistingTokenAsync();
 
         string LoginResult = "";
         if (IsTokenValid.Result != null)
@@ -84,15 +84,7 @@ public class CentralAuthService
         }
         else
         {
-            var device = await TwitchService.StartDeviceCodeFlowAsync();
-
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = device.VerificationUri,
-                UseShellExecute = true
-            });
-            // Visa UI eller vänta medan användaren godkänner
-            var token = await TwitchService.PollForTokenAsync(device.DeviceCode, device.Interval);
+            var token = await TwitchService.LoginAsync();
 
             if (token != null)
             {
@@ -103,7 +95,7 @@ public class CentralAuthService
                 _logger.Log("Timeout - user did not log in");
             }
         }
-        return LoginResult;
+        return null;
     }
     public async Task<(string, YouTubeService? _uTube)> LoginWithYoutube()
     {
@@ -203,7 +195,7 @@ public class CentralAuthService
         {
 
             // Twitch
-            var twitchToken = await TwitchService.TryLoadValidOrRefreshTokenAsync();
+            var twitchToken = await TwitchService.TryUseExistingTokenAsync();
 
             if (twitchToken != null)
             {

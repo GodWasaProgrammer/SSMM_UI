@@ -5,7 +5,7 @@ using SSMM_UI.Interfaces;
 
 namespace SSMM_UI.Oauth.Twitch;
 
-public class TwitchTokenToken : IAuthToken
+public class TwitchToken : IAuthToken
 {
     [JsonPropertyName("access_token")]
     public string AccessToken { get; set; } = "";
