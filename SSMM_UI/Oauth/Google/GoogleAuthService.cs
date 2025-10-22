@@ -20,7 +20,7 @@ using SSMM_UI.Interfaces;
 
 namespace SSMM_UI.Oauth.Google;
 
-public class GoogleAuthService
+public class GoogleAuthService : IOAuthService<GoogleToken>
 {
     private const string RedirectUri = "http://localhost:12347/";
     private const string ClientID = "376695458347-d9ieprrigebp9dptdm9asbl33vgg137o.apps.googleusercontent.com";
@@ -48,74 +48,29 @@ public class GoogleAuthService
         _stateService = stateservice;
     }
 
-    public static string GetClientId()
+    public async Task<GoogleToken?> TryUseExistingTokenAsync()
     {
-        return ClientID;
-    }
-
-    public string GetAccessToken()
-    {
-        if (_oauthResult != null)
-        {
-            return _oauthResult.AccessToken;
-        }
-        else
-        {
-            return "";
-        }
-    }
-
-    public async Task<GoogleToken?> LoginAutoIfTokenized()
-    {
-        try
-        {
-            _oauthResult = _stateService.DeserializeToken<GoogleToken>(OAuthServices.Youtube);
-            if (_oauthResult != null)
-            {
-                if (DateTime.UtcNow > _oauthResult.ExpiresAt)
-                {
-                    // token has passed check if we can refresh
-                    await RefreshTokenAsync(_oauthResult.RefreshToken);
-                }
-                var username = await GetUsernameAsync(_oauthResult.AccessToken);
-                if (username != null)
-                {
-                    if(username.Contains("Failed", StringComparison.OrdinalIgnoreCase))
-                    {
-                        _oauthResult = null;
-                        return _oauthResult;
-                    }
-
-                    _oauthResult.Username = username;
-                }
-                return _oauthResult;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.Log(ex.Message);
-            return null;
-        }
-        return _oauthResult;
-    }
-
-    public async Task<GoogleToken?> LoginWithYoutube()
-    {
-
         _oauthResult = _stateService.DeserializeToken<GoogleToken>(OAuthServices.Youtube);
         if (_oauthResult != null)
         {
-            if (_oauthResult.ExpiresAt > DateTime.UtcNow)
+            var res = await RefreshTokenAsync(_oauthResult.RefreshToken);
+            if (res is null)
             {
-                // token has passed check if we can refresh
-                await RefreshTokenAsync(_oauthResult.RefreshToken);
-                _oauthResult.Username = await GetUsernameAsync(_oauthResult.AccessToken);
+                return null;
+            }
+            _oauthResult = res;
+            var username = await GetUsernameAsync(_oauthResult.AccessToken);
+            if (username != null)
+            {
+                _oauthResult.Username = username;
                 return _oauthResult;
             }
-
         }
+        return null;
+    }
 
-
+    public async Task<GoogleToken?> LoginAsync()
+    {
         var (codeVerifier, codeChallenge) = GeneratePkceParameters();
         _currentCodeVerifier = codeVerifier;
         _currentState = GenerateRandomString(32);
@@ -125,36 +80,40 @@ public class GoogleAuthService
         OpenBrowser(AuthUrl);
 
         // listen for callback
-        string authCode = await ListenForAuthCodeAsync();
-        if (string.IsNullOrEmpty(authCode))
+        try
         {
-            throw new Exception("No authorization code received!");
-        }
-
-        if (authCode != null)
-        {
-            _oauthResult = await ExchangeCodeForTokenAsync(authCode);
-            if (_oauthResult == null)
+            string authCode = await ListenForAuthCodeAsync();
+            if (string.IsNullOrEmpty(authCode))
             {
-                throw new Exception("We failed the fetch the token for Google");
+                throw new Exception("No authorization code received!");
             }
-            else
+
+            if (authCode != null)
             {
-                _oauthResult.Username = await GetUsernameAsync(_oauthResult.AccessToken);
+                _oauthResult = await ExchangeCodeForTokenAsync(authCode);
+                if (_oauthResult == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    var res = await GetUsernameAsync(_oauthResult.AccessToken);
+                    if (res != null)
+                    {
+                        _oauthResult.Username = res;
+                        return _oauthResult;
+                    }
+                }
             }
         }
-        if (_oauthResult != null)
+        catch (Exception ex)
         {
-
-            return _oauthResult;
-
+            _logger.Log($"Google Auth Flow Failed:{ex.Message}");
         }
-        else
-            return _oauthResult;
-
+        return null;
     }
-
-    private static async Task<GoogleToken> RefreshTokenAsync(string refreshToken)
+    
+    public async Task<GoogleToken?> RefreshTokenAsync(string refreshToken)
     {
         using var httpClient = new HttpClient();
         var content = new FormUrlEncodedContent(
@@ -169,8 +128,7 @@ public class GoogleAuthService
 
         if (!response.IsSuccessStatusCode)
         {
-            // we have failed to refresh token, do full login
-            throw new Exception($"Google refresh-token failed: {response.StatusCode}\n{responseData}");
+            return null;
         }
 
         var tokenData = JsonDocument.Parse(responseData).RootElement;
@@ -185,9 +143,6 @@ public class GoogleAuthService
             ExpiresAt = DateTime.UtcNow.AddSeconds(tokenData.GetProperty("expires_in").GetInt32()),
             Scope = tokenData.GetProperty("scope").GetString() ?? string.Empty
         };
-
-        //SaveToken(newToken);
-
         return newToken;
     }
 
@@ -314,7 +269,7 @@ public class GoogleAuthService
         }
     }
 
-    private async Task<string> GetUsernameAsync(string accessToken)
+    private async Task<string?> GetUsernameAsync(string accessToken)
     {
         try
         {
@@ -327,7 +282,7 @@ public class GoogleAuthService
 
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"User info request failed: {response.StatusCode}\n{responseData}");
+                return null;
             }
 
             var json = JsonDocument.Parse(responseData).RootElement;

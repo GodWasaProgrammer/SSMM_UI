@@ -46,7 +46,6 @@ public class XAuthService
         }
         if (!string.IsNullOrEmpty(token.RefreshToken))
         {
-            _logger.Log("Refreshing X access token");
             var refreshed = await RefreshTokenAsync(token.RefreshToken, _clientId);
             if (refreshed != null)
             {

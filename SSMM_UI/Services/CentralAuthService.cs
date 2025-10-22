@@ -118,7 +118,7 @@ public class CentralAuthService
             }
             else
             {
-                var res = await GoogleAuthService.LoginWithYoutube();
+                var res = await GoogleAuthService.LoginAsync();
                 if (res != null)
                 {
                     username = res.Username;
@@ -225,7 +225,7 @@ public class CentralAuthService
             }
 
             // Google/YouTube
-            GoogleAuthResult = await GoogleAuthService.LoginAutoIfTokenized();
+            GoogleAuthResult = await GoogleAuthService.TryUseExistingTokenAsync();
             results.Add(GoogleAuthResult is not null
                 ? new AuthResult(AuthProvider.YouTube, true, GoogleAuthResult.Username, null)
                 : new AuthResult(AuthProvider.YouTube, false, null, "Token was missing or is invalid"));
