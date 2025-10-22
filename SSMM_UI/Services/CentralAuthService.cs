@@ -72,19 +72,16 @@ public class CentralAuthService
         {
             throw new Exception("TwitchService was null!");
         }
-        var IsTokenValid = TwitchService.TryUseExistingTokenAsync();
+        var token = await TwitchService.TryUseExistingTokenAsync();
 
         string LoginResult = "";
-        if (IsTokenValid.Result != null)
+        if (token != null)
         {
-            if (IsTokenValid.Result != null)
-            {
-                LoginResult = ($"✅ Logged in as: {IsTokenValid.Result.Username}");
-            }
+            LoginResult = ($"✅ Logged in as: {token.Username}");
         }
         else
         {
-            var token = await TwitchService.LoginAsync();
+            token = await TwitchService.LoginAsync();
 
             if (token != null)
             {
