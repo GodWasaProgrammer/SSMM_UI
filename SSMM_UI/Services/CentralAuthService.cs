@@ -54,7 +54,7 @@ public class CentralAuthService
         {
             throw new Exception("XOAuth was null!");
         }
-        var loginResult = await XOAuth.AuthenticateOrRefreshAsync();
+        var loginResult = await XOAuth.LoginAsync();
 
         if (loginResult != null)
         {

@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using SSMM_UI.Interfaces;
+using SSMM_UI.Oauth.Google;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
@@ -17,24 +19,26 @@ using System.Web;
 
 namespace SSMM_UI.Oauth.X;
 
-public class XAuthService
+public class XAuthService : IOAuthService<XToken>
 {
-    private readonly string _clientId;       // Client ID / API Key
+    private readonly string _clientId = "TGVNbDAzN0hOY1JLNlBSeVg3ZmU6MTpjaQ";     // Client ID / API Key
     private readonly string _redirectUri = "http://localhost:7890/callback";
     private readonly HttpClient _http = new();
     private StateService _stateService;
     private ILogService _logger;
+    private readonly string[] _scopes = [
+                "tweet.read",
+                "tweet.write",
+                "users.read",
+                "offline.access"
+            ];
 
     public XAuthService(ILogService logger, StateService stateservice)
     {
-        _clientId = "TGVNbDAzN0hOY1JLNlBSeVg3ZmU6MTpjaQ";
         _stateService = stateservice;
         _logger = logger;
     }
-    /// <summary>
-    /// auto login only
-    /// </summary>
-    /// <returns>valid token if success, otherwise null</returns>
+
     public async Task<XToken?> TryUseExistingTokenAsync()
     {
         var token = _stateService.DeserializeToken<XToken>(Enums.OAuthServices.X);
@@ -45,7 +49,7 @@ public class XAuthService
         }
         if (!string.IsNullOrEmpty(token.RefreshToken))
         {
-            var refreshed = await RefreshTokenAsync(token.RefreshToken, _clientId);
+            var refreshed = await RefreshTokenAsync(token.RefreshToken);
             if (refreshed != null)
             {
                 _stateService.SerializeToken(Enums.OAuthServices.X, refreshed);
@@ -55,17 +59,14 @@ public class XAuthService
         }
         return null;
     }
-    /// <summary>
-    /// Refreshes or starts the PKCE auth flow
-    /// </summary>
-    /// <returns>The PKCE result in token form, null if refresh failed</returns>
-    public async Task<XToken?> AuthenticateOrRefreshAsync()
+
+    public async Task<XToken?> LoginAsync()
     {
         var token = _stateService.DeserializeToken<XToken>(Enums.OAuthServices.X);
-        
+
         if (!string.IsNullOrEmpty(token.RefreshToken))
         {
-            var refreshed = await RefreshTokenAsync(token.RefreshToken, _clientId);
+            var refreshed = await RefreshTokenAsync(token.RefreshToken);
             if (refreshed != null)
             {
                 _stateService.SerializeToken(Enums.OAuthServices.X, refreshed);
@@ -74,23 +75,12 @@ public class XAuthService
         }
 
         _logger.Log("No existing X token found, starting authorization...");
-        var scopes = new[] {
-                "tweet.read",
-                "tweet.write",   // ← krävs för POST /2/tweets och DELETE /2/tweets/:id
-                "users.read",
-                "offline.access" // ← (valfritt) för att få en refresh_token
-            };
-        token = await AuthorizeWithPkceAsync(scopes, 60);
+
+        token = await AuthorizeWithPkceAsync(_scopes, 60);
         return token;
     }
 
-    /// <summary>
-    /// Uppdaterar access-token med hjälp av refresh-token (PKCE flow).
-    /// </summary>
-    /// <param name="refreshToken">Refresh token som du tidigare fått från X.</param>
-    /// <param name="clientId">Din OAuth 2.0 Client ID.</param>
-    /// <returns>Ny XToken med uppdaterad access-token och expiry.</returns>
-    public async Task<XToken?> RefreshTokenAsync(string refreshToken, string clientId)
+    public async Task<XToken?> RefreshTokenAsync(string refreshToken)
     {
         if (string.IsNullOrWhiteSpace(refreshToken))
             throw new ArgumentException("Refresh token is required.", nameof(refreshToken));
@@ -102,7 +92,7 @@ public class XAuthService
         {
             ["grant_type"] = "refresh_token",
             ["refresh_token"] = refreshToken,
-            ["client_id"] = clientId
+            ["client_id"] = _clientId,
         };
 
         using var req = new HttpRequestMessage(HttpMethod.Post, tokenEndpoint)
