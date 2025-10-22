@@ -72,6 +72,13 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
 
     public async Task<TwitchToken?> LoginAsync()
     {
+        // check if there is a token
+        var token = await TryUseExistingTokenAsync();
+        if (token != null)
+        {
+            return token;
+        }
+        // otherwise we continue with normal login
         var request = new HttpRequestMessage(HttpMethod.Post, DcfApiAdress);
 
         var content = new FormUrlEncodedContent(
@@ -86,36 +93,28 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
         response.EnsureSuccessStatusCode();
 
         var result = await response.Content.ReadFromJsonAsync<TwitchDCResponse>();
-        var IsTokenValid = TryUseExistingTokenAsync();
-        if (IsTokenValid.Result != null)
+
+        if (result != null)
         {
-            return IsTokenValid.Result;
-        }
-        else
-        {
-            if (result != null)
+            Process.Start(new ProcessStartInfo
             {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = result.VerificationUri,
-                    UseShellExecute = true
-                });
-                // Visa UI eller vänta medan användaren godkänner
-                var token = await PollForTokenAsync(result.DeviceCode, result.Interval);
+                FileName = result.VerificationUri,
+                UseShellExecute = true
+            });
 
-                if (token != null)
-                {
-                    return token;
-                }
-                else
-                {
-                    _logger.Log("Timeout - user did not log in");
-                }
+            token = await PollForTokenAsync(result.DeviceCode, result.Interval);
+
+            if (token != null)
+            {
+                return token;
             }
-
-            // login failed.
-            return null;
+            else
+            {
+                _logger.Log("Timeout - user did not log in");
+            }
         }
+        // login failed.
+        return null;
     }
 
     public async Task<TwitchToken?> RefreshTokenAsync(string refreshToken)
@@ -160,18 +159,16 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
         var token = _stateService.DeserializeToken<TwitchToken>(OAuthServices.Twitch);
         if (token != null)
         {
-            if (token is not null)
+            // try to refresh
+            var res = await RefreshTokenAsync(token.RefreshToken);
+            if (res != null)
             {
-                // try to refresh
-                var res = await RefreshTokenAsync(token.RefreshToken);
-                if(res != null)
-                {
-                    // refresh was successful, return
-                    token = res;
-                    _stateService.SerializeToken(OAuthServices.Twitch, token);
-                    return token;
-                }
+                // refresh was successful, return
+                token = res;
+                _stateService.SerializeToken(OAuthServices.Twitch, token);
+                return token;
             }
+
         }
         return null;
     }
@@ -260,7 +257,6 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
     {
         try
         {
-
             using var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             httpClient.DefaultRequestHeaders.Add("Client-Id", _clientId);

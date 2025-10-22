@@ -72,26 +72,19 @@ public class CentralAuthService
         {
             throw new Exception("TwitchService was null!");
         }
-        var token = await TwitchService.TryUseExistingTokenAsync();
 
-        string LoginResult = "";
+        var token = await TwitchService.LoginAsync();
+
         if (token != null)
         {
-            LoginResult = ($"✅ Logged in as: {token.Username}");
+            var LoginResult = ($"✅ Logged in as: {token.Username}");
+            return LoginResult;
         }
         else
         {
-            token = await TwitchService.LoginAsync();
-
-            if (token != null)
-            {
-                LoginResult = ($"✅ Logged in as: {token.Username}");
-            }
-            else
-            {
-                _logger.Log("Timeout - user did not log in");
-            }
+            _logger.Log("Timeout - user did not log in");
         }
+
         return null;
     }
     public async Task<(string, YouTubeService? _uTube)> LoginWithYoutube()
