@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using SSMM_UI.Interfaces;
-using SSMM_UI.Oauth.Google;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
@@ -52,11 +51,13 @@ public class XAuthService : IOAuthService<XToken>
             var refreshed = await RefreshTokenAsync(token.RefreshToken);
             if (refreshed != null)
             {
-                _stateService.SerializeToken(Enums.OAuthServices.X, refreshed);
-                return refreshed;
-
+                token = refreshed;
+                // omit refresh token?
+                _stateService.SerializeToken(Enums.OAuthServices.X, token);
+                return token;
             }
         }
+        
         return null;
     }
 

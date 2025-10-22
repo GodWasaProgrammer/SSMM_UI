@@ -51,7 +51,7 @@ public class GoogleAuthService : IOAuthService<GoogleToken>
         _oauthResult = _stateService.DeserializeToken<GoogleToken>(OAuthServices.Youtube);
         if (_oauthResult != null)
         {
-            var res = await RefreshTokenAsync(_oauthResult.RefreshToken);
+            var res = await RefreshTokenAsync(_oauthResult.AccessToken);
             if (res is null)
             {
                 return null;

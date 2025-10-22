@@ -37,7 +37,7 @@ public class CentralAuthService
 
     public async Task<string> FacebookLogin()
     {
-        var res = await fbAuth.AuthenticateOrRefreshAsync();
+        var res = await fbAuth.LoginAsync();
         if (res != null)
         {
             return $"✅ Logged in as: {res.Username}";
