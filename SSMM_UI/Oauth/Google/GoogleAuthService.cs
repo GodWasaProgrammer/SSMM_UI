@@ -3,15 +3,10 @@ using Google.Apis.YouTube.v3;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using SSMM_UI.Enums;
 using SSMM_UI.Interfaces;
@@ -74,21 +69,18 @@ public class GoogleAuthService : IOAuthService<GoogleToken>
         _currentState = PKCEHelper.RandomString(32);
 
         var AuthUrl = BuildAuthorizationUrl(Scopes, ClientID, RedirectUri, codeChallenge, _currentState);
-
         BrowserHelper.OpenUrlInBrowser(AuthUrl);
 
         // listen for callback
         try
         {
-            string authCode = await ListenForAuthCodeAsync();
-            if (string.IsNullOrEmpty(authCode))
-            {
-                throw new Exception("No authorization code received!");
-            }
-
+            var authCode = await OAuthListenerHelper.WaitForCallbackAsync(RedirectUri, _currentState, default);
             if (authCode != null)
             {
-                _oauthResult = await ExchangeCodeForTokenAsync(authCode);
+                authCode.TryGetValue("code", out string? code);
+                if (string.IsNullOrEmpty(code)) throw new Exception("No authorization code received!");
+
+                _oauthResult = await ExchangeCodeForTokenAsync(code);
                 if (_oauthResult == null)
                 {
                     return null;
@@ -110,7 +102,7 @@ public class GoogleAuthService : IOAuthService<GoogleToken>
         }
         return null;
     }
-    
+
     public async Task<GoogleToken?> RefreshTokenAsync(string refreshToken)
     {
         using var httpClient = new HttpClient();
@@ -304,56 +296,5 @@ public class GoogleAuthService : IOAuthService<GoogleToken>
             _logger.Log(ex.Message);
         }
         return "Failed to get username";
-    }
-
-    private async Task<string> ListenForAuthCodeAsync()
-    {
-        using var listener = new HttpListener();
-        listener.Prefixes.Add(RedirectUri);
-        listener.Start();
-
-        try
-        {
-            using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
-            var context = await listener.GetContextAsync().WaitAsync(cts.Token);
-
-            // Validera state
-            var receivedState = context.Request.QueryString["state"];
-
-            if (receivedState != _currentState)
-            {
-                await SendBrowserResponse(context.Response,
-                    "<html><body>Invalid state-parameter</body></html>");
-                throw new Exception("State doesnt match - potential CSRF-attack");
-            }
-
-            string authCode = context.Request.QueryString["code"]!;
-            await SendBrowserResponse(context.Response,
-                "<html><body> Login successful. You may close this window.</body></html>");
-            if (authCode != null)
-            {
-                return authCode;
-            }
-            else
-            {
-                throw new Exception("we did not receive an auth code");
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            throw new Exception("Login timed out");
-        }
-        finally
-        {
-            listener.Stop();
-        }
-    }
-
-    private static async Task SendBrowserResponse(HttpListenerResponse response, string content)
-    {
-        var buffer = Encoding.UTF8.GetBytes(content);
-        response.ContentLength64 = buffer.Length;
-        await response.OutputStream.WriteAsync(buffer);
-        response.Close();
     }
 }
