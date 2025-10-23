@@ -93,7 +93,6 @@ public class CentralAuthService
         string username;
         try
         {
-
             if (GoogleAuthService == null)
             {
                 throw new Exception("Google Auth Service was null");

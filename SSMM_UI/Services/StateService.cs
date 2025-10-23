@@ -119,7 +119,7 @@ public class StateService
                 _authObjects.Add(service, deserializedobj);
                 OnAuthObjectsUpdated?.Invoke();
             }
-            return JsonSerializer.Deserialize<T>(json, _regularJsonOptions)!;
+            return deserializedobj!;
         }
         catch (Exception ex)
         {

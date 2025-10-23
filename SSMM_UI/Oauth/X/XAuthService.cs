@@ -46,6 +46,7 @@ public class XAuthService : IOAuthService<XToken>
         {
             return null;
         }
+        if (token.IsValid) { return token; }
         if (!string.IsNullOrEmpty(token.RefreshToken))
         {
             var refreshed = await RefreshTokenAsync(token.RefreshToken);
@@ -108,11 +109,9 @@ public class XAuthService : IOAuthService<XToken>
             if (refreshedToken == null)
                 throw new Exception("Failed to deserialize refreshed token.");
 
-            refreshedToken.CreatedAt = DateTimeOffset.UtcNow;
-
             // Hämta användarinformation direkt efter refresh
-            var user = await GetCurrentUserAsync(refreshedToken);
-            refreshedToken.Username = user?.Username;
+            //var user = await GetCurrentUserAsync(refreshedToken);
+            //refreshedToken.Username = user?.Username;
 
             return refreshedToken;
         }

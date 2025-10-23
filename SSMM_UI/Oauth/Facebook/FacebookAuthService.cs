@@ -103,7 +103,7 @@ public class FacebookAuthService : IOAuthService<FacebookToken>
             if (fbuser != null)
             {
                 token.Username = fbuser.Name;
-                _stateService.SerializeToken(Enums.OAuthServices.X, token);
+                _stateService.SerializeToken(Enums.OAuthServices.Facebook, token);
                 return token;
             }
         }

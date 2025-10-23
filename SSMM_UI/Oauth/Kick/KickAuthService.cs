@@ -16,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace SSMM_UI.Oauth.Kick;
+
 public class KickAuthService : IOAuthService<KickToken>
 {
     private const string OAuthBaseUrl = "https://id.kick.com";
@@ -39,7 +40,7 @@ public class KickAuthService : IOAuthService<KickToken>
     {
         return string.Join(" ", scopes);
     }
-    
+
     private string? _currentCodeVerifier;
     private string? _currentState;
 
@@ -56,8 +57,11 @@ public class KickAuthService : IOAuthService<KickToken>
         var token = await TryUseExistingTokenAsync();
         if (token != null)
         {
-            _kickAuthResult = token;
-            return token;
+            if (token.IsValid)
+            {
+                _kickAuthResult = token;
+                return token;
+            }
         }
         try
         {
@@ -124,7 +128,11 @@ public class KickAuthService : IOAuthService<KickToken>
         var responseData = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
-            throw new Exception($"Refresh-token failed: {response.StatusCode}\n{responseData}");
+        {
+            _logger.Log($"Refresh-token failed: {response.StatusCode}\n{responseData}");
+            return null;
+        }
+
 
         var tokenData = JsonDocument.Parse(responseData).RootElement;
         var newToken = new KickToken
@@ -144,24 +152,26 @@ public class KickAuthService : IOAuthService<KickToken>
         var token = _stateService.DeserializeToken<KickToken>(OAuthServices.Kick);
         if (token != null)
         {
-            if (DateTime.UtcNow > token.ExpiresAt)
+            if (token.IsValid)
+            { return token; }
+            else if (!string.IsNullOrEmpty(token.RefreshToken))
             {
-                return await LoginAsync();
+                var newToken = await RefreshTokenAsync(token.RefreshToken);
+                if (newToken != null)
+                {
+                    if (newToken.IsValid)
+                    {
+                        return newToken;
+                    }
+                }
             }
-            var res = await GetUsernameAsync(token.AccessToken);
-            token.Username = res;
+            else
+            {
+                _logger.Log("Existing Kick token is invalid and no refresh token is available.");
+                return null;
+            }
         }
-
-        if (token != null && token.ExpiresAt > DateTime.UtcNow)
-        {
-
-            return token; // Token fortfarande giltig
-        }
-        else if (token?.RefreshToken != null)
-        {
-            return await RefreshTokenAsync(token.RefreshToken); // Förnya token
-        }
-        return null; // Full login om inget funkar
+        return null;
     }
 
     private async Task<string> ListenForAuthCodeAsync()
