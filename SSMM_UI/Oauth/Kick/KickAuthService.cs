@@ -16,7 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace SSMM_UI.Oauth.Kick;
-public class KickOAuthService : IOAuthService<KickToken>
+public class KickAuthService : IOAuthService<KickToken>
 {
     private const string OAuthBaseUrl = "https://id.kick.com";
     private const string RedirectUri = "http://localhost:12345/callback/";
@@ -45,7 +45,7 @@ public class KickOAuthService : IOAuthService<KickToken>
 
     private readonly ILogService _logger;
 
-    public KickOAuthService(ILogService logger, StateService stateService)
+    public KickAuthService(ILogService logger, StateService stateService)
     {
         _logger = logger;
         _stateService = stateService;

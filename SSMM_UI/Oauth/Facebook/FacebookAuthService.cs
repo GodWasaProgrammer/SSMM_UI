@@ -119,11 +119,11 @@ public class FacebookAuthService : IOAuthService<FacebookToken>
         _logger?.Log("No existing Facebook token, starting authorization...");
 
         // 1️⃣ Skapa code verifier/challenge
-        var codeVerifier = GenerateCodeVerifier();
-        var codeChallenge = GenerateCodeChallenge(codeVerifier);
+        var codeVerifier = PKCEHelper.GenerateCodeVerifier();
+        var codeChallenge = PKCEHelper.GenerateCodeChallenge(codeVerifier);
 
         // 2️⃣ Generera auth-url
-        var authUrl = GetAuthorizationUrl(codeChallenge);
+        var authUrl = PKCEHelper.GetAuthorizationUrl(codeChallenge, _clientId, _redirectUri, _scopes, AuthEndpoint);
         OpenBrowser(authUrl);
 
         // 3️⃣ Vänta på redirect med code (t.ex. lokal HTTP listener)
@@ -202,33 +202,6 @@ public class FacebookAuthService : IOAuthService<FacebookToken>
         return tcs.Task;
     }
 
-    private const int VerifierLength = 64;
-
-    public static string GenerateCodeVerifier()
-    {
-        var bytes = new byte[VerifierLength];
-        using var rng = RandomNumberGenerator.Create();
-        rng.GetBytes(bytes);
-
-        return Base64UrlEncode(bytes);
-    }
-
-    public static string GenerateCodeChallenge(string codeVerifier)
-    {
-        using var sha256 = SHA256.Create();
-        var bytes = Encoding.ASCII.GetBytes(codeVerifier);
-        var hash = sha256.ComputeHash(bytes);
-        return Base64UrlEncode(hash);
-    }
-
-    private static string Base64UrlEncode(byte[] input)
-    {
-        return Convert.ToBase64String(input)
-            .TrimEnd('=')
-            .Replace('+', '-')
-            .Replace('/', '_');
-    }
-
     private void OpenBrowser(string url)
     {
         // Din implementering för att öppna webbläsare
@@ -237,22 +210,6 @@ public class FacebookAuthService : IOAuthService<FacebookToken>
             FileName = url,
             UseShellExecute = true
         });
-    }
-
-    /// <summary>
-    /// Genererar URL för användarautentisering (PKCE)
-    /// </summary>
-    public string GetAuthorizationUrl(string codeChallenge)
-    {
-        var query = HttpUtility.ParseQueryString(string.Empty);
-        query["client_id"] = _clientId;
-        query["redirect_uri"] = _redirectUri;
-        query["response_type"] = "code";
-        query["scope"] = string.Join(",", _scopes);
-        query["code_challenge"] = codeChallenge;
-        query["code_challenge_method"] = "S256";
-
-        return $"{AuthEndpoint}?{query}";
     }
 
     /// <summary>
@@ -351,6 +308,6 @@ public class FacebookAuthService : IOAuthService<FacebookToken>
 
     public Task<FacebookToken?> RefreshTokenAsync(string token)
     {
-        throw new NotImplementedException();
+        throw new NotImplementedException("Facebook User long life tokens");
     }
 }

@@ -69,7 +69,7 @@ public class XAuthService : IOAuthService<XToken>
 
         _logger.Log("No existing X token found, starting authorization...");
 
-        token = await AuthorizeWithPkceAsync(_scopes, 60);
+        token = await AuthorizeWithPkceAsync(60);
         return token;
     }
 
@@ -129,15 +129,15 @@ public class XAuthService : IOAuthService<XToken>
     /// <summary>
     /// Startar OAuth2 Authorization Code flow med PKCE. Returnerar access_token (JSON) inkl. refresh_token om tillgängligt.
     /// </summary>
-    public async Task<XToken> AuthorizeWithPkceAsync(IEnumerable<string> scopes, int timeoutSeconds = 120)
+    public async Task<XToken> AuthorizeWithPkceAsync(int timeoutSeconds = 120)
     {
         // 1) skapa code_verifier & code_challenge
-        var codeVerifier = CreateCodeVerifier();
-        var codeChallenge = CreateCodeChallenge(codeVerifier);
+        var codeVerifier = PKCEHelper.GenerateCodeVerifier();
+        var codeChallenge = PKCEHelper.GenerateCodeChallenge(codeVerifier);
 
         // 2) bygg authorize URL
-        var state = RandomString(32);
-        var scopeStr = HttpUtility.UrlEncode(string.Join(" ", scopes));
+        var state = PKCEHelper.RandomString(32);
+        var scopeStr = HttpUtility.UrlEncode(string.Join(" ", _scopes));
         var authUrl =
             $"https://twitter.com/i/oauth2/authorize?response_type=code&client_id={_clientId}&redirect_uri={HttpUtility.UrlEncode(_redirectUri)}" +
             $"&scope={scopeStr}&state={state}&code_challenge={codeChallenge}&code_challenge_method=S256";
@@ -177,7 +177,10 @@ public class XAuthService : IOAuthService<XToken>
         var body = await resp.Content.ReadAsStringAsync();
 
         if (!resp.IsSuccessStatusCode)
-            throw new Exception($"Failed to fetch user info: {resp.StatusCode} - {body}");
+            _logger.Log($"Failed to fetch user info: {resp.StatusCode} - {body}");
+
+        try
+        {
 
         var json = JsonDocument.Parse(body);
         var user = json.RootElement.GetProperty("data");
@@ -188,6 +191,12 @@ public class XAuthService : IOAuthService<XToken>
             Username = user.GetProperty("username").GetString()!,
             Name = user.GetProperty("name").GetString()!
         };
+        }
+        catch (Exception ex)
+        {
+            _logger.Log($"Exception in GetCurrentUserAsync for X: {ex.Message}");
+            return null;
+        }
     }
     private async Task<JsonDocument?> ExchangePkceCodeForTokenAsync(string code, string codeVerifier)
     {
@@ -321,79 +330,6 @@ public class XAuthService : IOAuthService<XToken>
             else throw;
         }
     }
-
-    // -------------------------
-    // Utils: PKCE helpers
-    // -------------------------
-    private static string CreateCodeVerifier()
-    {
-        var rng = RandomNumberGenerator.Create();
-        var bytes = new byte[64];
-        rng.GetBytes(bytes);
-        return Base64UrlEncode(bytes);
-    }
-
-    private static string CreateCodeChallenge(string codeVerifier)
-    {
-        using var sha = SHA256.Create();
-        var bytes = Encoding.ASCII.GetBytes(codeVerifier);
-        var hash = sha.ComputeHash(bytes);
-        return Base64UrlEncode(hash);
-    }
-
-    private static string Base64UrlEncode(byte[] input)
-    {
-        return Convert.ToBase64String(input)
-            .TrimEnd('=')
-            .Replace('+', '-')
-            .Replace('/', '_');
-    }
-
-    private static string RandomString(int length)
-    {
-        const string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        var bytes = new byte[length];
-        RandomNumberGenerator.Fill(bytes);
-        var chars = new char[length];
-        for (int i = 0; i < length; i++) chars[i] = alphabet[bytes[i] % alphabet.Length];
-        return new string(chars);
-    }
-
-    // -------------------------
-    // Utils: Query parsing
-    // -------------------------
-    private static Dictionary<string, string> ParseQueryString(string qs)
-    {
-        var d = new Dictionary<string, string>();
-        var parts = qs.Split('&', StringSplitOptions.RemoveEmptyEntries);
-        foreach (var p in parts)
-        {
-            var kv = p.Split('=', 2);
-            var k = HttpUtility.UrlDecode(kv[0]);
-            var v = kv.Length > 1 ? HttpUtility.UrlDecode(kv[1]) : "";
-            d[k] = v;
-        }
-        return d;
-    }
-
-    // -------------------------
-    // Simple encrypted storage (Windows DPAPI)
-    // -------------------------
-    public static void ProtectAndSave(string path, string plain)
-    {
-        var data = Encoding.UTF8.GetBytes(plain);
-        var protectedData = ProtectedData.Protect(data, null, DataProtectionScope.CurrentUser);
-        System.IO.File.WriteAllBytes(path, protectedData);
-    }
-
-    public static string? LoadAndUnprotect(string path)
-    {
-        if (!System.IO.File.Exists(path)) return null;
-        var protectedData = System.IO.File.ReadAllBytes(path);
-        var data = ProtectedData.Unprotect(protectedData, null, DataProtectionScope.CurrentUser);
-        return Encoding.UTF8.GetString(data);
-    }
-
     // -------------------------
     // Inner helper classes
     // -------------------------
