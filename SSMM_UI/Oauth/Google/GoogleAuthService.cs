@@ -36,7 +36,6 @@ public class GoogleAuthService : IOAuthService<GoogleToken>
     ];
     private string? _currentCodeVerifier;
     private string? _currentState;
-    private static readonly JsonSerializerOptions _jsonoptions = new() { WriteIndented = true };
 
     private readonly ILogService _logger;
     private readonly StateService _stateService;
@@ -69,9 +68,10 @@ public class GoogleAuthService : IOAuthService<GoogleToken>
 
     public async Task<GoogleToken?> LoginAsync()
     {
-        var (codeVerifier, codeChallenge) = GeneratePkceParameters();
+        var codeVerifier = PKCEHelper.GenerateCodeVerifier();
+        var codeChallenge = PKCEHelper.GenerateCodeChallenge(codeVerifier);
         _currentCodeVerifier = codeVerifier;
-        _currentState = GenerateRandomString(32);
+        _currentState = PKCEHelper.RandomString(32);
 
         var AuthUrl = BuildAuthorizationUrl(Scopes, ClientID, RedirectUri, codeChallenge, _currentState);
 
@@ -304,14 +304,6 @@ public class GoogleAuthService : IOAuthService<GoogleToken>
             _logger.Log(ex.Message);
         }
         return "Failed to get username";
-    }
-
-    private static (string codeVerifier, string codeChallenge) GeneratePkceParameters()
-    {
-        var codeVerifier = GenerateRandomString(128);
-        var challengeBytes = SHA256.HashData(Encoding.UTF8.GetBytes(codeVerifier));
-        var codeChallenge = Base64UrlEncode(challengeBytes);
-        return (codeVerifier, codeChallenge);
     }
 
     private async Task<string> ListenForAuthCodeAsync()

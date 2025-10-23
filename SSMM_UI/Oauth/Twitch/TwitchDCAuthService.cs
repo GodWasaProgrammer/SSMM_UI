@@ -51,8 +51,6 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
             TwitchScopes.StreamKey
         ];
 
-
-
     public string GetClientId()
     {
         return _clientId;
@@ -76,18 +74,25 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
         var token = await TryUseExistingTokenAsync();
         if (token != null)
         {
-            return token;
+            if (token.IsValid)
+                return token;
+            if (!token.IsValid)
+            {
+                if (!string.IsNullOrEmpty(token.RefreshToken))
+                {
+                    var res = await RefreshTokenAsync(token.RefreshToken);
+                    if (res != null)
+                    {
+                        token = res;
+                        _stateService.SerializeToken(OAuthServices.Twitch, token);
+                        return token;
+                    }
+                }
+            }
+
         }
         // otherwise we continue with normal login
-        var request = new HttpRequestMessage(HttpMethod.Post, DcfApiAdress);
-
-        var content = new FormUrlEncodedContent(
-        [
-                    new KeyValuePair<string, string>("client_id", _clientId),
-                    new KeyValuePair<string, string>("scope", string.Join(" ", scopes))
-                ]);
-
-        request.Content = content;
+        HttpRequestMessage request = UriCreator();
 
         var response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
@@ -96,11 +101,7 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
 
         if (result != null)
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = result.VerificationUri,
-                UseShellExecute = true
-            });
+            BrowserHelper.OpenUrlInBrowser(result.VerificationUri);
 
             token = await PollForTokenAsync(result.DeviceCode, result.Interval);
 
@@ -115,6 +116,20 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
         }
         // login failed.
         return null;
+    }
+
+    private HttpRequestMessage UriCreator()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, DcfApiAdress);
+
+        var content = new FormUrlEncodedContent(
+        [
+                    new KeyValuePair<string, string>("client_id", _clientId),
+                    new KeyValuePair<string, string>("scope", string.Join(" ", scopes))
+                ]);
+
+        request.Content = content;
+        return request;
     }
 
     public async Task<TwitchToken?> RefreshTokenAsync(string refreshToken)
@@ -172,7 +187,6 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
         }
         return null;
     }
-
 
     public async Task<TwitchToken?> PollForTokenAsync(string deviceCode, int intervalSeconds, int maxWaitSeconds = 300)
     {
@@ -252,7 +266,6 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
         return null;
     }
 
-
     private async Task<string?> GetUsernameAsync(string accessToken)
     {
         try
@@ -326,5 +339,4 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
             ? userIdElement.GetString()
             : throw new Exception("Could not find 'id' in user response.");
     }
-    private static readonly JsonSerializerOptions _jsonoptions = new() { WriteIndented = true };
 }
