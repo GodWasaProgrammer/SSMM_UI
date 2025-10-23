@@ -66,32 +66,18 @@ public class KickAuthService : IOAuthService<KickToken>
         try
         {
             // 1. Generera PKCE-parametrar
-            var (codeVerifier, codeChallenge) = GeneratePkceParameters();
-            _currentCodeVerifier = codeVerifier;
-            _currentState = GenerateRandomString(32);
-
-            // 2. Bygg auktoriserings-URL
-            string scope = Combine(DefaultScopes);
-            string authUrl = $"{OAuthBaseUrl}/oauth/authorize?" +
-                           $"response_type=code&" +
-                           $"client_id={Uri.EscapeDataString(ClientID)}&" +
-                           $"redirect_uri={Uri.EscapeDataString(RedirectUri)}&" +
-                           $"scope={Uri.EscapeDataString(scope)}&" +
-                           $"code_challenge={codeChallenge}&" +
-                           $"code_challenge_method=S256&" +
-                           $"state={_currentState}";
-
-            _logger.Log($"Opening Authorization-URL: {authUrl}");
+            _currentCodeVerifier = PKCEHelper.GenerateCodeVerifier();
+            var codeChallenge = PKCEHelper.GenerateCodeChallenge(_currentCodeVerifier);
+            _currentState = PKCEHelper.RandomString(32);
+            string authUrl = BuildAuthUrl(codeChallenge);
 
             // 3. Öppna webbläsare
             BrowserHelper.OpenUrlInBrowser(authUrl);
 
             // 4. Lyssna efter callback
-            string authCode = await ListenForAuthCodeAsync();
-            if (string.IsNullOrEmpty(authCode))
-            {
-                throw new Exception("No authorization code received");
-            }
+            var CallBackResult = await OAuthListenerHelper.WaitForCallbackAsync(RedirectUri, _currentState, default);
+            string? authCode = CallBackResult?["code"];
+            if (string.IsNullOrEmpty(authCode)) throw new Exception("No authorization code received");
 
             // 5. Utför tokenutbyte
             var tokenResult = await ExchangeCodeForTokenAsync(authCode) ?? throw new Exception("Token exchange failed");
@@ -113,6 +99,21 @@ public class KickAuthService : IOAuthService<KickToken>
         }
     }
 
+    private string BuildAuthUrl(string codeChallenge)
+    {
+        // 2. Bygg auktoriserings-URL
+        string scope = Combine(DefaultScopes);
+        string authUrl = $"{OAuthBaseUrl}/oauth/authorize?" +
+                       $"response_type=code&" +
+                       $"client_id={Uri.EscapeDataString(ClientID)}&" +
+                       $"redirect_uri={Uri.EscapeDataString(RedirectUri)}&" +
+                       $"scope={Uri.EscapeDataString(scope)}&" +
+                       $"code_challenge={codeChallenge}&" +
+                       $"code_challenge_method=S256&" +
+                       $"state={_currentState}";
+        return authUrl;
+    }
+
     public async Task<KickToken?> RefreshTokenAsync(string refreshToken)
     {
         using var httpClient = new HttpClient();
@@ -121,7 +122,6 @@ public class KickAuthService : IOAuthService<KickToken>
         new KeyValuePair<string, string>("grant_type", "refresh_token"),
         new KeyValuePair<string, string>("refresh_token", refreshToken),
         new KeyValuePair<string, string>("client_id", ClientID),
-        //new KeyValuePair<string, string>("client_secret", clientSecret),
     ]);
 
         var response = await httpClient.PostAsync($"{OAuthBaseUrl}/oauth/token", content);
@@ -172,56 +172,6 @@ public class KickAuthService : IOAuthService<KickToken>
             }
         }
         return null;
-    }
-
-    private async Task<string> ListenForAuthCodeAsync()
-    {
-        using var listener = new HttpListener();
-        listener.Prefixes.Add(RedirectUri);
-        listener.Start();
-
-        try
-        {
-            using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
-            var context = await listener.GetContextAsync().WaitAsync(cts.Token);
-
-            // Validera state
-            var receivedState = context.Request.QueryString["state"];
-
-            if (receivedState != _currentState)
-            {
-                await SendBrowserResponse(context.Response,
-                    "<html><body>❌ Invalid state-parameter</body></html>");
-                throw new Exception("State doesnt match - potential CSRF-attack");
-            }
-
-            string? authCode = context.Request.QueryString["code"];
-
-            if (string.IsNullOrEmpty(authCode))
-            {
-                // Logga fel, redirecta till felssida, eller kasta exception
-                context.Response.Redirect("/error?message=missing_code");
-                return "Error"; // Avbryt vidare processing
-            }
-            await SendBrowserResponse(context.Response,
-                "<html><body>✅ Login Successful. Close this window.</body></html>");
-            if (authCode != null)
-            {
-                return authCode;
-            }
-            else
-            {
-                throw new Exception("we did not receive an auth code");
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            throw new Exception("Login timed out.");
-        }
-        finally
-        {
-            listener.Stop();
-        }
     }
 
     private async Task<KickToken> ExchangeCodeForTokenAsync(string authCode)
@@ -311,36 +261,5 @@ public class KickAuthService : IOAuthService<KickToken>
         }
 
         return ("No user data returned or malformed response");
-    }
-
-    private static (string codeVerifier, string codeChallenge) GeneratePkceParameters()
-    {
-        var codeVerifier = GenerateRandomString(128);
-        var challengeBytes = SHA256.HashData(Encoding.UTF8.GetBytes(codeVerifier));
-        var codeChallenge = Base64UrlEncode(challengeBytes);
-        return (codeVerifier, codeChallenge);
-    }
-
-    private static string GenerateRandomString(int length)
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
-        var random = new Random();
-        return new string([.. Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)])]);
-    }
-
-    private static string Base64UrlEncode(byte[] input)
-    {
-        return Convert.ToBase64String(input)
-            .TrimEnd('=')
-            .Replace('+', '-')
-            .Replace('/', '_');
-    }
-
-    private static async Task SendBrowserResponse(HttpListenerResponse response, string content)
-    {
-        var buffer = Encoding.UTF8.GetBytes(content);
-        response.ContentLength64 = buffer.Length;
-        await response.OutputStream.WriteAsync(buffer);
-        response.Close();
     }
 }
