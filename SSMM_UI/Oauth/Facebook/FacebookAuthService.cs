@@ -1,16 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using SSMM_UI.Interfaces;
+﻿using SSMM_UI.Interfaces;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace SSMM_UI.Oauth.Facebook;
 
@@ -127,79 +121,20 @@ public class FacebookAuthService : IOAuthService<FacebookToken>
         BrowserHelper.OpenUrlInBrowser(authUrl);
 
         // 3️⃣ Vänta på redirect med code (t.ex. lokal HTTP listener)
-        var code = await WaitForCodeAsync();
+        var result = await OAuthListenerHelper.WaitForCallbackAsync(_redirectUri, null, default);
+
+        if (result == null || !result.TryGetValue("code", out var code) || string.IsNullOrEmpty(code))
+        {
+            _logger?.Log("No authorization code received — login cancelled or failed.");
+            return null;
+        }
+
 
         // 4️⃣ Byt code mot token
         token = await ExchangeCodeForTokenAsync(code, codeVerifier);
         _stateService.SerializeToken(Enums.OAuthServices.Facebook, token);
 
         return token;
-    }
-
-    /// <summary>
-    /// Startar en enkel HTTP listener på redirectUri och väntar på "code" i querystring
-    /// </summary>
-    /// <summary>
-    /// Startar en minimal Kestrel-server på localhost för att lyssna på OAuth-redirect.
-    /// Returnerar koden från query-parametern "code".
-    /// </summary>
-    public static Task<string> WaitForCodeAsync(int port = 7891, string callbackPath = "/callback")
-    {
-        var tcs = new TaskCompletionSource<string>();
-
-        var builder = WebApplication.CreateBuilder();
-        builder.WebHost.UseUrls($"http://localhost:{port}");
-
-        var app = builder.Build();
-
-        app.MapGet(callbackPath, async (context) =>
-        {
-            try
-            {
-                var query = context.Request.Query;
-                if (!query.ContainsKey("code"))
-                {
-                    context.Response.StatusCode = 400;
-                    await context.Response.WriteAsync("Missing code in query string");
-                    return;
-                }
-
-                var code = query["code"];
-                var responseHtml = "<html><body><h2>You may now close this window</h2></body></html>";
-
-                context.Response.ContentType = "text/html";
-                await context.Response.WriteAsync(responseHtml);
-
-                tcs.TrySetResult(code);
-            }
-            catch (Exception ex)
-            {
-                tcs.TrySetException(ex);
-            }
-            finally
-            {
-                // Stäng ner servern efter första request
-                _ = Task.Run(async () =>
-                {
-                    await Task.Delay(100); // kort delay så response hinner skickas
-                    await app.StopAsync();
-                });
-            }
-        });
-
-        _ = Task.Run(() =>
-        {
-            try
-            {
-                app.Run();
-            }
-            catch (Exception ex)
-            {
-                tcs.TrySetException(ex);
-            }
-        });
-
-        return tcs.Task;
     }
 
     /// <summary>
