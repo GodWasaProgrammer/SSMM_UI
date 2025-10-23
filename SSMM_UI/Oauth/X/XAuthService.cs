@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
-using SSMM_UI.Interfaces;
+﻿using SSMM_UI.Interfaces;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
@@ -17,7 +13,7 @@ namespace SSMM_UI.Oauth.X;
 
 public class XAuthService : IOAuthService<XToken>
 {
-    private readonly string _clientId = "TGVNbDAzN0hOY1JLNlBSeVg3ZmU6MTpjaQ";     // Client ID / API Key
+    private readonly string _clientId = "TGVNbDAzN0hOY1JLNlBSeVg3ZmU6MTpjaQ";
     private readonly string _redirectUri = "http://localhost:7890/callback";
     private readonly HttpClient _http = new();
     private StateService _stateService;
@@ -123,7 +119,7 @@ public class XAuthService : IOAuthService<XToken>
     // PUBLIC: OAuth2 PKCE Flow
     // -------------------------
     /// <summary>
-    /// Startar OAuth2 Authorization Code flow med PKCE. Returnerar access_token (JSON) inkl. refresh_token om tillgängligt.
+    /// Starts the OAuth2 PKCE authorization flow.
     /// </summary>
     public async Task<XToken> AuthorizeWithPkceAsync(int timeoutSeconds = 120)
     {
@@ -134,26 +130,25 @@ public class XAuthService : IOAuthService<XToken>
         // 2) bygg authorize URL
         var state = PKCEHelper.RandomString(32);
         var scopeStr = HttpUtility.UrlEncode(string.Join(" ", _scopes));
-        var authUrl =
-            $"https://twitter.com/i/oauth2/authorize?response_type=code&client_id={_clientId}&redirect_uri={HttpUtility.UrlEncode(_redirectUri)}" +
-            $"&scope={scopeStr}&state={state}&code_challenge={codeChallenge}&code_challenge_method=S256";
+        string authUrl = BuildAuthUrl(codeChallenge, state, scopeStr);
 
         // 3) öppna browser och vänta på callback
+        BrowserHelper.OpenUrlInBrowser(authUrl);
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
-        var callback = await LaunchBrowserAndWaitForCallbackAsync(authUrl, state, cts.Token);
+        var callback = await OAuthListenerHelper.WaitForCallbackAsync(_redirectUri, state, cts.Token);
 
         if (callback == null) return null!;
 
-        if (!callback.Query.TryGetValue("code", out var code)) return null!;
+        if (!callback.TryGetValue("code", out var code)) return null!;
 
         // 4) exchange code for token
-        var token = await ExchangePkceCodeForTokenAsync(code!, codeVerifier);
+        var JsonToken = await ExchangePkceCodeForTokenAsync(code!, codeVerifier);
         XToken xToken = new XToken();
-        xToken.AccessToken = token.RootElement.GetProperty("access_token").GetString() ?? "";
-        xToken.RefreshToken = token.RootElement.GetProperty("refresh_token").GetString() ?? "";
-        xToken.ExpiresIn = token.RootElement.GetProperty("expires_in").GetInt32();
-        xToken.TokenType = token.RootElement.GetProperty("token_type").GetString() ?? "";
-        xToken.Scope = token.RootElement.GetProperty("scope").GetString() ?? "";
+        xToken.AccessToken = JsonToken.RootElement.GetProperty("access_token").GetString() ?? "";
+        xToken.RefreshToken = JsonToken.RootElement.GetProperty("refresh_token").GetString() ?? "";
+        xToken.ExpiresIn = JsonToken.RootElement.GetProperty("expires_in").GetInt32();
+        xToken.TokenType = JsonToken.RootElement.GetProperty("token_type").GetString() ?? "";
+        xToken.Scope = JsonToken.RootElement.GetProperty("scope").GetString() ?? "";
 
         var user = await GetCurrentUserAsync(xToken);
 
@@ -161,6 +156,12 @@ public class XAuthService : IOAuthService<XToken>
         _stateService.SerializeToken(Enums.OAuthServices.X, xToken);
 
         return xToken;
+    }
+
+    private string BuildAuthUrl(string codeChallenge, string state, string scopeStr)
+    {
+        return $"https://twitter.com/i/oauth2/authorize?response_type=code&client_id={_clientId}&redirect_uri={HttpUtility.UrlEncode(_redirectUri)}" +
+                    $"&scope={scopeStr}&state={state}&code_challenge={codeChallenge}&code_challenge_method=S256";
     }
 
     public async Task<XUser?> GetCurrentUserAsync(XToken token)
@@ -178,15 +179,15 @@ public class XAuthService : IOAuthService<XToken>
         try
         {
 
-        var json = JsonDocument.Parse(body);
-        var user = json.RootElement.GetProperty("data");
+            var json = JsonDocument.Parse(body);
+            var user = json.RootElement.GetProperty("data");
 
-        return new XUser
-        {
-            Id = user.GetProperty("id").GetString()!,
-            Username = user.GetProperty("username").GetString()!,
-            Name = user.GetProperty("name").GetString()!
-        };
+            return new XUser
+            {
+                Id = user.GetProperty("id").GetString()!,
+                Username = user.GetProperty("username").GetString()!,
+                Name = user.GetProperty("name").GetString()!
+            };
         }
         catch (Exception ex)
         {
@@ -218,88 +219,6 @@ public class XAuthService : IOAuthService<XToken>
             throw new Exception($"Token exchange failed: {resp.StatusCode} - {body}");
 
         return JsonDocument.Parse(body);
-    }
-
-    // -------------------------
-    // Helper: Launch browser + local HTTP listener for redirect
-    // -------------------------
-    public async Task<UriQuery?> LaunchBrowserAndWaitForCallbackAsync(string url, string? expectedState, CancellationToken ct)
-    {
-        var tcs = new TaskCompletionSource<UriQuery?>();
-        var uri = new Uri(_redirectUri);
-        var port = uri.Port;
-        var callbackPath = uri.AbsolutePath; // "/callback"
-
-        var builder = WebApplication.CreateBuilder();
-        builder.WebHost.UseUrls($"http://localhost:{port}");
-
-        var app = builder.Build();
-
-        app.MapGet(callbackPath, async context =>
-        {
-            try
-            {
-                var query = context.Request.Query;
-                var queryDict = new Dictionary<string, string?>();
-                foreach (var kv in query)
-                {
-                    queryDict[kv.Key] = kv.Value;
-                }
-
-                if (expectedState != null)
-                {
-                    if (!queryDict.TryGetValue("state", out var returnedState) || returnedState != expectedState)
-                    {
-                        context.Response.StatusCode = 400;
-                        await context.Response.WriteAsync("State mismatch");
-                        tcs.TrySetException(new Exception("State mismatch in OAuth callback"));
-                        return;
-                    }
-                }
-
-                // Skriv enkel HTML till användaren
-                var responseHtml = "<html><body><h2>Du kan nu stänga detta fönster.</h2></body></html>";
-                context.Response.ContentType = "text/html";
-                await context.Response.WriteAsync(responseHtml);
-
-                var result = new UriQuery(new Uri(context.Request.GetEncodedUrl()), queryDict);
-                tcs.TrySetResult(result);
-            }
-            catch (Exception ex)
-            {
-                tcs.TrySetException(ex);
-            }
-            finally
-            {
-                _ = Task.Run(async () =>
-                {
-                    await Task.Delay(100); // ge webbläsaren tid att rendera
-                    await app.StopAsync();
-                });
-            }
-        });
-
-        // Öppna webbläsaren
-        BrowserHelper.OpenUrlInBrowser(url);
-
-        // Kör Kestrel i bakgrund
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await app.RunAsync();
-            }
-            catch (OperationCanceledException)
-            {
-                tcs.TrySetResult(null);
-            }
-            catch (Exception ex)
-            {
-                tcs.TrySetException(ex);
-            }
-        });
-
-        return await tcs.Task;
     }
 
     // -------------------------
