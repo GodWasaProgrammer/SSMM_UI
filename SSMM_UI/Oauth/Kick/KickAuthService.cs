@@ -84,7 +84,7 @@ public class KickAuthService : IOAuthService<KickToken>
             _logger.Log($"Opening Authorization-URL: {authUrl}");
 
             // 3. Öppna webbläsare
-            OpenBrowser(authUrl);
+            BrowserHelper.OpenUrlInBrowser(authUrl);
 
             // 4. Lyssna efter callback
             string authCode = await ListenForAuthCodeAsync();
@@ -336,21 +336,6 @@ public class KickAuthService : IOAuthService<KickToken>
             .Replace('/', '_');
     }
 
-    private static void OpenBrowser(string url)
-    {
-        try
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = url,
-                UseShellExecute = true
-            });
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Failed to open browser: {ex.Message}");
-        }
-    }
     private static async Task SendBrowserResponse(HttpListenerResponse response, string content)
     {
         var buffer = Encoding.UTF8.GetBytes(content);

@@ -6,11 +6,8 @@ using SSMM_UI.Interfaces;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -145,9 +142,9 @@ public class XAuthService : IOAuthService<XToken>
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
         var callback = await LaunchBrowserAndWaitForCallbackAsync(authUrl, state, cts.Token);
 
-        if (callback == null) return null;
+        if (callback == null) return null!;
 
-        if (!callback.Query.TryGetValue("code", out var code)) return null;
+        if (!callback.Query.TryGetValue("code", out var code)) return null!;
 
         // 4) exchange code for token
         var token = await ExchangePkceCodeForTokenAsync(code!, codeVerifier);
@@ -283,7 +280,7 @@ public class XAuthService : IOAuthService<XToken>
         });
 
         // Öppna webbläsaren
-        OpenBrowser(url);
+        BrowserHelper.OpenUrlInBrowser(url);
 
         // Kör Kestrel i bakgrund
         _ = Task.Run(async () =>
@@ -305,30 +302,6 @@ public class XAuthService : IOAuthService<XToken>
         return await tcs.Task;
     }
 
-    // -------------------------
-    // Helper: Browser
-    // -------------------------
-    private static void OpenBrowser(string url)
-    {
-        try
-        {
-            // cross-platform way
-            ProcessStartInfo psi = new ProcessStartInfo
-            {
-                FileName = url,
-                UseShellExecute = true
-            };
-            Process.Start(psi);
-        }
-        catch
-        {
-            // fallback for older .NET / OS combos
-            if (OperatingSystem.IsWindows()) Process.Start(new ProcessStartInfo("cmd", $"/c start \"\" \"{url}\"") { CreateNoWindow = true });
-            else if (OperatingSystem.IsLinux()) Process.Start("xdg-open", url);
-            else if (OperatingSystem.IsMacOS()) Process.Start("open", url);
-            else throw;
-        }
-    }
     // -------------------------
     // Inner helper classes
     // -------------------------

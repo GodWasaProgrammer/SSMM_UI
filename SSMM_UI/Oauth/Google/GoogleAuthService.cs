@@ -75,7 +75,7 @@ public class GoogleAuthService : IOAuthService<GoogleToken>
 
         var AuthUrl = BuildAuthorizationUrl(Scopes, ClientID, RedirectUri, codeChallenge, _currentState);
 
-        OpenBrowser(AuthUrl);
+        BrowserHelper.OpenUrlInBrowser(AuthUrl);
 
         // listen for callback
         try
@@ -355,35 +355,5 @@ public class GoogleAuthService : IOAuthService<GoogleToken>
         response.ContentLength64 = buffer.Length;
         await response.OutputStream.WriteAsync(buffer);
         response.Close();
-    }
-
-    private static void OpenBrowser(string url)
-    {
-        try
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = url,
-                UseShellExecute = true
-            });
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Failed to open browser: {ex.Message}");
-        }
-    }
-
-    private static string GenerateRandomString(int length)
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
-        var random = new Random();
-        return new string([.. Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)])]);
-    }
-    private static string Base64UrlEncode(byte[] input)
-    {
-        return Convert.ToBase64String(input)
-            .TrimEnd('=')
-            .Replace('+', '-')
-            .Replace('/', '_');
     }
 }

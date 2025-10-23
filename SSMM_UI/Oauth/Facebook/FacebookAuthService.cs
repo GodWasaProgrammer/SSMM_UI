@@ -124,7 +124,7 @@ public class FacebookAuthService : IOAuthService<FacebookToken>
 
         // 2️⃣ Generera auth-url
         var authUrl = PKCEHelper.GetAuthorizationUrl(codeChallenge, _clientId, _redirectUri, _scopes, AuthEndpoint);
-        OpenBrowser(authUrl);
+        BrowserHelper.OpenUrlInBrowser(authUrl);
 
         // 3️⃣ Vänta på redirect med code (t.ex. lokal HTTP listener)
         var code = await WaitForCodeAsync();
@@ -200,16 +200,6 @@ public class FacebookAuthService : IOAuthService<FacebookToken>
         });
 
         return tcs.Task;
-    }
-
-    private void OpenBrowser(string url)
-    {
-        // Din implementering för att öppna webbläsare
-        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-        {
-            FileName = url,
-            UseShellExecute = true
-        });
     }
 
     /// <summary>
