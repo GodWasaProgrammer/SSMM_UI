@@ -1,14 +1,21 @@
-﻿using Google.Apis.Services;
+﻿using Google.Apis.Auth.OAuth2;
+using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
-using System.Text.Json;
-using Tweetinvi;
-using Tweetinvi.Core.Web;
-using System.Threading.Tasks;
-using System;
-using System.Net.Http;
-using System.Collections.Generic;
 using SSMM_UI.API_Key_Secrets_Loader;
 using SSMM_UI.DTO;
+using SSMM_UI.Enums;
+using SSMM_UI.Oauth.Facebook;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Tweetinvi;
+using Tweetinvi.Core.Web;
 
 namespace SSMM_UI.Poster;
 
@@ -65,35 +72,66 @@ public static class SocialPoster
         var template = new SocialPostTemplate("cybercola", streamlinks, platforms);
         var stringtoPost = template.Post;
 
+
         if (XPost)
         {
-
-            var client = new TwitterClient(
-                    kl.CONSUMER_Keys["X"],
-                    kl.CONSUMER_Secrets["X"],
-                    kl.ACCESS_Tokens["X"],
-                    kl.ACCESS_Secrets["X"]
-                );
-
-            var poster = new TweetsV2Poster(client);
-
-            ITwitterResult result = await poster.PostTweet
-                (
-                new TweetV2PostRequest
-                {
-                    Text = stringtoPost,
-                }
-                );
-
-            if (!result.Response.IsSuccessStatusCode)
+            // Post to X using Bearer Token (OAuth 2.0 Bearer Token)
+            if(postmaster._authobjects == null)
             {
-                Console.WriteLine("Error when posting tweet: " + Environment.NewLine + result.Content);
+                Console.WriteLine("Auth objects are null in PostMaster.");
+                return;
+            }
+            var accesstoken = postmaster._authobjects[OAuthServices.X]?.AccessToken;
+            if ((accesstoken != null))
+            {
+
+                using var http = new HttpClient();
+                http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accesstoken);
+                http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var payload = new
+                {
+                    text = "Testing X APi without Consumer_key and Consumer_Secret"
+                };
+
+                var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+                var response = await http.PostAsync("https://api.x.com/2/tweets", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Tweet skickad!");
+                }
+                else
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Fel vid postning: {response.StatusCode}");
+                    Console.WriteLine(responseBody);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Access token is null for X.");
             }
         }
 
         if (FBpost)
         {
-            await FacebookPoster.Post(stringtoPost, kl);
+            if (postmaster._authobjects == null)
+            {
+                Console.WriteLine("Auth objects are null in PostMaster.");
+                return;
+            }
+            postmaster._authobjects.TryGetValue(OAuthServices.Facebook, out var fbAuthToken);
+            if(fbAuthToken == null)
+            {
+                Console.WriteLine("Facebook auth token is null in PostMaster.");
+                return;
+            }
+
+            var res = await postmaster.RequestPagesAsync((FacebookToken)fbAuthToken);
+            var page = res.FirstOrDefault()!;
+            await FacebookPosterV2.PostAsync(page.Id, page.AccessToken, "Testing Graph API");
         }
         if (DiscordPost)
         {

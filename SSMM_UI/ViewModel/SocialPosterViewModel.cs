@@ -41,6 +41,6 @@ public partial class SocialPosterViewModel : ObservableObject
 
     public async Task Test()
     {
-        await _poster.RunPoster(PostToX, PostToFB, PostToDiscord);
+        await _poster.RunPoster(PostToDiscord, PostToFB, PostToX);
     }
 }
