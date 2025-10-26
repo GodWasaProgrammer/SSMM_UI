@@ -25,6 +25,8 @@ public class StateService
     private const string _userSettings = "UserSettings.json";
     private const string _savedMetaData = "MetaData_State.json";
     private const string _windowSettings = "WindowSettings.json";
+    private const string _tokenPath = "Tokens";
+    private const string _Webhooks = "Webhooks.json";
     private readonly JsonSerializerOptions _metaDataJsonOptions;
     private readonly JsonSerializerOptions _regularJsonOptions = new() { WriteIndented = true };
     private Dictionary<OAuthServices, IAuthToken> _authObjects = [];
@@ -33,10 +35,34 @@ public class StateService
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; private set; } = [];
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
     public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; private set; } = [];
+    public ObservableCollection<Dictionary<string,string>> Webhooks { get; private set; } = [];
 
     private StreamMetadata CurrentMetaData { get; set; } = new StreamMetadata();
 
-    private const string _tokenPath = "Tokens";
+
+    public void SaveWebHook(Dictionary<string,string> webhook)
+    {
+        Webhooks.Add(webhook);
+    }
+
+    public void SerializeWebhooks()
+    {
+        var json = JsonSerializer.Serialize(Webhooks, _regularJsonOptions);
+        File.WriteAllText(_Webhooks, json);
+    }
+
+    public void DeSerializeWebhooks()
+    {
+        if (File.Exists(_Webhooks))
+        {
+            var json = File.ReadAllText(_Webhooks);
+            var deserialized = JsonSerializer.Deserialize<ObservableCollection<Dictionary<string,string>>>(json);
+            if (deserialized != null)
+            {
+                Webhooks = deserialized;
+            }
+        }
+    }
 
     public void SaveWindowPosition(double Height, double Width, PixelPoint Position, WindowState windowState)
     {
@@ -156,6 +182,7 @@ public class StateService
         _logger = logger;
         DeSerializeServices();
         DeserializeSettings();
+        DeSerializeWebhooks();
         DeSerializeMetaData();
         LoadRtmpServersFromServicesJson(_obsServices);
         DeSerializeYoutubeCategories();
