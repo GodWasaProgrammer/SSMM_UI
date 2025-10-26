@@ -87,7 +87,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     private async Task ShowSecretsAndKeysDialog()
     {
-        await _dialogService.OpenSecretsAndKeys();
+        await _dialogService.WebhooksView();
     }
 
     private void ToggleTheme()

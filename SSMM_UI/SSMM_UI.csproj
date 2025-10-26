@@ -68,8 +68,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\SecretsAndKeysView.axaml.cs">
-      <DependentUpon>SecretsAndKeysView.axaml</DependentUpon>
+    <Compile Update="Views\WebhooksView.axaml.cs">
+      <DependentUpon>WebhooksView.axaml</DependentUpon>
     </Compile>
   </ItemGroup>
 

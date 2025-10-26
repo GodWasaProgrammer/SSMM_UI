@@ -10,5 +10,5 @@ public interface IDialogService
     Task<UserSettings> ShowSettingsDialogAsync(UserSettings currentSettings);
     Task About();
     Task InspectSelectedService(SelectedService value);
-    Task OpenSecretsAndKeys();
+    Task WebhooksView();
 }

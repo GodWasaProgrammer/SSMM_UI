@@ -1,7 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		x:Class="SSMM_UI.MainWindow"
-		xmlns:local="clr-namespace:SSMM_UI.ViewModel" 
+		xmlns:local="clr-namespace:SSMM_UI.ViewModel"
 		xmlns:Views="clr-namespace:SSMM_UI.Views"
 		x:DataType="local:MainWindowViewModel"
 		Title="SSMM_UI" Width="1920" Height="1080"
@@ -13,9 +13,9 @@
 		<Menu Grid.Row="0">
 			<MenuItem Header="Settings" Command="{Binding OpenSetting}" />
 			<MenuItem Header="Setup">
-				<MenuItem Header="Setup Youtube with PuppetMaster" Command="{Binding SetupPuppetYT}" />
-				<MenuItem Header="Setup Kick with PuppetMaster" Command="{Binding SetupPuppetKick}"/>
-				<MenuItem Header="Setup Secrets And Keys for SocialPoster" Command="{Binding ShowSecretsAndKeys}"/>
+				<MenuItem Header="Youtube" Command="{Binding SetupPuppetYT}" />
+				<MenuItem Header="Kick" Command="{Binding SetupPuppetKick}"/>
+				<MenuItem Header="Webhooks" Command="{Binding ShowSecretsAndKeys}"/>
 			</MenuItem>
 			<MenuItem Header="About" Command="{Binding OpenAbout}" />
 			<MenuItem Header="Theme" Command="{Binding ToggleThemes}" />
@@ -50,12 +50,12 @@
 				</TabItem>
 
 			</TabControl>
-			<Grid Grid.Column="2" RowDefinitions="Auto,*">
-			<Views:LoginView Grid.Row="0" DataContext="{Binding LoginVM}" />
-			<Views:InspectionView Grid.Row="1" x:Name="Preview" DataContext="{Binding InspectionVM}"/>
-				<Views:SocialPosterLoginView Grid.Row="2" DataContext="{Binding SocialPosterLoginVM}"/>
+			<Grid Grid.Column="2" RowDefinitions="Auto,*,*">
+				<Views:LoginView Grid.Row="0" DataContext="{Binding LoginVM}" />
+				<Views:SocialPosterLoginView Grid.Row="1" DataContext="{Binding SocialPosterLoginVM}"/>
+				<Views:InspectionView Grid.Row="2" x:Name="Preview" DataContext="{Binding InspectionVM}"/>
 			</Grid>
-			
+
 		</Grid>
 	</Grid>
 </Window>

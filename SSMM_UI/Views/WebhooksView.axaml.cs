@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace SSMM_UI.Views;
 
-public partial class SecretsAndKeysView : Window
+public partial class WebhooksView : Window
 {
-    public SecretsAndKeysView()
+    public WebhooksView()
     {
         InitializeComponent();
     }

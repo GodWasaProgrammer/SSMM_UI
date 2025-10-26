@@ -21,14 +21,14 @@ public class DialogService : IDialogService
     ILogService _logService;
     StateService _stateservice;
 
-    public async Task OpenSecretsAndKeys()
+    public async Task WebhooksView()
     {
-        var secretsAndKeysVM = new SecretsAndKeysViewModel();
-        var secretsandKeysView = new SecretsAndKeysView()
+        var WebhooksVM = new WebhooksViewModel();
+        var WebhooksView = new WebhooksView()
         {
-            DataContext = secretsAndKeysVM,
+            DataContext = WebhooksVM,
         };
-        await secretsandKeysView.ShowDialog(GetMainWindow()!);
+        await WebhooksView.ShowDialog(GetMainWindow()!);
     }
 
     public async Task InspectSelectedService(SelectedService selection)

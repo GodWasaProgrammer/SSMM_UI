@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="300"
+			 xmlns:local="clr-namespace:SSMM_UI.ViewModel"
+			 x:DataType="local:WebhooksViewModel"
+             x:Class="SSMM_UI.Views.WebhooksView"
+			 Title="Secrets And Keys For Social Poster">
+
+	<ScrollViewer>
+		<StackPanel Margin="20" Spacing="20">
+			
+			<!-- Webhooks -->
+			<Button Content="Show Webhooks(Discord)" Command="{Binding ToggleWebHooks}"/>
+			<Border Classes="card">
+				<StackPanel>
+					<TextBlock Text="Webhooks" FontSize="16" FontWeight="Bold" Margin="0 0 0 10"/>
+
+					<StackPanel Spacing="10">
+						<ListBox ItemsSource="{Binding Webhooks}" Height="150" IsVisible="{Binding DisplayWebhooks}">
+							<ListBox.ItemTemplate>
+								<DataTemplate>
+									<StackPanel Spacing="10">
+										<TextBlock Text="{Binding Key}" FontWeight="Bold"/>
+										<TextBox Text="{Binding Value}" Classes="secondary"/>
+									</StackPanel>
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
+					</StackPanel>
+
+				</StackPanel>
+			</Border>
+
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>
