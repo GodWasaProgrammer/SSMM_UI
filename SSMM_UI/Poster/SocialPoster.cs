@@ -5,17 +5,15 @@ using SSMM_UI.API_Key_Secrets_Loader;
 using SSMM_UI.DTO;
 using SSMM_UI.Enums;
 using SSMM_UI.Oauth.Facebook;
+using SSMM_UI.Oauth.Twitch;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Tweetinvi;
-using Tweetinvi.Core.Web;
 
 namespace SSMM_UI.Poster;
 
@@ -23,42 +21,42 @@ public static class SocialPoster
 {
     public static async Task RunPoster(PostMaster postmaster, bool XPost = false, bool DiscordPost = false, bool FBpost = false)
     {
+        string TwitchClientID = "y1cd8maguk5ob1m3lwvhdtupbj6pm3";
 
         // Använd Singleton-instansen
         var kl = KeyLoader.Instance;
-        // establish webhooks to deduce if live or not
+        
+        if(postmaster._authobjects == null)
+        {
+            Console.WriteLine("Auth objects are null in PostMaster.");
+            return;
+        }
+        var FetchTwitchToken = postmaster._authobjects.TryGetValue(OAuthServices.Twitch, out var twitchtoken);
+        if (!FetchTwitchToken || twitchtoken == null)
+        {
+            Console.WriteLine("Twitch token not found in PostMaster.");
+            return;
+        }
+        var castedToken = (TwitchToken)twitchtoken;
 
-        // fetch links for all active platforms
+        var isLiveTwitch = await IsUserLiveTwitch(TwitchClientID, castedToken.AccessToken, castedToken.UserId!);
 
-        // post on relevant media platforms with said links
+        var FetchYoutubeToken = postmaster._authobjects.TryGetValue(OAuthServices.Youtube, out var youtubetoken);
 
-        // generate tokens
-        var TwitchToken = await GetAccessTokenTwitch(kl.CLIENT_Ids["Twitch"], kl.API_Keys["Twitch"]);
-
-        var isLive = await IsStreamerLiveTwitch(kl.CLIENT_Ids["Twitch"], TwitchToken, kl.ACCOUNT_Names["Twitch"]);
-
-        Console.WriteLine(isLive ? $"{kl.ACCOUNT_Names["Twitch"]} is live!" : $"{kl.ACCOUNT_Names["Twitch"]} is not live.");
-
-        var LiveYT = await IsLiveYoutube(kl.API_Keys["Google"], kl.CLIENT_Ids["Youtube"]);
-        Console.WriteLine(LiveYT.IsLive ? $"{kl.ACCOUNT_Names["Youtube"]}is live" : $"{kl.ACCOUNT_Names["Youtube"]} is not live");
-
-        //isLive = IsStreamerLive(twitchClientId, TwitchToken.Result, currentLivePerson);
-        //Console.WriteLine(isLive.Result ? $"{currentLivePerson} is live!" : $"{currentLivePerson} is not live.");
-        //await XPoster.PostTweetAsync("Testing API", kl);
-
-        //if (true || isLive.Result && LiveYT.Result)
-        //{
-
+        if (!FetchYoutubeToken || youtubetoken == null)
+        {
+            Console.WriteLine("Youtube token not found in PostMaster.");
+            return;
+        }
+        var LiveYT = await IsLiveYoutube(youtubetoken.AccessToken);
 
         List<string> streamlinks = new List<string>();
         List<string> platforms = new List<string>();
 
-
-
-        if (isLive)
+        if (isLiveTwitch)
         {
             platforms.Add("Twitch");
-            streamlinks.Add("https://www.twitch.tv/cybercolagaming");
+            streamlinks.Add($"https://www.twitch.tv/{twitchtoken.Username}");
         }
         if (LiveYT.IsLive)
         {
@@ -72,11 +70,10 @@ public static class SocialPoster
         var template = new SocialPostTemplate("cybercola", streamlinks, platforms);
         var stringtoPost = template.Post;
 
-
         if (XPost)
         {
             // Post to X using Bearer Token (OAuth 2.0 Bearer Token)
-            if(postmaster._authobjects == null)
+            if (postmaster._authobjects == null)
             {
                 Console.WriteLine("Auth objects are null in PostMaster.");
                 return;
@@ -123,7 +120,7 @@ public static class SocialPoster
                 return;
             }
             postmaster._authobjects.TryGetValue(OAuthServices.Facebook, out var fbAuthToken);
-            if(fbAuthToken == null)
+            if (fbAuthToken == null)
             {
                 Console.WriteLine("Facebook auth token is null in PostMaster.");
                 return;
@@ -140,63 +137,41 @@ public static class SocialPoster
         }
     }
 
-    public static async Task<string> GetAccessTokenTwitch(string clientId, string clientSecret)
-    {
-        using var client = new HttpClient();
-        var response = await client.PostAsync($"https://id.twitch.tv/oauth2/token?client_id={clientId}&client_secret={clientSecret}&grant_type=client_credentials", null);
-        response.EnsureSuccessStatusCode();
-
-        var responseBody = await response.Content.ReadAsStringAsync();
-        var tokenResponse = JsonSerializer.Deserialize<TwitchTokenResponse>(responseBody);
-
-        if (tokenResponse is null || string.IsNullOrEmpty(tokenResponse.AccessToken))
-        {
-            throw new InvalidOperationException("Failed to retrieve the access token from the Twitch API response.");
-        }
-
-        return tokenResponse.AccessToken;
-    }
-
-    public static async Task<bool> IsStreamerLiveTwitch(string clientId, string accessToken, string streamerName)
+    public static async Task<bool> IsUserLiveTwitch(string clientId, string accessToken, string userId)
     {
         using HttpClient client = new();
         client.DefaultRequestHeaders.Add("Client-ID", clientId);
         client.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
 
-        var response = await client.GetAsync($"https://api.twitch.tv/helix/streams?user_login={streamerName}");
+        var response = await client.GetAsync($"https://api.twitch.tv/helix/streams?user_id={userId}");
         response.EnsureSuccessStatusCode();
 
         var responseBody = await response.Content.ReadAsStringAsync();
-        var json = JsonSerializer.Deserialize<Dictionary<string, object>>(responseBody);
+        using var json = JsonDocument.Parse(responseBody);
 
-        if (json is null || !json.TryGetValue("data", out var data))
-        {
-            throw new InvalidOperationException("Unexpected response format or missing 'data' field from Twitch API.");
-        }
-
-        // Kontrollera att datafältet är av typen JsonElement
-        if (data is not JsonElement dataElement || dataElement.ValueKind != JsonValueKind.Array)
-        {
-            throw new InvalidOperationException("The 'data' field in the response is not a valid JSON array.");
-        }
-
-        return ((JsonElement)json["data"]).GetArrayLength() > 0;
+        return json.RootElement.GetProperty("data").GetArrayLength() > 0;
     }
 
-    public static async Task<IsLiveDto> IsLiveYoutube(string apiKey, string channelId)
+    public static async Task<IsLiveDto> IsLiveYoutube(string accesstoken)
     {
         var islive = new IsLiveDto();
         try
         {
-            // Skapa YouTube Service
-            var youtubeService = new YouTubeService(new BaseClientService.Initializer()
+            var credential = GoogleCredential.FromAccessToken(accesstoken);
+            var YTService = new YouTubeService(new BaseClientService.Initializer
             {
-                ApiKey = apiKey,
-                ApplicationName = "YouTubeLiveChecker"
+                HttpClientInitializer = credential,
+                ApplicationName = "Streamer & Social Media Manager"
             });
 
+            var channelsRequest = YTService.Channels.List("id,snippet");
+            channelsRequest.Mine = true; // Viktigt: anger att vi vill ha den kanal som tillhör token
+
+            var channelsResponse = await channelsRequest.ExecuteAsync();
+            var channelId = channelsResponse.Items[0].Id;
+
             // Skapa en förfrågan
-            var searchRequest = youtubeService.Search.List("snippet");
+            var searchRequest = YTService.Search.List("snippet");
             searchRequest.ChannelId = channelId;
             searchRequest.EventType = SearchResource.ListRequest.EventTypeEnum.Live;
             searchRequest.Type = "video";
@@ -213,7 +188,6 @@ public static class SocialPoster
 
                 // Bygg den exakta live-URL:en
                 string liveUrl = $"https://www.youtube.com/watch?v={videoId}";
-                // Alternativt: https://www.youtube.com/live/{videoId}
 
                 islive.IsLive = true;
                 islive.LiveUrl = liveUrl;
@@ -222,14 +196,11 @@ public static class SocialPoster
             }
             else
             {
-                //return (false, null, null);
                 islive.IsLive = false;
                 islive.LiveUrl = null;
                 islive.VideoTitle = null;
                 return islive;
             }
-            // Kontrollera om det finns några live-videor
-            //return searchResponse.Items.Count > 0;
         }
         catch (Exception ex)
         {

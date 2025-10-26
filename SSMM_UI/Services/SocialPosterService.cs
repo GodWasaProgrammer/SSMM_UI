@@ -12,7 +12,7 @@ public class SocialPosterService
 
     private StateService _stateService;
     private ILogService _logService;
-    private PostMaster _postMaster;
+    public PostMaster _postMaster;
     public SocialPosterService(StateService stateService, ILogService logger)
     {
         _stateService = stateService;

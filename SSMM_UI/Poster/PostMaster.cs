@@ -1,4 +1,5 @@
-﻿using SSMM_UI.Enums;
+﻿using Google.Apis.YouTube.v3;
+using SSMM_UI.Enums;
 using SSMM_UI.Interfaces;
 using SSMM_UI.Oauth.Facebook;
 using SSMM_UI.RTMP;
@@ -15,6 +16,7 @@ namespace SSMM_UI.Poster;
 
 public class PostMaster
 {
+
     private ObservableCollection<SelectedService>? _selectedServices;
     public Dictionary<OAuthServices, IAuthToken>? _authobjects;
     private StateService _stateservice;
@@ -108,8 +110,8 @@ public class PostMaster
                 }
                 else
                 {
-                    
-                   // _logService.Log($"Username was missing for:{service}");
+
+                    // _logService.Log($"Username was missing for:{service}");
                 }
             }
         }
