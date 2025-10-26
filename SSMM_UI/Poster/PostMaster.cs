@@ -1,5 +1,4 @@
-﻿using Google.Apis.YouTube.v3;
-using SSMM_UI.Enums;
+﻿using SSMM_UI.Enums;
 using SSMM_UI.Interfaces;
 using SSMM_UI.Oauth.Facebook;
 using SSMM_UI.RTMP;
@@ -16,11 +15,23 @@ namespace SSMM_UI.Poster;
 
 public class PostMaster
 {
-
+    /// <summary>
+    /// The Services which will be streamed
+    /// </summary>
     private ObservableCollection<SelectedService>? _selectedServices;
+
+    /// <summary>
+    /// All our Oauth2 Objects with an enum listing what service they belong to
+    /// </summary>
     public Dictionary<OAuthServices, IAuthToken>? _authobjects;
+
+    /// <summary>
+    /// Provides access to the application's state management functionality.
+    /// </summary>
     private StateService _stateservice;
-    private Dictionary<string, OAuthServices>? _usernameAndService;
+
+    // used to map what is selected for streaming and what username to post as
+    public Dictionary<string, OAuthServices>? UsernameAndService;
     private ILogService _logService;
     public PostMaster(StateService stateservice, ILogService logger)
     {
@@ -78,16 +89,24 @@ public class PostMaster
         }
     }
 
+    /// <summary>
+    /// Passed to delegate in stateservice to have automatic update of authobjects
+    /// </summary>
     public void AuthObjectsUpdated()
     {
         _authobjects = _stateservice.AuthObjects;
         DetermineNamesAndServices();
     }
 
+    /// <summary>
+    /// Gives us our list of Named and Service Related to it, 
+    /// So that is, only if the person is Authed with that service and has selected it to stream
+    /// Will this return in the list.
+    /// </summary>
     public void DetermineNamesAndServices()
     {
         var selectedoutputs = new List<string>();
-        _usernameAndService = [];
+        UsernameAndService = [];
         if (_selectedServices != null)
         {
             foreach (var srv in _selectedServices)
@@ -106,7 +125,7 @@ public class PostMaster
 
                 if (username != null && isServiceSelected)
                 {
-                    _usernameAndService.Add(username, service);
+                    UsernameAndService.Add(username, service);
                 }
                 else
                 {
