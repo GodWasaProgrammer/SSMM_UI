@@ -16,12 +16,8 @@ public partial class WebhooksViewModel : ObservableObject
     {
         ToggleWebHooks = new RelayCommand(ToggleWebHooksEditDisplay);
         _stateService = _state;
-        Webhooks = new ObservableCollection<KeyValueItem>(_stateService.Webhooks
-        .SelectMany(dict => dict.Select(kvp => new KeyValueItem
-        {
-            Key = kvp.Key,
-            Value = kvp.Value
-        })));
+        Webhooks = _stateService.Webhooks;
+
     }
     public ObservableCollection<KeyValueItem> Webhooks { get; } = new();
     StateService _stateService;
@@ -52,7 +48,8 @@ public partial class WebhooksViewModel : ObservableObject
             Key = AnotherWebHook!.Keys.First(),
             Value = AnotherWebHook.Values.First()
         });
-        _stateService.SaveWebHook(AnotherWebHook);
+        //var kvi = new KeyValueItem { Value = LinkOfWebhook, Key = NameofWebHook };
+        //_stateService.SaveWebHook(kvi);
         NameofWebHook = string.Empty;
         LinkOfWebhook = string.Empty;
     }

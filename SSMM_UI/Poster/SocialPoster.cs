@@ -15,14 +15,16 @@ namespace SSMM_UI.Poster;
 
 public class SocialPoster
 {
-    public SocialPoster(ILogService logger, PostMaster postmaster)
+    public SocialPoster(ILogService logger, PostMaster postmaster, StateService stateservice)
     {
         _logger = logger;
         _postmaster = postmaster;
+        _stateservice = stateservice;
     }
 
     private ILogService _logger;
     private PostMaster _postmaster;
+    private StateService _stateservice;
     private string TwitchClientID = "y1cd8maguk5ob1m3lwvhdtupbj6pm3";
 
     public async Task RunPoster(bool XPost = false, bool DiscordPost = false, bool FBpost = false)
@@ -30,7 +32,7 @@ public class SocialPoster
         List<string> platforms = [];
         List<string> streamlinks = [];
         // Använd Singleton-instansen
-        var kl = KeyLoader.Instance;
+        //var kl = KeyLoader.Instance;
 
         if (_postmaster._authobjects == null)
         {
@@ -129,8 +131,13 @@ public class SocialPoster
             }
             if (DiscordPost)
             {
-                await DiscordPoster.PostToDiscord(kl.Webhooks["DGeneral"], stringtoPost);
-                await DiscordPoster.PostToDiscord(kl.Webhooks["DLive"], stringtoPost);
+                foreach (var webhook in _stateservice.Webhooks)
+                {
+                    var hook = webhook.Value;
+                    if (hook != null)
+                    await DiscordPoster.PostToDiscord(hook!, stringtoPost);
+
+                }
             }
         }
     }

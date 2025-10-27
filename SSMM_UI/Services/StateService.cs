@@ -8,6 +8,7 @@ using SSMM_UI.Interfaces;
 using SSMM_UI.MetaData;
 using SSMM_UI.RTMP;
 using SSMM_UI.Settings;
+using SSMM_UI.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -35,12 +36,12 @@ public class StateService
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; private set; } = [];
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
     public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; private set; } = [];
-    public ObservableCollection<Dictionary<string,string>> Webhooks { get; private set; } = [];
+    public ObservableCollection<KeyValueItem> Webhooks { get; private set; } = [];
 
     private StreamMetadata CurrentMetaData { get; set; } = new StreamMetadata();
 
 
-    public void SaveWebHook(Dictionary<string,string> webhook)
+    public void SaveWebHook(KeyValueItem webhook)
     {
         Webhooks.Add(webhook);
         SerializeWebhooks();
@@ -57,10 +58,14 @@ public class StateService
         if (File.Exists(_Webhooks))
         {
             var json = File.ReadAllText(_Webhooks);
-            var deserialized = JsonSerializer.Deserialize<ObservableCollection<Dictionary<string,string>>>(json);
-            if (deserialized != null)
+
+            var deserialized = JsonSerializer.Deserialize<ObservableCollection<KeyValueItem>>(json);
+
+            if (deserialized is not null)
             {
-                Webhooks = deserialized;
+                Webhooks.Clear();
+                foreach (var item in deserialized)
+                    Webhooks.Add(item);
             }
         }
     }

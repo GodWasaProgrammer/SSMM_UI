@@ -1,10 +1,6 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml.Styling;
-using Avalonia.Styling;
+﻿using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using SSMM_UI.Services;
-using System;
 namespace SSMM_UI;
 
 public partial class MainWindow : Window
@@ -16,6 +12,7 @@ public partial class MainWindow : Window
         {
             App.Services?.GetRequiredService<StateService>().SerializeServices();
             App.Services?.GetRequiredService<StateService>().SerializeSettings();
+            App.Services?.GetRequiredService<StateService>().SerializeWebhooks();
             App.Services?.GetRequiredService<StateService>().SaveWindowPosition(this.Height,this.Width,this.Position,this.WindowState);
         };
     }
