@@ -14,12 +14,7 @@ public partial class WebhooksViewModel : ObservableObject
 {
     public WebhooksViewModel(StateService _state)
     {
-        Webhooks = new ObservableCollection<KeyValueItem>(
-            KeyLoader.Instance.Webhooks.Select(kvp => new KeyValueItem { Key = kvp.Key, Value = kvp.Value }));
         ToggleWebHooks = new RelayCommand(ToggleWebHooksEditDisplay);
-
-
-
         _stateService = _state;
         Webhooks = new ObservableCollection<KeyValueItem>(_stateService.Webhooks
         .SelectMany(dict => dict.Select(kvp => new KeyValueItem
