@@ -10,7 +10,15 @@
 
 	<ScrollViewer>
 		<StackPanel Margin="20" Spacing="20">
-			
+
+			<Button Content="New Webhook" Command="{Binding AddWebhook}"/>
+			<Border Classes="card" IsVisible="{Binding IsAddingNewWebHook}">
+				<StackPanel>
+					<TextBox>Name</TextBox>
+					<TextBox>WebHook</TextBox>
+					<Button Content="Add" Command="{Binding SaveNewWebHook}"/>
+				</StackPanel>
+			</Border>
 			<!-- Webhooks -->
 			<Button Content="Show Webhooks(Discord)" Command="{Binding ToggleWebHooks}"/>
 			<Border Classes="card">

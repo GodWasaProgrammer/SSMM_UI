@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SSMM_UI.API_Key_Secrets_Loader;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
@@ -23,6 +24,23 @@ public partial class WebhooksViewModel : ObservableObject
     {
         DisplayWebhooks = !DisplayWebhooks;
     }
+    [ObservableProperty] bool isAddingNewWebHook;
+    public ICommand AddWebhook => new RelayCommand(AddNewWebHook);
+    private Dictionary<string, string>? AnotherWebHook;
+    public void AddNewWebHook()
+    {
+        IsAddingNewWebHook = true;
+        AnotherWebHook = [];
+    }
+    public ICommand SaveNewWebHook => new RelayCommand(SaveNewWebHookExecute);
+    private void SaveNewWebHookExecute()
+    {
+        Webhooks.Add(new KeyValueItem
+        {
+            Key = AnotherWebHook!.Keys.First(),
+            Value = AnotherWebHook.Values.First()
+        });
+    }
 }
 
 public class KeyValueItem
@@ -30,4 +48,3 @@ public class KeyValueItem
     public string? Key { get; set; }
     public string? Value { get; set; }
 }
-
