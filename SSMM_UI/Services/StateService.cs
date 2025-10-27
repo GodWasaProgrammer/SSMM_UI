@@ -1,7 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
-using Avalonia.Media.TextFormatting.Unicode;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.Enums;
 using SSMM_UI.Interfaces;
@@ -18,6 +17,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace SSMM_UI.Services;
+
 public class StateService
 {
     private const string SerializedServices = "Serialized_Services.json";
@@ -40,25 +40,26 @@ public class StateService
 
     private StreamMetadata CurrentMetaData { get; set; } = new StreamMetadata();
 
-
-    public void SaveWebHook(KeyValueItem webhook)
-    {
-        Webhooks.Add(webhook);
-        SerializeWebhooks();
-    }
-
     public void SerializeWebhooks()
     {
-        var json = JsonSerializer.Serialize(Webhooks, _regularJsonOptions);
-        File.WriteAllText(_Webhooks, json);
+        try
+        {
+            var json = JsonSerializer.Serialize(Webhooks, _regularJsonOptions);
+            File.WriteAllText(_Webhooks, json);
+        }
+        catch (Exception ex)
+        {
+            _logger.Log($"Failed to serialize webhooks: {ex.Message}");
+        }
     }
 
     public void DeSerializeWebhooks()
     {
-        if (File.Exists(_Webhooks))
+        try
         {
-            var json = File.ReadAllText(_Webhooks);
+            if (!File.Exists(_Webhooks)) return;
 
+            var json = File.ReadAllText(_Webhooks);
             var deserialized = JsonSerializer.Deserialize<ObservableCollection<KeyValueItem>>(json);
 
             if (deserialized is not null)
@@ -68,19 +69,30 @@ public class StateService
                     Webhooks.Add(item);
             }
         }
+        catch (Exception ex)
+        {
+            _logger.Log($"Failed to deserialize webhooks: {ex.Message}");
+        }
     }
 
     public void SaveWindowPosition(double Height, double Width, PixelPoint Position, WindowState windowState)
     {
-        var windowstate = new WindowSettings
+        try
         {
-            Width = Width,
-            Height = Height,
-            Pos = Position,
-            WindowState = windowState
-        };
-        var json = JsonSerializer.Serialize(windowstate, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(_windowSettings, json);
+            var windowstate = new WindowSettings
+            {
+                Width = Width,
+                Height = Height,
+                Pos = Position,
+                WindowState = windowState
+            };
+            var json = JsonSerializer.Serialize(windowstate, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(_windowSettings, json);
+        }
+        catch (Exception ex)
+        {
+            _logger.Log($"Failed to save window position: {ex.Message}");
+        }
     }
 
     public WindowSettings? LoadWindowPosition()
@@ -89,7 +101,7 @@ public class StateService
         {
             var json = File.ReadAllText(_windowSettings);
             var res = JsonSerializer.Deserialize<WindowSettings>(json);
-            if(res != null)
+            if (res != null)
             {
                 return res;
             }
@@ -102,7 +114,7 @@ public class StateService
         {
             return null;
         }
-        
+
     }
 
     public void SerializeToken<T>(OAuthServices service, T token) where T : class, IAuthToken
@@ -239,8 +251,10 @@ public class StateService
 
     private void DeSerializeMetaData()
     {
-        if (File.Exists(_savedMetaData))
+        try
         {
+            if (!File.Exists(_savedMetaData)) return;
+
             var json = File.ReadAllText(_savedMetaData);
             var deserialized = JsonSerializer.Deserialize<StreamMetadata>(json, _metaDataJsonOptions);
             if (deserialized != null)
@@ -254,6 +268,11 @@ public class StateService
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            _logger.Log($"Failed to deserialize metadata: {ex.Message}");
+            CurrentMetaData = new StreamMetadata();
         }
     }
 
@@ -285,22 +304,16 @@ public class StateService
     {
         try
         {
-
             YoutubeVideoCategories.Clear();
-            if (File.Exists(YoutubeCategories))
+            if (!File.Exists(YoutubeCategories)) return;
+
+            var json = File.ReadAllText(YoutubeCategories);
+            var deserialized = JsonSerializer.Deserialize<ObservableCollection<VideoCategory>>(json);
+            if (deserialized != null)
+                YoutubeVideoCategories = deserialized;
+            if (deserialized == null)
             {
-                var json = File.ReadAllText(YoutubeCategories);
-                var deserialized = JsonSerializer.Deserialize<ObservableCollection<VideoCategory>>(json);
-                if (deserialized != null)
-                    YoutubeVideoCategories = deserialized;
-                if (deserialized == null)
-                {
-                    throw new Exception("There was an issue deserializing Youtube Category list");
-                }
-            }
-            else
-            {
-                throw new Exception("File for Youtube Categories was missing");
+                throw new Exception("There was an issue deserializing Youtube Category list");
             }
         }
         catch (Exception ex)
@@ -311,57 +324,63 @@ public class StateService
 
     private void LoadRtmpServersFromServicesJson(string jsonPath)
     {
-        if (!File.Exists(jsonPath))
-            return;
-
-        using var doc = JsonDocument.Parse(File.ReadAllText(jsonPath));
-        var services = doc.RootElement.GetProperty("services");
-
-        foreach (var service in services.EnumerateArray())
+        try
         {
-            if (service.TryGetProperty("protocol", out var proto) && !proto.GetString()!.Contains("rtmp", StringComparison.CurrentCultureIgnoreCase))
-                continue;
+            if (!File.Exists(jsonPath)) return;
 
-            var serviceName = service.GetProperty("name").GetString() ?? "Unknown";
+            using var doc = JsonDocument.Parse(File.ReadAllText(jsonPath));
+            var services = doc.RootElement.GetProperty("services");
 
-            var rtmpServers = new List<RtmpServerInfo>();
-
-            foreach (var server in service.GetProperty("servers").EnumerateArray())
+            foreach (var service in services.EnumerateArray())
             {
-                var url = server.GetProperty("url").GetString() ?? "";
-                if (!url.StartsWith("rtmp")) continue;
+                if (service.TryGetProperty("protocol", out var proto) && !proto.GetString()!.Contains("rtmp", StringComparison.CurrentCultureIgnoreCase))
+                    continue;
 
-                rtmpServers.Add(new RtmpServerInfo
+                var serviceName = service.GetProperty("name").GetString() ?? "Unknown";
+
+                var rtmpServers = new List<RtmpServerInfo>();
+
+                foreach (var server in service.GetProperty("servers").EnumerateArray())
                 {
-                    ServiceName = serviceName,
-                    ServerName = server.GetProperty("name").GetString() ?? "Unnamed",
-                    Url = url
-                });
-            }
+                    var url = server.GetProperty("url").GetString() ?? "";
+                    if (!url.StartsWith("rtmp")) continue;
 
-            RecommendedSettings? recommended = null;
+                    rtmpServers.Add(new RtmpServerInfo
+                    {
+                        ServiceName = serviceName,
+                        ServerName = server.GetProperty("name").GetString() ?? "Unnamed",
+                        Url = url
+                    });
+                }
 
-            if (service.TryGetProperty("recommended", out var rec))
-            {
-                recommended = JsonSerializer.Deserialize<RecommendedSettings>(rec.GetRawText());
-            }
+                RecommendedSettings? recommended = null;
 
-            // Plocka supported video codecs
-            if (service.TryGetProperty("supported video codecs", out var codecs))
-            {
-                recommended ??= new RecommendedSettings();
-                recommended.SupportedVideoCodes = [.. codecs.EnumerateArray().Select(c => c.GetString()!)];
-            }
-
-            if (rtmpServers.Count > 0)
-            {
-                RtmpServiceGroups.Add(new RtmpServiceGroup
+                if (service.TryGetProperty("recommended", out var rec))
                 {
-                    ServiceName = serviceName,
-                    Servers = rtmpServers,
-                    RecommendedSettings = recommended
-                });
+                    recommended = JsonSerializer.Deserialize<RecommendedSettings>(rec.GetRawText());
+                }
+
+                // Plocka supported video codecs
+                if (service.TryGetProperty("supported video codecs", out var codecs))
+                {
+                    recommended ??= new RecommendedSettings();
+                    recommended.SupportedVideoCodes = [.. codecs.EnumerateArray().Select(c => c.GetString()!)];
+                }
+
+                if (rtmpServers.Count > 0)
+                {
+                    RtmpServiceGroups.Add(new RtmpServiceGroup
+                    {
+                        ServiceName = serviceName,
+                        Servers = rtmpServers,
+                        RecommendedSettings = recommended
+                    });
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            _logger.Log($"❌ Failed to load RTMP services from services.json: {ex.Message}");
         }
     }
 }
