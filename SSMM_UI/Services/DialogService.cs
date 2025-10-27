@@ -23,7 +23,7 @@ public class DialogService : IDialogService
 
     public async Task WebhooksView()
     {
-        var WebhooksVM = new WebhooksViewModel();
+        var WebhooksVM = new WebhooksViewModel(_stateservice);
         var WebhooksView = new WebhooksView()
         {
             DataContext = WebhooksVM,

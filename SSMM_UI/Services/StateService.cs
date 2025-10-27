@@ -43,6 +43,7 @@ public class StateService
     public void SaveWebHook(Dictionary<string,string> webhook)
     {
         Webhooks.Add(webhook);
+        SerializeWebhooks();
     }
 
     public void SerializeWebhooks()

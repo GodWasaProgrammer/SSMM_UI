@@ -14,8 +14,8 @@
 			<Button Content="New Webhook" Command="{Binding AddWebhook}"/>
 			<Border Classes="card" IsVisible="{Binding IsAddingNewWebHook}">
 				<StackPanel>
-					<TextBox>Name</TextBox>
-					<TextBox>WebHook</TextBox>
+					<TextBox Watermark="Name of webhook" Text="{Binding NameofWebHook}"/>
+					<TextBox  Watermark="Webhook link" Text="{Binding LinkOfWebhook}"/>
 					<Button Content="Add" Command="{Binding SaveNewWebHook}"/>
 				</StackPanel>
 			</Border>
