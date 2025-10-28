@@ -1,12 +1,10 @@
-﻿using Autofac.Core;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SSMM_UI.Enums;
 using SSMM_UI.Services;
 using SSMM_UI.Settings;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Tmds.DBus.Protocol;
 
 namespace SSMM_UI.ViewModel;
 
