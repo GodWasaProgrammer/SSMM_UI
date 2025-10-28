@@ -127,24 +127,19 @@ public class BroadCastService
                     await thumbnailRequest.UploadAsync();
                 }
 
-                if (metadata != null)
+                if (metadata?.YouTubeCategory?.Id != null)
                 {
-                    if (metadata.YouTubeCategory != null)
+                    var success = int.TryParse(metadata.YouTubeCategory.Id, out int category);
+                    if (success)
                     {
-                        if (metadata.YouTubeCategory.Id != null)
-                        {
-                            var success = int.TryParse(metadata.YouTubeCategory.Id, out int category);
-                            if (success)
-                            {
-                                await MDService.SetTitleAndCategoryYoutubeAsync(insertedBroadcast.Id, category);
+                        await MDService.SetTitleAndCategoryYoutubeAsync(insertedBroadcast.Id, category);
 
-                            }
-                        }
                     }
                 }
 
-                
-                await _puppeteer.ChangeGameTitleYoutube(insertedBroadcast.Id, metadata.TwitchCategory.Name);
+
+                if (metadata?.TwitchCategory?.Name != null)
+                    await _puppeteer.ChangeGameTitleYoutube(insertedBroadcast.Id, metadata.TwitchCategory.Name);
 
                 // 5. Returnera RTMP-url + streamkey
                 var ingestionInfo = insertedStream.Cdn.IngestionInfo;
