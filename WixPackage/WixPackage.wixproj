@@ -7,19 +7,32 @@
     <!-- Publish configuration used by the pre-build publish step -->
     <PublishConfig>Release</PublishConfig>
     <PublishRuntime>win-x64</PublishRuntime>
-	  <PublishDir>$(SolutionDir)SSMM_UI\bin\Release\net8.0-windows\publish\</PublishDir>
 
-    <!-- expose PublishDir to WiX heat via a WiX variable -->
+    <!-- Publish output directory -->
+    <PublishDir>$(SolutionDir)SSMM_UI\bin\Release\net9.0\win-x64</PublishDir>
+
+    <!-- Expose PublishDir to WiX heat via a WiX variable -->
     <DefineConstants>SSMM_UI.PublishDir=$(PublishDir)</DefineConstants>
 
-    <!-- path to the project that will be published -->
+    <!-- Path to the project that will be published -->
     <SSMMProject>$(SolutionDir)SSMM_UI\SSMM_UI.csproj</SSMMProject>
+
+    <!-- Directory for WixPackage outputs -->
+    <WixPackageDir>$(SolutionDir)WixPackage</WixPackageDir>
+  </PropertyGroup>
+	
+	<PropertyGroup>
+  <PublishDirNoSlash>$([System.String]::Copy($(PublishDir)).TrimEnd('\'))</PublishDirNoSlash>
+</PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Use WiX Heat 6.0.2 from NuGet instead of old WiX paths -->
+    <HeatExe>dotnet exec "$(NuGetPackageRoot)wixtoolset.heat\6.0.2\tools\net6.0\heat.dll"</HeatExe>
   </PropertyGroup>
 
-	<PropertyGroup>
-		<!-- Use WiX Heat 6.0.2 from NuGet instead of searching old WiX v4 paths -->
-		<HeatExe>dotnet exec "$(NuGetPackageRoot)wixtoolset.heat\6.0.2\tools\net6.0\heat.dll"</HeatExe>
-	</PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Heat" Version="6.0.2" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SSMM_UI\SSMM_UI.csproj" />
@@ -27,20 +40,22 @@
 
   <!-- Fail fast if heat.exe is not available -->
   <Target Name="EnsureHeatAvailable" BeforeTargets="PublishAndHarvestPublishFolder">
-    <Error Condition=" '$(HeatExe)' == '' " Text="heat.exe not found. Install the WiX Toolset or add heat.exe to PATH, or set the HeatExe property in the wixproj to the full path of heat.exe." />
+    <Error Condition=" '$(HeatExe)' == '' "
+           Text="heat.exe not found. Install the WiX Toolset or add heat.exe to PATH, or set the HeatExe property in the wixproj to the full path of heat.exe." />
   </Target>
 
   <!-- Publish the app then harvest the publish folder into a .wxs fragment before compiling the installer -->
   <Target Name="PublishAndHarvestPublishFolder" BeforeTargets="BeforeBuild">
     <Message Text="Publishing SSMM_UI to $(PublishDir)" Importance="high" />
-    <Exec Command='dotnet publish "%(SSMMProject.Identity)" -c $(PublishConfig) -r $(PublishRuntime) -o "$(PublishDir)"' />
+    <Exec Command="dotnet publish &quot;%(SSMMProject.Identity)&quot; -c $(PublishConfig) -r $(PublishRuntime) -o &quot;$(PublishDir)&quot;" />
 
     <Message Text="Harvesting publish folder with heat.exe ($(HeatExe)) into HarvestedComponents.wxs" Importance="high" />
-	  <Exec Command='dotnet exec "C:\Users\Björn\.nuget\packages\wixtoolset.heat\6.0.2\tools\net6.0\heat.dll" dir "C:\Users\Björn\source\repos\SSMM_UI\SSMM_UI\bin\Release\net8.0-windows\publish" -cg ProductComponents -dr INSTALLFOLDER -srd -suid -ag -var var.SSMM_UI.PublishDir -out "C:\Users\Björn\source\repos\SSMM_UI\WixPackage\HarvestedComponents.wxs"' />
+<Exec Command="$(HeatExe) dir &quot;$(PublishDirNoSlash)&quot; -cg ProductComponents -dr INSTALLFOLDER -srd -suid -ag -gg -var var.SSMM_UI.PublishDir -out &quot;$(WixPackageDir)\HarvestedComponents.wxs&quot;" />
 
-	  <!-- include the harvested fragment in the WiX compile -->
+
+    <!-- Include the harvested fragment in the WiX compile -->
     <ItemGroup>
-      <Compile Include="$(ProjectDir)HarvestedComponents.wxs" />
+      <Compile Include="$(WixPackageDir)\HarvestedComponents.wxs" />
     </ItemGroup>
   </Target>
 </Project>
