@@ -7,7 +7,7 @@
     <!-- Publish configuration used by the pre-build publish step -->
     <PublishConfig>Release</PublishConfig>
     <PublishRuntime>win-x64</PublishRuntime>
-    <PublishDir>$(SolutionDir)SSMM_UI\bin\$(PublishConfig)\net9.0\$(PublishRuntime)\publish\</PublishDir>
+	  <PublishDir>$(SolutionDir)SSMM_UI\bin\Release\net8.0-windows\publish\</PublishDir>
 
     <!-- expose PublishDir to WiX heat via a WiX variable -->
     <DefineConstants>SSMM_UI.PublishDir=$(PublishDir)</DefineConstants>
@@ -16,14 +16,10 @@
     <SSMMProject>$(SolutionDir)SSMM_UI\SSMM_UI.csproj</SSMMProject>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <!-- Resolve heat.exe: prefer WixToolPath if set, otherwise check common install locations -->
-    <HeatExe Condition="Exists('$(WixToolPath)heat.exe')">$(WixToolPath)heat.exe</HeatExe>
-    <HeatExe Condition=" '$(HeatExe)' == '' and Exists('$(ProgramFiles)\WiX Toolset v4\bin\heat.exe') ">$(ProgramFiles)\WiX Toolset v4\bin\heat.exe</HeatExe>
-    <HeatExe Condition=" '$(HeatExe)' == '' and Exists('$(ProgramFiles(x86))\WiX Toolset v4\bin\heat.exe') ">$(ProgramFiles(x86))\WiX Toolset v4\bin\heat.exe</HeatExe>
-    <!-- Fallback to plain 'heat.exe' so PATH works too -->
-    <HeatExe Condition=" '$(HeatExe)' == '' ">heat.exe</HeatExe>
-  </PropertyGroup>
+	<PropertyGroup>
+		<!-- Use WiX Heat 6.0.2 from NuGet instead of searching old WiX v4 paths -->
+		<HeatExe>dotnet exec "$(NuGetPackageRoot)wixtoolset.heat\6.0.2\tools\net6.0\heat.dll"</HeatExe>
+	</PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SSMM_UI\SSMM_UI.csproj" />
@@ -40,9 +36,9 @@
     <Exec Command='dotnet publish "%(SSMMProject.Identity)" -c $(PublishConfig) -r $(PublishRuntime) -o "$(PublishDir)"' />
 
     <Message Text="Harvesting publish folder with heat.exe ($(HeatExe)) into HarvestedComponents.wxs" Importance="high" />
-    <Exec Command='"$(HeatExe)" dir "$(PublishDir)" -cg ProductComponents -dr INSTALLFOLDER -srd -var "var.SSMM_UI.PublishDir" -out "$(ProjectDir)HarvestedComponents.wxs"' />
+	  <Exec Command='dotnet exec "C:\Users\Björn\.nuget\packages\wixtoolset.heat\6.0.2\tools\net6.0\heat.dll" dir "C:\Users\Björn\source\repos\SSMM_UI\SSMM_UI\bin\Release\net8.0-windows\publish" -cg ProductComponents -dr INSTALLFOLDER -srd -suid -ag -var var.SSMM_UI.PublishDir -out "C:\Users\Björn\source\repos\SSMM_UI\WixPackage\HarvestedComponents.wxs"' />
 
-    <!-- include the harvested fragment in the WiX compile -->
+	  <!-- include the harvested fragment in the WiX compile -->
     <ItemGroup>
       <Compile Include="$(ProjectDir)HarvestedComponents.wxs" />
     </ItemGroup>

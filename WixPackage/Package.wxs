@@ -9,7 +9,7 @@
 
 		<Feature Id="MainApplication" Title="Main Application" Level="1">
 			<ComponentGroupRef Id="ProductComponents" />
-			<ComponentGroupRef Id="DependencyComponents" />
+			<!--<ComponentGroupRef Id="DependencyComponents" />-->
 		</Feature>
 	</Package>
 
