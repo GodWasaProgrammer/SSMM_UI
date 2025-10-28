@@ -1,0 +1,7 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+	<Fragment>
+		<DirectoryRef Id="INSTALLFOLDER">
+			<Directory Id="DependenciesFolder" Name="Dependencies" />
+		</DirectoryRef>
+	</Fragment>
+</Wix>

@@ -1,0 +1,23 @@
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+	<Package
+	  Name="Streamer Social Media Manager"
+	  Manufacturer="GWAP Technologies"
+	  Version="1.0.0.0"
+	  UpgradeCode="8f4e8913-4100-4f7c-b255-66dfb20c2fd3">
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+		<Feature Id="MainApplication" Title="Main Application" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+			<ComponentGroupRef Id="DependencyComponents" />
+		</Feature>
+	</Package>
+
+	<Fragment>
+		<StandardDirectory Id="ProgramFiles6432Folder">
+			<Directory Id="ManufacturerFolder" Name="!(bind.property.Manufacturer)">
+				<Directory Id="INSTALLFOLDER" Name="!(bind.property.ProductName)" />
+			</Directory>
+		</StandardDirectory>
+	</Fragment>
+</Wix>
