@@ -24,7 +24,7 @@ public class BroadCastService
     private readonly ILogService _logger;
     private StreamInfo? StreamInfo;
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
-    private PuppetMaster _puppeteer;
+    private readonly PuppetMaster _puppeteer;
     public void CreateYTService(YouTubeService YTService)
     {
         _youTubeService = YTService;

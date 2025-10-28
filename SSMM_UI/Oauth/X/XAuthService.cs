@@ -16,8 +16,8 @@ public class XAuthService : IOAuthService<XToken>
     private readonly string _clientId = "TGVNbDAzN0hOY1JLNlBSeVg3ZmU6MTpjaQ";
     private readonly string _redirectUri = "http://localhost:7890/callback";
     private readonly HttpClient _http = new();
-    private StateService _stateService;
-    private ILogService _logger;
+    private readonly StateService _stateService;
+    private readonly ILogService _logger;
     private readonly string[] _scopes = [
                 "tweet.read",
                 "tweet.write",
@@ -98,9 +98,7 @@ public class XAuthService : IOAuthService<XToken>
         try
         {
             // Deserialisera till XToken
-            var refreshedToken = JsonSerializer.Deserialize<XToken>(body);
-            if (refreshedToken == null)
-                throw new Exception("Failed to deserialize refreshed token.");
+            var refreshedToken = JsonSerializer.Deserialize<XToken>(body) ?? throw new Exception("Failed to deserialize refreshed token.");
 
             // Hämta användarinformation direkt efter refresh
             //var user = await GetCurrentUserAsync(refreshedToken);
@@ -143,12 +141,22 @@ public class XAuthService : IOAuthService<XToken>
 
         // 4) exchange code for token
         var JsonToken = await ExchangePkceCodeForTokenAsync(code!, codeVerifier);
-        XToken xToken = new XToken();
-        xToken.AccessToken = JsonToken.RootElement.GetProperty("access_token").GetString() ?? "";
-        xToken.RefreshToken = JsonToken.RootElement.GetProperty("refresh_token").GetString() ?? "";
-        xToken.ExpiresIn = JsonToken.RootElement.GetProperty("expires_in").GetInt32();
-        xToken.TokenType = JsonToken.RootElement.GetProperty("token_type").GetString() ?? "";
-        xToken.Scope = JsonToken.RootElement.GetProperty("scope").GetString() ?? "";
+        XToken xToken = new();
+
+        if (JsonToken != null)
+        {
+
+            if (JsonToken.RootElement.TryGetProperty("access_token", out var accessTokenProp))
+                xToken.AccessToken = accessTokenProp.GetString() ?? "";
+            else
+                xToken.AccessToken = "";
+
+
+            xToken.RefreshToken = JsonToken.RootElement.GetProperty("refresh_token").GetString() ?? "";
+            xToken.ExpiresIn = JsonToken.RootElement.GetProperty("expires_in").GetInt32();
+            xToken.TokenType = JsonToken.RootElement.GetProperty("token_type").GetString() ?? "";
+            xToken.Scope = JsonToken.RootElement.GetProperty("scope").GetString() ?? "";
+        }
 
         var user = await GetCurrentUserAsync(xToken);
 

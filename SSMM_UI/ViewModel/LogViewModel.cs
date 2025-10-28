@@ -16,7 +16,7 @@ public partial class LogViewModel : ObservableObject
         _logService.OnLogAdded = ScrollToEnd;
     }
 
-    public ObservableCollection<string> LogMessages { get; } = new ObservableCollection<string>();
+    public ObservableCollection<string> LogMessages { get; } = [];
 
     [ObservableProperty] string? _selectedLogItem;
     [ObservableProperty] DisplayStreamOutputViewModel? _streamOutputVM;

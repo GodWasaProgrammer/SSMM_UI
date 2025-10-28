@@ -20,7 +20,7 @@ public class CentralAuthService
     public TwitchDCAuthService TwitchService;
     private readonly KickAuthService? _kickOauthService;
     private XAuthService XOAuth { get; set; }
-    private FacebookAuthService fbAuth;
+    private readonly FacebookAuthService fbAuth;
     private readonly ILogService _logger;
     private readonly StateService _stateService;
 

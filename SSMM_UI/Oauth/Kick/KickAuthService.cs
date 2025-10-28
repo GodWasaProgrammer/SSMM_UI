@@ -28,13 +28,13 @@ public class KickAuthService : IOAuthService<KickToken>
     public static string GetClientId() => ClientID;
     public string GetAccessToken() => _kickAuthResult?.AccessToken ?? string.Empty;
 
-    private static readonly string[] DefaultScopes = new[]
-    {
+    private static readonly string[] DefaultScopes =
+    [
         "user:read",
         "channel:read",
         "channel:write",
         "chat:write"
-    };
+    ];
 
     public static string Combine(params string[] scopes)
     {

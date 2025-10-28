@@ -19,8 +19,8 @@ public partial class SelectedServiceViewModel : ObservableObject
     [ObservableProperty] RtmpServerInfo? _selectedServer;
     [ObservableProperty] bool _showServerList = false;
     [ObservableProperty] bool isActive;
-    ILogService _logService;
-    StateService _stateservice;
+    readonly ILogService _logService;
+    readonly StateService _stateservice;
 
     public SelectedServiceViewModel(SelectedService selection, ILogService logservice, StateService stateservice)
     {

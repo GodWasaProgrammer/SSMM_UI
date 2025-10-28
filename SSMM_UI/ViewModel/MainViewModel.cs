@@ -58,10 +58,10 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     private UserSettings _settings = new();
-    private PuppetMaster _puppeteer;
+    private readonly PuppetMaster _puppeteer;
 
     // ==== Theme ====
-    private IThemeService _themeService;
+    private readonly IThemeService _themeService;
     [ObservableProperty] bool isDarkMode;
 
     // ==== Child Models ====

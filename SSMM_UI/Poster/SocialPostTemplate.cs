@@ -5,17 +5,17 @@ namespace SSMM_UI.Poster;
 
 public class SocialPostTemplate
 {
-    private string _title = string.Empty;
-    private string _description = string.Empty;
-    private Bitmap? _Thumbnail;
+    private readonly string _title = string.Empty;
+    private readonly string _description = string.Empty;
+    private readonly Bitmap? _Thumbnail;
     private readonly string _userName = string.Empty;
     private string _suffix = string.Empty;
-    private List<string> _linksToStreams = [];
-    private string _githubLink = "https://github.com/GodWasaProgrammer/SSMM_UI";
+    private readonly List<string> _linksToStreams = [];
+    private const string _githubLink = "https://github.com/GodWasaProgrammer/SSMM_UI";
 
     public string Post { get; set; } = string.Empty;
 
-    private List<string> Platforms = new List<string>();
+    private readonly List<string> Platforms = [];
 
     private void BuildPost()
     {

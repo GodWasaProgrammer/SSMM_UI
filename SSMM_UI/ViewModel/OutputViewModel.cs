@@ -20,7 +20,7 @@ public partial class OutputViewModel : ObservableObject
     [ObservableProperty] string? selectedMessage;
 
     /// Take Task of stream with the output ? 
-    public ObservableCollection<string> LogMessages { get; } = new();
+    public ObservableCollection<string> LogMessages { get; } = [];
 
     private void StartReadingOutput(Process process)
     {

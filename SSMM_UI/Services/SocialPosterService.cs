@@ -10,10 +10,10 @@ public class SocialPosterService
         await _socialPoster.RunPoster(X, Discord, Facebook);
     }
 
-    private StateService _stateService;
-    private ILogService _logService;
-    private PostMaster _postMaster;
-    private SocialPoster _socialPoster;
+    private readonly StateService _stateService;
+    private readonly ILogService _logService;
+    private readonly PostMaster _postMaster;
+    private readonly SocialPoster _socialPoster;
     public SocialPosterService(StateService stateService, ILogService logger)
     {
         _stateService = stateService;

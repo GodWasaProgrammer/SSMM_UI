@@ -66,7 +66,7 @@ public class StreamMetaDataConverterUnitTests
 
         // Assert
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-        Assert.Equal(new List<string> { "gaming", "live", "fun" }, metadata.Tags);
+        Assert.Equal(["gaming", "live", "fun"], metadata.Tags);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
     }
 
@@ -131,7 +131,7 @@ public class StreamMetaDataConverterUnitTests
         var metadata = new StreamMetadata
         {
             Title = "Test Stream",
-            Tags = new List<string> { "gaming", "live" }
+            Tags = ["gaming", "live"]
         };
 
         // Act

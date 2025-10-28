@@ -74,7 +74,7 @@ public partial class App : Application
 
             mainWindow.DataContext = Services.GetRequiredService<MainWindowViewModel>();
             var getState = Services.GetRequiredService<StateService>();
-            var windowPosition = getState.LoadWindowPosition();
+            var windowPosition = StateService.LoadWindowPosition();
             if (windowPosition != null)
             {
                 mainWindow.Height = windowPosition.Height;

@@ -19,9 +19,9 @@ public partial class SocialPosterLoginViewModel : ObservableObject
         _settings = stateService.UserSettingsObj;
         _ = AutoLoginIfTokenized();
     }
-    CentralAuthService _AuthService;
-    StateService _StateService;
-    UserSettings _settings;
+    readonly CentralAuthService _AuthService;
+    readonly StateService _StateService;
+    readonly UserSettings _settings;
     public ICommand LoginWithXCommand => new AsyncRelayCommand(LoginWithX);
     public ICommand LoginWithFacebook => new AsyncRelayCommand(FacebookLogin);
 

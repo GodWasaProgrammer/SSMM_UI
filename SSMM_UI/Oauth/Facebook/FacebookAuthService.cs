@@ -17,16 +17,16 @@ public class FacebookAuthService : IOAuthService<FacebookToken>
     private const string AuthEndpoint = "https://www.facebook.com/v21.0/dialog/oauth";
     private const string TokenEndpoint = "https://graph.facebook.com/v21.0/oauth/access_token";
     private const string UserInfoEndpoint = "https://graph.facebook.com/me?fields=id,name,email,picture";
-    private ILogService? _logger;
-    private StateService _stateService;
+    private readonly ILogService? _logger;
+    private readonly StateService _stateService;
 
     private static readonly string[] _scopes =
-    {
+    [
         "public_profile",
         "pages_show_list",
         "pages_read_engagement",
         "pages_manage_posts"
-    };
+    ];
 
     public FacebookAuthService(ILogService logger, StateService stateservice)
     {
@@ -34,7 +34,7 @@ public class FacebookAuthService : IOAuthService<FacebookToken>
         _stateService = stateservice;
     }
 
-    public async Task<List<FacebookPage>> RequestPagesAsync(FacebookToken userToken)
+    public static async Task<List<FacebookPage>> RequestPagesAsync(FacebookToken userToken)
     {
         var pages = new List<FacebookPage>();
 

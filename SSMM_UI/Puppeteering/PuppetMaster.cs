@@ -12,7 +12,7 @@ public class PuppetMaster
     private const string KickUrl = "https://dashboard.kick.com/stream";
     private const string StudioUrl = "https://studio.youtube.com/";
     private const string ChromePath = @"C:\Program Files\Google\Chrome\Application\chrome.exe";
-    private ILogService _logService;
+    private readonly ILogService _logService;
     public PuppetMaster(ILogService logservice)
     {
         _logService = logservice;

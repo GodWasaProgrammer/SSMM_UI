@@ -21,10 +21,10 @@ public class SocialPoster
         _stateservice = stateservice;
     }
 
-    private ILogService _logger;
-    private PostMaster _postmaster;
-    private StateService _stateservice;
-    private string TwitchClientID = "y1cd8maguk5ob1m3lwvhdtupbj6pm3";
+    private readonly ILogService _logger;
+    private readonly PostMaster _postmaster;
+    private readonly StateService _stateservice;
+    private const string TwitchClientID = "y1cd8maguk5ob1m3lwvhdtupbj6pm3";
 
     public async Task RunPoster(bool XPost = false, bool DiscordPost = false, bool FBpost = false)
     {
@@ -124,7 +124,7 @@ public class SocialPoster
                     _logger.Log("Facebook auth token is null in PostMaster.");
                     return;
                 }
-                var res = await _postmaster.RequestPagesAsync((FacebookToken)fbAuthToken);
+                var res = await PostMaster.RequestPagesAsync((FacebookToken)fbAuthToken);
                 var page = res.FirstOrDefault()!;
                 await FacebookPosterV2.PostAsync(page.Id, page.AccessToken, "Testing Graph API");
             }

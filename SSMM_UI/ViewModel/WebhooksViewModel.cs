@@ -17,8 +17,8 @@ public partial class WebhooksViewModel : ObservableObject
         Webhooks = _stateService.Webhooks;
 
     }
-    public ObservableCollection<KeyValueItem> Webhooks { get; } = new();
-    StateService _stateService;
+    public ObservableCollection<KeyValueItem> Webhooks { get; } = [];
+    readonly StateService _stateService;
 
     public ICommand ToggleWebHooks { get; }
     [ObservableProperty] bool displayWebhooks;

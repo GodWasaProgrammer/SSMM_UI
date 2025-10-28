@@ -24,7 +24,6 @@ public class RTMPServerUnitTests
     public void SetupServerAsync_ShouldStartBackgroundTask()
     {
         // Arrange
-        var cancellationTokenSource = new CancellationTokenSource();
 
         // Act
         RTMPServer.SetupServerAsync();

@@ -9,9 +9,9 @@ namespace SSMM_UI.Services;
 
 public class ThemeService : IThemeService
 {
-    private Application App => Application.Current!;
+    private static Application App => Application.Current!;
     private UserSettings UserSettings => _stateService.UserSettingsObj;
-    private StateService _stateService;
+    private readonly StateService _stateService;
 
     public bool IsDark { get; private set; }
 

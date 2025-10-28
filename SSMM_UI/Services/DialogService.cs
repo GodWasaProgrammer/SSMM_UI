@@ -18,8 +18,8 @@ public class DialogService : IDialogService
         _logService = logService;
         _stateservice = stateservice;
     }
-    ILogService _logService;
-    StateService _stateservice;
+    readonly ILogService _logService;
+    readonly StateService _stateservice;
 
     public async Task WebhooksView()
     {

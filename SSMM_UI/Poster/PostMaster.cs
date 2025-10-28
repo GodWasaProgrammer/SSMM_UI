@@ -18,7 +18,7 @@ public class PostMaster
     /// <summary>
     /// The Services which will be streamed
     /// </summary>
-    private ObservableCollection<SelectedService>? _selectedServices;
+    private readonly ObservableCollection<SelectedService>? _selectedServices;
 
     /// <summary>
     /// All our Oauth2 Objects with an enum listing what service they belong to
@@ -28,11 +28,11 @@ public class PostMaster
     /// <summary>
     /// Provides access to the application's state management functionality.
     /// </summary>
-    private StateService _stateservice;
+    private readonly StateService _stateservice;
 
     // used to map what is selected for streaming and what username to post as
     public Dictionary<string, OAuthServices>? UsernameAndService;
-    private ILogService _logService;
+    private readonly ILogService _logService;
     public PostMaster(StateService stateservice, ILogService logger)
     {
         _selectedServices = stateservice.SelectedServicesToStream;
@@ -42,7 +42,7 @@ public class PostMaster
         //DetermineNamesAndServices();
     }
 
-    public async Task<List<FacebookPage>> RequestPagesAsync(FacebookToken userToken)
+    public static async Task<List<FacebookPage>> RequestPagesAsync(FacebookToken userToken)
     {
         var pages = new List<FacebookPage>();
 

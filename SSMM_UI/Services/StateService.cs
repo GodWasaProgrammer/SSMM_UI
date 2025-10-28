@@ -30,7 +30,7 @@ public class StateService
     private const string _Webhooks = "Webhooks.json";
     private readonly JsonSerializerOptions _metaDataJsonOptions;
     private readonly JsonSerializerOptions _regularJsonOptions = new() { WriteIndented = true };
-    private Dictionary<OAuthServices, IAuthToken> _authObjects = [];
+    private readonly Dictionary<OAuthServices, IAuthToken> _authObjects = [];
     public event Action? OnAuthObjectsUpdated;
     public Dictionary<OAuthServices, IAuthToken> AuthObjects { get { return _authObjects; } }
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; private set; } = [];
@@ -86,7 +86,7 @@ public class StateService
                 Pos = Position,
                 WindowState = windowState
             };
-            var json = JsonSerializer.Serialize(windowstate, new JsonSerializerOptions { WriteIndented = true });
+            var json = JsonSerializer.Serialize(windowstate, _regularJsonOptions);
             File.WriteAllText(_windowSettings, json);
         }
         catch (Exception ex)
@@ -95,7 +95,7 @@ public class StateService
         }
     }
 
-    public WindowSettings? LoadWindowPosition()
+    public static WindowSettings? LoadWindowPosition()
     {
         if (File.Exists(_windowSettings))
         {

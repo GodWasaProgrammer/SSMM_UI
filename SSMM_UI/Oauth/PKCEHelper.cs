@@ -23,9 +23,8 @@ public class PKCEHelper
 
     public static string GenerateCodeChallenge(string codeVerifier)
     {
-        using var sha256 = SHA256.Create();
         var bytes = Encoding.ASCII.GetBytes(codeVerifier);
-        var hash = sha256.ComputeHash(bytes);
+        var hash = SHA256.HashData(bytes);
         return Base64UrlEncode(hash);
     }
 
