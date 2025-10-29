@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.Enums;
+using SSMM_UI.Helpers;
 using SSMM_UI.Interfaces;
 using SSMM_UI.MetaData;
 using SSMM_UI.RTMP;
@@ -20,14 +21,46 @@ namespace SSMM_UI.Services;
 
 public class StateService
 {
-    private const string SerializedServices = "Serialized_Services.json";
+    public StateService(ILogService logger)
+    {
+        _metaDataJsonOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            PropertyNameCaseInsensitive = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
+
+        _webHooksPath = StorageHelper.GetFilePath(StorageScope.Roaming, _Webhooks, _webHooksFolder);
+        _windowsPath = StorageHelper.GetFilePath(StorageScope.Roaming, _windowSettings, _settingsFolder);
+        _metaDataPath = StorageHelper.GetFilePath(StorageScope.Roaming, _savedMetaData, _MetadataFolder);
+        _savedServicesPath = StorageHelper.GetFilePath(StorageScope.Roaming, _serializedServices, _servicesFolder);
+        _settingsPath = StorageHelper.GetFilePath(StorageScope.Roaming, _userSettings, _settingsFolder);
+
+        _logger = logger;
+        DeSerializeServices();
+        DeserializeSettings();
+        DeSerializeWebhooks();
+        DeSerializeMetaData();
+        LoadRtmpServersFromServicesJson(_obsServices);
+        DeSerializeYoutubeCategories();
+    }
+
+    // Filenames
+    private const string _serializedServices = "Serialized_Services.json";
     private const string _obsServices = "services.json";
-    private const string YoutubeCategories = "youtube_categories.json";
+    private const string _youtubeCategories = "youtube_categories.json";
     private const string _userSettings = "UserSettings.json";
     private const string _savedMetaData = "MetaData_State.json";
     private const string _windowSettings = "WindowSettings.json";
-    private const string _tokenPath = "Tokens";
     private const string _Webhooks = "Webhooks.json";
+
+    // Folders
+    private const string _tokenFolder = "Tokens";
+    private const string _settingsFolder = "Settings";
+    private const string _MetadataFolder = "Metadata";
+    private const string _servicesFolder = "Services";
+    private const string _webHooksFolder = "WebHooks";
+
     private readonly JsonSerializerOptions _metaDataJsonOptions;
     private readonly JsonSerializerOptions _regularJsonOptions = new() { WriteIndented = true };
     private readonly Dictionary<OAuthServices, IAuthToken> _authObjects = [];
@@ -38,14 +71,21 @@ public class StateService
     public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; private set; } = [];
     public ObservableCollection<KeyValueItem> Webhooks { get; private set; } = [];
 
-    private StreamMetadata CurrentMetaData { get; set; } = new StreamMetadata();
+    private StreamMetadata _currentMetaData { get; set; } = new StreamMetadata();
+
+    // Paths
+    private readonly string _webHooksPath;
+    private readonly string _windowsPath;
+    private readonly string _metaDataPath;
+    private readonly string _savedServicesPath;
+    private readonly string _settingsPath;
 
     public void SerializeWebhooks()
     {
         try
         {
             var json = JsonSerializer.Serialize(Webhooks, _regularJsonOptions);
-            File.WriteAllText(_Webhooks, json);
+            File.WriteAllText(_webHooksPath, json);
         }
         catch (Exception ex)
         {
@@ -57,9 +97,9 @@ public class StateService
     {
         try
         {
-            if (!File.Exists(_Webhooks)) return;
+            if (!File.Exists(_webHooksPath)) return;
 
-            var json = File.ReadAllText(_Webhooks);
+            var json = File.ReadAllText(_webHooksPath);
             var deserialized = JsonSerializer.Deserialize<ObservableCollection<KeyValueItem>>(json);
 
             if (deserialized is not null)
@@ -86,8 +126,9 @@ public class StateService
                 Pos = Position,
                 WindowState = windowState
             };
+
             var json = JsonSerializer.Serialize(windowstate, _regularJsonOptions);
-            File.WriteAllText(_windowSettings, json);
+            File.WriteAllText(_windowsPath, json);
         }
         catch (Exception ex)
         {
@@ -97,24 +138,27 @@ public class StateService
 
     public static WindowSettings? LoadWindowPosition()
     {
-        if (File.Exists(_windowSettings))
+        try
         {
-            var json = File.ReadAllText(_windowSettings);
-            var res = JsonSerializer.Deserialize<WindowSettings>(json);
-            if (res != null)
-            {
-                return res;
-            }
-            else
-            {
+            // Skapa samma sökväg som du använde i SaveWindowPosition
+            var fullPath = StorageHelper.GetFilePath(
+                StorageScope.Roaming,
+                _windowSettings,
+                _settingsFolder
+            );
+
+            if (!File.Exists(fullPath))
                 return null;
-            }
+
+            var json = File.ReadAllText(fullPath);
+            return JsonSerializer.Deserialize<WindowSettings>(json);
         }
-        else
+        catch (Exception ex)
         {
+            // Logga gärna, men returnera null om något går fel
+            Console.WriteLine($"Failed to load window position: {ex.Message}");
             return null;
         }
-
     }
 
     public void SerializeToken<T>(OAuthServices service, T token) where T : class, IAuthToken
@@ -123,20 +167,18 @@ public class StateService
         {
             ArgumentNullException.ThrowIfNull(token);
 
+            var fullPath = StorageHelper.GetFilePath(
+                StorageScope.Roaming,
+                $"{service}Token.json",
+                _tokenFolder);
+
             var json = JsonSerializer.Serialize(token, _regularJsonOptions);
 
-            var path = Path.Combine(_tokenPath, $"{service}Token.json");
-            if (!Path.Exists(_tokenPath))
-            {
-                Directory.CreateDirectory(path);
-            }
-            File.WriteAllText(path, json);
+            File.WriteAllText(fullPath, json);
 
-            // CA1853 says you dont need to guard against if it contains it, its built in
-            _authObjects.Remove(service);
-            _authObjects.Add(service, token);
+            _authObjects[service] = token;
+
             OnAuthObjectsUpdated?.Invoke();
-
         }
         catch (Exception ex)
         {
@@ -144,42 +186,45 @@ public class StateService
         }
     }
 
-    public T DeserializeToken<T>(OAuthServices service) where T : class, IAuthToken
+    public T? DeserializeToken<T>(OAuthServices service) where T : class, IAuthToken
     {
         try
         {
-            string filePath = Path.Combine(_tokenPath, $"{service}Token.json");
-            if (!File.Exists(filePath))
-            {
-                return null!;
-            }
-            var json = File.ReadAllText(filePath);
-            var deserializedobj = JsonSerializer.Deserialize<T>(json, _regularJsonOptions);
+            // Full path till tokenfilen i Roaming/Tokens
+            var fullPath = StorageHelper.GetFilePath(
+                StorageScope.Roaming,
+                $"{service}Token.json",
+                _tokenFolder);
 
-            //CA1853 claims you dont need to guard against removing something as it ignores if its not contained within
-            _authObjects.Remove(service);
-            if (deserializedobj != null)
+            if (!File.Exists(fullPath))
+                return null;
+
+            var json = File.ReadAllText(fullPath);
+            var deserializedObj = JsonSerializer.Deserialize<T>(json, _regularJsonOptions);
+
+            if (deserializedObj != null)
             {
-                _authObjects.Add(service, deserializedobj);
+                _authObjects[service] = deserializedObj;
                 OnAuthObjectsUpdated?.Invoke();
             }
-            return deserializedobj!;
+
+            return deserializedObj;
         }
         catch (Exception ex)
         {
-            _logger.Log($"{ex.Message} Failed to Deserialize token for:{service}");
-            return null!;
+            _logger.Log($"{ex.Message} Failed to deserialize token for: {service}");
+            return null;
         }
     }
 
     public StreamMetadata GetCurrentMetaData()
     {
-        return CurrentMetaData;
+        return _currentMetaData;
     }
 
     public void UpdateCurrentMetaData(StreamMetadata metadata)
     {
-        CurrentMetaData = metadata;
+        _currentMetaData = metadata;
         SerializeMetaData();
     }
 
@@ -187,47 +232,29 @@ public class StateService
 
     private readonly ILogService _logger;
 
-    //TODO: When running initially, check what boxart we have available, build a list, supply list to VM's
-    public StateService(ILogService logger)
-    {
-        _metaDataJsonOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNameCaseInsensitive = true,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
-
-        _logger = logger;
-        DeSerializeServices();
-        DeserializeSettings();
-        DeSerializeWebhooks();
-        DeSerializeMetaData();
-        LoadRtmpServersFromServicesJson(_obsServices);
-        DeSerializeYoutubeCategories();
-    }
-
     public void SettingsChanged(UserSettings settings)
     {
         UserSettingsObj = settings;
     }
 
-    public void SerializeServices()
-    {
-        var json = JsonSerializer.Serialize(SelectedServicesToStream, _regularJsonOptions);
-        File.WriteAllText(SerializedServices, json);
-    }
 
     public void SerializeSettings()
     {
-        var json = JsonSerializer.Serialize(UserSettingsObj, _regularJsonOptions);
-        File.WriteAllText(_userSettings, json);
+        try
+        {
+            var json = JsonSerializer.Serialize(UserSettingsObj, _regularJsonOptions);
+            File.WriteAllText(_settingsPath, json);
+        }
+        catch(Exception ex)
+        {
+            _logger.Log($"Error in saving Settings:{ex.Message}");
+        }
     }
-
     private void DeserializeSettings()
     {
-        if (File.Exists(_userSettings))
+        if (File.Exists(_settingsPath))
         {
-            var json = File.ReadAllText(_userSettings);
+            var json = File.ReadAllText(_settingsPath);
             var deserialized = JsonSerializer.Deserialize<UserSettings>(json);
             if (deserialized != null)
             {
@@ -240,50 +267,58 @@ public class StateService
     {
         try
         {
-            string json = JsonSerializer.Serialize(CurrentMetaData, _metaDataJsonOptions);
-            File.WriteAllText(_savedMetaData, json);
+            string json = JsonSerializer.Serialize(_currentMetaData, _metaDataJsonOptions);
+            File.WriteAllText(_metaDataPath, json);
         }
         catch (Exception ex)
         {
             _logger.Log($"Failed to serialize metadata: {ex.Message}");
         }
     }
-
     private void DeSerializeMetaData()
     {
         try
         {
-            if (!File.Exists(_savedMetaData)) return;
+            if (!File.Exists(_metaDataPath)) return;
 
-            var json = File.ReadAllText(_savedMetaData);
+            var json = File.ReadAllText(_metaDataPath);
             var deserialized = JsonSerializer.Deserialize<StreamMetadata>(json, _metaDataJsonOptions);
             if (deserialized != null)
             {
-                CurrentMetaData = deserialized;
-                if (CurrentMetaData != null)
+                _currentMetaData = deserialized;
+
+                if (_currentMetaData.ThumbnailPath != null)
                 {
-                    if (CurrentMetaData.ThumbnailPath != null)
-                    {
-                        CurrentMetaData.Thumbnail = new Bitmap(CurrentMetaData.ThumbnailPath);
-                    }
+                    _currentMetaData.Thumbnail = new Bitmap(_currentMetaData.ThumbnailPath);
                 }
             }
         }
         catch (Exception ex)
         {
             _logger.Log($"Failed to deserialize metadata: {ex.Message}");
-            CurrentMetaData = new StreamMetadata();
         }
     }
 
+    public void SerializeServices()
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(SelectedServicesToStream, _regularJsonOptions);
+            File.WriteAllText(_savedServicesPath, json);
+        }
+        catch (Exception ex)
+        {
+            _logger.Log($"Error in Serialize Services:{ex.Message}");
+        }
+    }
     private void DeSerializeServices()
     {
-        if (!File.Exists(SerializedServices))
+        if (!File.Exists(_savedServicesPath))
             return;
 
         try
         {
-            var json = File.ReadAllText(SerializedServices);
+            var json = File.ReadAllText(_savedServicesPath);
             var deserialized = JsonSerializer.Deserialize<ObservableCollection<SelectedService>>(json);
             if (deserialized != null)
             {
@@ -305,9 +340,9 @@ public class StateService
         try
         {
             YoutubeVideoCategories.Clear();
-            if (!File.Exists(YoutubeCategories)) return;
+            if (!File.Exists(_youtubeCategories)) return;
 
-            var json = File.ReadAllText(YoutubeCategories);
+            var json = File.ReadAllText(_youtubeCategories);
             var deserialized = JsonSerializer.Deserialize<ObservableCollection<VideoCategory>>(json);
             if (deserialized != null)
                 YoutubeVideoCategories = deserialized;

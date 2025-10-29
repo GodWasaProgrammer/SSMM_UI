@@ -4,7 +4,7 @@ using SSMM_UI.Enums;
 using System;
 using System.IO;
 
-public static class AppStorageHelper
+public static class StorageHelper
 {
     public static string CompanyName { get; set; } = "GWAP Technologies";
     public static string AppName { get; set; } = "Streamer & Social Media Manager";
