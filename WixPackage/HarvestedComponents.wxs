@@ -1,20 +1,18 @@
 ﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
     <Fragment>
         <DirectoryRef Id="INSTALLFOLDER">
-            <Directory Id="_.playwright" Name=".playwright" />
             <Directory Id="About" Name="About" />
-            <Directory Id="admin_panel_ui" Name="admin-panel-ui" />
             <Directory Id="Dependencies" Name="Dependencies" />
             <Directory Id="libvlc" Name="libvlc" />
         </DirectoryRef>
     </Fragment>
     <Fragment>
         <ComponentGroup Id="ProductComponents">
-            <Component Id="Autofac.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Autofac.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Autofac.dll" />
-            </Component>
             <Component Id="Avalonia.Base.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="Avalonia.Base.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Avalonia.Base.dll" />
+            </Component>
+            <Component Id="Avalonia.Controls.ColorPicker.dll" Directory="INSTALLFOLDER" Guid="*">
+                <File Id="Avalonia.Controls.ColorPicker.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Avalonia.Controls.ColorPicker.dll" />
             </Component>
             <Component Id="Avalonia.Controls.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="Avalonia.Controls.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Avalonia.Controls.dll" />
@@ -24,6 +22,9 @@
             </Component>
             <Component Id="Avalonia.Desktop.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="Avalonia.Desktop.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Avalonia.Desktop.dll" />
+            </Component>
+            <Component Id="Avalonia.Diagnostics.dll" Directory="INSTALLFOLDER" Guid="*">
+                <File Id="Avalonia.Diagnostics.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Avalonia.Diagnostics.dll" />
             </Component>
             <Component Id="Avalonia.Dialogs.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="Avalonia.Dialogs.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Avalonia.Dialogs.dll" />
@@ -64,6 +65,9 @@
             <Component Id="Avalonia.Themes.Fluent.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="Avalonia.Themes.Fluent.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Avalonia.Themes.Fluent.dll" />
             </Component>
+            <Component Id="Avalonia.Themes.Simple.dll" Directory="INSTALLFOLDER" Guid="*">
+                <File Id="Avalonia.Themes.Simple.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Avalonia.Themes.Simple.dll" />
+            </Component>
             <Component Id="Avalonia.Vulkan.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="Avalonia.Vulkan.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Avalonia.Vulkan.dll" />
             </Component>
@@ -81,9 +85,6 @@
             </Component>
             <Component Id="CommunityToolkit.Mvvm.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="CommunityToolkit.Mvvm.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\CommunityToolkit.Mvvm.dll" />
-            </Component>
-            <Component Id="e_sqlite3.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="e_sqlite3.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\e_sqlite3.dll" />
             </Component>
             <Component Id="FFmpeg.AutoGen.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="FFmpeg.AutoGen.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\FFmpeg.AutoGen.dll" />
@@ -111,9 +112,6 @@
             </Component>
             <Component Id="HarfBuzzSharp.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="HarfBuzzSharp.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\HarfBuzzSharp.dll" />
-            </Component>
-            <Component Id="HtmlAgilityPack.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="HtmlAgilityPack.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\HtmlAgilityPack.dll" />
             </Component>
             <Component Id="IconPacks.Avalonia.BootstrapIcons.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="IconPacks.Avalonia.BootstrapIcons.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\IconPacks.Avalonia.BootstrapIcons.dll" />
@@ -250,9 +248,6 @@
             <Component Id="libSkiaSharp.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="libSkiaSharp.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libSkiaSharp.dll" />
             </Component>
-            <Component Id="LibVLCSharp.Avalonia.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="LibVLCSharp.Avalonia.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\LibVLCSharp.Avalonia.dll" />
-            </Component>
             <Component Id="LibVLCSharp.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="LibVLCSharp.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\LibVLCSharp.dll" />
             </Component>
@@ -301,54 +296,6 @@
             <Component Id="MicroCom.Runtime.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="MicroCom.Runtime.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\MicroCom.Runtime.dll" />
             </Component>
-            <Component Id="Microsoft.Bcl.AsyncInterfaces.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Microsoft.Bcl.AsyncInterfaces.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Microsoft.Bcl.AsyncInterfaces.dll" />
-            </Component>
-            <Component Id="Microsoft.Data.Sqlite.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Microsoft.Data.Sqlite.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Microsoft.Data.Sqlite.dll" />
-            </Component>
-            <Component Id="Microsoft.Extensions.Configuration.Abstractions.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Microsoft.Extensions.Configuration.Abstractions.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Microsoft.Extensions.Configuration.Abstractions.dll" />
-            </Component>
-            <Component Id="Microsoft.Extensions.Configuration.Binder.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Microsoft.Extensions.Configuration.Binder.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Microsoft.Extensions.Configuration.Binder.dll" />
-            </Component>
-            <Component Id="Microsoft.Extensions.Configuration.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Microsoft.Extensions.Configuration.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Microsoft.Extensions.Configuration.dll" />
-            </Component>
-            <Component Id="Microsoft.Extensions.DependencyInjection.Abstractions.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Microsoft.Extensions.DependencyInjection.Abstractions.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
-            </Component>
-            <Component Id="Microsoft.Extensions.DependencyInjection.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Microsoft.Extensions.DependencyInjection.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Microsoft.Extensions.DependencyInjection.dll" />
-            </Component>
-            <Component Id="Microsoft.Extensions.Logging.Abstractions.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Microsoft.Extensions.Logging.Abstractions.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Microsoft.Extensions.Logging.Abstractions.dll" />
-            </Component>
-            <Component Id="Microsoft.Extensions.Logging.Configuration.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Microsoft.Extensions.Logging.Configuration.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Microsoft.Extensions.Logging.Configuration.dll" />
-            </Component>
-            <Component Id="Microsoft.Extensions.Logging.Console.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Microsoft.Extensions.Logging.Console.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Microsoft.Extensions.Logging.Console.dll" />
-            </Component>
-            <Component Id="Microsoft.Extensions.Logging.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Microsoft.Extensions.Logging.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Microsoft.Extensions.Logging.dll" />
-            </Component>
-            <Component Id="Microsoft.Extensions.Options.ConfigurationExtensions.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Microsoft.Extensions.Options.ConfigurationExtensions.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Microsoft.Extensions.Options.ConfigurationExtensions.dll" />
-            </Component>
-            <Component Id="Microsoft.Extensions.Options.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Microsoft.Extensions.Options.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Microsoft.Extensions.Options.dll" />
-            </Component>
-            <Component Id="Microsoft.Extensions.Primitives.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Microsoft.Extensions.Primitives.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Microsoft.Extensions.Primitives.dll" />
-            </Component>
-            <Component Id="Microsoft.Playwright.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Microsoft.Playwright.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Microsoft.Playwright.dll" />
-            </Component>
-            <Component Id="Mpv.NET.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Mpv.NET.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Mpv.NET.dll" />
-            </Component>
             <Component Id="mtanksl.ActionMessageFormat.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="mtanksl.ActionMessageFormat.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\mtanksl.ActionMessageFormat.dll" />
             </Component>
@@ -370,9 +317,6 @@
             <Component Id="Open.Threading.ReadWrite.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="Open.Threading.ReadWrite.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Open.Threading.ReadWrite.dll" />
             </Component>
-            <Component Id="playwright.ps1" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="playwright.ps1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\playwright.ps1" />
-            </Component>
             <Component Id="PuppeteerSharp.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="PuppeteerSharp.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\PuppeteerSharp.dll" />
             </Component>
@@ -384,15 +328,6 @@
             </Component>
             <Component Id="SkiaSharp.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="SkiaSharp.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\SkiaSharp.dll" />
-            </Component>
-            <Component Id="SQLitePCLRaw.batteries_v2.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="SQLitePCLRaw.batteries_v2.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\SQLitePCLRaw.batteries_v2.dll" />
-            </Component>
-            <Component Id="SQLitePCLRaw.core.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="SQLitePCLRaw.core.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\SQLitePCLRaw.core.dll" />
-            </Component>
-            <Component Id="SQLitePCLRaw.provider.e_sqlite3.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="SQLitePCLRaw.provider.e_sqlite3.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\SQLitePCLRaw.provider.e_sqlite3.dll" />
             </Component>
             <Component Id="SSMM_UI.deps.json" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="SSMM_UI.deps.json" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\SSMM_UI.deps.json" />
@@ -421,1082 +356,11 @@
             <Component Id="Tmds.DBus.Protocol.dll" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="Tmds.DBus.Protocol.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Tmds.DBus.Protocol.dll" />
             </Component>
-            <Component Id="Tweetinvi.Controllers.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Tweetinvi.Controllers.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Tweetinvi.Controllers.dll" />
-            </Component>
-            <Component Id="Tweetinvi.Core.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Tweetinvi.Core.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Tweetinvi.Core.dll" />
-            </Component>
-            <Component Id="Tweetinvi.Credentials.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Tweetinvi.Credentials.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Tweetinvi.Credentials.dll" />
-            </Component>
-            <Component Id="Tweetinvi.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Tweetinvi.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Tweetinvi.dll" />
-            </Component>
-            <Component Id="Tweetinvi.Logic.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Tweetinvi.Logic.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Tweetinvi.Logic.dll" />
-            </Component>
-            <Component Id="Tweetinvi.Security.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Tweetinvi.Security.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Tweetinvi.Security.dll" />
-            </Component>
-            <Component Id="Tweetinvi.Streams.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Tweetinvi.Streams.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Tweetinvi.Streams.dll" />
-            </Component>
-            <Component Id="Tweetinvi.WebLogic.dll" Directory="INSTALLFOLDER" Guid="*">
-                <File Id="Tweetinvi.WebLogic.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Tweetinvi.WebLogic.dll" />
-            </Component>
             <Component Id="youtube_categories.json" Directory="INSTALLFOLDER" Guid="*">
                 <File Id="youtube_categories.json" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\youtube_categories.json" />
             </Component>
-            <Component Id="LICENSE" Directory="node" Guid="*">
-                <File Id="LICENSE" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\node\LICENSE" />
-            </Component>
-            <Component Id="node.exe" Directory="win32_x64" Guid="*">
-                <File Id="node.exe" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\node\win32_x64\node.exe" />
-            </Component>
-            <Component Id="api.json" Directory="package" Guid="*">
-                <File Id="api.json" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\api.json" />
-            </Component>
-            <Component Id="browsers.json" Directory="package" Guid="*">
-                <File Id="browsers.json" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\browsers.json" />
-            </Component>
-            <Component Id="cli.js" Directory="package" Guid="*">
-                <File Id="cli.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\cli.js" />
-            </Component>
-            <Component Id="index.d.ts" Directory="package" Guid="*">
-                <File Id="index.d.ts" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\index.d.ts" />
-            </Component>
-            <Component Id="index.js" Directory="package" Guid="*">
-                <File Id="index.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\index.js" />
-            </Component>
-            <Component Id="index.mjs" Directory="package" Guid="*">
-                <File Id="index.mjs" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\index.mjs" />
-            </Component>
-            <Component Id="package.json" Directory="package" Guid="*">
-                <File Id="package.json" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\package.json" />
-            </Component>
-            <Component Id="protocol.yml" Directory="package" Guid="*">
-                <File Id="protocol.yml" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\protocol.yml" />
-            </Component>
-            <Component Id="README.md" Directory="package" Guid="*">
-                <File Id="README.md" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\README.md" />
-            </Component>
-            <Component Id="ThirdPartyNotices.txt" Directory="package" Guid="*">
-                <File Id="ThirdPartyNotices.txt" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\ThirdPartyNotices.txt" />
-            </Component>
-            <Component Id="install_media_pack.ps1" Directory="bin" Guid="*">
-                <File Id="install_media_pack.ps1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\bin\install_media_pack.ps1" />
-            </Component>
-            <Component Id="reinstall_chrome_beta_linux.sh" Directory="bin" Guid="*">
-                <File Id="reinstall_chrome_beta_linux.sh" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\bin\reinstall_chrome_beta_linux.sh" />
-            </Component>
-            <Component Id="reinstall_chrome_beta_mac.sh" Directory="bin" Guid="*">
-                <File Id="reinstall_chrome_beta_mac.sh" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\bin\reinstall_chrome_beta_mac.sh" />
-            </Component>
-            <Component Id="reinstall_chrome_beta_win.ps1" Directory="bin" Guid="*">
-                <File Id="reinstall_chrome_beta_win.ps1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\bin\reinstall_chrome_beta_win.ps1" />
-            </Component>
-            <Component Id="reinstall_chrome_stable_linux.sh" Directory="bin" Guid="*">
-                <File Id="reinstall_chrome_stable_linux.sh" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\bin\reinstall_chrome_stable_linux.sh" />
-            </Component>
-            <Component Id="reinstall_chrome_stable_mac.sh" Directory="bin" Guid="*">
-                <File Id="reinstall_chrome_stable_mac.sh" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\bin\reinstall_chrome_stable_mac.sh" />
-            </Component>
-            <Component Id="reinstall_chrome_stable_win.ps1" Directory="bin" Guid="*">
-                <File Id="reinstall_chrome_stable_win.ps1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\bin\reinstall_chrome_stable_win.ps1" />
-            </Component>
-            <Component Id="reinstall_msedge_beta_linux.sh" Directory="bin" Guid="*">
-                <File Id="reinstall_msedge_beta_linux.sh" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\bin\reinstall_msedge_beta_linux.sh" />
-            </Component>
-            <Component Id="reinstall_msedge_beta_mac.sh" Directory="bin" Guid="*">
-                <File Id="reinstall_msedge_beta_mac.sh" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\bin\reinstall_msedge_beta_mac.sh" />
-            </Component>
-            <Component Id="reinstall_msedge_beta_win.ps1" Directory="bin" Guid="*">
-                <File Id="reinstall_msedge_beta_win.ps1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\bin\reinstall_msedge_beta_win.ps1" />
-            </Component>
-            <Component Id="reinstall_msedge_dev_linux.sh" Directory="bin" Guid="*">
-                <File Id="reinstall_msedge_dev_linux.sh" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\bin\reinstall_msedge_dev_linux.sh" />
-            </Component>
-            <Component Id="reinstall_msedge_dev_mac.sh" Directory="bin" Guid="*">
-                <File Id="reinstall_msedge_dev_mac.sh" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\bin\reinstall_msedge_dev_mac.sh" />
-            </Component>
-            <Component Id="reinstall_msedge_dev_win.ps1" Directory="bin" Guid="*">
-                <File Id="reinstall_msedge_dev_win.ps1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\bin\reinstall_msedge_dev_win.ps1" />
-            </Component>
-            <Component Id="reinstall_msedge_stable_linux.sh" Directory="bin" Guid="*">
-                <File Id="reinstall_msedge_stable_linux.sh" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\bin\reinstall_msedge_stable_linux.sh" />
-            </Component>
-            <Component Id="reinstall_msedge_stable_mac.sh" Directory="bin" Guid="*">
-                <File Id="reinstall_msedge_stable_mac.sh" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\bin\reinstall_msedge_stable_mac.sh" />
-            </Component>
-            <Component Id="reinstall_msedge_stable_win.ps1" Directory="bin" Guid="*">
-                <File Id="reinstall_msedge_stable_win.ps1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\bin\reinstall_msedge_stable_win.ps1" />
-            </Component>
-            <Component Id="androidServerImpl.js" Directory="lib" Guid="*">
-                <File Id="androidServerImpl.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\androidServerImpl.js" />
-            </Component>
-            <Component Id="browserServerImpl.js" Directory="lib" Guid="*">
-                <File Id="browserServerImpl.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\browserServerImpl.js" />
-            </Component>
-            <Component Id="inprocess.js" Directory="lib" Guid="*">
-                <File Id="inprocess.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\inprocess.js" />
-            </Component>
-            <Component Id="inProcessFactory.js" Directory="lib" Guid="*">
-                <File Id="inProcessFactory.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\inProcessFactory.js" />
-            </Component>
-            <Component Id="outofprocess.js" Directory="lib" Guid="*">
-                <File Id="outofprocess.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\outofprocess.js" />
-            </Component>
-            <Component Id="utils.js" Directory="lib" Guid="*">
-                <File Id="utils.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils.js" />
-            </Component>
-            <Component Id="utilsBundle.js" Directory="lib" Guid="*">
-                <File Id="utilsBundle.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utilsBundle.js" />
-            </Component>
-            <Component Id="zipBundle.js" Directory="lib" Guid="*">
-                <File Id="zipBundle.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\zipBundle.js" />
-            </Component>
-            <Component Id="zipBundleImpl.js" Directory="lib" Guid="*">
-                <File Id="zipBundleImpl.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\zipBundleImpl.js" />
-            </Component>
-            <Component Id="driver.js" Directory="cli" Guid="*">
-                <File Id="driver.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\cli\driver.js" />
-            </Component>
-            <Component Id="program.js" Directory="cli" Guid="*">
-                <File Id="program.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\cli\program.js" />
-            </Component>
-            <Component Id="programWithTestStub.js" Directory="cli" Guid="*">
-                <File Id="programWithTestStub.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\cli\programWithTestStub.js" />
-            </Component>
-            <Component Id="accessibility.js" Directory="client" Guid="*">
-                <File Id="accessibility.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\accessibility.js" />
-            </Component>
-            <Component Id="android.js" Directory="client" Guid="*">
-                <File Id="android.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\android.js" />
-            </Component>
-            <Component Id="api.js" Directory="client" Guid="*">
-                <File Id="api.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\api.js" />
-            </Component>
-            <Component Id="artifact.js" Directory="client" Guid="*">
-                <File Id="artifact.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\artifact.js" />
-            </Component>
-            <Component Id="browser.js" Directory="client" Guid="*">
-                <File Id="browser.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\browser.js" />
-            </Component>
-            <Component Id="browserContext.js" Directory="client" Guid="*">
-                <File Id="browserContext.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\browserContext.js" />
-            </Component>
-            <Component Id="browserType.js" Directory="client" Guid="*">
-                <File Id="browserType.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\browserType.js" />
-            </Component>
-            <Component Id="cdpSession.js" Directory="client" Guid="*">
-                <File Id="cdpSession.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\cdpSession.js" />
-            </Component>
-            <Component Id="channelOwner.js" Directory="client" Guid="*">
-                <File Id="channelOwner.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\channelOwner.js" />
-            </Component>
-            <Component Id="clientHelper.js" Directory="client" Guid="*">
-                <File Id="clientHelper.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\clientHelper.js" />
-            </Component>
-            <Component Id="clientInstrumentation.js" Directory="client" Guid="*">
-                <File Id="clientInstrumentation.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\clientInstrumentation.js" />
-            </Component>
-            <Component Id="clientStackTrace.js" Directory="client" Guid="*">
-                <File Id="clientStackTrace.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\clientStackTrace.js" />
-            </Component>
-            <Component Id="clock.js" Directory="client" Guid="*">
-                <File Id="clock.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\clock.js" />
-            </Component>
-            <Component Id="connection.js" Directory="client" Guid="*">
-                <File Id="connection.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\connection.js" />
-            </Component>
-            <Component Id="consoleMessage.js" Directory="client" Guid="*">
-                <File Id="consoleMessage.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\consoleMessage.js" />
-            </Component>
-            <Component Id="coverage.js" Directory="client" Guid="*">
-                <File Id="coverage.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\coverage.js" />
-            </Component>
-            <Component Id="dialog.js" Directory="client" Guid="*">
-                <File Id="dialog.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\dialog.js" />
-            </Component>
-            <Component Id="download.js" Directory="client" Guid="*">
-                <File Id="download.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\download.js" />
-            </Component>
-            <Component Id="electron.js" Directory="client" Guid="*">
-                <File Id="electron.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\electron.js" />
-            </Component>
-            <Component Id="elementHandle.js" Directory="client" Guid="*">
-                <File Id="elementHandle.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\elementHandle.js" />
-            </Component>
-            <Component Id="errors.js" Directory="client" Guid="*">
-                <File Id="errors.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\errors.js" />
-            </Component>
-            <Component Id="eventEmitter.js" Directory="client" Guid="*">
-                <File Id="eventEmitter.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\eventEmitter.js" />
-            </Component>
-            <Component Id="events.js" Directory="client" Guid="*">
-                <File Id="events.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\events.js" />
-            </Component>
-            <Component Id="fetch.js" Directory="client" Guid="*">
-                <File Id="fetch.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\fetch.js" />
-            </Component>
-            <Component Id="fileChooser.js" Directory="client" Guid="*">
-                <File Id="fileChooser.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\fileChooser.js" />
-            </Component>
-            <Component Id="fileUtils.js" Directory="client" Guid="*">
-                <File Id="fileUtils.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\fileUtils.js" />
-            </Component>
-            <Component Id="frame.js" Directory="client" Guid="*">
-                <File Id="frame.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\frame.js" />
-            </Component>
-            <Component Id="harRouter.js" Directory="client" Guid="*">
-                <File Id="harRouter.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\harRouter.js" />
-            </Component>
-            <Component Id="input.js" Directory="client" Guid="*">
-                <File Id="input.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\input.js" />
-            </Component>
-            <Component Id="jsHandle.js" Directory="client" Guid="*">
-                <File Id="jsHandle.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\jsHandle.js" />
-            </Component>
-            <Component Id="jsonPipe.js" Directory="client" Guid="*">
-                <File Id="jsonPipe.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\jsonPipe.js" />
-            </Component>
-            <Component Id="localUtils.js" Directory="client" Guid="*">
-                <File Id="localUtils.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\localUtils.js" />
-            </Component>
-            <Component Id="locator.js" Directory="client" Guid="*">
-                <File Id="locator.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\locator.js" />
-            </Component>
-            <Component Id="network.js" Directory="client" Guid="*">
-                <File Id="network.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\network.js" />
-            </Component>
-            <Component Id="page.js" Directory="client" Guid="*">
-                <File Id="page.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\page.js" />
-            </Component>
-            <Component Id="platform.js" Directory="client" Guid="*">
-                <File Id="platform.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\platform.js" />
-            </Component>
-            <Component Id="playwright.js" Directory="client" Guid="*">
-                <File Id="playwright.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\playwright.js" />
-            </Component>
-            <Component Id="selectors.js" Directory="client" Guid="*">
-                <File Id="selectors.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\selectors.js" />
-            </Component>
-            <Component Id="stream.js" Directory="client" Guid="*">
-                <File Id="stream.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\stream.js" />
-            </Component>
-            <Component Id="timeoutSettings.js" Directory="client" Guid="*">
-                <File Id="timeoutSettings.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\timeoutSettings.js" />
-            </Component>
-            <Component Id="tracing.js" Directory="client" Guid="*">
-                <File Id="tracing.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\tracing.js" />
-            </Component>
-            <Component Id="types.js" Directory="client" Guid="*">
-                <File Id="types.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\types.js" />
-            </Component>
-            <Component Id="video.js" Directory="client" Guid="*">
-                <File Id="video.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\video.js" />
-            </Component>
-            <Component Id="waiter.js" Directory="client" Guid="*">
-                <File Id="waiter.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\waiter.js" />
-            </Component>
-            <Component Id="webError.js" Directory="client" Guid="*">
-                <File Id="webError.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\webError.js" />
-            </Component>
-            <Component Id="webSocket.js" Directory="client" Guid="*">
-                <File Id="webSocket.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\webSocket.js" />
-            </Component>
-            <Component Id="worker.js" Directory="client" Guid="*">
-                <File Id="worker.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\worker.js" />
-            </Component>
-            <Component Id="writableStream.js" Directory="client" Guid="*">
-                <File Id="writableStream.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\client\writableStream.js" />
-            </Component>
-            <Component Id="bindingsControllerSource.js" Directory="generated" Guid="*">
-                <File Id="bindingsControllerSource.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\generated\bindingsControllerSource.js" />
-            </Component>
-            <Component Id="clockSource.js" Directory="generated" Guid="*">
-                <File Id="clockSource.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\generated\clockSource.js" />
-            </Component>
-            <Component Id="injectedScriptSource.js" Directory="generated" Guid="*">
-                <File Id="injectedScriptSource.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\generated\injectedScriptSource.js" />
-            </Component>
-            <Component Id="pollingRecorderSource.js" Directory="generated" Guid="*">
-                <File Id="pollingRecorderSource.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\generated\pollingRecorderSource.js" />
-            </Component>
-            <Component Id="storageScriptSource.js" Directory="generated" Guid="*">
-                <File Id="storageScriptSource.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\generated\storageScriptSource.js" />
-            </Component>
-            <Component Id="utilityScriptSource.js" Directory="generated" Guid="*">
-                <File Id="utilityScriptSource.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\generated\utilityScriptSource.js" />
-            </Component>
-            <Component Id="webSocketMockSource.js" Directory="generated" Guid="*">
-                <File Id="webSocketMockSource.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\generated\webSocketMockSource.js" />
-            </Component>
-            <Component Id="serializers.js" Directory="protocol" Guid="*">
-                <File Id="serializers.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\protocol\serializers.js" />
-            </Component>
-            <Component Id="validator.js" Directory="protocol" Guid="*">
-                <File Id="validator.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\protocol\validator.js" />
-            </Component>
-            <Component Id="validatorPrimitives.js" Directory="protocol" Guid="*">
-                <File Id="validatorPrimitives.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\protocol\validatorPrimitives.js" />
-            </Component>
-            <Component Id="playwrightConnection.js" Directory="remote" Guid="*">
-                <File Id="playwrightConnection.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\remote\playwrightConnection.js" />
-            </Component>
-            <Component Id="playwrightServer.js" Directory="remote" Guid="*">
-                <File Id="playwrightServer.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\remote\playwrightServer.js" />
-            </Component>
-            <Component Id="accessibility.js_1" Directory="server" Guid="*">
-                <File Id="accessibility.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\accessibility.js" />
-            </Component>
-            <Component Id="artifact.js_1" Directory="server" Guid="*">
-                <File Id="artifact.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\artifact.js" />
-            </Component>
-            <Component Id="browser.js_1" Directory="server" Guid="*">
-                <File Id="browser.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\browser.js" />
-            </Component>
-            <Component Id="browserContext.js_1" Directory="server" Guid="*">
-                <File Id="browserContext.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\browserContext.js" />
-            </Component>
-            <Component Id="browserType.js_1" Directory="server" Guid="*">
-                <File Id="browserType.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\browserType.js" />
-            </Component>
-            <Component Id="callLog.js" Directory="server" Guid="*">
-                <File Id="callLog.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\callLog.js" />
-            </Component>
-            <Component Id="clock.js_1" Directory="server" Guid="*">
-                <File Id="clock.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\clock.js" />
-            </Component>
-            <Component Id="console.js" Directory="server" Guid="*">
-                <File Id="console.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\console.js" />
-            </Component>
-            <Component Id="cookieStore.js" Directory="server" Guid="*">
-                <File Id="cookieStore.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\cookieStore.js" />
-            </Component>
-            <Component Id="debugController.js" Directory="server" Guid="*">
-                <File Id="debugController.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\debugController.js" />
-            </Component>
-            <Component Id="debugger.js" Directory="server" Guid="*">
-                <File Id="debugger.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\debugger.js" />
-            </Component>
-            <Component Id="deviceDescriptors.js" Directory="server" Guid="*">
-                <File Id="deviceDescriptors.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\deviceDescriptors.js" />
-            </Component>
-            <Component Id="deviceDescriptorsSource.json" Directory="server" Guid="*">
-                <File Id="deviceDescriptorsSource.json" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\deviceDescriptorsSource.json" />
-            </Component>
-            <Component Id="dialog.js_1" Directory="server" Guid="*">
-                <File Id="dialog.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dialog.js" />
-            </Component>
-            <Component Id="dom.js" Directory="server" Guid="*">
-                <File Id="dom.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dom.js" />
-            </Component>
-            <Component Id="download.js_1" Directory="server" Guid="*">
-                <File Id="download.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\download.js" />
-            </Component>
-            <Component Id="errors.js_1" Directory="server" Guid="*">
-                <File Id="errors.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\errors.js" />
-            </Component>
-            <Component Id="fetch.js_1" Directory="server" Guid="*">
-                <File Id="fetch.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\fetch.js" />
-            </Component>
-            <Component Id="fileChooser.js_1" Directory="server" Guid="*">
-                <File Id="fileChooser.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\fileChooser.js" />
-            </Component>
-            <Component Id="fileUploadUtils.js" Directory="server" Guid="*">
-                <File Id="fileUploadUtils.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\fileUploadUtils.js" />
-            </Component>
-            <Component Id="formData.js" Directory="server" Guid="*">
-                <File Id="formData.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\formData.js" />
-            </Component>
-            <Component Id="frames.js" Directory="server" Guid="*">
-                <File Id="frames.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\frames.js" />
-            </Component>
-            <Component Id="frameSelectors.js" Directory="server" Guid="*">
-                <File Id="frameSelectors.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\frameSelectors.js" />
-            </Component>
-            <Component Id="harBackend.js" Directory="server" Guid="*">
-                <File Id="harBackend.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\harBackend.js" />
-            </Component>
-            <Component Id="helper.js" Directory="server" Guid="*">
-                <File Id="helper.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\helper.js" />
-            </Component>
-            <Component Id="index.js_1" Directory="server" Guid="*">
-                <File Id="index.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\index.js" />
-            </Component>
-            <Component Id="input.js_1" Directory="server" Guid="*">
-                <File Id="input.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\input.js" />
-            </Component>
-            <Component Id="instrumentation.js" Directory="server" Guid="*">
-                <File Id="instrumentation.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\instrumentation.js" />
-            </Component>
-            <Component Id="javascript.js" Directory="server" Guid="*">
-                <File Id="javascript.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\javascript.js" />
-            </Component>
-            <Component Id="launchApp.js" Directory="server" Guid="*">
-                <File Id="launchApp.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\launchApp.js" />
-            </Component>
-            <Component Id="localUtils.js_1" Directory="server" Guid="*">
-                <File Id="localUtils.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\localUtils.js" />
-            </Component>
-            <Component Id="macEditingCommands.js" Directory="server" Guid="*">
-                <File Id="macEditingCommands.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\macEditingCommands.js" />
-            </Component>
-            <Component Id="network.js_1" Directory="server" Guid="*">
-                <File Id="network.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\network.js" />
-            </Component>
-            <Component Id="page.js_1" Directory="server" Guid="*">
-                <File Id="page.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\page.js" />
-            </Component>
-            <Component Id="pipeTransport.js" Directory="server" Guid="*">
-                <File Id="pipeTransport.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\pipeTransport.js" />
-            </Component>
-            <Component Id="playwright.js_1" Directory="server" Guid="*">
-                <File Id="playwright.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\playwright.js" />
-            </Component>
-            <Component Id="progress.js" Directory="server" Guid="*">
-                <File Id="progress.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\progress.js" />
-            </Component>
-            <Component Id="protocolError.js" Directory="server" Guid="*">
-                <File Id="protocolError.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\protocolError.js" />
-            </Component>
-            <Component Id="recorder.js" Directory="server" Guid="*">
-                <File Id="recorder.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\recorder.js" />
-            </Component>
-            <Component Id="screenshotter.js" Directory="server" Guid="*">
-                <File Id="screenshotter.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\screenshotter.js" />
-            </Component>
-            <Component Id="selectors.js_1" Directory="server" Guid="*">
-                <File Id="selectors.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\selectors.js" />
-            </Component>
-            <Component Id="socksClientCertificatesInterceptor.js" Directory="server" Guid="*">
-                <File Id="socksClientCertificatesInterceptor.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\socksClientCertificatesInterceptor.js" />
-            </Component>
-            <Component Id="socksInterceptor.js" Directory="server" Guid="*">
-                <File Id="socksInterceptor.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\socksInterceptor.js" />
-            </Component>
-            <Component Id="transport.js" Directory="server" Guid="*">
-                <File Id="transport.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\transport.js" />
-            </Component>
-            <Component Id="types.js_1" Directory="server" Guid="*">
-                <File Id="types.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\types.js" />
-            </Component>
-            <Component Id="usKeyboardLayout.js" Directory="server" Guid="*">
-                <File Id="usKeyboardLayout.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\usKeyboardLayout.js" />
-            </Component>
-            <Component Id="android.js_1" Directory="android" Guid="*">
-                <File Id="android.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\android\android.js" />
-            </Component>
-            <Component Id="backendAdb.js" Directory="android" Guid="*">
-                <File Id="backendAdb.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\android\backendAdb.js" />
-            </Component>
-            <Component Id="bidiBrowser.js" Directory="bidi" Guid="*">
-                <File Id="bidiBrowser.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\bidiBrowser.js" />
-            </Component>
-            <Component Id="bidiChromium.js" Directory="bidi" Guid="*">
-                <File Id="bidiChromium.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\bidiChromium.js" />
-            </Component>
-            <Component Id="bidiConnection.js" Directory="bidi" Guid="*">
-                <File Id="bidiConnection.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\bidiConnection.js" />
-            </Component>
-            <Component Id="bidiExecutionContext.js" Directory="bidi" Guid="*">
-                <File Id="bidiExecutionContext.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\bidiExecutionContext.js" />
-            </Component>
-            <Component Id="bidiFirefox.js" Directory="bidi" Guid="*">
-                <File Id="bidiFirefox.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\bidiFirefox.js" />
-            </Component>
-            <Component Id="bidiInput.js" Directory="bidi" Guid="*">
-                <File Id="bidiInput.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\bidiInput.js" />
-            </Component>
-            <Component Id="bidiNetworkManager.js" Directory="bidi" Guid="*">
-                <File Id="bidiNetworkManager.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\bidiNetworkManager.js" />
-            </Component>
-            <Component Id="bidiOverCdp.js" Directory="bidi" Guid="*">
-                <File Id="bidiOverCdp.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\bidiOverCdp.js" />
-            </Component>
-            <Component Id="bidiPage.js" Directory="bidi" Guid="*">
-                <File Id="bidiPage.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\bidiPage.js" />
-            </Component>
-            <Component Id="bidiPdf.js" Directory="bidi" Guid="*">
-                <File Id="bidiPdf.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\bidiPdf.js" />
-            </Component>
-            <Component Id="bidiCommands.d.js" Directory="third_party" Guid="*">
-                <File Id="bidiCommands.d.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\third_party\bidiCommands.d.js" />
-            </Component>
-            <Component Id="bidiDeserializer.js" Directory="third_party" Guid="*">
-                <File Id="bidiDeserializer.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\third_party\bidiDeserializer.js" />
-            </Component>
-            <Component Id="bidiKeyboard.js" Directory="third_party" Guid="*">
-                <File Id="bidiKeyboard.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\third_party\bidiKeyboard.js" />
-            </Component>
-            <Component Id="bidiProtocol.js" Directory="third_party" Guid="*">
-                <File Id="bidiProtocol.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\third_party\bidiProtocol.js" />
-            </Component>
-            <Component Id="bidiProtocolCore.js" Directory="third_party" Guid="*">
-                <File Id="bidiProtocolCore.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\third_party\bidiProtocolCore.js" />
-            </Component>
-            <Component Id="bidiProtocolPermissions.js" Directory="third_party" Guid="*">
-                <File Id="bidiProtocolPermissions.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\third_party\bidiProtocolPermissions.js" />
-            </Component>
-            <Component Id="bidiSerializer.js" Directory="third_party" Guid="*">
-                <File Id="bidiSerializer.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\third_party\bidiSerializer.js" />
-            </Component>
-            <Component Id="firefoxPrefs.js" Directory="third_party" Guid="*">
-                <File Id="firefoxPrefs.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\bidi\third_party\firefoxPrefs.js" />
-            </Component>
-            <Component Id="appIcon.png" Directory="chromium" Guid="*">
-                <File Id="appIcon.png" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\appIcon.png" />
-            </Component>
-            <Component Id="chromium.js" Directory="chromium" Guid="*">
-                <File Id="chromium.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\chromium.js" />
-            </Component>
-            <Component Id="chromiumSwitches.js" Directory="chromium" Guid="*">
-                <File Id="chromiumSwitches.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\chromiumSwitches.js" />
-            </Component>
-            <Component Id="crAccessibility.js" Directory="chromium" Guid="*">
-                <File Id="crAccessibility.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\crAccessibility.js" />
-            </Component>
-            <Component Id="crBrowser.js" Directory="chromium" Guid="*">
-                <File Id="crBrowser.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\crBrowser.js" />
-            </Component>
-            <Component Id="crConnection.js" Directory="chromium" Guid="*">
-                <File Id="crConnection.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\crConnection.js" />
-            </Component>
-            <Component Id="crCoverage.js" Directory="chromium" Guid="*">
-                <File Id="crCoverage.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\crCoverage.js" />
-            </Component>
-            <Component Id="crDevTools.js" Directory="chromium" Guid="*">
-                <File Id="crDevTools.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\crDevTools.js" />
-            </Component>
-            <Component Id="crDragDrop.js" Directory="chromium" Guid="*">
-                <File Id="crDragDrop.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\crDragDrop.js" />
-            </Component>
-            <Component Id="crExecutionContext.js" Directory="chromium" Guid="*">
-                <File Id="crExecutionContext.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\crExecutionContext.js" />
-            </Component>
-            <Component Id="crInput.js" Directory="chromium" Guid="*">
-                <File Id="crInput.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\crInput.js" />
-            </Component>
-            <Component Id="crNetworkManager.js" Directory="chromium" Guid="*">
-                <File Id="crNetworkManager.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\crNetworkManager.js" />
-            </Component>
-            <Component Id="crPage.js" Directory="chromium" Guid="*">
-                <File Id="crPage.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\crPage.js" />
-            </Component>
-            <Component Id="crPdf.js" Directory="chromium" Guid="*">
-                <File Id="crPdf.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\crPdf.js" />
-            </Component>
-            <Component Id="crProtocolHelper.js" Directory="chromium" Guid="*">
-                <File Id="crProtocolHelper.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\crProtocolHelper.js" />
-            </Component>
-            <Component Id="crServiceWorker.js" Directory="chromium" Guid="*">
-                <File Id="crServiceWorker.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\crServiceWorker.js" />
-            </Component>
-            <Component Id="defaultFontFamilies.js" Directory="chromium" Guid="*">
-                <File Id="defaultFontFamilies.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\defaultFontFamilies.js" />
-            </Component>
-            <Component Id="protocol.d.js" Directory="chromium" Guid="*">
-                <File Id="protocol.d.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\protocol.d.js" />
-            </Component>
-            <Component Id="videoRecorder.js" Directory="chromium" Guid="*">
-                <File Id="videoRecorder.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\chromium\videoRecorder.js" />
-            </Component>
-            <Component Id="csharp.js" Directory="codegen" Guid="*">
-                <File Id="csharp.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\codegen\csharp.js" />
-            </Component>
-            <Component Id="java.js" Directory="codegen" Guid="*">
-                <File Id="java.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\codegen\java.js" />
-            </Component>
-            <Component Id="javascript.js_1" Directory="codegen" Guid="*">
-                <File Id="javascript.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\codegen\javascript.js" />
-            </Component>
-            <Component Id="jsonl.js" Directory="codegen" Guid="*">
-                <File Id="jsonl.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\codegen\jsonl.js" />
-            </Component>
-            <Component Id="language.js" Directory="codegen" Guid="*">
-                <File Id="language.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\codegen\language.js" />
-            </Component>
-            <Component Id="languages.js" Directory="codegen" Guid="*">
-                <File Id="languages.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\codegen\languages.js" />
-            </Component>
-            <Component Id="python.js" Directory="codegen" Guid="*">
-                <File Id="python.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\codegen\python.js" />
-            </Component>
-            <Component Id="types.js_2" Directory="codegen" Guid="*">
-                <File Id="types.js_2" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\codegen\types.js" />
-            </Component>
-            <Component Id="androidDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="androidDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\androidDispatcher.js" />
-            </Component>
-            <Component Id="artifactDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="artifactDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\artifactDispatcher.js" />
-            </Component>
-            <Component Id="browserContextDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="browserContextDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\browserContextDispatcher.js" />
-            </Component>
-            <Component Id="browserDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="browserDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\browserDispatcher.js" />
-            </Component>
-            <Component Id="browserTypeDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="browserTypeDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\browserTypeDispatcher.js" />
-            </Component>
-            <Component Id="cdpSessionDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="cdpSessionDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\cdpSessionDispatcher.js" />
-            </Component>
-            <Component Id="debugControllerDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="debugControllerDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\debugControllerDispatcher.js" />
-            </Component>
-            <Component Id="dialogDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="dialogDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\dialogDispatcher.js" />
-            </Component>
-            <Component Id="dispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="dispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\dispatcher.js" />
-            </Component>
-            <Component Id="electronDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="electronDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\electronDispatcher.js" />
-            </Component>
-            <Component Id="elementHandlerDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="elementHandlerDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\elementHandlerDispatcher.js" />
-            </Component>
-            <Component Id="frameDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="frameDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\frameDispatcher.js" />
-            </Component>
-            <Component Id="jsHandleDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="jsHandleDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\jsHandleDispatcher.js" />
-            </Component>
-            <Component Id="jsonPipeDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="jsonPipeDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\jsonPipeDispatcher.js" />
-            </Component>
-            <Component Id="localUtilsDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="localUtilsDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\localUtilsDispatcher.js" />
-            </Component>
-            <Component Id="networkDispatchers.js" Directory="dispatchers" Guid="*">
-                <File Id="networkDispatchers.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\networkDispatchers.js" />
-            </Component>
-            <Component Id="pageDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="pageDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\pageDispatcher.js" />
-            </Component>
-            <Component Id="playwrightDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="playwrightDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\playwrightDispatcher.js" />
-            </Component>
-            <Component Id="streamDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="streamDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\streamDispatcher.js" />
-            </Component>
-            <Component Id="tracingDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="tracingDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\tracingDispatcher.js" />
-            </Component>
-            <Component Id="webSocketRouteDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="webSocketRouteDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\webSocketRouteDispatcher.js" />
-            </Component>
-            <Component Id="writableStreamDispatcher.js" Directory="dispatchers" Guid="*">
-                <File Id="writableStreamDispatcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\dispatchers\writableStreamDispatcher.js" />
-            </Component>
-            <Component Id="electron.js_1" Directory="electron" Guid="*">
-                <File Id="electron.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\electron\electron.js" />
-            </Component>
-            <Component Id="loader.js" Directory="electron" Guid="*">
-                <File Id="loader.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\electron\loader.js" />
-            </Component>
-            <Component Id="ffAccessibility.js" Directory="firefox" Guid="*">
-                <File Id="ffAccessibility.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\firefox\ffAccessibility.js" />
-            </Component>
-            <Component Id="ffBrowser.js" Directory="firefox" Guid="*">
-                <File Id="ffBrowser.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\firefox\ffBrowser.js" />
-            </Component>
-            <Component Id="ffConnection.js" Directory="firefox" Guid="*">
-                <File Id="ffConnection.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\firefox\ffConnection.js" />
-            </Component>
-            <Component Id="ffExecutionContext.js" Directory="firefox" Guid="*">
-                <File Id="ffExecutionContext.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\firefox\ffExecutionContext.js" />
-            </Component>
-            <Component Id="ffInput.js" Directory="firefox" Guid="*">
-                <File Id="ffInput.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\firefox\ffInput.js" />
-            </Component>
-            <Component Id="ffNetworkManager.js" Directory="firefox" Guid="*">
-                <File Id="ffNetworkManager.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\firefox\ffNetworkManager.js" />
-            </Component>
-            <Component Id="ffPage.js" Directory="firefox" Guid="*">
-                <File Id="ffPage.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\firefox\ffPage.js" />
-            </Component>
-            <Component Id="firefox.js" Directory="firefox" Guid="*">
-                <File Id="firefox.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\firefox\firefox.js" />
-            </Component>
-            <Component Id="protocol.d.js_1" Directory="firefox" Guid="*">
-                <File Id="protocol.d.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\firefox\protocol.d.js" />
-            </Component>
-            <Component Id="harRecorder.js" Directory="har" Guid="*">
-                <File Id="harRecorder.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\har\harRecorder.js" />
-            </Component>
-            <Component Id="harTracer.js" Directory="har" Guid="*">
-                <File Id="harTracer.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\har\harTracer.js" />
-            </Component>
-            <Component Id="chat.js" Directory="recorder" Guid="*">
-                <File Id="chat.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\recorder\chat.js" />
-            </Component>
-            <Component Id="recorderApp.js" Directory="recorder" Guid="*">
-                <File Id="recorderApp.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\recorder\recorderApp.js" />
-            </Component>
-            <Component Id="recorderRunner.js" Directory="recorder" Guid="*">
-                <File Id="recorderRunner.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\recorder\recorderRunner.js" />
-            </Component>
-            <Component Id="recorderSignalProcessor.js" Directory="recorder" Guid="*">
-                <File Id="recorderSignalProcessor.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\recorder\recorderSignalProcessor.js" />
-            </Component>
-            <Component Id="recorderUtils.js" Directory="recorder" Guid="*">
-                <File Id="recorderUtils.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\recorder\recorderUtils.js" />
-            </Component>
-            <Component Id="throttledFile.js" Directory="recorder" Guid="*">
-                <File Id="throttledFile.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\recorder\throttledFile.js" />
-            </Component>
-            <Component Id="browserFetcher.js" Directory="registry" Guid="*">
-                <File Id="browserFetcher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\registry\browserFetcher.js" />
-            </Component>
-            <Component Id="dependencies.js" Directory="registry" Guid="*">
-                <File Id="dependencies.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\registry\dependencies.js" />
-            </Component>
-            <Component Id="index.js_2" Directory="registry" Guid="*">
-                <File Id="index.js_2" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\registry\index.js" />
-            </Component>
-            <Component Id="nativeDeps.js" Directory="registry" Guid="*">
-                <File Id="nativeDeps.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\registry\nativeDeps.js" />
-            </Component>
-            <Component Id="oopDownloadBrowserMain.js" Directory="registry" Guid="*">
-                <File Id="oopDownloadBrowserMain.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\registry\oopDownloadBrowserMain.js" />
-            </Component>
-            <Component Id="snapshotter.js" Directory="recorder_1" Guid="*">
-                <File Id="snapshotter.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\trace\recorder\snapshotter.js" />
-            </Component>
-            <Component Id="snapshotterInjected.js" Directory="recorder_1" Guid="*">
-                <File Id="snapshotterInjected.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\trace\recorder\snapshotterInjected.js" />
-            </Component>
-            <Component Id="tracing.js_1" Directory="recorder_1" Guid="*">
-                <File Id="tracing.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\trace\recorder\tracing.js" />
-            </Component>
-            <Component Id="inMemorySnapshotter.js" Directory="test" Guid="*">
-                <File Id="inMemorySnapshotter.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\trace\test\inMemorySnapshotter.js" />
-            </Component>
-            <Component Id="traceViewer.js" Directory="viewer" Guid="*">
-                <File Id="traceViewer.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\trace\viewer\traceViewer.js" />
-            </Component>
-            <Component Id="ascii.js" Directory="utils" Guid="*">
-                <File Id="ascii.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\ascii.js" />
-            </Component>
-            <Component Id="comparators.js" Directory="utils" Guid="*">
-                <File Id="comparators.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\comparators.js" />
-            </Component>
-            <Component Id="crypto.js" Directory="utils" Guid="*">
-                <File Id="crypto.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\crypto.js" />
-            </Component>
-            <Component Id="debug.js" Directory="utils" Guid="*">
-                <File Id="debug.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\debug.js" />
-            </Component>
-            <Component Id="debugLogger.js" Directory="utils" Guid="*">
-                <File Id="debugLogger.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\debugLogger.js" />
-            </Component>
-            <Component Id="env.js" Directory="utils" Guid="*">
-                <File Id="env.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\env.js" />
-            </Component>
-            <Component Id="eventsHelper.js" Directory="utils" Guid="*">
-                <File Id="eventsHelper.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\eventsHelper.js" />
-            </Component>
-            <Component Id="expectUtils.js" Directory="utils" Guid="*">
-                <File Id="expectUtils.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\expectUtils.js" />
-            </Component>
-            <Component Id="fileUtils.js_1" Directory="utils" Guid="*">
-                <File Id="fileUtils.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\fileUtils.js" />
-            </Component>
-            <Component Id="happyEyeballs.js" Directory="utils" Guid="*">
-                <File Id="happyEyeballs.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\happyEyeballs.js" />
-            </Component>
-            <Component Id="hostPlatform.js" Directory="utils" Guid="*">
-                <File Id="hostPlatform.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\hostPlatform.js" />
-            </Component>
-            <Component Id="httpServer.js" Directory="utils" Guid="*">
-                <File Id="httpServer.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\httpServer.js" />
-            </Component>
-            <Component Id="linuxUtils.js" Directory="utils" Guid="*">
-                <File Id="linuxUtils.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\linuxUtils.js" />
-            </Component>
-            <Component Id="network.js_2" Directory="utils" Guid="*">
-                <File Id="network.js_2" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\network.js" />
-            </Component>
-            <Component Id="nodePlatform.js" Directory="utils" Guid="*">
-                <File Id="nodePlatform.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\nodePlatform.js" />
-            </Component>
-            <Component Id="pipeTransport.js_1" Directory="utils" Guid="*">
-                <File Id="pipeTransport.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\pipeTransport.js" />
-            </Component>
-            <Component Id="processLauncher.js" Directory="utils" Guid="*">
-                <File Id="processLauncher.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\processLauncher.js" />
-            </Component>
-            <Component Id="profiler.js" Directory="utils" Guid="*">
-                <File Id="profiler.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\profiler.js" />
-            </Component>
-            <Component Id="socksProxy.js" Directory="utils" Guid="*">
-                <File Id="socksProxy.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\socksProxy.js" />
-            </Component>
-            <Component Id="spawnAsync.js" Directory="utils" Guid="*">
-                <File Id="spawnAsync.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\spawnAsync.js" />
-            </Component>
-            <Component Id="task.js" Directory="utils" Guid="*">
-                <File Id="task.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\task.js" />
-            </Component>
-            <Component Id="userAgent.js" Directory="utils" Guid="*">
-                <File Id="userAgent.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\userAgent.js" />
-            </Component>
-            <Component Id="wsServer.js" Directory="utils" Guid="*">
-                <File Id="wsServer.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\wsServer.js" />
-            </Component>
-            <Component Id="zipFile.js" Directory="utils" Guid="*">
-                <File Id="zipFile.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\zipFile.js" />
-            </Component>
-            <Component Id="zones.js" Directory="utils" Guid="*">
-                <File Id="zones.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\zones.js" />
-            </Component>
-            <Component Id="colorUtils.js" Directory="image_tools" Guid="*">
-                <File Id="colorUtils.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\image_tools\colorUtils.js" />
-            </Component>
-            <Component Id="compare.js" Directory="image_tools" Guid="*">
-                <File Id="compare.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\image_tools\compare.js" />
-            </Component>
-            <Component Id="imageChannel.js" Directory="image_tools" Guid="*">
-                <File Id="imageChannel.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\image_tools\imageChannel.js" />
-            </Component>
-            <Component Id="stats.js" Directory="image_tools" Guid="*">
-                <File Id="stats.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\utils\image_tools\stats.js" />
-            </Component>
-            <Component Id="protocol.d.js_2" Directory="webkit" Guid="*">
-                <File Id="protocol.d.js_2" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\webkit\protocol.d.js" />
-            </Component>
-            <Component Id="webkit.js" Directory="webkit" Guid="*">
-                <File Id="webkit.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\webkit\webkit.js" />
-            </Component>
-            <Component Id="wkAccessibility.js" Directory="webkit" Guid="*">
-                <File Id="wkAccessibility.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\webkit\wkAccessibility.js" />
-            </Component>
-            <Component Id="wkBrowser.js" Directory="webkit" Guid="*">
-                <File Id="wkBrowser.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\webkit\wkBrowser.js" />
-            </Component>
-            <Component Id="wkConnection.js" Directory="webkit" Guid="*">
-                <File Id="wkConnection.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\webkit\wkConnection.js" />
-            </Component>
-            <Component Id="wkExecutionContext.js" Directory="webkit" Guid="*">
-                <File Id="wkExecutionContext.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\webkit\wkExecutionContext.js" />
-            </Component>
-            <Component Id="wkInput.js" Directory="webkit" Guid="*">
-                <File Id="wkInput.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\webkit\wkInput.js" />
-            </Component>
-            <Component Id="wkInterceptableRequest.js" Directory="webkit" Guid="*">
-                <File Id="wkInterceptableRequest.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\webkit\wkInterceptableRequest.js" />
-            </Component>
-            <Component Id="wkPage.js" Directory="webkit" Guid="*">
-                <File Id="wkPage.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\webkit\wkPage.js" />
-            </Component>
-            <Component Id="wkProvisionalPage.js" Directory="webkit" Guid="*">
-                <File Id="wkProvisionalPage.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\webkit\wkProvisionalPage.js" />
-            </Component>
-            <Component Id="wkWorkers.js" Directory="webkit" Guid="*">
-                <File Id="wkWorkers.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\server\webkit\wkWorkers.js" />
-            </Component>
-            <Component Id="pixelmatch.js" Directory="third_party_1" Guid="*">
-                <File Id="pixelmatch.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\third_party\pixelmatch.js" />
-            </Component>
-            <Component Id="ariaSnapshot.js" Directory="isomorphic" Guid="*">
-                <File Id="ariaSnapshot.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\ariaSnapshot.js" />
-            </Component>
-            <Component Id="assert.js" Directory="isomorphic" Guid="*">
-                <File Id="assert.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\assert.js" />
-            </Component>
-            <Component Id="colors.js" Directory="isomorphic" Guid="*">
-                <File Id="colors.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\colors.js" />
-            </Component>
-            <Component Id="cssParser.js" Directory="isomorphic" Guid="*">
-                <File Id="cssParser.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\cssParser.js" />
-            </Component>
-            <Component Id="cssTokenizer.js" Directory="isomorphic" Guid="*">
-                <File Id="cssTokenizer.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\cssTokenizer.js" />
-            </Component>
-            <Component Id="headers.js" Directory="isomorphic" Guid="*">
-                <File Id="headers.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\headers.js" />
-            </Component>
-            <Component Id="locatorGenerators.js" Directory="isomorphic" Guid="*">
-                <File Id="locatorGenerators.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\locatorGenerators.js" />
-            </Component>
-            <Component Id="locatorParser.js" Directory="isomorphic" Guid="*">
-                <File Id="locatorParser.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\locatorParser.js" />
-            </Component>
-            <Component Id="locatorUtils.js" Directory="isomorphic" Guid="*">
-                <File Id="locatorUtils.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\locatorUtils.js" />
-            </Component>
-            <Component Id="manualPromise.js" Directory="isomorphic" Guid="*">
-                <File Id="manualPromise.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\manualPromise.js" />
-            </Component>
-            <Component Id="mimeType.js" Directory="isomorphic" Guid="*">
-                <File Id="mimeType.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\mimeType.js" />
-            </Component>
-            <Component Id="multimap.js" Directory="isomorphic" Guid="*">
-                <File Id="multimap.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\multimap.js" />
-            </Component>
-            <Component Id="protocolFormatter.js" Directory="isomorphic" Guid="*">
-                <File Id="protocolFormatter.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\protocolFormatter.js" />
-            </Component>
-            <Component Id="protocolMetainfo.js" Directory="isomorphic" Guid="*">
-                <File Id="protocolMetainfo.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\protocolMetainfo.js" />
-            </Component>
-            <Component Id="rtti.js" Directory="isomorphic" Guid="*">
-                <File Id="rtti.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\rtti.js" />
-            </Component>
-            <Component Id="selectorParser.js" Directory="isomorphic" Guid="*">
-                <File Id="selectorParser.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\selectorParser.js" />
-            </Component>
-            <Component Id="semaphore.js" Directory="isomorphic" Guid="*">
-                <File Id="semaphore.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\semaphore.js" />
-            </Component>
-            <Component Id="stackTrace.js" Directory="isomorphic" Guid="*">
-                <File Id="stackTrace.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\stackTrace.js" />
-            </Component>
-            <Component Id="stringUtils.js" Directory="isomorphic" Guid="*">
-                <File Id="stringUtils.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\stringUtils.js" />
-            </Component>
-            <Component Id="time.js" Directory="isomorphic" Guid="*">
-                <File Id="time.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\time.js" />
-            </Component>
-            <Component Id="timeoutRunner.js" Directory="isomorphic" Guid="*">
-                <File Id="timeoutRunner.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\timeoutRunner.js" />
-            </Component>
-            <Component Id="traceUtils.js" Directory="isomorphic" Guid="*">
-                <File Id="traceUtils.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\traceUtils.js" />
-            </Component>
-            <Component Id="types.js_3" Directory="isomorphic" Guid="*">
-                <File Id="types.js_3" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\types.js" />
-            </Component>
-            <Component Id="urlMatch.js" Directory="isomorphic" Guid="*">
-                <File Id="urlMatch.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\urlMatch.js" />
-            </Component>
-            <Component Id="utilityScriptSerializers.js" Directory="isomorphic" Guid="*">
-                <File Id="utilityScriptSerializers.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utils\isomorphic\utilityScriptSerializers.js" />
-            </Component>
-            <Component Id="index.js_3" Directory="utilsBundleImpl" Guid="*">
-                <File Id="index.js_3" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utilsBundleImpl\index.js" />
-            </Component>
-            <Component Id="xdg_open" Directory="utilsBundleImpl" Guid="*">
-                <File Id="xdg_open" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\utilsBundleImpl\xdg-open" />
-            </Component>
-            <Component Id="index.html" Directory="htmlReport" Guid="*">
-                <File Id="index.html" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\htmlReport\index.html" />
-            </Component>
-            <Component Id="index.html_1" Directory="recorder_2" Guid="*">
-                <File Id="index.html_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\recorder\index.html" />
-            </Component>
-            <Component Id="playwright_logo.svg" Directory="recorder_2" Guid="*">
-                <File Id="playwright_logo.svg" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\recorder\playwright-logo.svg" />
-            </Component>
-            <Component Id="codeMirrorModule_C3UTv_Ge.css" Directory="assets" Guid="*">
-                <File Id="codeMirrorModule_C3UTv_Ge.css" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\recorder\assets\codeMirrorModule-C3UTv-Ge.css" />
-            </Component>
-            <Component Id="codeMirrorModule_ISMgoUzq.js" Directory="assets" Guid="*">
-                <File Id="codeMirrorModule_ISMgoUzq.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\recorder\assets\codeMirrorModule-ISMgoUzq.js" />
-            </Component>
-            <Component Id="codicon_DCmgc_ay.ttf" Directory="assets" Guid="*">
-                <File Id="codicon_DCmgc_ay.ttf" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\recorder\assets\codicon-DCmgc-ay.ttf" />
-            </Component>
-            <Component Id="index_Ds0aE8ml.js" Directory="assets" Guid="*">
-                <File Id="index_Ds0aE8ml.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\recorder\assets\index-Ds0aE8ml.js" />
-            </Component>
-            <Component Id="index_eHBmevrY.css" Directory="assets" Guid="*">
-                <File Id="index_eHBmevrY.css" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\recorder\assets\index-eHBmevrY.css" />
-            </Component>
-            <Component Id="codeMirrorModule.C3UTv_Ge.css" Directory="traceViewer" Guid="*">
-                <File Id="codeMirrorModule.C3UTv_Ge.css" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\traceViewer\codeMirrorModule.C3UTv-Ge.css" />
-            </Component>
-            <Component Id="codicon.DCmgc_ay.ttf" Directory="traceViewer" Guid="*">
-                <File Id="codicon.DCmgc_ay.ttf" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\traceViewer\codicon.DCmgc-ay.ttf" />
-            </Component>
-            <Component Id="defaultSettingsView.NYBT19Ch.css" Directory="traceViewer" Guid="*">
-                <File Id="defaultSettingsView.NYBT19Ch.css" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\traceViewer\defaultSettingsView.NYBT19Ch.css" />
-            </Component>
-            <Component Id="index.CFOW_Ezb.css" Directory="traceViewer" Guid="*">
-                <File Id="index.CFOW_Ezb.css" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\traceViewer\index.CFOW-Ezb.css" />
-            </Component>
-            <Component Id="index.CG3BNeDq.js" Directory="traceViewer" Guid="*">
-                <File Id="index.CG3BNeDq.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\traceViewer\index.CG3BNeDq.js" />
-            </Component>
-            <Component Id="index.html_2" Directory="traceViewer" Guid="*">
-                <File Id="index.html_2" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\traceViewer\index.html" />
-            </Component>
-            <Component Id="playwright_logo.svg_1" Directory="traceViewer" Guid="*">
-                <File Id="playwright_logo.svg_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\traceViewer\playwright-logo.svg" />
-            </Component>
-            <Component Id="snapshot.html" Directory="traceViewer" Guid="*">
-                <File Id="snapshot.html" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\traceViewer\snapshot.html" />
-            </Component>
-            <Component Id="sw.bundle.js" Directory="traceViewer" Guid="*">
-                <File Id="sw.bundle.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\traceViewer\sw.bundle.js" />
-            </Component>
-            <Component Id="uiMode.BatfzHMG.css" Directory="traceViewer" Guid="*">
-                <File Id="uiMode.BatfzHMG.css" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\traceViewer\uiMode.BatfzHMG.css" />
-            </Component>
-            <Component Id="uiMode.BijnIl3L.js" Directory="traceViewer" Guid="*">
-                <File Id="uiMode.BijnIl3L.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\traceViewer\uiMode.BijnIl3L.js" />
-            </Component>
-            <Component Id="uiMode.html" Directory="traceViewer" Guid="*">
-                <File Id="uiMode.html" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\traceViewer\uiMode.html" />
-            </Component>
-            <Component Id="xtermModule.Beg8tuEN.css" Directory="traceViewer" Guid="*">
-                <File Id="xtermModule.Beg8tuEN.css" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\traceViewer\xtermModule.Beg8tuEN.css" />
-            </Component>
-            <Component Id="codeMirrorModule_3kZ8GVgK.js" Directory="assets_1" Guid="*">
-                <File Id="codeMirrorModule_3kZ8GVgK.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\traceViewer\assets\codeMirrorModule-3kZ8GVgK.js" />
-            </Component>
-            <Component Id="defaultSettingsView_Ds_bson8.js" Directory="assets_1" Guid="*">
-                <File Id="defaultSettingsView_Ds_bson8.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\traceViewer\assets\defaultSettingsView-Ds-bson8.js" />
-            </Component>
-            <Component Id="xtermModule_BoAIEibi.js" Directory="assets_1" Guid="*">
-                <File Id="xtermModule_BoAIEibi.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\lib\vite\traceViewer\assets\xtermModule-BoAIEibi.js" />
-            </Component>
-            <Component Id="protocol.d.ts" Directory="types" Guid="*">
-                <File Id="protocol.d.ts" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\types\protocol.d.ts" />
-            </Component>
-            <Component Id="structs.d.ts" Directory="types" Guid="*">
-                <File Id="structs.d.ts" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\types\structs.d.ts" />
-            </Component>
-            <Component Id="types.d.ts" Directory="types" Guid="*">
-                <File Id="types.d.ts" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\.playwright\package\types\types.d.ts" />
-            </Component>
             <Component Id="ProfilePic.jpeg" Directory="About" Guid="*">
                 <File Id="ProfilePic.jpeg" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\About\ProfilePic.jpeg" />
-            </Component>
-            <Component Id="asset_manifest.json" Directory="admin_panel_ui" Guid="*">
-                <File Id="asset_manifest.json" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\admin-panel-ui\asset-manifest.json" />
-            </Component>
-            <Component Id="env_config.js" Directory="admin_panel_ui" Guid="*">
-                <File Id="env_config.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\admin-panel-ui\env-config.js" />
-            </Component>
-            <Component Id="index.html_3" Directory="admin_panel_ui" Guid="*">
-                <File Id="index.html_3" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\admin-panel-ui\index.html" />
-            </Component>
-            <Component Id="manifest.json" Directory="admin_panel_ui" Guid="*">
-                <File Id="manifest.json" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\admin-panel-ui\manifest.json" />
-            </Component>
-            <Component Id="robots.txt" Directory="admin_panel_ui" Guid="*">
-                <File Id="robots.txt" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\admin-panel-ui\robots.txt" />
-            </Component>
-            <Component Id="main.ab8209f0.css" Directory="css" Guid="*">
-                <File Id="main.ab8209f0.css" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\admin-panel-ui\static\css\main.ab8209f0.css" />
-            </Component>
-            <Component Id="main.ab8209f0.css.map" Directory="css" Guid="*">
-                <File Id="main.ab8209f0.css.map" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\admin-panel-ui\static\css\main.ab8209f0.css.map" />
-            </Component>
-            <Component Id="main.8cf54616.js" Directory="js" Guid="*">
-                <File Id="main.8cf54616.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\admin-panel-ui\static\js\main.8cf54616.js" />
-            </Component>
-            <Component Id="main.8cf54616.js.LICENSE.txt" Directory="js" Guid="*">
-                <File Id="main.8cf54616.js.LICENSE.txt" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\admin-panel-ui\static\js\main.8cf54616.js.LICENSE.txt" />
-            </Component>
-            <Component Id="main.8cf54616.js.map" Directory="js" Guid="*">
-                <File Id="main.8cf54616.js.map" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\admin-panel-ui\static\js\main.8cf54616.js.map" />
             </Component>
             <Component Id="avcodec_61.dll" Directory="Dependencies" Guid="*">
                 <File Id="avcodec_61.dll" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\Dependencies\avcodec-61.dll" />
@@ -1555,8 +419,8 @@
             <Component Id="favicon.ico" Directory="http" Guid="*">
                 <File Id="favicon.ico" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x64\lua\http\favicon.ico" />
             </Component>
-            <Component Id="index.html_4" Directory="http" Guid="*">
-                <File Id="index.html_4" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x64\lua\http\index.html" />
+            <Component Id="index.html" Directory="http" Guid="*">
+                <File Id="index.html" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x64\lua\http\index.html" />
             </Component>
             <Component Id="mobile.html" Directory="http" Guid="*">
                 <File Id="mobile.html" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x64\lua\http\mobile.html" />
@@ -1579,10 +443,10 @@
             <Component Id="vlm_export.html" Directory="http" Guid="*">
                 <File Id="vlm_export.html" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x64\lua\http\vlm_export.html" />
             </Component>
-            <Component Id="main.css" Directory="css_1" Guid="*">
+            <Component Id="main.css" Directory="css" Guid="*">
                 <File Id="main.css" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x64\lua\http\css\main.css" />
             </Component>
-            <Component Id="mobile.css" Directory="css_1" Guid="*">
+            <Component Id="mobile.css" Directory="css" Guid="*">
                 <File Id="mobile.css" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x64\lua\http\css\mobile.css" />
             </Component>
             <Component Id="jquery_ui_1.8.13.custom.css" Directory="ui_lightness" Guid="*">
@@ -1684,16 +548,16 @@
             <Component Id="vlc16x16.png" Directory="images_1" Guid="*">
                 <File Id="vlc16x16.png" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x64\lua\http\images\vlc16x16.png" />
             </Component>
-            <Component Id="common.js" Directory="js_1" Guid="*">
+            <Component Id="common.js" Directory="js" Guid="*">
                 <File Id="common.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x64\lua\http\js\common.js" />
             </Component>
-            <Component Id="controllers.js" Directory="js_1" Guid="*">
+            <Component Id="controllers.js" Directory="js" Guid="*">
                 <File Id="controllers.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x64\lua\http\js\controllers.js" />
             </Component>
-            <Component Id="jquery.jstree.js" Directory="js_1" Guid="*">
+            <Component Id="jquery.jstree.js" Directory="js" Guid="*">
                 <File Id="jquery.jstree.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x64\lua\http\js\jquery.jstree.js" />
             </Component>
-            <Component Id="ui.js" Directory="js_1" Guid="*">
+            <Component Id="ui.js" Directory="js" Guid="*">
                 <File Id="ui.js" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x64\lua\http\js\ui.js" />
             </Component>
             <Component Id="browse.json" Directory="requests" Guid="*">
@@ -2821,8 +1685,8 @@
             <Component Id="favicon.ico_1" Directory="http_1" Guid="*">
                 <File Id="favicon.ico_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x86\lua\http\favicon.ico" />
             </Component>
-            <Component Id="index.html_5" Directory="http_1" Guid="*">
-                <File Id="index.html_5" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x86\lua\http\index.html" />
+            <Component Id="index.html_1" Directory="http_1" Guid="*">
+                <File Id="index.html_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x86\lua\http\index.html" />
             </Component>
             <Component Id="mobile.html_1" Directory="http_1" Guid="*">
                 <File Id="mobile.html_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x86\lua\http\mobile.html" />
@@ -2845,10 +1709,10 @@
             <Component Id="vlm_export.html_1" Directory="http_1" Guid="*">
                 <File Id="vlm_export.html_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x86\lua\http\vlm_export.html" />
             </Component>
-            <Component Id="main.css_1" Directory="css_2" Guid="*">
+            <Component Id="main.css_1" Directory="css_1" Guid="*">
                 <File Id="main.css_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x86\lua\http\css\main.css" />
             </Component>
-            <Component Id="mobile.css_1" Directory="css_2" Guid="*">
+            <Component Id="mobile.css_1" Directory="css_1" Guid="*">
                 <File Id="mobile.css_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x86\lua\http\css\mobile.css" />
             </Component>
             <Component Id="jquery_ui_1.8.13.custom.css_1" Directory="ui_lightness_1" Guid="*">
@@ -2950,16 +1814,16 @@
             <Component Id="vlc16x16.png_1" Directory="images_3" Guid="*">
                 <File Id="vlc16x16.png_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x86\lua\http\images\vlc16x16.png" />
             </Component>
-            <Component Id="common.js_1" Directory="js_2" Guid="*">
+            <Component Id="common.js_1" Directory="js_1" Guid="*">
                 <File Id="common.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x86\lua\http\js\common.js" />
             </Component>
-            <Component Id="controllers.js_1" Directory="js_2" Guid="*">
+            <Component Id="controllers.js_1" Directory="js_1" Guid="*">
                 <File Id="controllers.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x86\lua\http\js\controllers.js" />
             </Component>
-            <Component Id="jquery.jstree.js_1" Directory="js_2" Guid="*">
+            <Component Id="jquery.jstree.js_1" Directory="js_1" Guid="*">
                 <File Id="jquery.jstree.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x86\lua\http\js\jquery.jstree.js" />
             </Component>
-            <Component Id="ui.js_1" Directory="js_2" Guid="*">
+            <Component Id="ui.js_1" Directory="js_1" Guid="*">
                 <File Id="ui.js_1" KeyPath="yes" Source="$(var.SSMM_UI.PublishDir)\libvlc\win-x86\lua\http\js\ui.js" />
             </Component>
             <Component Id="browse.json_1" Directory="requests_1" Guid="*">
@@ -4086,11 +2950,6 @@
         </DirectoryRef>
     </Fragment>
     <Fragment>
-        <DirectoryRef Id="server">
-            <Directory Id="android" Name="android" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
         <DirectoryRef Id="meta">
             <Directory Id="art" Name="art" />
         </DirectoryRef>
@@ -4098,16 +2957,6 @@
     <Fragment>
         <DirectoryRef Id="meta_1">
             <Directory Id="art_1" Name="art" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="recorder_2">
-            <Directory Id="assets" Name="assets" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="traceViewer">
-            <Directory Id="assets_1" Name="assets" />
         </DirectoryRef>
     </Fragment>
     <Fragment>
@@ -4141,31 +2990,6 @@
         </DirectoryRef>
     </Fragment>
     <Fragment>
-        <DirectoryRef Id="server">
-            <Directory Id="bidi" Name="bidi" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="package">
-            <Directory Id="bin" Name="bin" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="server">
-            <Directory Id="chromium" Name="chromium" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="lib">
-            <Directory Id="cli" Name="cli" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="lib">
-            <Directory Id="client" Name="client" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
         <DirectoryRef Id="plugins">
             <Directory Id="codec" Name="codec" />
         </DirectoryRef>
@@ -4176,23 +3000,13 @@
         </DirectoryRef>
     </Fragment>
     <Fragment>
-        <DirectoryRef Id="server">
-            <Directory Id="codegen" Name="codegen" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="static">
+        <DirectoryRef Id="http">
             <Directory Id="css" Name="css" />
         </DirectoryRef>
     </Fragment>
     <Fragment>
-        <DirectoryRef Id="http">
-            <Directory Id="css_1" Name="css" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
         <DirectoryRef Id="http_1">
-            <Directory Id="css_2" Name="css" />
+            <Directory Id="css_1" Name="css" />
         </DirectoryRef>
     </Fragment>
     <Fragment>
@@ -4236,16 +3050,6 @@
         </DirectoryRef>
     </Fragment>
     <Fragment>
-        <DirectoryRef Id="server">
-            <Directory Id="dispatchers" Name="dispatchers" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="server">
-            <Directory Id="electron" Name="electron" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
         <DirectoryRef Id="lua">
             <Directory Id="extensions" Name="extensions" />
         </DirectoryRef>
@@ -4253,21 +3057,6 @@
     <Fragment>
         <DirectoryRef Id="lua_2">
             <Directory Id="extensions_1" Name="extensions" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="server">
-            <Directory Id="firefox" Name="firefox" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="lib">
-            <Directory Id="generated" Name="generated" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="server">
-            <Directory Id="har" Name="har" />
         </DirectoryRef>
     </Fragment>
     <Fragment>
@@ -4281,11 +3070,6 @@
         </DirectoryRef>
     </Fragment>
     <Fragment>
-        <DirectoryRef Id="vite">
-            <Directory Id="htmlReport" Name="htmlReport" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
         <DirectoryRef Id="lua">
             <Directory Id="http" Name="http" />
         </DirectoryRef>
@@ -4293,11 +3077,6 @@
     <Fragment>
         <DirectoryRef Id="lua_2">
             <Directory Id="http_1" Name="http" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="utils">
-            <Directory Id="image_tools" Name="image_tools" />
         </DirectoryRef>
     </Fragment>
     <Fragment>
@@ -4331,23 +3110,13 @@
         </DirectoryRef>
     </Fragment>
     <Fragment>
-        <DirectoryRef Id="utils_1">
-            <Directory Id="isomorphic" Name="isomorphic" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="static">
+        <DirectoryRef Id="http">
             <Directory Id="js" Name="js" />
         </DirectoryRef>
     </Fragment>
     <Fragment>
-        <DirectoryRef Id="http">
-            <Directory Id="js_1" Name="js" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
         <DirectoryRef Id="http_1">
-            <Directory Id="js_2" Name="js" />
+            <Directory Id="js_1" Name="js" />
         </DirectoryRef>
     </Fragment>
     <Fragment>
@@ -4358,11 +3127,6 @@
     <Fragment>
         <DirectoryRef Id="plugins_1">
             <Directory Id="keystore_1" Name="keystore" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="package">
-            <Directory Id="lib" Name="lib" />
         </DirectoryRef>
     </Fragment>
     <Fragment>
@@ -4456,16 +3220,6 @@
         </DirectoryRef>
     </Fragment>
     <Fragment>
-        <DirectoryRef Id="_.playwright">
-            <Directory Id="node" Name="node" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="_.playwright">
-            <Directory Id="package" Name="package" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
         <DirectoryRef Id="plugins">
             <Directory Id="packetizer" Name="packetizer" />
         </DirectoryRef>
@@ -4496,11 +3250,6 @@
         </DirectoryRef>
     </Fragment>
     <Fragment>
-        <DirectoryRef Id="lib">
-            <Directory Id="protocol" Name="protocol" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
         <DirectoryRef Id="meta">
             <Directory Id="reader" Name="reader" />
         </DirectoryRef>
@@ -4508,31 +3257,6 @@
     <Fragment>
         <DirectoryRef Id="meta_1">
             <Directory Id="reader_1" Name="reader" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="server">
-            <Directory Id="recorder" Name="recorder" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="trace">
-            <Directory Id="recorder_1" Name="recorder" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="vite">
-            <Directory Id="recorder_2" Name="recorder" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="server">
-            <Directory Id="registry" Name="registry" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="lib">
-            <Directory Id="remote" Name="remote" />
         </DirectoryRef>
     </Fragment>
     <Fragment>
@@ -4556,11 +3280,6 @@
         </DirectoryRef>
     </Fragment>
     <Fragment>
-        <DirectoryRef Id="lib">
-            <Directory Id="server" Name="server" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
         <DirectoryRef Id="plugins">
             <Directory Id="services_discovery" Name="services_discovery" />
         </DirectoryRef>
@@ -4578,11 +3297,6 @@
     <Fragment>
         <DirectoryRef Id="plugins_1">
             <Directory Id="spu_1" Name="spu" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="admin_panel_ui">
-            <Directory Id="static" Name="static" />
         </DirectoryRef>
     </Fragment>
     <Fragment>
@@ -4616,11 +3330,6 @@
         </DirectoryRef>
     </Fragment>
     <Fragment>
-        <DirectoryRef Id="trace">
-            <Directory Id="test" Name="test" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
         <DirectoryRef Id="plugins">
             <Directory Id="text_renderer" Name="text_renderer" />
         </DirectoryRef>
@@ -4631,53 +3340,13 @@
         </DirectoryRef>
     </Fragment>
     <Fragment>
-        <DirectoryRef Id="bidi">
-            <Directory Id="third_party" Name="third_party" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="lib">
-            <Directory Id="third_party_1" Name="third_party" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="server">
-            <Directory Id="trace" Name="trace" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="vite">
-            <Directory Id="traceViewer" Name="traceViewer" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="package">
-            <Directory Id="types" Name="types" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="css_1">
+        <DirectoryRef Id="css">
             <Directory Id="ui_lightness" Name="ui-lightness" />
         </DirectoryRef>
     </Fragment>
     <Fragment>
-        <DirectoryRef Id="css_2">
+        <DirectoryRef Id="css_1">
             <Directory Id="ui_lightness_1" Name="ui-lightness" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="server">
-            <Directory Id="utils" Name="utils" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="lib">
-            <Directory Id="utils_1" Name="utils" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="lib">
-            <Directory Id="utilsBundleImpl" Name="utilsBundleImpl" />
         </DirectoryRef>
     </Fragment>
     <Fragment>
@@ -4721,11 +3390,6 @@
         </DirectoryRef>
     </Fragment>
     <Fragment>
-        <DirectoryRef Id="trace">
-            <Directory Id="viewer" Name="viewer" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
         <DirectoryRef Id="plugins">
             <Directory Id="visualization" Name="visualization" />
         </DirectoryRef>
@@ -4736,16 +3400,6 @@
         </DirectoryRef>
     </Fragment>
     <Fragment>
-        <DirectoryRef Id="lib">
-            <Directory Id="vite" Name="vite" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="server">
-            <Directory Id="webkit" Name="webkit" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
         <DirectoryRef Id="libvlc">
             <Directory Id="win_x64" Name="win-x64" />
         </DirectoryRef>
@@ -4753,11 +3407,6 @@
     <Fragment>
         <DirectoryRef Id="libvlc">
             <Directory Id="win_x86" Name="win-x86" />
-        </DirectoryRef>
-    </Fragment>
-    <Fragment>
-        <DirectoryRef Id="node">
-            <Directory Id="win32_x64" Name="win32_x64" />
         </DirectoryRef>
     </Fragment>
 </Wix>
