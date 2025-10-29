@@ -172,9 +172,11 @@ public class StateService
                 $"{service}Token.json",
                 _tokenFolder);
 
-            var json = JsonSerializer.Serialize(token, _regularJsonOptions);
+            //var json = JsonSerializer.Serialize(token, _regularJsonOptions);
 
-            File.WriteAllText(fullPath, json);
+            //File.WriteAllText(fullPath, json);
+
+            SecureStorage.SaveEncrypted(fullPath, token, _regularJsonOptions);
 
             _authObjects[service] = token;
 
@@ -199,16 +201,16 @@ public class StateService
             if (!File.Exists(fullPath))
                 return null;
 
-            var json = File.ReadAllText(fullPath);
-            var deserializedObj = JsonSerializer.Deserialize<T>(json, _regularJsonOptions);
+            //var json = File.ReadAllText(fullPath);
+            var token = SecureStorage.LoadEncrypted<T>(fullPath, _regularJsonOptions);
 
-            if (deserializedObj != null)
+            if (token != null)
             {
-                _authObjects[service] = deserializedObj;
+                _authObjects[service] = token;
                 OnAuthObjectsUpdated?.Invoke();
             }
 
-            return deserializedObj;
+            return token;
         }
         catch (Exception ex)
         {
