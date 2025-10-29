@@ -192,6 +192,8 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
     {
         int elapsed = 0;
 
+        await Task.Delay(5000);
+
         while (elapsed < maxWaitSeconds)
         {
             // Vänta enligt det rekommenderade intervallet (sekunder -> millisekunder)
