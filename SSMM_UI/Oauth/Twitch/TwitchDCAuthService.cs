@@ -19,7 +19,6 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
     private const string TokenAdress = "https://id.twitch.tv/oauth2/token";
     public readonly string _clientId = "y1cd8maguk5ob1m3lwvhdtupbj6pm3";
     private const string ApiBaseUrl = "https://api.twitch.tv/helix";
-    private TwitchToken? _authResult;
     private readonly ILogService _logger;
     private readonly StateService _stateService;
     public TwitchDCAuthService(ILogService logger, StateService stateService)
@@ -28,6 +27,8 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
         _httpClient = new HttpClient();
         _stateService = stateService;
     }
+
+    private TwitchToken? _authResult;
     public TwitchToken? AuthResult
     {
         get => _authResult;
@@ -75,7 +76,10 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
         if (token != null)
         {
             if (token.IsValid)
+            {
+                AuthResult = token;
                 return token;
+            }
             if (!token.IsValid)
             {
                 if (!string.IsNullOrEmpty(token.RefreshToken))
@@ -85,6 +89,7 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
                     {
                         token = res;
                         _stateService.SerializeToken(OAuthServices.Twitch, token);
+                        AuthResult = token;
                         return token;
                     }
                 }
@@ -165,7 +170,7 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
             token.UserId = await GetUserIdAsync(token.AccessToken);
             _stateService.SerializeToken(OAuthServices.Twitch, token);
         }
-
+        AuthResult = token;
         return token!;
     }
 
@@ -181,6 +186,7 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
                 // refresh was successful, return
                 token = res;
                 _stateService.SerializeToken(OAuthServices.Twitch, token);
+                AuthResult = token;
                 return token;
             }
 

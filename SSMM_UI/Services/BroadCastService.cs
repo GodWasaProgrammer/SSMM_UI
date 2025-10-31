@@ -25,11 +25,15 @@ public class BroadCastService
     private StreamInfo? StreamInfo;
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
     private readonly PuppetMaster _puppeteer;
+
+    /// <summary>
+    /// Because of the need to instantiate this when the user authenticates, this exists
+    /// </summary>
+    /// <param name="YTService"></param>
     public void CreateYTService(YouTubeService YTService)
     {
         _youTubeService = YTService;
     }
-
 
     public BroadCastService(CentralAuthService authService, ILogService logger, MetaDataService mdservice, PuppetMaster puppeteer)
     {
@@ -136,8 +140,6 @@ public class BroadCastService
 
                     }
                 }
-
-
                 if (metadata?.TwitchCategory?.Name != null)
                     await _puppeteer.ChangeGameTitleYoutube(insertedBroadcast.Id, metadata.TwitchCategory.Name);
 
@@ -157,66 +159,86 @@ public class BroadCastService
         }
         else
         {
-            if (_youTubeService is null)
-                throw new Exception("CentralAuthService.YTService Was null");
-            if (StreamInfo is null)
-                throw new Exception("Streaminfo failed to fetch data");
+            try
+            {
+                if (_youTubeService is null)
+                    throw new Exception("CentralAuthService.YTService Was null");
+                if (StreamInfo is null)
+                    throw new Exception("Streaminfo failed to fetch data");
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(ex.Message);
+            }
         }
         return (string.Empty, string.Empty);
     }
 
     public async Task<(string rtmpUrl, string? streamKey)> CreateTwitchBroadcastAsync(StreamMetadata metadata)
     {
-        if (_authService != null)
+        try
         {
-            if (_authService.TwitchService != null)
+            if (_authService != null)
             {
-                if (_authService.TwitchService.AuthResult != null)
+                if (_authService.TwitchService != null)
                 {
-                    var accessToken = _authService.TwitchService.AuthResult.AccessToken;
-                    var ClientId = _authService.TwitchService._clientId;
-                    var userId = _authService.TwitchService.AuthResult.UserId;
-                    using var httpClient = new HttpClient();
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-                    httpClient.DefaultRequestHeaders.Add("Client-Id", ClientId);
+                    if (_authService.TwitchService.AuthResult != null)
+                    {
+                        var accessToken = _authService.TwitchService.AuthResult.AccessToken;
+                        var ClientId = _authService.TwitchService._clientId;
+                        var userId = _authService.TwitchService.AuthResult.UserId;
+                        using var httpClient = new HttpClient();
+                        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                        httpClient.DefaultRequestHeaders.Add("Client-Id", ClientId);
 
-                    // Title and game should be set after this
-                    if (metadata.TwitchCategory != null)
-                    {
-                        await MDService.SetTwitchTitleAndCategory(metadata.Title, metadata.TwitchCategory.Name);
-                    }
-                    if (metadata.TwitchCategory == null)
-                    {
-                        if (metadata != null)
+                        // Title and game should be set after this
+                        if (metadata.TwitchCategory != null)
                         {
-                            if (metadata.Title != null)
+                            await MDService.SetTwitchTitleAndCategory(metadata.Title, metadata.TwitchCategory.Name);
+                        }
+                        if (metadata.TwitchCategory == null)
+                        {
+                            if (metadata != null)
                             {
-                                await MDService.SetTwitchTitleAndCategory(metadata.Title);
+                                if (metadata.Title != null)
+                                {
+                                    await MDService.SetTwitchTitleAndCategory(metadata.Title);
+                                }
                             }
                         }
+
+
+                        // Twitch RTMP-info är statisk (RTMP URL och stream key)
+                        var streamKeyResponse = await httpClient.GetAsync($"https://api.twitch.tv/helix/streams/key?broadcaster_id={userId}");
+                        streamKeyResponse.EnsureSuccessStatusCode();
+
+                        var json = await streamKeyResponse.Content.ReadAsStringAsync();
+                        var doc = JsonDocument.Parse(json);
+                        var key = doc.RootElement.GetProperty("data")[0].GetProperty("stream_key").GetString();
+
+                        return (TwitchAdress, key);
                     }
-
-
-                    // Twitch RTMP-info är statisk (RTMP URL och stream key)
-                    var streamKeyResponse = await httpClient.GetAsync($"https://api.twitch.tv/helix/streams/key?broadcaster_id={userId}");
-                    streamKeyResponse.EnsureSuccessStatusCode();
-
-                    var json = await streamKeyResponse.Content.ReadAsStringAsync();
-                    var doc = JsonDocument.Parse(json);
-                    var key = doc.RootElement.GetProperty("data")[0].GetProperty("stream_key").GetString();
-
-                    return (TwitchAdress, key);
                 }
             }
+            throw new ArgumentException("Failed to create TwitchBroadCast");
         }
-
-        throw new ArgumentException("Failed to create TwitchBroadCast");
-
+        catch (Exception ex)
+        {
+            _logger.Log($"Failed to create Twitch broadcast: {ex.Message}");
+            return (string.Empty, null);
+        }
     }
     public async Task CreateKickBroadcastAsync(StreamMetadata metadata)
     {
-        // kick keys remain the same unless reset so there is no need to return them as they should be set by user.
-        await _puppeteer.SetKickGameTitle(StreamTitle: metadata.Title);
+        try
+        {
+            // kick keys remain the same unless reset so there is no need to return them as they should be set by user.
+            await _puppeteer.SetKickGameTitle(StreamTitle: metadata.Title);
+        }
+        catch (Exception ex)
+        {
+            _logger.Log($"Failed to create Kick broadcast: {ex.Message}");
+        }
     }
     public async Task<(string rtmpUrl, string? streamKey)> CreateTrovoBroadcastAsync(StreamMetadata metadata)
     {
@@ -335,7 +357,5 @@ public class BroadCastService
             _logger.Log($"Failed to probe RTMP stream: {ex.Message}");
             return null; // ✅ Returnerar null vid exception
         }
-
-        // ✅ Alla kodvägar returnerar nu ett värde!
     }
 }

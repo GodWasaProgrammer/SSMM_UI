@@ -174,23 +174,14 @@ public class CentralAuthService
         YouTubeService? ytService = null;
         try
         {
-
             // Twitch
             var twitchToken = await TwitchService.TryUseExistingTokenAsync();
 
             if (twitchToken != null)
             {
-
-                if (twitchToken.ErrorMessage == null)
-                {
-                    results.Add(twitchToken is not null
+                results.Add(twitchToken is not null
                         ? new AuthResult(AuthProvider.Twitch, true, twitchToken.Username, null)
                         : new AuthResult(AuthProvider.Twitch, false, null, "Token was missing or is invalid"));
-                }
-                else
-                {
-                    results.Add(new AuthResult(AuthProvider.Twitch, false, null, twitchToken.ErrorMessage));
-                }
             }
             else
             {
@@ -219,7 +210,6 @@ public class CentralAuthService
         }
         if (GoogleAuthResult != null)
         {
-
             if (GoogleAuthResult.AccessToken != null)
             {
                 var credential = GoogleCredential.FromAccessToken(GoogleAuthResult.AccessToken);
@@ -229,7 +219,6 @@ public class CentralAuthService
                     ApplicationName = "Streamer & Social Media Manager"
                 });
                 ytService = YTService;
-
             }
         }
         return (results, ytService)!;
