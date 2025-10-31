@@ -9,7 +9,6 @@ using SSMM_UI.Oauth.Twitch;
 using SSMM_UI.Oauth.X;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace SSMM_UI.Services;

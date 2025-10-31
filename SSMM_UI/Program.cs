@@ -1,8 +1,6 @@
 ﻿using Avalonia;
 using FFmpeg.AutoGen;
 using System;
-using System.IO;
-using System.Linq;
 
 namespace SSMM_UI
 {

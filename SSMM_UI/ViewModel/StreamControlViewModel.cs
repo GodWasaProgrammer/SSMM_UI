@@ -5,7 +5,6 @@ using SSMM_UI.RTMP;
 using SSMM_UI.Services;
 using SSMM_UI.Settings;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,14 +14,14 @@ namespace SSMM_UI.ViewModel;
 
 public partial class StreamControlViewModel : ObservableObject
 {
-    public StreamControlViewModel(LogViewModel logVM, 
-                                  ILogService logger, 
-                                  LeftSideBarViewModel leftSideBarViewModel, 
-                                  StreamService streamservice, 
-                                  MetaDataService mdService, 
-                                  StateService stateservice, 
-                                  BroadCastService broadCastService, 
-                                  PollService pollService, 
+    public StreamControlViewModel(LogViewModel logVM,
+                                  ILogService logger,
+                                  LeftSideBarViewModel leftSideBarViewModel,
+                                  StreamService streamservice,
+                                  MetaDataService mdService,
+                                  StateService stateservice,
+                                  BroadCastService broadCastService,
+                                  PollService pollService,
                                   SocialPosterService socialposterservice,
                                   LoginViewModel loginVM)
     {
@@ -38,7 +37,6 @@ public partial class StreamControlViewModel : ObservableObject
         _mdService = mdService;
         _stateService = stateservice;
         _broadCastService = broadCastService;
-        _socialposterservice = socialposterservice;
         // init our settings
         _settings = _stateService.UserSettingsObj;
         _pollService = pollService;
@@ -68,7 +66,6 @@ public partial class StreamControlViewModel : ObservableObject
     readonly StateService _stateService;
     readonly BroadCastService _broadCastService;
     readonly PollService _pollService;
-    readonly SocialPosterService _socialposterservice;
 
     // Settings
     readonly UserSettings _settings;
@@ -162,7 +159,7 @@ public partial class StreamControlViewModel : ObservableObject
                 {
                     if (LogVM.StreamOutputVM.Outputs != null)
                     {
-                        LogVM.StreamOutputVM.Outputs.Clear();
+                        //LogVM.StreamOutputVM.Outputs.Clear();
                         foreach (var info in bla)
                         {
                             if (info != null)
@@ -181,19 +178,6 @@ public partial class StreamControlViewModel : ObservableObject
                 }
             }
         }
-        //_logService.Log("Attempting to post to social medias");
-        //if(_settings.PostToDiscord)
-        //{
-        //    await SocialPosterService.Discord();
-        //}
-        //if(_settings.PostToFB)
-        //{
-        //    await SocialPosterService.Facebook();
-        //}
-        //if(_settings.PostToX)
-        //{
-        //    await SocialPosterService.X();
-        //}
     }
 
     private void OnStopStreams()
@@ -204,6 +188,18 @@ public partial class StreamControlViewModel : ObservableObject
             _logService.Log("Stopped all streams.");
             CanStartStream = true;
             CanStopStream = false;
+            if (LogVM.StreamOutputVM != null)
+            {
+                if (LogVM.StreamOutputVM.Outputs != null)
+                {
+                    foreach (var output in LogVM.StreamOutputVM.Outputs)
+                    {
+                        output.Dispose();
+                    }
+                    LogVM.StreamOutputVM.Outputs.Clear();
+                    _streamService?.ProcessInfos.Clear();
+                }
+            }
         }
         catch (Exception ex)
         {
