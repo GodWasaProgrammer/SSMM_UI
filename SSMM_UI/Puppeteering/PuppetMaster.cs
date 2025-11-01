@@ -46,7 +46,6 @@ public class PuppetMaster
     {
         try
         {
-
             var options = GetLaunchOptions();
 
             using var browser = await Puppeteer.LaunchAsync(options);
@@ -106,18 +105,21 @@ public class PuppetMaster
             var page = await browser.NewPageAsync();
 
             await page.GoToAsync(KickUrl, WaitUntilNavigation.Networkidle2);
-            await Task.Delay(500);
+            await Task.Delay(1500);
 
             // === Edit button click with validation ===
+            int retry = 5;
+            //bool editClicked = false;
+
             var editClicked = await page.EvaluateFunctionAsync<bool>(@"() => {
-            const btn = Array.from(document.querySelectorAll('button'))
-                            .find(b => b.textContent.trim() === 'Edit');
-            if (btn) {
-                btn.click();
-                return true;
-            }
-            return false;
-        }");
+    const btn = document.querySelector('button[aria-haspopup=""dialog""][data-state=""closed""]');
+    if(btn) {
+        btn.click(); // Klickar på knappen
+        return true;
+    }
+    return false;
+}");
+
 
             if (!editClicked)
             {
