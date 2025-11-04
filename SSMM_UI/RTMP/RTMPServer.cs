@@ -7,6 +7,9 @@ using LiveStreamingServerNet.StreamProcessor.AspNetCore.Installer;
 using LiveStreamingServerNet.StreamProcessor.Installer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.FileProviders;
+using System;
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -62,14 +65,16 @@ public class RTMPServer
         var app = builder.Build();
         app.UseHttpFlv();
         app.UseHlsFiles();
-
+        //var uiPath = Path.Combine(AppContext.BaseDirectory, "dist");
         app.MapStandaloneServerApiEndPoints();
+
         app.UseAdminPanelUI(new AdminPanelUIOptions
         {
             // The Admin Panel UI will be available at https://localhost:7000/ui
             BasePath = "/ui",
 
             // The Admin Panel UI will access HTTP-FLV streams at https://localhost:7000/{streamPath}.flv
+            //FileProvider = new PhysicalFileProvider(uiPath),
             HasHttpFlvPreview = UseHttpFlvPreview,
             HttpFlvUriPattern = "{streamPath}.flv",
 
