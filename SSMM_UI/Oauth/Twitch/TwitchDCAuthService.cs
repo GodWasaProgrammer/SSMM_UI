@@ -178,15 +178,25 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
         var token = _stateService.DeserializeToken<TwitchToken>(OAuthServices.Twitch);
         if (token != null)
         {
-            // try to refresh
-            var res = await RefreshTokenAsync(token.RefreshToken);
-            if (res != null)
+            if (token.IsValid)
             {
-                // refresh was successful, return
-                token = res;
-                _stateService.SerializeToken(OAuthServices.Twitch, token);
+                var duser = await GetUsernameAsync(token.AccessToken);
+                token.Username = duser;
                 AuthResult = token;
                 return token;
+            }
+            else
+            {
+                // try to refresh
+                var res = await RefreshTokenAsync(token.RefreshToken);
+                if (res != null)
+                {
+                    // refresh was successful, return
+                    token = res;
+                    _stateService.SerializeToken(OAuthServices.Twitch, token);
+                    AuthResult = token;
+                    return token;
+                }
             }
 
         }

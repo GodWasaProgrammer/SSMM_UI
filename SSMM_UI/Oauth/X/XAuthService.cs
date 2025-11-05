@@ -39,7 +39,12 @@ public class XAuthService : IOAuthService<XToken>
         {
             return null;
         }
-        if (token.IsValid) { return token; }
+        if (token.IsValid) 
+        {
+            var duser = await GetCurrentUserAsync(token);
+            token.Username = duser?.Username;
+            return token; 
+        }
         if (!string.IsNullOrEmpty(token.RefreshToken))
         {
             var refreshed = await RefreshTokenAsync(token.RefreshToken);
