@@ -44,10 +44,10 @@
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.70.0.3847" />
     <PackageReference Include="IconPacks.Avalonia" Version="1.2.0" />
     <PackageReference Include="LibVLCSharp" Version="3.9.4" />
-    <PackageReference Include="LiveStreamingServerNet" Version="0.33.0" />
-    <PackageReference Include="LiveStreamingServerNet.Flv" Version="0.33.0" />
-    <PackageReference Include="LiveStreamingServerNet.Standalone" Version="0.33.0" />
-    <PackageReference Include="LiveStreamingServerNet.StreamProcessor.AspNetCore" Version="0.33.0" />
+    <PackageReference Include="LiveStreamingServerNet" Version="0.33.1" />
+    <PackageReference Include="LiveStreamingServerNet.Flv" Version="0.33.1" />
+    <PackageReference Include="LiveStreamingServerNet.Standalone" Version="0.33.1" />
+    <PackageReference Include="LiveStreamingServerNet.StreamProcessor.AspNetCore" Version="0.33.1" />
     <PackageReference Include="PuppeteerSharp" Version="20.2.4" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="9.0.10" />
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />

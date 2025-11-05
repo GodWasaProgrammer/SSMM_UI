@@ -1,15 +1,11 @@
 ﻿using LiveStreamingServerNet;
 using LiveStreamingServerNet.AdminPanelUI;
 using LiveStreamingServerNet.Flv.Installer;
-using LiveStreamingServerNet.Standalone;
 using LiveStreamingServerNet.Standalone.Installer;
 using LiveStreamingServerNet.StreamProcessor.AspNetCore.Installer;
 using LiveStreamingServerNet.StreamProcessor.Installer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.FileProviders;
-using System;
-using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -18,14 +14,6 @@ namespace SSMM_UI.RTMP;
 // TODO: Fix cert or just run HTTP
 public class RTMPServer
 {
-    //public async Task SetupServerAsync()
-    //{
-    //    using var server = LiveStreamingServerBuilder.Create()
-    //        .ConfigureLogging(options => options.AddConsole())
-    //        .Build();
-
-    //    await server.RunAsync(new IPEndPoint(IPAddress.Any, 1935));
-    //}
     public static void SetupServerAsync()
     {
         Task.Run(() =>
@@ -65,16 +53,12 @@ public class RTMPServer
         var app = builder.Build();
         app.UseHttpFlv();
         app.UseHlsFiles();
-        //var uiPath = Path.Combine(AppContext.BaseDirectory, "dist");
-        app.MapStandaloneServerApiEndPoints();
-
         app.UseAdminPanelUI(new AdminPanelUIOptions
         {
             // The Admin Panel UI will be available at https://localhost:7000/ui
             BasePath = "/ui",
 
             // The Admin Panel UI will access HTTP-FLV streams at https://localhost:7000/{streamPath}.flv
-            //FileProvider = new PhysicalFileProvider(uiPath),
             HasHttpFlvPreview = UseHttpFlvPreview,
             HttpFlvUriPattern = "{streamPath}.flv",
 
