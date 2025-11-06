@@ -192,6 +192,8 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
                 if (res != null)
                 {
                     // refresh was successful, return
+                    var fetchuser = await GetUsernameAsync(res.AccessToken);
+                    if (fetchuser != null) { res.Username = fetchuser; }
                     token = res;
                     _stateService.SerializeToken(OAuthServices.Twitch, token);
                     AuthResult = token;

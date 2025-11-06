@@ -37,6 +37,7 @@ public partial class StreamControlViewModel : ObservableObject
         _mdService = mdService;
         _stateService = stateservice;
         _broadCastService = broadCastService;
+        _socialPosterService = socialposterservice;
         // init our settings
         _settings = _stateService.UserSettingsObj;
         _pollService = pollService;
@@ -66,6 +67,7 @@ public partial class StreamControlViewModel : ObservableObject
     readonly StateService _stateService;
     readonly BroadCastService _broadCastService;
     readonly PollService _pollService;
+    readonly SocialPosterService _socialPosterService;
 
     // Settings
     readonly UserSettings _settings;
@@ -146,6 +148,7 @@ public partial class StreamControlViewModel : ObservableObject
                 var ActiveServices = new ObservableCollection<SelectedService>(LeftSideBarViewModel.SelectedServicesToStream.Where(x => x.IsActive).ToList());
 
                 await _streamService.StartStream(CurrentMetaData, ActiveServices);
+                
                 _logService.Log("Started streaming...");
             }
             catch (Exception ex)
@@ -178,6 +181,7 @@ public partial class StreamControlViewModel : ObservableObject
                 }
             }
         }
+       // await _socialPosterService.RunPoster(_settings.PostToDiscord, _settings.PostToFB, _settings.PostToX);
     }
 
     private void OnStopStreams()

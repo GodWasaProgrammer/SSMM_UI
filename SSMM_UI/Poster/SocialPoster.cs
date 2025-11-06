@@ -126,7 +126,7 @@ public class SocialPoster
                 }
                 var res = await PostMaster.RequestPagesAsync((FacebookToken)fbAuthToken);
                 var page = res.FirstOrDefault()!;
-                await FacebookPosterV2.PostAsync(page.Id, page.AccessToken, "Testing Graph API");
+                await FacebookPosterV2.PostAsync(page.Id, page.AccessToken, stringtoPost);
             }
             if (DiscordPost)
             {
