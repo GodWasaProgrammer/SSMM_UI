@@ -7,6 +7,7 @@ using LibVLCSharp.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using SSMM_UI.Interfaces;
 using SSMM_UI.MetaData;
+using SSMM_UI.Poster;
 using SSMM_UI.Puppeteering;
 using SSMM_UI.Services;
 using SSMM_UI.Settings;
@@ -61,6 +62,8 @@ public partial class App : Application
                 .AddSingleton<InspectionViewModel>()
                 .AddSingleton<PuppetMaster>()
                 .AddSingleton<SocialPosterLoginViewModel>()
+                .AddSingleton<SocialPoster>()
+                .AddSingleton<PostMaster>()
                 .BuildServiceProvider();
 
 

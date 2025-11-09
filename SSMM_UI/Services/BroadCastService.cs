@@ -77,7 +77,7 @@ public class BroadCastService
 
                 var broadcastStatus = new LiveBroadcastStatus
                 {
-                    PrivacyStatus = "private"
+                    PrivacyStatus = "public"
                 };
 
                 var liveBroadcast = new LiveBroadcast

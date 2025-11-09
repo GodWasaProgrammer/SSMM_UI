@@ -39,7 +39,10 @@ public class PostMaster
         _logService = logger;
         _stateservice = stateservice;
         _stateservice.OnAuthObjectsUpdated += AuthObjectsUpdated;
-        //DetermineNamesAndServices();
+        _stateservice.SelectedServicesToStream.CollectionChanged += (_, __) =>
+        {
+            DetermineNamesAndServices();
+        };
     }
 
     public static async Task<List<FacebookPage>> RequestPagesAsync(FacebookToken userToken)

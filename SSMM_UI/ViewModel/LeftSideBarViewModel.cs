@@ -1,14 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Google.Apis.YouTube.v3;
 using SSMM_UI.Interfaces;
 using SSMM_UI.RTMP;
 using SSMM_UI.Services;
-using SSMM_UI.Settings;
 using System.Collections.ObjectModel;
-using System.Security;
 using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace SSMM_UI.ViewModel;
 
@@ -39,9 +35,6 @@ public partial class LeftSideBarViewModel : ObservableObject
     private readonly IDialogService _dialogService;
     private readonly ILogService _logService;
     private readonly StateService _stateService;
-
-    // == bool toggler for the preview window for stream ==
-    [ObservableProperty] private bool isReceivingStream;
 
     [ObservableProperty] private RtmpServiceGroup? selectedRtmpService;
     async partial void OnSelectedRtmpServiceChanged(RtmpServiceGroup? value)

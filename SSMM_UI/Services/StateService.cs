@@ -6,6 +6,7 @@ using SSMM_UI.Enums;
 using SSMM_UI.Helpers;
 using SSMM_UI.Interfaces;
 using SSMM_UI.MetaData;
+using SSMM_UI.Poster;
 using SSMM_UI.RTMP;
 using SSMM_UI.Settings;
 using SSMM_UI.ViewModel;
@@ -156,7 +157,7 @@ public class StateService
         catch (Exception ex)
         {
             // Logga gärna, men returnera null om något går fel
-            Console.WriteLine($"Failed to load window position: {ex.Message}");
+            //_logger.Log($"Failed to load window position: {ex.Message}");
             return null;
         }
     }
