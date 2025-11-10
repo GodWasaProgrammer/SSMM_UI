@@ -32,57 +32,40 @@ public class PosterHelper
         try
         {
             var credential = GoogleCredential.FromAccessToken(accesstoken);
-            var YTService = new YouTubeService(new BaseClientService.Initializer
+            var ytService = new YouTubeService(new BaseClientService.Initializer
             {
                 HttpClientInitializer = credential,
                 ApplicationName = "Streamer & Social Media Manager"
             });
 
-            var channelsRequest = YTService.Channels.List("id,snippet");
-            channelsRequest.Mine = true; // Viktigt: anger att vi vill ha den kanal som tillhör token
+            // Hämta alla aktuella live-broadcasts
+            var request = ytService.LiveBroadcasts.List("id,snippet,contentDetails,status");
+            request.BroadcastStatus = LiveBroadcastsResource.ListRequest.BroadcastStatusEnum.Active; // Aktiva sändningar
 
-            var channelsResponse = await channelsRequest.ExecuteAsync();
-            var channelId = channelsResponse.Items[0].Id;
+            var response = await request.ExecuteAsync();
 
-            // Skapa en förfrågan
-            var searchRequest = YTService.Search.List("snippet");
-            searchRequest.ChannelId = channelId;
-            searchRequest.EventType = SearchResource.ListRequest.EventTypeEnum.Live;
-            searchRequest.Type = "video";
-
-            // Skicka förfrågan
-            var searchResponse = await searchRequest.ExecuteAsync();
-
-            if (searchResponse.Items.Count > 0)
+            if (response.Items.Count > 0)
             {
-                // Hämta den första live-videon
-                var liveVideo = searchResponse.Items[0];
-                string videoId = liveVideo.Id.VideoId;
-                string videoTitle = liveVideo.Snippet.Title;
-
-                // Bygg den exakta live-URL:en
+                var broadcast = response.Items[0];
+                string videoId = broadcast.Id;
+                string title = broadcast.Snippet.Title;
                 string liveUrl = $"https://www.youtube.com/watch?v={videoId}";
 
                 islive.IsLive = true;
                 islive.LiveUrl = liveUrl;
-                islive.VideoTitle = videoTitle;
-                return islive;
+                islive.VideoTitle = title;
             }
             else
             {
                 islive.IsLive = false;
-                islive.LiveUrl = null;
-                islive.VideoTitle = null;
-                return islive;
             }
+
+            return islive;
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Ett fel inträffade: " + ex.Message);
-            //return (false, null, null);
+            Console.WriteLine("Fel vid kontroll av YouTube live-status: " + ex.Message);
             islive.IsLive = false;
-            islive.LiveUrl = null;
-            islive.VideoTitle = null;
             return islive;
         }
     }

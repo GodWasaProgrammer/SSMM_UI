@@ -43,7 +43,7 @@ public class BroadCastService
         _puppeteer = puppeteer;
     }
 
-    public async Task<(string rtmpUrl, string streamKey)> CreateYouTubeBroadcastAsync(StreamMetadata metadata)
+    public async Task<(string rtmpUrl, string streamKey, string BroadCastId, YouTubeService? ytservice)> CreateYouTubeBroadcastAsync(StreamMetadata metadata)
     {
 
         try
@@ -72,7 +72,7 @@ public class BroadCastService
                 var broadcastSnippet = new LiveBroadcastSnippet
                 {
                     Title = metadata.Title,
-                    ScheduledStartTimeDateTimeOffset = DateTime.UtcNow.AddMinutes(1)
+                    ScheduledStartTimeDateTimeOffset = DateTime.UtcNow.AddMinutes(0)
                 };
 
                 var broadcastStatus = new LiveBroadcastStatus
@@ -145,7 +145,7 @@ public class BroadCastService
 
                 // 5. Returnera RTMP-url + streamkey
                 var ingestionInfo = insertedStream.Cdn.IngestionInfo;
-                return (ingestionInfo.IngestionAddress, ingestionInfo.StreamName);
+                return (ingestionInfo.IngestionAddress, ingestionInfo.StreamName, insertedBroadcast.Id, _youTubeService);
             }
             catch (Google.GoogleApiException ex)
             {
@@ -171,7 +171,7 @@ public class BroadCastService
                 _logger.Log(ex.Message);
             }
         }
-        return (string.Empty, string.Empty);
+        return (string.Empty, string.Empty,string.Empty, _youTubeService);
     }
 
     public async Task<(string rtmpUrl, string? streamKey)> CreateTwitchBroadcastAsync(StreamMetadata metadata)

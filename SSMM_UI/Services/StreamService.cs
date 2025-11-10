@@ -1,10 +1,12 @@
-﻿using SSMM_UI.MetaData;
+﻿using Google.Apis.YouTube.v3;
+using SSMM_UI.MetaData;
 using SSMM_UI.Puppeteering;
 using SSMM_UI.RTMP;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -35,6 +37,8 @@ public class StreamService
             return;
         }
 
+        string YTbroadcastId = string.Empty;
+        YouTubeService? _ytService = null;
         foreach (var service in SelectedServicesToStream)
         {
             // Kolla om metadata finns satt (titel eller thumbnail-path)
@@ -49,8 +53,9 @@ public class StreamService
                         if (metadata != null)
                         {
 
-                            var (newUrl, newKey) = await _broadCastService.CreateYouTubeBroadcastAsync(metadata);
-
+                            var (newUrl, newKey, id, ytservice) = await _broadCastService.CreateYouTubeBroadcastAsync(metadata);
+                            YTbroadcastId = id;
+                            _ytService = ytservice;
                             // Uppdatera service med nya värden så vi kör rätt stream
                             if (service.SelectedServer != null)
                             {
@@ -58,7 +63,7 @@ public class StreamService
                                 service.StreamKey = newKey;
                             }
                         }
-                        
+
                     }
                     if (service.DisplayName.Contains("Twitch", StringComparison.OrdinalIgnoreCase))
                     {
@@ -183,6 +188,46 @@ public class StreamService
                         {
                             _logger.Log($"FFmpeg start failed: {ex.Message}\n");
                         }
+                        _ = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                // Vänta tills YouTube har fått RTMP-signal
+                                for (int i = 0; i < 20; i++)
+                                {
+                                    await Task.Delay(TimeSpan.FromSeconds(5));
+
+                                    var listRequest = _ytService.LiveBroadcasts.List("id,status");
+                                    listRequest.Id = YTbroadcastId;
+                                    var listResponse = await listRequest.ExecuteAsync();
+
+                                    var broadcast = listResponse.Items.FirstOrDefault();
+                                    var state = broadcast?.Status?.LifeCycleStatus;
+
+                                    _logger.Log($"[YouTube] Broadcast lifecycle: {state}");
+
+                                    if (state == "ready")
+                                    {
+                                        await Task.Delay(TimeSpan.FromSeconds(10));
+                                        var transitionRequest = _ytService.LiveBroadcasts.Transition(
+                                            LiveBroadcastsResource.TransitionRequest.BroadcastStatusEnum.Live,
+                                            YTbroadcastId,
+                                            "status"
+                                        );
+
+                                        var response = await transitionRequest.ExecuteAsync();
+                                        _logger.Log($"YouTube broadcast transitioned to LIVE: {response.Snippet.Title}");
+                                        return;
+                                    }
+                                }
+
+                                _logger.Log("YouTube broadcast never reached 'ready' state.");
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.Log($"Failed to auto-start YouTube broadcast: {ex.Message}");
+                            }
+                        });
                     }
                 }
             }
