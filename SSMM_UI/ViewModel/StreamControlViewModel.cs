@@ -128,6 +128,14 @@ public partial class StreamControlViewModel : ObservableObject
         }
     }
 
+    //private async Task<bool> TriggerSocialPosterAsync(bool success)
+    //{
+    //    if(success)
+    //    {
+    //        await _socialPosterService.RunPoster(_settings.PostToDiscord, _settings.PostToFB, _settings.PostToX);
+    //    }
+    //}
+
     private async Task StartStream()
     {
         CanStartStream = false;
@@ -147,7 +155,7 @@ public partial class StreamControlViewModel : ObservableObject
 
                 var ActiveServices = new ObservableCollection<SelectedService>(LeftSideBarViewModel.SelectedServicesToStream.Where(x => x.IsActive).ToList());
 
-                await _streamService.StartStream(CurrentMetaData, ActiveServices);
+                await _streamService.StartStream(CurrentMetaData, ActiveServices /*TriggerSocialPosterAsync*/);
                 
                 _logService.Log("Started streaming...");
             }
