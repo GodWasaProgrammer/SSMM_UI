@@ -30,8 +30,6 @@ public class SocialPoster
     {
         List<string> platforms = [];
         List<string> streamlinks = [];
-        // Använd Singleton-instansen
-        //var kl = KeyLoader.Instance;
 
         if (_postmaster._authobjects == null)
         {
@@ -74,6 +72,20 @@ public class SocialPoster
                 streamlinks.Add($"https://www.twitch.tv/{twitchtoken.Username}");
             }
         }
+
+        if (_postmaster.UsernameAndService?.ContainsValue(OAuthServices.Kick) == true)
+        {
+            // as the username and service should reflect only selected AND authed services, this should never run UNLESS those conditions are filled
+            // this is a subpar solution, but because the public Kick Api doesnt provide any way of deducing if the stream is actually live,
+            // this is the only solution.
+            var kvp = _postmaster.UsernameAndService.FirstOrDefault(x => x.Value == OAuthServices.Kick);
+            if (kvp.Key != null)
+            {
+                platforms.Add("Kick");
+                streamlinks.Add($"https://www.kick.com/{kvp.Key}");
+            }
+        }
+
         var first = _postmaster.UsernameAndService?.FirstOrDefault().Key;
         if (first != null)
         {
@@ -134,7 +146,7 @@ public class SocialPoster
                 {
                     var hook = webhook.Value;
                     if (hook != null)
-                    await DiscordPoster.PostToDiscord(hook!, stringtoPost);
+                        await DiscordPoster.PostToDiscord(hook!, stringtoPost);
 
                 }
             }
