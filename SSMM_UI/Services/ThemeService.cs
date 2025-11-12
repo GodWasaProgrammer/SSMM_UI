@@ -1,9 +1,7 @@
 ﻿using Avalonia;
-using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
 using SSMM_UI.Interfaces;
 using SSMM_UI.Settings;
-using System;
 
 namespace SSMM_UI.Services;
 

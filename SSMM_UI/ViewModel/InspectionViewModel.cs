@@ -34,4 +34,3 @@ public partial class InspectionViewModel : ObservableObject
         StreamButtonText = IsReceivingStream ? "Stop Receiving" : "Start Receiving";
     }
 }
-

@@ -108,7 +108,7 @@ public class PuppetMaster
             await Task.Delay(1500);
 
             // === Edit button click with validation ===
-            int retry = 5;
+            //int retry = 5;
             //bool editClicked = false;
 
             var editClicked = await page.EvaluateFunctionAsync<bool>(@"() => {

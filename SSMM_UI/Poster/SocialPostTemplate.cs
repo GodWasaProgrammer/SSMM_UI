@@ -32,8 +32,6 @@ public class SocialPostTemplate
             $"\n{_githubLink}";
 
         Post = $"{_userName} is now LIVE on:\n{platformsText}{_suffix}";
-
-
     }
 
     public SocialPostTemplate(string username, List<string> linkstostreams, List<string> platforms)
@@ -43,5 +41,4 @@ public class SocialPostTemplate
         _userName = username;
         BuildPost();
     }
-
 }

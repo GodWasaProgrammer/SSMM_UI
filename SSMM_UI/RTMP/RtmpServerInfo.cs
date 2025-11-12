@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace SSMM_UI.RTMP;
+﻿namespace SSMM_UI.RTMP;
 
 public class RtmpServerInfo
 {

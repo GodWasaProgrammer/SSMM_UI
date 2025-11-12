@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using PuppeteerSharp;
 using SSMM_UI.Interfaces;
 using SSMM_UI.Puppeteering;
 using SSMM_UI.Services;

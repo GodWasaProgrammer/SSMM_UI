@@ -14,7 +14,6 @@ using SSMM_UI.MetaData;
 
 namespace SSMM_UI.ViewModel;
 
-
 public partial class SearchViewModel : ObservableObject
 {
     private readonly Timer _searchTimer;

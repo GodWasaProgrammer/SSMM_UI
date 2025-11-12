@@ -6,7 +6,6 @@ using SSMM_UI.Enums;
 using SSMM_UI.Helpers;
 using SSMM_UI.Interfaces;
 using SSMM_UI.MetaData;
-using SSMM_UI.Poster;
 using SSMM_UI.RTMP;
 using SSMM_UI.Settings;
 using SSMM_UI.ViewModel;

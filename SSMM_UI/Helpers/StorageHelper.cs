@@ -10,7 +10,7 @@ public static class StorageHelper
     public static string AppName { get; set; } = "Streamer & Social Media Manager";
 
     /// <summary>
-    /// Root folder for User specific settings inställningar (roaming).
+    /// Root folder for User specific settings(roaming).
     /// Ex: C:\Users\<user>\AppData\Roaming\GWAP Technologies\SSMM
     /// </summary>
     public static string RoamingDataPath =>
@@ -50,7 +50,7 @@ public static class StorageHelper
 
     /// <summary>
     /// Returns a full path to the file in the selected scope.
-    /// Skapar mappen om den inte finns.
+    /// Creates folder if it does not exist.
     /// </summary>
     public static string GetFilePath(StorageScope scope, string fileName, string? subfolder = null)
     {
