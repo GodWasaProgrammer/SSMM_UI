@@ -1,0 +1,19 @@
+﻿<Project Sdk="WixToolset.Sdk/6.0.2">
+  <PropertyGroup>
+	<OutputType>Bundle</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+	<PackageReference Include="WixToolset.BootstrapperApplications.wixext" Version="6.0.2" />
+  </ItemGroup>
+  <ItemGroup>
+	<ProjectReference Include="..\WixPackage\WixPackage.wixproj" />
+  </ItemGroup>
+	<Target Name="GetMSIFromReference" BeforeTargets="Build">
+		<MSBuild
+			Projects="..\WixPackage\WixPackage.wixproj"
+			Targets="Build"
+			Properties="Configuration=$(Configuration);PlatformTarget=$(PlatformTarget)">
+			<Output TaskParameter="TargetOutputs" ItemName="MSIFile"/>
+		</MSBuild>
+	</Target>
+</Project>
