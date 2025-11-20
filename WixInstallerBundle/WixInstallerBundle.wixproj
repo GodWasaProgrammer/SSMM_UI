@@ -1,19 +1,34 @@
 ﻿<Project Sdk="WixToolset.Sdk/6.0.2">
-  <PropertyGroup>
-	<OutputType>Bundle</OutputType>
-  </PropertyGroup>
-  <ItemGroup>
-	<PackageReference Include="WixToolset.BootstrapperApplications.wixext" Version="6.0.2" />
-  </ItemGroup>
-  <ItemGroup>
-	<ProjectReference Include="..\WixPackage\WixPackage.wixproj" />
-  </ItemGroup>
-	<Target Name="GetMSIFromReference" BeforeTargets="Build">
+
+	<PropertyGroup>
+		<OutputType>Bundle</OutputType>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="WixToolset.BootstrapperApplications.wixext" Version="6.0.2" />
+	</ItemGroup>
+
+	<!-- Se till att MSI-projektet byggs först -->
+	<ItemGroup>
+		<ProjectReference Include="..\WixPackage\WixPackage.wixproj" />
+	</ItemGroup>
+
+	<!-- Kör MSI-bygget och få ut MSI-filen -->
+	<Target Name="ResolveMSIFromWixPackage" BeforeTargets="Build">
+
 		<MSBuild
 			Projects="..\WixPackage\WixPackage.wixproj"
 			Targets="Build"
 			Properties="Configuration=$(Configuration);PlatformTarget=$(PlatformTarget)">
-			<Output TaskParameter="TargetOutputs" ItemName="MSIFile"/>
+			<Output TaskParameter="TargetOutputs" ItemName="ResolvedMSI" />
 		</MSBuild>
+
+		<Message Text="Detected MSI: %(ResolvedMSI.Identity)" Importance="high" />
 	</Target>
+
+	<!-- Lägg MSI som bundlepayload -->
+	<ItemGroup>
+		<WixBundlePayload Include="@(ResolvedMSI)" />
+	</ItemGroup>
+
 </Project>

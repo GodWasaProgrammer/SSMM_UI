@@ -1,21 +1,22 @@
 ﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-	 xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal">
-	<Bundle Id="GWAP.StreamerSocialMediaManager.Bundle"
-			Name="Streamer Social Media Manager Installer"
-			Manufacturer="GWAP Technologies"
-			Version="1.0.0.0">
+     xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal">
 
-		<BootstrapperApplication>
-			<bal:WixStandardBootstrapperApplication
-				LicenseUrl="https://www.example.com/license"
-				Theme="hyperlinkLicense"/>
-		</BootstrapperApplication>
+  <Bundle Id="GWAP.StreamerSocialMediaManager.Bundle"
+          Name="Streamer Social Media Manager Installer"
+          Manufacturer="GWAP Technologies"
+          Version="1.0.0.0">
 
-		<Chain>
-			<MsiPackage SourceFile="@(MSIFile)">
-				<MsiProperty Name="INSTALLFOLDER" Value="[InstallFolder]" />
-			</MsiPackage>
-		</Chain>
+    <BootstrapperApplication>
+      <bal:WixStandardBootstrapperApplication
+          LicenseUrl="https://www.example.com/license"
+          Theme="hyperlinkLicense"/>
+    </BootstrapperApplication>
 
-	</Bundle>
+    <Chain>
+      <MsiPackage Name="StreamerSocialMediaManager.msi">
+        <MsiProperty Name="INSTALLFOLDER" Value="[InstallFolder]" />
+      </MsiPackage>
+    </Chain>
+
+  </Bundle>
 </Wix>

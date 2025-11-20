@@ -1,52 +1,61 @@
 ﻿<Project Sdk="WixToolset.Sdk/6.0.2">
   <PropertyGroup>
-    <OutputName>StreamerSocialMediaManager</OutputName>
-    <OutputType>Package</OutputType>
-    <Platform>$(PlatformTarget)</Platform>
-    <!-- Publish configuration used by the pre-build publish step -->
-    <PublishConfig>$(Configuration)</PublishConfig>
-    <PublishRuntime Condition=" '$(PlatformTarget)' == 'AnyCPU' ">win-x64</PublishRuntime>
-    <PublishRuntime Condition=" '$(PlatformTarget)' != '' AND '$(PlatformTarget)' != 'AnyCPU' ">win-$(PlatformTarget)</PublishRuntime>
-    <PublishRuntime Condition=" '$(PublishRuntime)' == '' ">win-x64</PublishRuntime>
-    <!-- Publish output directory -->
-    <!--<PublishDir>$(SolutionDir)SSMM_UI\bin\$(Platform)\$(Configuration)\$(PlatformTarget)</PublishDir>-->
-    <PublishDir>$(SolutionDir)SSMM_UI\bin\$(PlatformTarget)\$(Configuration)\net$(TargetFrameworkVersion)</PublishDir>
-    <!-- Expose PublishDir to WiX heat via a WiX variable -->
-    <DefineConstants>SSMM_UI.PublishDir=$(PublishDir)</DefineConstants>
-    <!-- Path to the project that will be published -->
-    <SSMMProject>$(SolutionDir)SSMM_UI\SSMM_UI.csproj</SSMMProject>
-    <!-- Directory for WixPackage outputs -->
-    <WixPackageDir>$(SolutionDir)WixPackage</WixPackageDir>
+	<OutputName>StreamerSocialMediaManager</OutputName>
+	<OutputType>Package</OutputType>
+	<Platform>$(PlatformTarget)</Platform>
+	<!-- Publish configuration used by the pre-build publish step -->
+	<PublishConfig>$(Configuration)</PublishConfig>
+	<PublishRuntime Condition=" '$(PlatformTarget)' == 'AnyCPU' ">win-x64</PublishRuntime>
+	<PublishRuntime Condition=" '$(PlatformTarget)' != '' AND '$(PlatformTarget)' != 'AnyCPU' ">win-$(PlatformTarget)</PublishRuntime>
+	<PublishRuntime Condition=" '$(PublishRuntime)' == '' ">win-x64</PublishRuntime>
+	<!-- Publish output directory -->
+	<!--<PublishDir>$(SolutionDir)SSMM_UI\bin\$(Platform)\$(Configuration)\$(PlatformTarget)</PublishDir>-->
+	<PublishDir>$(SolutionDir)SSMM_UI\bin\$(PlatformTarget)\$(Configuration)\net$(TargetFrameworkVersion)</PublishDir>
+	<!-- Expose PublishDir to WiX heat via a WiX variable -->
+	<DefineConstants>SSMM_UI.PublishDir=$(PublishDir)</DefineConstants>
+	<!-- Path to the project that will be published -->
+	<SSMMProject>$(SolutionDir)SSMM_UI\SSMM_UI.csproj</SSMMProject>
+	<!-- Directory for WixPackage outputs -->
+	<WixPackageDir>$(SolutionDir)WixPackage</WixPackageDir>
   </PropertyGroup>
   <PropertyGroup>
-    <PublishDirNoSlash>$([System.String]::Copy($(PublishDir)).TrimEnd('\'))</PublishDirNoSlash>
+	<PublishDirNoSlash>$([System.String]::Copy($(PublishDir)).TrimEnd('\'))</PublishDirNoSlash>
   </PropertyGroup>
   <PropertyGroup>
-    <!-- Use WiX Heat 6.0.2 from NuGet instead of old WiX paths -->
-    <HeatExe>dotnet exec "$(NuGetPackageRoot)wixtoolset.heat\6.0.2\tools\net6.0\heat.dll"</HeatExe>
+	<!-- Use WiX Heat 6.0.2 from NuGet instead of old WiX paths -->
+	<HeatExe>dotnet exec "$(NuGetPackageRoot)wixtoolset.heat\6.0.2\tools\net6.0\heat.dll"</HeatExe>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="WixToolset.Heat" Version="6.0.2" />
+	<PackageReference Include="WixToolset.Heat" Version="6.0.2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SSMM_UI\SSMM_UI.csproj" />
+	<ProjectReference Include="..\SSMM_UI\SSMM_UI.csproj" />
   </ItemGroup>
   <!-- Fail fast if heat.exe is not available -->
   <Target Name="EnsureHeatAvailable" BeforeTargets="PublishAndHarvestPublishFolder">
-    <Error Condition=" '$(HeatExe)' == '' " Text="heat.exe not found. Install the WiX Toolset or add heat.exe to PATH, or set the HeatExe property in the wixproj to the full path of heat.exe." />
+	<Error Condition=" '$(HeatExe)' == '' " Text="heat.exe not found. Install the WiX Toolset or add heat.exe to PATH, or set the HeatExe property in the wixproj to the full path of heat.exe." />
   </Target>
   <!-- Publish the app then harvest the publish folder into a .wxs fragment before compiling the installer -->
   <Target Name="PublishAndHarvestPublishFolder" BeforeTargets="BeforeBuild">
-    <Message Text="Publishing SSMM_UI to $(PublishDir)" Importance="high" />
-    <Exec Command="dotnet publish &quot;$(SSMMProject)&quot; -c $(PublishConfig) -r $(PublishRuntime) -o &quot;$(PublishDir)&quot;" />
-    <Message Text="Harvesting publish folder with heat.exe ($(HeatExe)) into HarvestedComponents.wxs" Importance="high" />
-    <Exec Command="$(HeatExe) dir &quot;$(PublishDirNoSlash)&quot; -cg ProductComponents -dr INSTALLFOLDER -srd -suid -ag -gg -var var.SSMM_UI.PublishDir -out &quot;$(WixPackageDir)\HarvestedComponents.wxs&quot; -scom" />
-    <!-- Include the harvested fragment in the WiX compile -->
-    <ItemGroup>
-      <Compile Include="$(WixPackageDir)\HarvestedComponents.wxs" />
-    </ItemGroup>
+	<Message Text="Publishing SSMM_UI to $(PublishDir)" Importance="high" />
+	<Exec Command="dotnet publish &quot;$(SSMMProject)&quot; -c $(PublishConfig) -r $(PublishRuntime) -o &quot;$(PublishDir)&quot;" />
+	<Message Text="Harvesting publish folder with heat.exe ($(HeatExe)) into HarvestedComponents.wxs" Importance="high" />
+	<Exec Command="$(HeatExe) dir &quot;$(PublishDirNoSlash)&quot; -cg ProductComponents -dr INSTALLFOLDER -srd -suid -ag -gg -var var.SSMM_UI.PublishDir -out &quot;$(WixPackageDir)\HarvestedComponents.wxs&quot; -scom" />
+	<!-- Include the harvested fragment in the WiX compile -->
+	<ItemGroup>
+	  <Compile Include="$(WixPackageDir)\HarvestedComponents.wxs" />
+	</ItemGroup>
   </Target>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="del $(ProjectDir)\HarvestedComponents.wxs" />
+	<Exec Command="del $(ProjectDir)\HarvestedComponents.wxs" />
   </Target>
+	<PropertyGroup>
+		<BuiltMsi>$(OutputPath)$(OutputName).msi</BuiltMsi>
+	</PropertyGroup>
+
+	<Target Name="GenerateBuildOutput" Returns="@(OutputFiles)" AfterTargets="Build">
+		<ItemGroup>
+			<OutputFiles Include="$(BuiltMsi)" />
+		</ItemGroup>
+	</Target>
 </Project>
