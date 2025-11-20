@@ -8,13 +8,12 @@
 		<PackageReference Include="WixToolset.BootstrapperApplications.wixext" Version="6.0.2" />
 	</ItemGroup>
 
-	<!-- Se till att MSI-projektet byggs först -->
 	<ItemGroup>
 		<ProjectReference Include="..\WixPackage\WixPackage.wixproj" />
 	</ItemGroup>
 
 	<!-- Kör MSI-bygget och få ut MSI-filen -->
-	<Target Name="ResolveMSIFromWixPackage" BeforeTargets="Build">
+	<!--<Target Name="ResolveMSIFromWixPackage" BeforeTargets="Build">
 
 		<MSBuild
 			Projects="..\WixPackage\WixPackage.wixproj"
@@ -24,8 +23,12 @@
 		</MSBuild>
 
 		<Message Text="Detected MSI: %(ResolvedMSI.Identity)" Importance="high" />
-	</Target>
+	</Target>-->
 
+	<ItemGroup>
+		<WixBundlePayload Include="@(ProjectReference->'%(TargetPath)')" />
+	</ItemGroup>
+	
 	<!-- Lägg MSI som bundlepayload -->
 	<ItemGroup>
 		<WixBundlePayload Include="@(ResolvedMSI)" />

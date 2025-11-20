@@ -1,4 +1,5 @@
-﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+	 xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
 	<Package
 	  Name="Streamer Social Media Manager"
 	  Manufacturer="GWAP Technologies"
@@ -11,6 +12,12 @@
 			<ComponentGroupRef Id="ProductComponents" />
 			<!--<ComponentGroupRef Id="DependencyComponents" />-->
 		</Feature>
+		<UI>
+			<ui:WixUI
+				Id="WixUI_InstallDir"
+				InstallDirectory="INSTALLFOLDER"
+				ExtendedPathValidation="yes" />
+		</UI>
 	</Package>
 
 	<Fragment>
