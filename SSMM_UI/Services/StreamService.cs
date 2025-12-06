@@ -19,14 +19,12 @@ public class StreamService
     private readonly List<Process>? ffmpegProcess = [];
     private readonly BroadCastService _broadCastService;
     private readonly ILogService _logger;
-    private readonly PuppetMaster puppetMaster;
     public List<StreamProcessInfo> ProcessInfos { get; private set; } = [];
-    public StreamService(ILogService logger, BroadCastService broadCastService, PuppetMaster puppeteer)
+    public StreamService(ILogService logger, BroadCastService broadCastService)
     {
         RTMPServer.StartSrv();
         _logger = logger;
         _broadCastService = broadCastService;
-        puppetMaster = puppeteer;
     }
 
     // TODO: needs to indicate success

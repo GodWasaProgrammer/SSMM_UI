@@ -8,10 +8,13 @@
 			 x:DataType="local:OutputViewModel"
              x:Class="SSMM_UI.Views.OutPutView">
 
+	<Grid RowDefinitions="Auto,Auto,Auto">
+
 		<Border Classes="card">
 			<Grid>
-				<TextBlock Text="{Binding Header}"></TextBlock>
-				<ListBox ItemsSource="{Binding LogMessages}"
+				<TextBlock Grid.Row="0" Text="{Binding Header}"></TextBlock>
+				<ListBox Grid.Row="2"
+						ItemsSource="{Binding LogMessages}"
 						 SelectedItem="{Binding SelectedMessage}"
 						 Height="200"
 						 Width="400"
@@ -22,5 +25,11 @@
 				Opacity="1"/>
 			</Grid>
 		</Border>
-	
-</UserControl> 
+		<Button Grid.Row="1"
+				Content="Restart"
+				Command="{Binding RestartProcessCMD}"
+				HorizontalAlignment="Left"
+				VerticalAlignment="Bottom"
+				Margin="10,6,0,0"/>
+	</Grid>
+</UserControl>

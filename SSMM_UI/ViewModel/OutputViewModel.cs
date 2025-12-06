@@ -1,10 +1,12 @@
 ﻿using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace SSMM_UI.ViewModel;
 
@@ -14,6 +16,7 @@ public partial class OutputViewModel : ObservableObject, IDisposable
     {
         Header = header;
         StartReadingOutput(process, _cts.Token);
+        localProcess = process;
     }
 
     [ObservableProperty] string? header;
@@ -21,8 +24,22 @@ public partial class OutputViewModel : ObservableObject, IDisposable
     [ObservableProperty] string? selectedMessage;
     private Task? _processreader;
     private readonly CancellationTokenSource _cts = new();
+    private Process localProcess;
+    public ICommand RestartProcessCMD => new AsyncRelayCommand (RestartProcess);
+    private string restarted = string.Empty;
+
     /// Take Task of stream with the output ? 
     public ObservableCollection<string> LogMessages { get; } = [];
+
+    private async Task RestartProcess()
+    {
+        localProcess.Kill();
+        var success = localProcess.Start();
+        if (success) 
+        {
+
+        }
+    }
 
     private void StartReadingOutput(Process process, CancellationToken token)
     {
