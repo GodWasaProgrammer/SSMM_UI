@@ -189,7 +189,8 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
             {
                 // try to refresh
                 var res = await RefreshTokenAsync(token.RefreshToken);
-                if (res != null)
+                // not null and valid -> get username, otherwise the refresh failed and full login required
+                if (res != null && res.IsValid!)
                 {
                     // refresh was successful, return
                     var fetchuser = await GetUsernameAsync(res.AccessToken);
