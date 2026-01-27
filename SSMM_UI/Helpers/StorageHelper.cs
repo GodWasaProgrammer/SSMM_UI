@@ -2,6 +2,7 @@
 
 using SSMM_UI.Enums;
 using System;
+using System.Diagnostics;
 using System.IO;
 
 public static class StorageHelper
@@ -56,5 +57,50 @@ public static class StorageHelper
     {
         string dir = GetOrCreateDirectory(scope, subfolder);
         return Path.Combine(dir, fileName);
+    }
+
+    /// <summary>
+    /// Deletes all tokens for the specified provider
+    /// </summary>
+    /// <param name="provider"></param>
+    /// <returns>bool for result</returns>
+    public static bool PurgeToken(AuthProvider provider)
+    {
+        try
+        {
+            DirectoryInfo tokensDir = new DirectoryInfo(GetOrCreateDirectory(StorageScope.Roaming, "Tokens"));
+
+            foreach (FileInfo file in tokensDir.GetFiles())
+            {
+                if (file.Name.StartsWith(provider.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    file.Delete();
+                }
+            }
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Deletes all stored tokens
+    /// </summary>
+    /// <returns>bool for result</returns>
+    public static bool PurgeTokens()
+    {
+        try
+        {
+            Directory.Delete(GetOrCreateDirectory(StorageScope.Roaming, "Tokens"), true);
+            return true;
+        }
+        catch(Exception e) 
+        {
+           Debug.WriteLine($"Failed to delete tokens: {e.Message}");
+            return false;
+        }
     }
 }

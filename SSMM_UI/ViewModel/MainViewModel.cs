@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SSMM_UI.Enums;
 using SSMM_UI.Interfaces;
 using SSMM_UI.Puppeteering;
 using SSMM_UI.Services;
@@ -11,14 +12,14 @@ namespace SSMM_UI.ViewModel;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    public MainWindowViewModel(StateService stateService, 
-                               LeftSideBarViewModel leftSideBarVM, 
-                               UserSettings settings, 
-                               IDialogService dialogService, 
-                               LogViewModel logVM, 
-                               SocialPosterViewModel socialposterVM, 
-                               StreamControlViewModel streamControlVM, 
-                               MetaDataViewModel metadataVM, 
+    public MainWindowViewModel(StateService stateService,
+                               LeftSideBarViewModel leftSideBarVM,
+                               UserSettings settings,
+                               IDialogService dialogService,
+                               LogViewModel logVM,
+                               SocialPosterViewModel socialposterVM,
+                               StreamControlViewModel streamControlVM,
+                               MetaDataViewModel metadataVM,
                                IThemeService themeService,
                                LoginViewModel loginVM,
                                InspectionViewModel inspectionVM,
@@ -82,7 +83,9 @@ public partial class MainWindowViewModel : ObservableObject
     public ICommand OpenSetting { get; }
     public ICommand OpenAbout { get; }
     public ICommand ToggleThemes => new RelayCommand(ToggleTheme);
-    public ICommand ShowSecretsAndKeys {  get; }
+    public ICommand ShowSecretsAndKeys { get; }
+    public ICommand DeleteAllTokens => new RelayCommand(DeleteAllToken);
+    public ICommand DeleteSpecifiedTokenCmd => new RelayCommand<AuthProvider>(DeleteSpecifiedToken);
 
     private async Task ShowSecretsAndKeysDialog()
     {
@@ -106,8 +109,22 @@ public partial class MainWindowViewModel : ObservableObject
         _stateService.SettingsChanged(_settings);
     }
 
+    private void DeleteAllToken()
+    {
+        var _ = _stateService.DeleteAllTokens();
+
+        _dialogService.DeleteAllTokens(_);
+    }
+
+
+    private void DeleteSpecifiedToken(AuthProvider provider)
+    {
+        var _ =  _stateService.DeleteToken(provider);
+        _dialogService.DeleteToken(provider, _);
+    }
+
     public ICommand SetupPuppetYT { get; }
-    public ICommand SetupPuppetKick {  get; }
+    public ICommand SetupPuppetKick { get; }
 
     private async Task SetupPuppetMasterYoutube()
     {

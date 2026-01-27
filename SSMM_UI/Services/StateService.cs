@@ -219,6 +219,16 @@ public class StateService
         }
     }
 
+    public bool DeleteAllTokens()
+    {
+        return StorageHelper.PurgeTokens();
+    }
+
+    public bool DeleteToken(AuthProvider service)
+    {
+        return StorageHelper.PurgeToken(service);
+    }
+
     public StreamMetadata GetCurrentMetaData()
     {
         return _currentMetaData;

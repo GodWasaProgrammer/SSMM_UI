@@ -19,6 +19,11 @@
 			</MenuItem>
 			<MenuItem Header="About" Command="{Binding OpenAbout}" />
 			<MenuItem Header="Theme" Command="{Binding ToggleThemes}" />
+			<MenuItem Header="Tokens">
+				<MenuItem Header="Purge All Auth Tokens" Command="{Binding DeleteAllTokens}"/>
+				<!--<MenuItem Header="Purge Specific token" Command="{Binding DeleteSpecifiedTokenCMD}"/>-->
+			</MenuItem>
+					  <MenuItem/>
 		</Menu>
 
 		<!-- Huvudinnehåll: sidebar + main -->

@@ -8,6 +8,8 @@ using System;
 using System.Threading.Tasks;
 using SSMM_UI.Views;
 using SSMM_UI.Interfaces;
+using SSMM_UI.Enums;
+using SSMM_UI.Dialogs;
 
 namespace SSMM_UI.Services;
 
@@ -33,7 +35,7 @@ public class DialogService : IDialogService
 
     public async Task InspectSelectedService(SelectedService selection)
     {
-        if (selection == null) 
+        if (selection == null)
         {
             return;
         }
@@ -136,12 +138,36 @@ public class DialogService : IDialogService
 
     private static Window? GetMainWindow()
     {
-        if(Application.Current != null)
+        if (Application.Current != null)
         {
-        return Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
-            ? desktop.MainWindow
-            : throw new InvalidOperationException("Application is not desktop");
+            return Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
+                ? desktop.MainWindow
+                : throw new InvalidOperationException("Application is not desktop");
         }
         return null;
+    }
+
+    public async Task DeleteToken(AuthProvider provider, bool result)
+    {
+        if (result)
+        {
+            await MessageBox.Show(GetMainWindow()!, $"The token for {provider} has been deleted.");
+        }
+        else
+        {
+            await MessageBox.Show(GetMainWindow()!, $"The token for {provider} could not be deleted.");
+        }
+    }
+
+    public async Task DeleteAllTokens(bool result)
+    {
+        if (result)
+        {
+            await MessageBox.Show(GetMainWindow()!, "All tokens have been deleted.");
+        }
+        else
+        {
+            await MessageBox.Show(GetMainWindow()!, "Failed to delete all tokens.");
+        }
     }
 }

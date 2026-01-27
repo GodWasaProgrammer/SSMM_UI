@@ -1,4 +1,5 @@
-﻿using SSMM_UI.RTMP;
+﻿using SSMM_UI.Enums;
+using SSMM_UI.RTMP;
 using SSMM_UI.Settings;
 using System.Threading.Tasks;
 
@@ -11,4 +12,6 @@ public interface IDialogService
     Task About();
     Task InspectSelectedService(SelectedService value);
     Task WebhooksView();
+    Task DeleteToken(AuthProvider provider, bool result);
+    Task DeleteAllTokens(bool result);
 }
