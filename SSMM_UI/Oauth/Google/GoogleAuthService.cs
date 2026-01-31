@@ -42,7 +42,7 @@ public class GoogleAuthService : IOAuthService<GoogleToken>
 
     public async Task<GoogleToken?> TryUseExistingTokenAsync()
     {
-        _oauthResult = _stateService.DeserializeToken<GoogleToken>(OAuthServices.Youtube);
+        _oauthResult = _stateService.DeserializeToken<GoogleToken>(AuthProvider.YouTube);
         if (_oauthResult != null)
         {
             var res = await RefreshTokenAsync(_oauthResult.AccessToken);
@@ -246,7 +246,7 @@ public class GoogleAuthService : IOAuthService<GoogleToken>
             }
 
             // Spara token lokalt
-            _stateService.SerializeToken<GoogleToken>(OAuthServices.Youtube, result);
+            _stateService.SerializeToken<GoogleToken>(AuthProvider.YouTube, result);
             // Rensa temporära värden så de inte återanvänds
             _currentCodeVerifier = null;
             _currentState = null;

@@ -62,6 +62,7 @@ public partial class App : Application
                 .AddSingleton<InspectionViewModel>()
                 .AddSingleton<PuppetMaster>()
                 .AddSingleton<SocialPosterLoginViewModel>()
+                .AddSingleton<PurgeTokenViewModel>()
                 .AddSingleton<SocialPoster>()
                 .AddSingleton<PostMaster>()
                 .BuildServiceProvider();

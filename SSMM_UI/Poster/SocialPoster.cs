@@ -37,9 +37,9 @@ public class SocialPoster
             return;
         }
 
-        if (_postmaster.UsernameAndService?.ContainsValue(OAuthServices.Youtube) == true)
+        if (_postmaster.UsernameAndService?.ContainsValue(AuthProvider.YouTube) == true)
         {
-            var FetchYoutubeToken = _postmaster._authobjects.TryGetValue(OAuthServices.Youtube, out var youtubetoken);
+            var FetchYoutubeToken = _postmaster._authobjects.TryGetValue(AuthProvider.YouTube, out var youtubetoken);
             if (!FetchYoutubeToken || youtubetoken == null)
             {
                 _logger.Log("Youtube token not found in PostMaster.");
@@ -56,9 +56,9 @@ public class SocialPoster
             }
         }
 
-        if (_postmaster.UsernameAndService?.ContainsValue(OAuthServices.Twitch) == true)
+        if (_postmaster.UsernameAndService?.ContainsValue(AuthProvider.Twitch) == true)
         {
-            var FetchTwitchToken = _postmaster._authobjects.TryGetValue(OAuthServices.Twitch, out var twitchtoken);
+            var FetchTwitchToken = _postmaster._authobjects.TryGetValue(AuthProvider.Twitch, out var twitchtoken);
             if (!FetchTwitchToken || twitchtoken == null)
             {
                 _logger.Log("Twitch token not found in PostMaster.");
@@ -73,12 +73,12 @@ public class SocialPoster
             }
         }
 
-        if (_postmaster.UsernameAndService?.ContainsValue(OAuthServices.Kick) == true)
+        if (_postmaster.UsernameAndService?.ContainsValue(AuthProvider.Kick) == true)
         {
             // as the username and service should reflect only selected AND authed services, this should never run UNLESS those conditions are filled
             // this is a subpar solution, but because the public Kick Api doesnt provide any way of deducing if the stream is actually live,
             // this is the only solution.
-            var kvp = _postmaster.UsernameAndService.FirstOrDefault(x => x.Value == OAuthServices.Kick);
+            var kvp = _postmaster.UsernameAndService.FirstOrDefault(x => x.Value == AuthProvider.Kick);
             if (kvp.Key != null)
             {
                 platforms.Add("Kick");
@@ -95,7 +95,7 @@ public class SocialPoster
             if (XPost)
             {
                 // Post to X using Bearer Token (OAuth 2.0 Bearer Token)
-                var accesstoken = _postmaster._authobjects[OAuthServices.X]?.AccessToken;
+                var accesstoken = _postmaster._authobjects[AuthProvider.X]?.AccessToken;
                 if ((accesstoken != null))
                 {
                     using var http = new HttpClient();
@@ -130,7 +130,7 @@ public class SocialPoster
 
             if (FBpost)
             {
-                _postmaster._authobjects.TryGetValue(OAuthServices.Facebook, out var fbAuthToken);
+                _postmaster._authobjects.TryGetValue(AuthProvider.Facebook, out var fbAuthToken);
                 if (fbAuthToken == null)
                 {
                     _logger.Log("Facebook auth token is null in PostMaster.");

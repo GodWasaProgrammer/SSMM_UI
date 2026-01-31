@@ -1,4 +1,5 @@
-﻿using SSMM_UI.Interfaces;
+﻿using SSMM_UI.Enums;
+using SSMM_UI.Interfaces;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
@@ -33,7 +34,7 @@ public class XAuthService : IOAuthService<XToken>
 
     public async Task<XToken?> TryUseExistingTokenAsync()
     {
-        var token = _stateService.DeserializeToken<XToken>(Enums.OAuthServices.X);
+        var token = _stateService.DeserializeToken<XToken>(AuthProvider.X);
 
         if (token == null)
         {
@@ -52,7 +53,7 @@ public class XAuthService : IOAuthService<XToken>
             {
                 token = refreshed;
                 // omit refresh token?
-                _stateService.SerializeToken(Enums.OAuthServices.X, token);
+                _stateService.SerializeToken(AuthProvider.X, token);
                 return token;
             }
         }
@@ -166,7 +167,7 @@ public class XAuthService : IOAuthService<XToken>
         var user = await GetCurrentUserAsync(xToken);
 
         xToken.Username = user?.Username ?? "";
-        _stateService.SerializeToken(Enums.OAuthServices.X, xToken);
+        _stateService.SerializeToken(AuthProvider.X, xToken);
 
         return xToken;
     }

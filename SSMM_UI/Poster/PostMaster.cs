@@ -23,7 +23,7 @@ public class PostMaster
     /// <summary>
     /// All our Oauth2 Objects with an enum listing what service they belong to
     /// </summary>
-    public Dictionary<OAuthServices, IAuthToken>? _authobjects;
+    public Dictionary<AuthProvider, IAuthToken>? _authobjects;
 
     /// <summary>
     /// Provides access to the application's state management functionality.
@@ -31,7 +31,7 @@ public class PostMaster
     private readonly StateService _stateservice;
 
     // used to map what is selected for streaming and what username to post as
-    public Dictionary<string, OAuthServices>? UsernameAndService;
+    public Dictionary<string, AuthProvider>? UsernameAndService;
     private readonly ILogService _logService;
     public PostMaster(StateService stateservice, ILogService logger)
     {

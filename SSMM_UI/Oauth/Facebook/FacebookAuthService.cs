@@ -1,4 +1,5 @@
-﻿using SSMM_UI.Interfaces;
+﻿using SSMM_UI.Enums;
+using SSMM_UI.Interfaces;
 using SSMM_UI.Services;
 using System;
 using System.Collections.Generic;
@@ -83,7 +84,7 @@ public class FacebookAuthService : IOAuthService<FacebookToken>
 
     public async Task<FacebookToken?> TryUseExistingTokenAsync()
     {
-        var token = _stateService.DeserializeToken<FacebookToken>(Enums.OAuthServices.Facebook);
+        var token = _stateService.DeserializeToken<FacebookToken>(AuthProvider.Facebook);
 
         if (token == null)
         {
@@ -97,7 +98,7 @@ public class FacebookAuthService : IOAuthService<FacebookToken>
             if (fbuser != null)
             {
                 token.Username = fbuser.Name;
-                _stateService.SerializeToken(Enums.OAuthServices.Facebook, token);
+                _stateService.SerializeToken(AuthProvider.Facebook, token);
                 return token;
             }
         }
@@ -132,7 +133,7 @@ public class FacebookAuthService : IOAuthService<FacebookToken>
 
         // 4️⃣ Byt code mot token
         token = await ExchangeCodeForTokenAsync(code, codeVerifier);
-        _stateService.SerializeToken(Enums.OAuthServices.Facebook, token);
+        _stateService.SerializeToken(AuthProvider.Facebook, token);
 
         return token;
     }

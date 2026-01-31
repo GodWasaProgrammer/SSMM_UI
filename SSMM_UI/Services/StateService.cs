@@ -63,9 +63,9 @@ public class StateService
 
     private readonly JsonSerializerOptions _metaDataJsonOptions;
     private readonly JsonSerializerOptions _regularJsonOptions = new() { WriteIndented = true };
-    private readonly Dictionary<OAuthServices, IAuthToken> _authObjects = [];
+    private readonly Dictionary<AuthProvider, IAuthToken> _authObjects = [];
     public event Action? OnAuthObjectsUpdated;
-    public Dictionary<OAuthServices, IAuthToken> AuthObjects { get { return _authObjects; } }
+    public Dictionary<AuthProvider, IAuthToken> AuthObjects { get { return _authObjects; } }
     public ObservableCollection<SelectedService> SelectedServicesToStream { get; private set; } = [];
     public ObservableCollection<RtmpServiceGroup> RtmpServiceGroups { get; } = [];
     public ObservableCollection<VideoCategory> YoutubeVideoCategories { get; private set; } = [];
@@ -161,7 +161,7 @@ public class StateService
         }
     }
 
-    public void SerializeToken<T>(OAuthServices service, T token) where T : class, IAuthToken
+    public void SerializeToken<T>(AuthProvider service, T token) where T : class, IAuthToken
     {
         try
         {
@@ -188,7 +188,7 @@ public class StateService
         }
     }
 
-    public T? DeserializeToken<T>(OAuthServices service) where T : class, IAuthToken
+    public T? DeserializeToken<T>(AuthProvider service) where T : class, IAuthToken
     {
         try
         {

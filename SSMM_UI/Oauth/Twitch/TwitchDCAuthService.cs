@@ -87,7 +87,7 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
                     if (res != null)
                     {
                         token = res;
-                        _stateService.SerializeToken(OAuthServices.Twitch, token);
+                        _stateService.SerializeToken(AuthProvider.Twitch, token);
                         AuthResult = token;
                         return token;
                     }
@@ -167,7 +167,7 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
             token.ExpiresAt = DateTime.UtcNow.AddSeconds(token.ExpiresIn);
             token.Username = await GetUsernameAsync(token.AccessToken);
             token.UserId = await GetUserIdAsync(token.AccessToken);
-            _stateService.SerializeToken(OAuthServices.Twitch, token);
+            _stateService.SerializeToken(AuthProvider.Twitch, token);
         }
         AuthResult = token;
         return token!;
@@ -175,7 +175,7 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
 
     public async Task<TwitchToken?> TryUseExistingTokenAsync()
     {
-        var token = _stateService.DeserializeToken<TwitchToken>(OAuthServices.Twitch);
+        var token = _stateService.DeserializeToken<TwitchToken>(AuthProvider.Twitch);
         if (token != null)
         {
             if (token.IsValid)
@@ -196,7 +196,7 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
                     var fetchuser = await GetUsernameAsync(res.AccessToken);
                     if (fetchuser != null) { res.Username = fetchuser; }
                     token = res;
-                    _stateService.SerializeToken(OAuthServices.Twitch, token);
+                    _stateService.SerializeToken(AuthProvider.Twitch, token);
                     AuthResult = token;
                     return token;
                 }
@@ -237,7 +237,7 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
                     token.Username = await GetUsernameAsync(token.AccessToken);
                     token.UserId = await GetUserIdAsync(token.AccessToken);
                     AuthResult = token;
-                    _stateService.SerializeToken(OAuthServices.Twitch, token);
+                    _stateService.SerializeToken(AuthProvider.Twitch, token);
                     return token;
                 }
             }

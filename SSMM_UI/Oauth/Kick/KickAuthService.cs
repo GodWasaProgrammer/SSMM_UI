@@ -79,7 +79,7 @@ public class KickAuthService : IOAuthService<KickToken>
             tokenResult.Username = await GetUsernameAsync(tokenResult.AccessToken);
 
             // 7. Spara token
-            _stateService.SerializeToken(OAuthServices.Kick, tokenResult);
+            _stateService.SerializeToken(AuthProvider.Kick, tokenResult);
 
             _kickAuthResult = tokenResult;
             return tokenResult;
@@ -137,12 +137,12 @@ public class KickAuthService : IOAuthService<KickToken>
             Scope = tokenData.GetProperty("scope").GetString() ?? ""
         };
 
-        _stateService.SerializeToken(OAuthServices.Kick, newToken);
+        _stateService.SerializeToken(AuthProvider.Kick, newToken);
         return newToken;
     }
     public async Task<KickToken?> TryUseExistingTokenAsync()
     {
-        var token = _stateService.DeserializeToken<KickToken>(OAuthServices.Kick);
+        var token = _stateService.DeserializeToken<KickToken>(AuthProvider.Kick);
         if (token != null)
         {
             if (token.IsValid)
