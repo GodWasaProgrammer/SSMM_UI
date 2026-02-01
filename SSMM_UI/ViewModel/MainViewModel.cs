@@ -5,6 +5,7 @@ using SSMM_UI.Interfaces;
 using SSMM_UI.Puppeteering;
 using SSMM_UI.Services;
 using SSMM_UI.Settings;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -86,7 +87,7 @@ public partial class MainWindowViewModel : ObservableObject
     public ICommand ToggleThemes => new RelayCommand(ToggleTheme);
     public ICommand ShowSecretsAndKeys { get; }
     public ICommand DeleteAllTokens => new RelayCommand(DeleteAllToken);
-    public ICommand DeleteSpecifiedTokenCmd => new RelayCommand<ObservableCollection<AuthProvider>>(DeleteSpecifiedToken!);
+    public ICommand DeleteSpecifiedTokenCmd => new RelayCommand(DeleteSpecifiedToken);
     private async Task ShowSecretsAndKeysDialog()
     {
         await _dialogService.WebhooksView();
@@ -117,11 +118,14 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
 
-    private void DeleteSpecifiedToken(ObservableCollection<AuthProvider> provider)
+    private void DeleteSpecifiedToken()
     {
-        //_dialogService.PurgeSpecificToken(provider);
-        //var _ =  _stateService.DeleteToken(provider);
-        //_dialogService.DeleteToken(provider, _);
+        List<AuthProvider> providers = new();
+        foreach (var item in _stateService.AuthObjects)
+        {
+            providers.Add(item.Key);
+        }
+        _dialogService.PurgeSpecificToken();
     }
 
     public ICommand SetupPuppetYT { get; }

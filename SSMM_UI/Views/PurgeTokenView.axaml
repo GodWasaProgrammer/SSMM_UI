@@ -2,10 +2,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="450"
 		xmlns:local="clr-namespace:SSMM_UI.ViewModel"
         x:Class="SSMM_UI.Views.PurgeTokenView"
 		x:DataType="local:PurgeTokenViewModel"
+		SizeToContent="WidthAndHeight"
         Title="PurgeTokenView">
 	<Border Classes="card" Margin="20">
 		<StackPanel Spacing="15">
@@ -13,13 +14,20 @@
 			<TextBlock  Text="Purge Tokens" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
 			<StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
 				<!-- Genererad lista -->
-				<!--<ItemsControl Items="{Binding AuthProviders}">
+				<ItemsControl ItemsSource="{Binding AuthProviders}">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
-							<TextBlock Text="{Binding}" Margin="4"/>
+							<Border Classes="card" Margin="20">
+							<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+							<TextBlock Text="{Binding}" Margin="20"/>
+								<Button Content="Purge"
+										Command="{Binding $parent[ItemsControl].DataContext.PurgeSpecifiedTokenCommand}"	
+										CommandParameter="{Binding}" />
+							</StackPanel>
+							</Border>
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
-				</ItemsControl>-->
+				</ItemsControl>
 			</StackPanel>
 		</StackPanel>
 	</Border>

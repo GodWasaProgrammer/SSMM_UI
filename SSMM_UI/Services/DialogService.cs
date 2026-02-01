@@ -10,7 +10,6 @@ using SSMM_UI.Views;
 using SSMM_UI.Interfaces;
 using SSMM_UI.Enums;
 using SSMM_UI.Dialogs;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace SSMM_UI.Services;
@@ -175,7 +174,7 @@ public class DialogService : IDialogService
 
     public async Task PurgeSpecificToken()
     {
-        
+
         var mw = GetMainWindow()!;
         var auth = _stateservice.AuthObjects;
 
@@ -185,13 +184,12 @@ public class DialogService : IDialogService
             list.Add(au.Key);
         }
 
+        var vm = new PurgeTokenViewModel(mw, list, _stateservice);
 
-        //var vm = new PurgeTokenViewModel(mw);
-        
-        //var dialog = new PurgeTokenView
-        //{
-        //    DataContext = vm
-        //};
-        //await dialog.ShowDialog(mw);
+        var dialog = new PurgeTokenView
+        {
+            DataContext = vm
+        };
+        await dialog.ShowDialog(mw);
     }
 }
