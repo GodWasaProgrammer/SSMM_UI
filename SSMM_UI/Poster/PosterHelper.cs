@@ -35,7 +35,7 @@ public class PosterHelper
             var ytService = new YouTubeService(new BaseClientService.Initializer
             {
                 HttpClientInitializer = credential,
-                ApplicationName = "Streamer & Social Media Manager"
+                ApplicationName = "MultiStream Manager"
             });
 
             // Hämta alla aktuella live-broadcasts

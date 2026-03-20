@@ -1,14 +1,14 @@
-﻿namespace SSMM_UI.Helpers;
-
+﻿using SSMM_UI.Constants;
 using SSMM_UI.Enums;
 using System;
 using System.Diagnostics;
 using System.IO;
 
+namespace SSMM_UI.Helpers;
 public static class StorageHelper
 {
     public static string CompanyName { get; set; } = "GWAP Technologies";
-    public static string AppName { get; set; } = "Streamer & Social Media Manager";
+    public static string AppName { get; set; } = Name.MULTISTREAM_MANAGER;
 
     /// <summary>
     /// Root folder for User specific settings(roaming).

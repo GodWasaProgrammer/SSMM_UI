@@ -1,6 +1,7 @@
 ﻿using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
+using SSMM_UI.Constants;
 using SSMM_UI.Enums;
 using SSMM_UI.Oauth.Facebook;
 using SSMM_UI.Oauth.Google;
@@ -108,7 +109,7 @@ public class CentralAuthService
                         var YTService = new YouTubeService(new BaseClientService.Initializer
                         {
                             HttpClientInitializer = credential,
-                            ApplicationName = "Streamer & Social Media Manager"
+                            ApplicationName = Name.MULTISTREAM_MANAGER
                         });
                         ytService = YTService;
 
@@ -215,7 +216,7 @@ public class CentralAuthService
                 var YTService = new YouTubeService(new BaseClientService.Initializer
                 {
                     HttpClientInitializer = credential,
-                    ApplicationName = "Streamer & Social Media Manager"
+                    ApplicationName = Name.MULTISTREAM_MANAGER
                 });
                 ytService = YTService;
             }

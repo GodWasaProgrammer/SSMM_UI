@@ -17,6 +17,8 @@ Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "WixPackage", "WixPackage\Wi
 EndProject
 Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "WixInstallerBundle", "WixInstallerBundle\WixInstallerBundle.wixproj", "{E6618DF9-E78B-4997-B174-E91D466533E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSM_WEB", "..\Castrix\Castrix\MSM_WEB.csproj", "{6208CE4B-C0BA-021D-8777-951809FB6CB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,7 +44,6 @@ Global
 		{F6DA560D-E62B-4E4D-A04D-24668BAA3076}.Release|ARM64.ActiveCfg = Release|Any CPU
 		{F6DA560D-E62B-4E4D-A04D-24668BAA3076}.Release|ARM64.Build.0 = Release|Any CPU
 		{F6DA560D-E62B-4E4D-A04D-24668BAA3076}.Release|x64.ActiveCfg = Release|x64
-		{F6DA560D-E62B-4E4D-A04D-24668BAA3076}.Release|x64.Build.0 = Release|x64
 		{F6DA560D-E62B-4E4D-A04D-24668BAA3076}.Release|x86.ActiveCfg = Release|Any CPU
 		{8C8C7A1E-0B8F-5D14-DE9A-07ADD4FD8B5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8C8C7A1E-0B8F-5D14-DE9A-07ADD4FD8B5D}.Debug|ARM64.ActiveCfg = Debug|Any CPU
@@ -65,7 +66,6 @@ Global
 		{83021F33-72C4-4D2B-99AE-4EF5A5887F05}.Release|ARM64.ActiveCfg = Release|ARM64
 		{83021F33-72C4-4D2B-99AE-4EF5A5887F05}.Release|ARM64.Build.0 = Release|ARM64
 		{83021F33-72C4-4D2B-99AE-4EF5A5887F05}.Release|x64.ActiveCfg = Release|x64
-		{83021F33-72C4-4D2B-99AE-4EF5A5887F05}.Release|x64.Build.0 = Release|x64
 		{83021F33-72C4-4D2B-99AE-4EF5A5887F05}.Release|x86.ActiveCfg = Release|x86
 		{83021F33-72C4-4D2B-99AE-4EF5A5887F05}.Release|x86.Build.0 = Release|x86
 		{E6618DF9-E78B-4997-B174-E91D466533E0}.Debug|Any CPU.ActiveCfg = Debug|x64
@@ -78,9 +78,23 @@ Global
 		{E6618DF9-E78B-4997-B174-E91D466533E0}.Release|ARM64.ActiveCfg = Release|ARM64
 		{E6618DF9-E78B-4997-B174-E91D466533E0}.Release|ARM64.Build.0 = Release|ARM64
 		{E6618DF9-E78B-4997-B174-E91D466533E0}.Release|x64.ActiveCfg = Release|x64
-		{E6618DF9-E78B-4997-B174-E91D466533E0}.Release|x64.Build.0 = Release|x64
 		{E6618DF9-E78B-4997-B174-E91D466533E0}.Release|x86.ActiveCfg = Release|x86
 		{E6618DF9-E78B-4997-B174-E91D466533E0}.Release|x86.Build.0 = Release|x86
+		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Debug|x86.Build.0 = Debug|Any CPU
+		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Release|ARM64.Build.0 = Release|Any CPU
+		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Release|x64.ActiveCfg = Release|Any CPU
+		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Release|x64.Build.0 = Release|Any CPU
+		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Release|x86.ActiveCfg = Release|Any CPU
+		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

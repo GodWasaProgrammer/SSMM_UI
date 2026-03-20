@@ -27,7 +27,7 @@ public class SocialPostTemplate
 
         string platformsText = string.Join("\n", platformLines);
 
-        _suffix = "\nThis was generated using Streamer & Social Media Manager," +
+        _suffix = "\nThis was generated using Multistream Manager," +
             "\nA MultiStreaming Desktop Application Developed and maintained by cybercola!" +
             $"\n{_githubLink}";
 

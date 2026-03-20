@@ -6,7 +6,7 @@
         x:Class="SSMM_UI.Views.AboutView"
 		xmlns:local="clr-namespace:SSMM_UI.ViewModel"
 		x:DataType="local:AboutViewModel"
-        Title="About Streamer and Social Media Manager"
+        Title="About Multistream Manager"
 		SizeToContent="Manual"
         WindowStartupLocation="CenterOwner"
 		xmlns:iconPacks="https://github.com/MahApps/IconPacks.Avalonia">

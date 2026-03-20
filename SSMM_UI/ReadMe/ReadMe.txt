@@ -1,4 +1,4 @@
-﻿Welcome to Streamer Social Media Manager(SSMM) by cybercola/GodWasaProgrammer
+﻿Welcome to Multistream Manager(MSM) by cybercola/GodWasaProgrammer
 
 https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full-shared.7z <---- required
 copy the contents of the extracted "bin" dir into "dependencies".
