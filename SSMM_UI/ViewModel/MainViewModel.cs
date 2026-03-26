@@ -7,6 +7,7 @@ using SSMM_UI.Services;
 using SSMM_UI.Settings;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -36,6 +37,8 @@ public partial class MainWindowViewModel : ObservableObject
         SetupPuppetKick = new AsyncRelayCommand(SetupPuppetMasterKick);
         OpenAbout = new AsyncRelayCommand(OpenAboutWindow);
         ShowSecretsAndKeys = new AsyncRelayCommand(ShowSecretsAndKeysDialog);
+        ToggleThemes = new RelayCommand(ToggleTheme);
+        ApplyThemeCommand = new RelayCommand<ThemeOption?>(ApplyTheme);
 
         // === start children ====
         LeftSideBarVM = leftSideBarVM;
@@ -50,6 +53,7 @@ public partial class MainWindowViewModel : ObservableObject
         // theme
         _themeService = themeService;
         IsDarkMode = _themeService.IsDark;
+        SelectedTheme = _themeService.Themes.FirstOrDefault(t => t.IsSelected) ?? _themeService.Themes.First();
 
         // services
         _stateService = stateService;
@@ -65,6 +69,8 @@ public partial class MainWindowViewModel : ObservableObject
     // ==== Theme ====
     private readonly IThemeService _themeService;
     [ObservableProperty] bool isDarkMode;
+    [ObservableProperty] ThemeOption? selectedTheme;
+    public IReadOnlyList<ThemeOption> Themes => _themeService.Themes;
 
     // ==== Child Models ====
     public LeftSideBarViewModel LeftSideBarVM { get; }
@@ -84,7 +90,8 @@ public partial class MainWindowViewModel : ObservableObject
     // ==== Commands ====
     public ICommand OpenSetting { get; }
     public ICommand OpenAbout { get; }
-    public ICommand ToggleThemes => new RelayCommand(ToggleTheme);
+    public ICommand ToggleThemes { get; }
+    public ICommand ApplyThemeCommand { get; }
     public ICommand ShowSecretsAndKeys { get; }
     public ICommand DeleteAllTokens => new RelayCommand(DeleteAllToken);
     public ICommand DeleteSpecifiedTokenCmd => new RelayCommand(DeleteSpecifiedToken);
@@ -96,6 +103,16 @@ public partial class MainWindowViewModel : ObservableObject
     private void ToggleTheme()
     {
         _themeService.ToggleTheme();
+        IsDarkMode = _themeService.IsDark;
+        SelectedTheme = _themeService.Themes.FirstOrDefault(t => t.IsSelected);
+    }
+
+    private void ApplyTheme(ThemeOption? theme)
+    {
+        if (theme is null) return;
+
+        _themeService.ApplyTheme(theme.Key);
+        SelectedTheme = _themeService.Themes.FirstOrDefault(t => t.IsSelected);
         IsDarkMode = _themeService.IsDark;
     }
 
