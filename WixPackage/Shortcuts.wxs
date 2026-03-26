@@ -6,7 +6,7 @@
 				<Shortcut Id="DesktopShortcut"
 						  Name="Multistream Manager"
 						  Description="Launch Multistream Manager"
-						  Target="[INSTALLFOLDER]SSMM_UI.exe"
+						  Target="[INSTALLFOLDER]MultistreamManager.exe"
 						  WorkingDirectory="INSTALLFOLDER" />
 				<RegistryValue Root="HKCU"
 							   Key="Software\GWAP Technologies\Multistream Manager"
@@ -22,7 +22,7 @@
 					<Shortcut Id="StartMenuShortcut"
 							  Name="Multistream Manager"
 							  Description="Launch Multistream Manager"
-							  Target="[INSTALLFOLDER]SSMM_UI.exe"
+							  Target="[INSTALLFOLDER]MultistreamManager.exe"
 							  WorkingDirectory="INSTALLFOLDER" />
 					<RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
 					<RegistryValue Root="HKCU"

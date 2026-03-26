@@ -13,7 +13,7 @@
     </BootstrapperApplication>
 
     <Chain>
-      <MsiPackage Name="MultistreamManager.msi" SourceFile="@(ProjectReference->'%(TargetPath)')">
+		<MsiPackage Name="MultiStreamManager.msi">
         <MsiProperty Name="INSTALLFOLDER" Value="[InstallFolder]" />
       </MsiPackage>
     </Chain>
