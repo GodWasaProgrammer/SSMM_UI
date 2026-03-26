@@ -241,12 +241,20 @@ public partial class StreamControlViewModel : ObservableObject
         }
         try
         {
-            await _socialPosterService.RunPoster(_settings.PostToDiscord, _settings.PostToFB, _settings.PostToX, _settings.CustomSocialMessage);
-            _logService.Log("Auto-posted to selected social media.");
+            var result = await _socialPosterService.RunPoster(_settings.PostToDiscord, _settings.PostToFB, _settings.PostToX, _settings.CustomSocialMessage);
+            if (result.PostedAny && result.PostedTo.Count > 0)
+            {
+                _logService.Log($"Auto-posted to: {string.Join(", ", result.PostedTo)}.");
+            }
+            else
+            {
+                var reason = result.SkippedReasons.Count > 0 ? string.Join("; ", result.SkippedReasons) : "No destinations accepted the post.";
+                _logService.Log($"Auto-post triggered but nothing was sent. {reason}");
+            }
         }
         catch (Exception ex)
         {
-            _logService.Log($"Social poster failed: {ex.Message}");
+            _logService.Log($"Social poster failed: {ex}");
         }
     }
 }
