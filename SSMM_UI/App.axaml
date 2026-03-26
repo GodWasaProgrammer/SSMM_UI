@@ -4,9 +4,6 @@
              RequestedThemeVariant="Default">
 	<Application.Resources>
 		<ResourceDictionary>
-			<ResourceDictionary.MergedDictionaries>
-				<ResourceInclude Source="avares://SSMM_UI/Themes/MidnightTheme.axaml" />
-			</ResourceDictionary.MergedDictionaries>
 
 			<Color x:Key="SuccessColor">#22C55E</Color>
 			<Color x:Key="DangerColor">#EF4444</Color>
