@@ -17,4 +17,5 @@ public interface IDialogService
     Task DeleteToken(AuthProvider provider, bool result);
     Task DeleteAllTokens(bool result);
     Task PurgeSpecificToken();
+    Task<string?> EditSocialPostMessageAsync(string currentMessage);
 }
