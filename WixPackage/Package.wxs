@@ -10,6 +10,7 @@
 
 		<Feature Id="MainApplication" Title="Main Application" Level="1">
 			<ComponentGroupRef Id="ProductComponents" />
+			<ComponentGroupRef Id="ShortcutComponents" />
 			<!--<ComponentGroupRef Id="DependencyComponents" />-->
 		</Feature>
 		<UI>

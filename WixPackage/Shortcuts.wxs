@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+	<Fragment>
+		<StandardDirectory Id="DesktopFolder">
+			<Component Id="DesktopShortcut" Guid="8F4E8913-4100-4F7C-B255-66DFB20C2FD4">
+				<Shortcut Id="DesktopShortcut"
+						  Name="Streamer Social Media Manager"
+						  Description="Launch Streamer Social Media Manager"
+						  Target="[INSTALLFOLDER]SSMM_UI.exe"
+						  WorkingDirectory="INSTALLFOLDER" />
+				<RegistryValue Root="HKCU"
+							   Key="Software\GWAP Technologies\Streamer Social Media Manager"
+							   Name="DesktopShortcut"
+							   Type="integer"
+							   Value="1"
+							   KeyPath="yes" />
+			</Component>
+		</StandardDirectory>
+		<StandardDirectory Id="ProgramMenuFolder">
+			<Directory Id="ApplicationProgramsFolder" Name="Streamer Social Media Manager">
+				<Component Id="StartMenuShortcut" Guid="9F5E8913-4100-4F7C-B255-66DFB20C2FD5">
+					<Shortcut Id="StartMenuShortcut"
+							  Name="Streamer Social Media Manager"
+							  Description="Launch Streamer Social Media Manager"
+							  Target="[INSTALLFOLDER]SSMM_UI.exe"
+							  WorkingDirectory="INSTALLFOLDER" />
+					<RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
+					<RegistryValue Root="HKCU"
+								   Key="Software\GWAP Technologies\Streamer Social Media Manager"
+								   Name="StartMenuShortcut"
+								   Type="integer"
+								   Value="1"
+								   KeyPath="yes" />
+				</Component>
+			</Directory>
+		</StandardDirectory>
+	</Fragment>
+
+	<Fragment>
+		<ComponentGroup Id="ShortcutComponents">
+			<ComponentRef Id="DesktopShortcut" />
+			<ComponentRef Id="StartMenuShortcut" />
+		</ComponentGroup>
+	</Fragment>
+</Wix>
