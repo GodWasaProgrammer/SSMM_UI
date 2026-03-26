@@ -24,6 +24,13 @@ public class CentralAuthService
     private readonly ILogService _logger;
     private readonly StateService _stateService;
 
+    private void OnAuthServiceUpdated()
+    {
+        this.GoogleAuthService?.ResetToken();
+        TwitchService?.ResetToken();
+        _kickOauthService?.ResetToken();
+    }
+
     public CentralAuthService(ILogService logger, StateService stateService)
     {
         _stateService = stateService;
@@ -33,6 +40,7 @@ public class CentralAuthService
         XOAuth = new(_logger, _stateService);
         TwitchService = new(_logger, _stateService);
         fbAuth = new(_logger, _stateService);
+        _stateService.OnAuthObjectsUpdated += OnAuthServiceUpdated;
     }
 
     public async Task<string> FacebookLogin()

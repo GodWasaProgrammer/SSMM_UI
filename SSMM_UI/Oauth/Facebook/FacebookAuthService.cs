@@ -236,4 +236,9 @@ public class FacebookAuthService : IOAuthService<FacebookToken>
     {
         throw new NotImplementedException("Facebook User long life tokens");
     }
+
+    public Task<bool> ResetToken()
+    {
+        throw new NotImplementedException();
+    }
 }

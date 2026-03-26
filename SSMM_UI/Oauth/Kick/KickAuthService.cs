@@ -255,4 +255,10 @@ public class KickAuthService : IOAuthService<KickToken>
 
         return ("No user data returned or malformed response");
     }
+
+    public Task<bool> ResetToken()
+    {
+        _kickAuthResult = null;
+        return Task.FromResult(true);
+    }
 }

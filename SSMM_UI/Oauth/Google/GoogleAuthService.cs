@@ -297,4 +297,10 @@ public class GoogleAuthService : IOAuthService<GoogleToken>
         }
         return "Failed to get username";
     }
+
+    public Task<bool> ResetToken()
+    {
+        _oauthResult = null;
+        return Task.FromResult(true);
+    }
 }

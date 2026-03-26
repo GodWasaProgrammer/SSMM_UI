@@ -20,6 +20,8 @@ public partial class LoginViewModel: ObservableObject
         LoginWithKickCommand = new AsyncRelayCommand(LoginWithKick);
         LoginWithTwitchCommand = new AsyncRelayCommand(LoginWithTwitch);
         _userSettings = _stateService.UserSettingsObj;
+        _stateService.OnAuthObjectsUpdated += RefreshStatusesFromState;
+        RefreshStatusesFromState();
         // Auto-login if possible
         _ = Initialize();
 
@@ -56,7 +58,6 @@ public partial class LoginViewModel: ObservableObject
 
     private async Task OnLoginWithGoogleClicked()
     {
-
         YoutubeLoginStatus = "Logging in...";
 
         var (userName, ytservice) = await _centralAuthService.LoginWithYoutube();
@@ -72,18 +73,21 @@ public partial class LoginViewModel: ObservableObject
         {
             YoutubeLoginStatus = "Login failed";
         }
+        RefreshStatusesFromState();
     }
 
     private async Task LoginWithTwitch()
     {
         TwitchLoginStatus = "Logging in...";
         TwitchLoginStatus = await _centralAuthService.LoginWithTwitch();
+        RefreshStatusesFromState();
     }
 
     private async Task LoginWithKick()
     {
         KickLoginStatus = "Logging in...";
         KickLoginStatus = await _centralAuthService.LoginWithKick();
+        RefreshStatusesFromState();
     }
 
     private async Task AutoLoginIfTokenized()
@@ -117,5 +121,25 @@ public partial class LoginViewModel: ObservableObject
                 }
             }
         }
+
+        RefreshStatusesFromState();
+    }
+
+    private void RefreshStatusesFromState()
+    {
+        TwitchLoginStatus = BuildLoginStatus(AuthProvider.Twitch, "❌ Not logged in.");
+        YoutubeLoginStatus = BuildLoginStatus(AuthProvider.YouTube, "❌ Not logged in.");
+        KickLoginStatus = BuildLoginStatus(AuthProvider.Kick, "❌ Not logged in.");
+    }
+
+    private string BuildLoginStatus(AuthProvider provider, string defaultMessage)
+    {
+        if (_stateService.AuthObjects.TryGetValue(provider, out var token) && token.IsValid)
+        {
+            var username = string.IsNullOrWhiteSpace(token.Username) ? provider.ToString() : token.Username;
+            return $"✅ Logged in as: {username}";
+        }
+
+        return defaultMessage;
     }
 }

@@ -359,4 +359,10 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
             ? userIdElement.GetString()
             : throw new Exception("Could not find 'id' in user response.");
     }
+
+    public Task<bool> ResetToken()
+    {
+        _authResult = null;
+        return Task.FromResult(true);
+    }
 }

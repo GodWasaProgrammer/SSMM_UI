@@ -10,7 +10,6 @@ using SSMM_UI.Views;
 using SSMM_UI.Interfaces;
 using SSMM_UI.Enums;
 using SSMM_UI.Dialogs;
-using System.Collections.ObjectModel;
 
 namespace SSMM_UI.Services;
 
@@ -176,15 +175,7 @@ public class DialogService : IDialogService
     {
 
         var mw = GetMainWindow()!;
-        var auth = _stateservice.AuthObjects;
-
-        var list = new ObservableCollection<AuthProvider>();
-        foreach (var au in auth)
-        {
-            list.Add(au.Key);
-        }
-
-        var vm = new PurgeTokenViewModel(mw, list, _stateservice);
+        var vm = new PurgeTokenViewModel(_stateservice.AvailableAuthProviders, _stateservice, this);
 
         var dialog = new PurgeTokenView
         {

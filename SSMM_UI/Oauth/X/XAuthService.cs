@@ -235,6 +235,11 @@ public class XAuthService : IOAuthService<XToken>
         return JsonDocument.Parse(body);
     }
 
+    public Task<bool> ResetToken()
+    {
+        throw new NotImplementedException();
+    }
+
     // -------------------------
     // Inner helper classes
     // -------------------------
