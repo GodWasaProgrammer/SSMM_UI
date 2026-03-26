@@ -1,4 +1,4 @@
-﻿using Avalonia.Styling;
+using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace SSMM_UI.Settings;

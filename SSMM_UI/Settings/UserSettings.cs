@@ -1,4 +1,4 @@
-﻿namespace SSMM_UI.Settings;
+namespace SSMM_UI.Settings;
 
 public class UserSettings
 {

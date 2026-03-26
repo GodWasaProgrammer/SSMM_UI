@@ -1,13 +1,14 @@
-<Window xmlns="https://github.com/avaloniaui"
-		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-		x:Class="SSMM_UI.MainWindow"
-		xmlns:local="clr-namespace:SSMM_UI.ViewModel"
-		xmlns:Views="clr-namespace:SSMM_UI.Views"
-		x:DataType="local:MainWindowViewModel"
-		Title="SSMM_UI" Width="1920" Height="1080"
+	<Window xmlns="https://github.com/avaloniaui"
+			xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			x:Class="SSMM_UI.MainWindow"
+			xmlns:local="clr-namespace:SSMM_UI.ViewModel"
+			xmlns:settings="clr-namespace:SSMM_UI.Settings"
+			xmlns:Views="clr-namespace:SSMM_UI.Views"
+			x:DataType="local:MainWindowViewModel"
+		Title="Multistream Manager" Width="1920" Height="1080"
 		Background="{DynamicResource AppBackgroundBrush}"
 		Padding="18"
-		Icon="avares://SSMM_UI/Assets/MainIcon.png">
+		Icon="avares://MultistreamManager/Assets/MainIcon.png">
 
 	<Grid RowDefinitions="Auto,*">
 
@@ -27,20 +28,6 @@
 					<MenuItem Header="Webhooks" Command="{Binding ShowSecretsAndKeys}"/>
 				</MenuItem>
 				<MenuItem Header="About" Command="{Binding OpenAbout}" />
-				<MenuItem Header="Themes">
-					<MenuItem Header="Cycle Theme" Command="{Binding ToggleThemes}" />
-					<MenuItem Header="Available" ItemsSource="{Binding Themes}">
-						<MenuItem.ItemTemplate>
-							<DataTemplate>
-								<MenuItem Header="{Binding Name}"
-										  ToggleType="CheckBox"
-										  IsChecked="{Binding IsSelected}"
-										  Command="{Binding $parent[Window].DataContext.ApplyThemeCommand}"
-										  CommandParameter="{Binding}" />
-							</DataTemplate>
-						</MenuItem.ItemTemplate>
-					</MenuItem>
-				</MenuItem>
 				<MenuItem Header="Tokens">
 					<MenuItem Header="Purge All Auth Tokens" Command="{Binding DeleteAllTokens}"/>
 					<MenuItem Header="Purge Specific token" Command="{Binding DeleteSpecifiedTokenCmd}"/>
@@ -65,9 +52,19 @@
 					<StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
 						<TextBlock Text="Streaming Control Center" FontWeight="Bold" FontSize="18"/>
 						<Rectangle Width="1" Height="22" Fill="{DynamicResource CardBorderBrush}" />
-						<TextBlock Text="{Binding SelectedTheme.Name, FallbackValue='Midnight Neon'}"
+						<TextBlock Text="Theme"
 								   Foreground="{DynamicResource TextSubtleBrush}"
 								   VerticalAlignment="Center"/>
+						<ComboBox Width="180"
+								  Height="34"
+								  ItemsSource="{Binding Themes}"
+								  SelectedItem="{Binding SelectedTheme, Mode=TwoWay}">
+							<ComboBox.ItemTemplate>
+								<DataTemplate x:DataType="settings:ThemeOption">
+									<TextBlock Text="{Binding Name}" />
+								</DataTemplate>
+							</ComboBox.ItemTemplate>
+						</ComboBox>
 					</StackPanel>
 				</Border>
 

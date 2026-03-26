@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Google.Apis.YouTube.v3.Data;

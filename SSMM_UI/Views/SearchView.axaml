@@ -1,7 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:SSMM_UI.ViewModel"
-             xmlns:conv="clr-namespace:SSMM_UI.Converters;assembly=SSMM_UI"
+             xmlns:conv="clr-namespace:SSMM_UI.Converters"
              x:Class="SSMM_UI.Views.SearchView"
 			 x:DataType="vm:SearchViewModel"
              Width="400"

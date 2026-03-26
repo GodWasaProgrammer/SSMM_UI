@@ -1,4 +1,4 @@
-﻿namespace SSMM_UI.Constants;
+namespace SSMM_UI.Constants;
 
 public class Name
 {

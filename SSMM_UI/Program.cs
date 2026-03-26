@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using FFmpeg.AutoGen;
 using System;
 

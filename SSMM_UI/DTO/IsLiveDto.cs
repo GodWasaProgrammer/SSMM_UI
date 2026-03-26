@@ -1,4 +1,4 @@
-﻿namespace SSMM_UI.DTO;
+namespace SSMM_UI.DTO;
 
 public class IsLiveDto
 {

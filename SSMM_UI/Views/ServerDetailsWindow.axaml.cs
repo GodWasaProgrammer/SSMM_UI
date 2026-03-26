@@ -17,7 +17,7 @@ public partial class ServerDetailsWindow : Window
     {
         InitializeComponent();
 
-        // ViewModel förväntar sig (serviceGroup, window, callback) men du skickar bara (serviceGroup, callback)
+        // ViewModel fï¿½rvï¿½ntar sig (serviceGroup, window, callback) men du skickar bara (serviceGroup, callback)
         DataContext = new ServerDetailsWindowViewModel(serviceGroup, this,
             (success, streamKey, server) => callback(success, streamKey!, server!, serviceGroup));
     }

@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SSMM_UI.Enums;
 using SSMM_UI.Interfaces;
@@ -70,6 +70,20 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly IThemeService _themeService;
     [ObservableProperty] bool isDarkMode;
     [ObservableProperty] ThemeOption? selectedTheme;
+    partial void OnSelectedThemeChanged(ThemeOption? value)
+    {
+        if (value is null)
+        {
+            return;
+        }
+
+        if (!_themeService.CurrentKey.Equals(value.Key))
+        {
+            _themeService.ApplyTheme(value.Key);
+        }
+
+        IsDarkMode = _themeService.IsDark;
+    }
     public IReadOnlyList<ThemeOption> Themes => _themeService.Themes;
 
     // ==== Child Models ====

@@ -1,4 +1,4 @@
-﻿using SSMM_UI.Constants;
+using SSMM_UI.Constants;
 using SSMM_UI.Enums;
 using System;
 using System.Diagnostics;

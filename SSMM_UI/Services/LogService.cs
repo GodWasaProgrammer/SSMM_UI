@@ -1,4 +1,4 @@
-﻿using Avalonia.Threading;
+using Avalonia.Threading;
 using System;
 using System.Collections.ObjectModel;
 

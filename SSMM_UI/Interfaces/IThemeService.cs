@@ -1,4 +1,4 @@
-﻿using SSMM_UI.Settings;
+using SSMM_UI.Settings;
 using System.Collections.Generic;
 
 namespace SSMM_UI.Interfaces;

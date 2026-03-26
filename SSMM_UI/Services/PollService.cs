@@ -1,4 +1,4 @@
-﻿using FFmpeg.AutoGen;
+using FFmpeg.AutoGen;
 using System;
 using System.Diagnostics;
 using System.Net.Http;

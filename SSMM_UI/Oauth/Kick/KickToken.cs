@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using SSMM_UI.Interfaces;
 
 namespace SSMM_UI.Oauth.Kick;

@@ -1,4 +1,4 @@
-﻿namespace SSMM_UI.Oauth.X;
+namespace SSMM_UI.Oauth.X;
 
 public class XUser
 {

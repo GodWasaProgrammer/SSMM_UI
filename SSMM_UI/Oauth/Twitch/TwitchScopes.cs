@@ -1,4 +1,4 @@
-﻿namespace SSMM_UI.Oauth.Twitch;
+namespace SSMM_UI.Oauth.Twitch;
 
 public static class TwitchScopes
 {

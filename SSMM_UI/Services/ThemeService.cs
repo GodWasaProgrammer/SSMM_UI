@@ -1,10 +1,11 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
 using SSMM_UI.Interfaces;
 using SSMM_UI.Settings;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace SSMM_UI.Services;
@@ -13,11 +14,18 @@ public class ThemeService : IThemeService
 {
     private static Application App => Application.Current!;
     private readonly StateService _stateService;
+    private bool _isApplyingTheme;
     private readonly List<ThemeOption> _themes =
     [
-        new("midnight", "Midnight Neon", ThemeVariant.Dark, "avares://SSMM_UI/Themes/MidnightTheme.axaml"),
-        new("aurora", "Aurora Glass", ThemeVariant.Dark, "avares://SSMM_UI/Themes/AuroraTheme.axaml"),
-        new("sunrise", "Sunrise Glow", ThemeVariant.Light, "avares://SSMM_UI/Themes/SunriseTheme.axaml")
+        new("midnight", "Midnight Neon", ThemeVariant.Dark, "avares://MultistreamManager/Themes/MidnightTheme.axaml"),
+        new("cyberpunk", "Cyberpunk Pulse", ThemeVariant.Dark, "avares://MultistreamManager/Themes/CyberpunkTheme.axaml"),
+        new("vaporwave", "Vaporwave Drift", ThemeVariant.Dark, "avares://MultistreamManager/Themes/VaporWaveTheme.axaml"),
+        new("crimson", "Crimson Core", ThemeVariant.Dark, "avares://MultistreamManager/Themes/CrimsonTheme.axaml"),
+        new("aurora", "Aurora Glass", ThemeVariant.Dark, "avares://MultistreamManager/Themes/AuroraTheme.axaml"),
+        new("oceanic", "Oceanic Storm", ThemeVariant.Dark, "avares://MultistreamManager/Themes/OceanicTheme.axaml"),
+        new("solarflare", "Solar Flare", ThemeVariant.Dark, "avares://MultistreamManager/Themes/SolarFlareTheme.axaml"),
+        new("acid", "Acid Reactor", ThemeVariant.Dark, "avares://MultistreamManager/Themes/AcidTheme.axaml"),
+        new("sunrise", "Sunrise Glow", ThemeVariant.Light, "avares://MultistreamManager/Themes/SunriseTheme.axaml")
     ];
 
     private UserSettings UserSettings => _stateService.UserSettingsObj;
@@ -34,6 +42,10 @@ public class ThemeService : IThemeService
     {
         _stateService = stateservice;
         CurrentTheme = _themes.First();
+        foreach (var theme in _themes)
+        {
+            theme.PropertyChanged += OnThemeOptionPropertyChanged;
+        }
 
         var preferredTheme = string.IsNullOrWhiteSpace(UserSettings.ThemeKey)
             ? CurrentKey
@@ -54,6 +66,9 @@ public class ThemeService : IThemeService
 
     private void ApplyThemeInternal(string themeKey, bool persist)
     {
+        _isApplyingTheme = true;
+        try
+        {
         var theme = _themes.FirstOrDefault(x => x.Key.Equals(themeKey, StringComparison.OrdinalIgnoreCase))
                     ?? _themes.First();
 
@@ -70,7 +85,7 @@ public class ThemeService : IThemeService
             mergedDictionaries.Remove(dict);
         }
 
-        var resourceInclude = new ResourceInclude(new Uri("avares://SSMM_UI/App.axaml"))
+        var resourceInclude = new ResourceInclude(new Uri("avares://MultistreamManager/App.axaml"))
         {
             Source = new Uri(theme.ResourceUri)
         };
@@ -90,6 +105,24 @@ public class ThemeService : IThemeService
         if (persist)
         {
             _stateService.SettingsChanged(UserSettings);
+        }
+        }
+        finally
+        {
+            _isApplyingTheme = false;
+        }
+    }
+
+    private void OnThemeOptionPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (_isApplyingTheme || e.PropertyName != nameof(ThemeOption.IsSelected))
+        {
+            return;
+        }
+
+        if (sender is ThemeOption theme && theme.IsSelected && !theme.Key.Equals(CurrentKey, StringComparison.OrdinalIgnoreCase))
+        {
+            ApplyThemeInternal(theme.Key, true);
         }
     }
 }

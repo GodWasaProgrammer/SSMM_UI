@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using SSMM_UI.Poster;
 
 namespace SSMM_UI.Services;

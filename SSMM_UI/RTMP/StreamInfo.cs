@@ -1,4 +1,4 @@
-﻿namespace SSMM_UI.RTMP;
+namespace SSMM_UI.RTMP;
 
 public class StreamInfo
 {
