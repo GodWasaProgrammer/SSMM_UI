@@ -1,4 +1,4 @@
-﻿using SSMM_UI.Enums;
+using SSMM_UI.Enums;
 using SSMM_UI.RTMP;
 using SSMM_UI.Settings;
 using System.Collections.Generic;

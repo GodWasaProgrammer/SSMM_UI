@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SSMM_UI.Enums;
 using SSMM_UI.Services;
@@ -15,6 +15,8 @@ public partial class SocialPosterLoginViewModel : ObservableObject
         _AuthService = authService;
         _StateService = stateService;
         _settings = stateService.UserSettingsObj;
+        _StateService.OnAuthObjectsUpdated += RefreshStatusesFromState;
+        RefreshStatusesFromState();
         _ = AutoLoginIfTokenized();
     }
     readonly CentralAuthService _AuthService;
@@ -26,11 +28,13 @@ public partial class SocialPosterLoginViewModel : ObservableObject
     public async Task FacebookLogin()
     {
         FacebookLoginStatus = await _AuthService.FacebookLogin();
+        RefreshStatusesFromState();
     }
     private async Task LoginWithX()
     {
         var result = await _AuthService.LoginWithX();
         XLoginStatus = result;
+        RefreshStatusesFromState();
         // Handle result (e.g., update UI or log)
     }
     [ObservableProperty] string xLoginStatus = "❌ Not logged in.";
@@ -64,5 +68,33 @@ public partial class SocialPosterLoginViewModel : ObservableObject
                 }
             }
         }
+
+        RefreshStatusesFromState();
+    }
+
+    private void RefreshStatusesFromState()
+    {
+        XLoginStatus = BuildLoginStatus(AuthProvider.X, "❌ Not logged in.");
+        FacebookLoginStatus = BuildLoginStatus(AuthProvider.Facebook, "❌ Not logged in.");
+    }
+
+    private string BuildLoginStatus(AuthProvider provider, string defaultMessage)
+    {
+        if (_StateService.AuthObjects.TryGetValue(provider, out var token))
+        {
+            var hasUsableToken = provider == AuthProvider.Facebook
+                ? !string.IsNullOrWhiteSpace(token.AccessToken)
+                : token.IsValid;
+
+            if (!hasUsableToken)
+            {
+                return defaultMessage;
+            }
+
+            var username = string.IsNullOrWhiteSpace(token.Username) ? provider.ToString() : token.Username;
+            return $"✅ Logged in as: {username}";
+        }
+
+        return defaultMessage;
     }
 }

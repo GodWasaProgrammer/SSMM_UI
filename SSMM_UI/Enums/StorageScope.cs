@@ -1,4 +1,4 @@
-﻿namespace SSMM_UI.Enums;
+namespace SSMM_UI.Enums;
 
 public enum StorageScope
 {

@@ -1,4 +1,4 @@
-﻿namespace SSMM_UI.Oauth.Facebook;
+namespace SSMM_UI.Oauth.Facebook;
 
 public class FacebookPage
 {

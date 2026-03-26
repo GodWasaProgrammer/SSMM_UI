@@ -1,31 +1,29 @@
-﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SSMM_UI.Enums;
 using SSMM_UI.Services;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Windows.Input;
+using System.Threading.Tasks;
 
 namespace SSMM_UI.ViewModel;
 
 public partial class PurgeTokenViewModel : ObservableObject
 {
-    Window mainWindow;
-    private StateService _stateService;
-    public PurgeTokenViewModel(Window window, ObservableCollection<AuthProvider> auths, StateService _stateservice)
+    private readonly StateService _stateService;
+    private readonly DialogService _dialogService;
+    public PurgeTokenViewModel(ReadOnlyObservableCollection<AuthProvider> auths, StateService _stateservice, DialogService dialogService)
     {
-        mainWindow = window;
         authProviders = auths;
         _stateService = _stateservice;
-        authProviders ??= [];
+        _dialogService = dialogService;
     }
     [ObservableProperty]
-    public ObservableCollection<AuthProvider> authProviders;
+    public ReadOnlyObservableCollection<AuthProvider> authProviders;
 
     [RelayCommand]
-    private void PurgeSpecifiedToken(AuthProvider authProvider)
+    private async Task PurgeSpecifiedToken(AuthProvider authProvider)
     {
-        _stateService.DeleteToken(authProvider);
+        var res = _stateService.DeleteToken(authProvider);
+        await _dialogService.DeleteToken(authProvider, res);
     }
 }

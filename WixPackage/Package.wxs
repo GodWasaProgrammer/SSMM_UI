@@ -1,7 +1,7 @@
 ﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
 	 xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
 	<Package
-	  Name="Streamer Social Media Manager"
+	  Name="Multistream Manager"
 	  Manufacturer="GWAP Technologies"
 	  Version="1.0.0.0"
 	  UpgradeCode="8f4e8913-4100-4f7c-b255-66dfb20c2fd3">
@@ -10,6 +10,7 @@
 
 		<Feature Id="MainApplication" Title="Main Application" Level="1">
 			<ComponentGroupRef Id="ProductComponents" />
+			<ComponentGroupRef Id="ShortcutComponents" />
 			<!--<ComponentGroupRef Id="DependencyComponents" />-->
 		</Feature>
 		<UI>

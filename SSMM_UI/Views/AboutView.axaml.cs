@@ -17,7 +17,7 @@ public partial class AboutView : Window
         InitializeComponent();
         DataContext = aboutVM;
 
-        // Registrera för CloseWindowMessage
+        // Registrera fï¿½r CloseWindowMessage
         WeakReferenceMessenger.Default.Register<CloseWindowMessage>(this, (recipient, message) =>
         {
             this.Close();

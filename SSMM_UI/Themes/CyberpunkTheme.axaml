@@ -1,0 +1,45 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<Color x:Key="AccentColor">#00F5FF</Color>
+	<Color x:Key="AccentSecondaryColor">#FF2EC4</Color>
+	<Color x:Key="SurfaceColor">#09041A</Color>
+	<Color x:Key="CardColor">#120829</Color>
+	<Color x:Key="BorderColor">#2B1461</Color>
+	<Color x:Key="MutedTextColor">#E2D7FF</Color>
+	<Color x:Key="MenuColor">#0F0722</Color>
+	<Color x:Key="MenuBorderColor">#3D1F80</Color>
+	<Color x:Key="InputColor">#140B2B</Color>
+	<Color x:Key="InputBorderColor">#3A2085</Color>
+	<Color x:Key="ShadowColor">#77000000</Color>
+
+	<LinearGradientBrush x:Key="AppBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+		<GradientStop Color="#070212" Offset="0" />
+		<GradientStop Color="#120626" Offset="0.5" />
+		<GradientStop Color="#0B031A" Offset="1" />
+	</LinearGradientBrush>
+
+	<LinearGradientBrush x:Key="AccentGradientBrush" StartPoint="0,0" EndPoint="1,1">
+		<GradientStop Color="#A000F5FF" Offset="0" />
+		<GradientStop Color="#90FF2EC4" Offset="1" />
+	</LinearGradientBrush>
+
+	<SolidColorBrush x:Key="AccentBrush" Color="{DynamicResource AccentColor}" />
+	<SolidColorBrush x:Key="AccentMutedBrush" Color="#7E22CE" Opacity="0.72" />
+	<SolidColorBrush x:Key="CardBackgroundBrush" Color="{DynamicResource CardColor}" Opacity="0.9" />
+	<SolidColorBrush x:Key="CardBorderBrush" Color="{DynamicResource BorderColor}" Opacity="0.75" />
+	<SolidColorBrush x:Key="SurfaceOverlayBrush" Color="{DynamicResource SurfaceColor}" Opacity="0.92" />
+	<SolidColorBrush x:Key="PanelOverlayBrush" Color="#170A33" Opacity="0.75" />
+	<SolidColorBrush x:Key="InputBackgroundBrush" Color="{DynamicResource InputColor}" Opacity="0.94" />
+	<SolidColorBrush x:Key="InputBorderBrush" Color="{DynamicResource InputBorderColor}" Opacity="0.78" />
+	<SolidColorBrush x:Key="TextSubtleBrush" Color="{DynamicResource MutedTextColor}" Opacity="0.83" />
+	<SolidColorBrush x:Key="MenuBackgroundBrush" Color="{DynamicResource MenuColor}" Opacity="0.96" />
+	<SolidColorBrush x:Key="MenuForegroundBrush" Color="#F4EEFF" />
+	<SolidColorBrush x:Key="MenuBorderBrush" Color="{DynamicResource MenuBorderColor}" />
+	<SolidColorBrush x:Key="GlassHighlightBrush" Color="#67E8F9" Opacity="0.12" />
+	<SolidColorBrush x:Key="AltHigh" Color="#F8FAFC" />
+
+	<Color x:Key="SystemAccentColor">#00F5FF</Color>
+	<SolidColorBrush x:Key="SystemControlBackgroundAltHighBrush" Color="{DynamicResource CardColor}" Opacity="0.94" />
+	<SolidColorBrush x:Key="SystemControlBackgroundBaseLowBrush" Color="{DynamicResource BorderColor}" Opacity="0.72" />
+	<SolidColorBrush x:Key="SystemControlForegroundAltHighBrush" Color="#F8FAFF" />
+</ResourceDictionary>

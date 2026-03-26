@@ -1,4 +1,4 @@
-﻿using SSMM_UI.Enums;
+using SSMM_UI.Enums;
 using SSMM_UI.Interfaces;
 using SSMM_UI.Services;
 using System;
@@ -235,5 +235,10 @@ public class FacebookAuthService : IOAuthService<FacebookToken>
     public Task<FacebookToken?> RefreshTokenAsync(string token)
     {
         throw new NotImplementedException("Facebook User long life tokens");
+    }
+
+    public Task<bool> ResetToken()
+    {
+        throw new NotImplementedException();
     }
 }

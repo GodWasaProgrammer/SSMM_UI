@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using SSMM_UI.Services;
 namespace SSMM_UI;

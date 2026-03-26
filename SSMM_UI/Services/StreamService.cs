@@ -1,4 +1,4 @@
-﻿using Google.Apis.YouTube.v3;
+using Google.Apis.YouTube.v3;
 using SSMM_UI.MetaData;
 using SSMM_UI.Puppeteering;
 using SSMM_UI.RTMP;

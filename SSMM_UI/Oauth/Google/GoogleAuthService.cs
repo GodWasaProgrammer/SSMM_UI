@@ -1,4 +1,4 @@
-﻿using Google.Apis.Oauth2.v2;
+using Google.Apis.Oauth2.v2;
 using Google.Apis.YouTube.v3;
 using SSMM_UI.Services;
 using System;
@@ -296,5 +296,11 @@ public class GoogleAuthService : IOAuthService<GoogleToken>
             _logger.Log(ex.Message);
         }
         return "Failed to get username";
+    }
+
+    public Task<bool> ResetToken()
+    {
+        _oauthResult = null;
+        return Task.FromResult(true);
     }
 }

@@ -1,4 +1,4 @@
-﻿using LiveStreamingServerNet;
+using LiveStreamingServerNet;
 using LiveStreamingServerNet.AdminPanelUI;
 using LiveStreamingServerNet.Flv.Installer;
 using LiveStreamingServerNet.Standalone.Installer;

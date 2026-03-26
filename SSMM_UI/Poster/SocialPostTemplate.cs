@@ -1,4 +1,4 @@
-﻿using Avalonia.Media.Imaging;
+using Avalonia.Media.Imaging;
 using System.Collections.Generic;
 
 namespace SSMM_UI.Poster;

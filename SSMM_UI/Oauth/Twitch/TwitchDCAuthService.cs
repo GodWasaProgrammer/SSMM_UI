@@ -1,4 +1,4 @@
-﻿using SSMM_UI.Enums;
+using SSMM_UI.Enums;
 using SSMM_UI.Interfaces;
 using SSMM_UI.Services;
 using System;
@@ -358,5 +358,11 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
         return user.TryGetProperty("id", out var userIdElement)
             ? userIdElement.GetString()
             : throw new Exception("Could not find 'id' in user response.");
+    }
+
+    public Task<bool> ResetToken()
+    {
+        _authResult = null;
+        return Task.FromResult(true);
     }
 }

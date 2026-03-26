@@ -381,3 +381,4 @@ FodyWeavers.xsd
 /SSMM_UI/API_Key_Secrets_Loader/Consumer_Keys.txt
 /SSMM_UI/API_Key_Secrets_Loader/Consumer_Secrets.txt
 /SSMM_UI/API_Key_Secrets_Loader/Webhooks.txt
+/.github/agents/MSM_AGENT.agent.md

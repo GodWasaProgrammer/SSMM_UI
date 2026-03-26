@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 
 namespace SSMM_UI.Interfaces;
 
@@ -21,4 +21,6 @@ public interface IOAuthService<TToken>
     /// <param name="token">The RefreshToken as a plain string</param>
     /// <returns>Token Of Type <typeparamref name="TToken"/> If Success, Otherwise <c>null</c> </returns>
     Task<TToken?> RefreshTokenAsync(string token);
+
+    Task<bool> ResetToken();
 }

@@ -1,4 +1,4 @@
-﻿using SSMM_UI.Interfaces;
+using SSMM_UI.Interfaces;
 using System;
 using System.Text.Json.Serialization;
 

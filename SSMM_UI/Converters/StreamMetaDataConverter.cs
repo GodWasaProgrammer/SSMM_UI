@@ -1,4 +1,4 @@
-﻿using Google.Apis.YouTube.v3.Data;
+using Google.Apis.YouTube.v3.Data;
 using SSMM_UI.MetaData;
 using System;
 using System.Collections.Generic;

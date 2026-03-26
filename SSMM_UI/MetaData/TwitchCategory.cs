@@ -1,4 +1,4 @@
-﻿using Avalonia.Media.Imaging;
+using Avalonia.Media.Imaging;
 using System.Text.Json.Serialization;
 
 namespace SSMM_UI.MetaData;

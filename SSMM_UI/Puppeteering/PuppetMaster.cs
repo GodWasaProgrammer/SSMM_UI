@@ -1,4 +1,4 @@
-﻿using PuppeteerSharp;
+using PuppeteerSharp;
 using PuppeteerSharp.Input;
 using SSMM_UI.Services;
 using System;

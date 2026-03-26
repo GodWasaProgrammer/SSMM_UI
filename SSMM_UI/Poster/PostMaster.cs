@@ -1,4 +1,4 @@
-﻿using SSMM_UI.Enums;
+using SSMM_UI.Enums;
 using SSMM_UI.Interfaces;
 using SSMM_UI.Oauth.Facebook;
 using SSMM_UI.RTMP;

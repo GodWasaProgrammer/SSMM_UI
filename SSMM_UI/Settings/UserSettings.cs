@@ -1,4 +1,4 @@
-﻿namespace SSMM_UI.Settings;
+namespace SSMM_UI.Settings;
 
 public class UserSettings
 {
@@ -22,4 +22,5 @@ public class UserSettings
 
     // Theme
     public bool IsDarkMode { get; set; } = true;
+    public string ThemeKey { get; set; } = "midnight";
 }

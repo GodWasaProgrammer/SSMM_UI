@@ -1,4 +1,4 @@
-﻿using SSMM_UI.Enums;
+using SSMM_UI.Enums;
 using SSMM_UI.Interfaces;
 using SSMM_UI.Services;
 using System;
@@ -233,6 +233,11 @@ public class XAuthService : IOAuthService<XToken>
             throw new Exception($"Token exchange failed: {resp.StatusCode} - {body}");
 
         return JsonDocument.Parse(body);
+    }
+
+    public Task<bool> ResetToken()
+    {
+        throw new NotImplementedException();
     }
 
     // -------------------------

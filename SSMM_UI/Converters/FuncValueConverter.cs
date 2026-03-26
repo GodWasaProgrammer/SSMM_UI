@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Avalonia.Data.Converters;
 
 namespace SSMM_UI.Converters;

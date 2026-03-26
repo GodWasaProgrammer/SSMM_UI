@@ -1,4 +1,4 @@
-﻿using SSMM_UI.Enums;
+using SSMM_UI.Enums;
 using SSMM_UI.Interfaces;
 using SSMM_UI.Services;
 using System;
@@ -254,5 +254,11 @@ public class KickAuthService : IOAuthService<KickToken>
         }
 
         return ("No user data returned or malformed response");
+    }
+
+    public Task<bool> ResetToken()
+    {
+        _kickAuthResult = null;
+        return Task.FromResult(true);
     }
 }

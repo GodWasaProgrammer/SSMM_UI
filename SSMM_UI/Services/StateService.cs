@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Google.Apis.YouTube.v3.Data;
@@ -21,8 +21,10 @@ namespace SSMM_UI.Services;
 
 public class StateService
 {
+
     public StateService(ILogService logger)
     {
+        _availableAuthProvidersReadOnly = new(_availableAuthProviders);
         _metaDataJsonOptions = new JsonSerializerOptions
         {
             WriteIndented = true,
@@ -44,6 +46,16 @@ public class StateService
         LoadRtmpServersFromServicesJson(_obsServices);
         DeSerializeYoutubeCategories();
     }
+
+    // ============================= Token Logic =============================
+    // Delegates and related logic to update UI when auth objects change, e.g., after login/logout
+    private readonly ObservableCollection<AuthProvider> _availableAuthProviders = new();
+    private readonly ReadOnlyObservableCollection<AuthProvider> _availableAuthProvidersReadOnly;
+    public ReadOnlyObservableCollection<AuthProvider> AvailableAuthProviders => _availableAuthProvidersReadOnly;
+    public event Action<AuthProvider, IAuthToken>? OnTokenAdded;
+    public event Action<AuthProvider>? OnTokenRemoved;
+    public event Action? OnAuthObjectsCleared;
+
 
     // Filenames
     private const string _serializedServices = "Serialized_Services.json";
@@ -179,7 +191,8 @@ public class StateService
             SecureStorage.SaveEncrypted(fullPath, token, _regularJsonOptions);
 
             _authObjects[service] = token;
-
+            TrackAuthProvider(service);
+            OnTokenAdded?.Invoke(service, token);
             OnAuthObjectsUpdated?.Invoke();
         }
         catch (Exception ex)
@@ -207,6 +220,8 @@ public class StateService
             if (token != null)
             {
                 _authObjects[service] = token;
+                TrackAuthProvider(service);
+                OnTokenAdded?.Invoke(service, token);
                 OnAuthObjectsUpdated?.Invoke();
             }
 
@@ -221,12 +236,40 @@ public class StateService
 
     public bool DeleteAllTokens()
     {
-        return StorageHelper.PurgeTokens();
+        var res = StorageHelper.PurgeTokens();
+        if (AuthObjects.Count > 0)
+        {
+            foreach (var provider in AuthObjects.Keys.ToList())
+            {
+                OnTokenRemoved?.Invoke(provider);
+            }
+        }
+        AuthObjects.Clear();
+        _availableAuthProviders.Clear();
+        OnAuthObjectsCleared?.Invoke();
+        OnAuthObjectsUpdated?.Invoke();
+        return res;
     }
 
     public bool DeleteToken(AuthProvider service)
     {
-        return StorageHelper.PurgeToken(service);
+        var res = StorageHelper.PurgeToken(service);
+        var removed = AuthObjects.Remove(service);
+        if (removed)
+        {
+            _availableAuthProviders.Remove(service);
+            OnTokenRemoved?.Invoke(service);
+        }
+        OnAuthObjectsUpdated?.Invoke();
+        return res;
+    }
+
+    private void TrackAuthProvider(AuthProvider service)
+    {
+        if (!_availableAuthProviders.Contains(service))
+        {
+            _availableAuthProviders.Add(service);
+        }
     }
 
     public StreamMetadata GetCurrentMetaData()
@@ -257,7 +300,7 @@ public class StateService
             var json = JsonSerializer.Serialize(UserSettingsObj, _regularJsonOptions);
             File.WriteAllText(_settingsPath, json);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _logger.Log($"Error in saving Settings:{ex.Message}");
         }

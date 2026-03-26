@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using System.Threading.Tasks;
 
 namespace SSMM_UI.Dialogs
