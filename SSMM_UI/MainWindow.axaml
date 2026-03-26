@@ -45,7 +45,6 @@
 					<MenuItem Header="Purge All Auth Tokens" Command="{Binding DeleteAllTokens}"/>
 					<MenuItem Header="Purge Specific token" Command="{Binding DeleteSpecifiedTokenCmd}"/>
 				</MenuItem>
-						  <MenuItem/>
 			</Menu>
 		</Border>
 
