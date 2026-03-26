@@ -2,152 +2,206 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="SSMM_UI.App"
              RequestedThemeVariant="Default">
-	<!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 	<Application.Resources>
-		<!-- Definiera BÅDE Color och SolidColorBrush -->
-		<Color x:Key="PrimaryButtonColor">#3B82F6</Color>
-		<Color x:Key="SuccessColor">#10B981</Color>
-		<Color x:Key="DangerColor">#EF4444</Color>
-		<Color x:Key="WhiteColor">#FFFFFF</Color>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceInclude Source="avares://SSMM_UI/Themes/MidnightTheme.axaml" />
+			</ResourceDictionary.MergedDictionaries>
 
-		<SolidColorBrush x:Key="PrimaryButtonBrush" Color="{DynamicResource PrimaryButtonColor}"/>
-		<SolidColorBrush x:Key="SuccessBrush" Color="{DynamicResource SuccessColor}"/>
-		<SolidColorBrush x:Key="DangerBrush" Color="{DynamicResource DangerColor}"/>
-		<SolidColorBrush x:Key="WhiteBrush" Color="{DynamicResource WhiteColor}"/>
+			<Color x:Key="SuccessColor">#22C55E</Color>
+			<Color x:Key="DangerColor">#EF4444</Color>
+			<Color x:Key="WarningColor">#F59E0B</Color>
+
+			<SolidColorBrush x:Key="SuccessBrush" Color="{DynamicResource SuccessColor}" />
+			<SolidColorBrush x:Key="DangerBrush" Color="{DynamicResource DangerColor}" />
+			<SolidColorBrush x:Key="WarningBrush" Color="{DynamicResource WarningColor}" />
+			<SolidColorBrush x:Key="WhiteBrush" Color="#FFFFFF" />
+		</ResourceDictionary>
 	</Application.Resources>
+
 	<Application.Styles>
-		<FluentTheme />
-		<StyleInclude Source="avares://IconPacks.Avalonia/Icons.axaml" />
-		<FluentTheme>
-			<FluentTheme.Palettes>
-				<ColorPaletteResources x:Key="Light"
-									   Accent="#ff0073cf"
-									   AltHigh="White"
-									   AltLow="White"
-									   AltMedium="White"
-									   AltMediumHigh="White"
-									   AltMediumLow="White"
-									   BaseHigh="Black"
-									   BaseLow="#ffcccccc"
-									   BaseMedium="#ff898989"
-									   BaseMediumHigh="#ff5d5d5d"
-									   BaseMediumLow="#ff737373"
-									   ChromeAltLow="#ff5d5d5d"
-									   ChromeBlackHigh="Black"
-									   ChromeBlackLow="#ffcccccc"
-									   ChromeBlackMedium="#ff5d5d5d"
-									   ChromeBlackMediumLow="#ff898989"
-									   ChromeDisabledHigh="#ffcccccc"
-									   ChromeDisabledLow="#ff898989"
-									   ChromeGray="#ff737373"
-									   ChromeHigh="#ffcccccc"
-									   ChromeLow="#ffececec"
-									   ChromeMedium="#ffe6e6e6"
-									   ChromeMediumLow="#ffececec"
-									   ChromeWhite="White"
-									   ListLow="#ffe6e6e6"
-									   ListMedium="#ffcccccc"
-									   RegionColor="White" />
-				<ColorPaletteResources x:Key="Dark"
-									   Accent="#ff0073cf"
-								       AltHigh="Black"
-								       AltLow="Black"
-								       AltMedium="Black"
-								       AltMediumHigh="Black"
-								       AltMediumLow="Black"
-								       BaseHigh="White"
-								       BaseLow="#ff333333"
-								       BaseMedium="#ff9a9a9a"
-								       BaseMediumHigh="#ffb4b4b4"
-								       BaseMediumLow="#ff676767"
-								       ChromeAltLow="#ffb4b4b4"
-								       ChromeBlackHigh="Black"
-								       ChromeBlackLow="#ffb4b4b4"
-								       ChromeBlackMedium="Black"
-								       ChromeBlackMediumLow="Black"
-								       ChromeDisabledHigh="#ff333333"
-								       ChromeDisabledLow="#ff9a9a9a"
-								       ChromeGray="Gray"
-								       ChromeHigh="Gray"
-								       ChromeLow="#ff151515"
-								       ChromeMedium="#ff1d1d1d"
-								       ChromeMediumLow="#ff2c2c2c"
-								       ChromeWhite="White"
-								       ListLow="#ff1d1d1d"
-								       ListMedium="#ff333333"
-								       RegionColor="Black" />
-			</FluentTheme.Palettes>
-		</FluentTheme>
+		<FluentTheme DensityStyle="Compact" />
 		<StyleInclude Source="avares://IconPacks.Avalonia/Icons.axaml" />
 
-		<!-- Använd Brush-resurserna för Background/BorderBrush -->
-		<Style Selector="Border.card">
-			<Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
-			<Setter Property="BorderBrush" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}"/>
-			<Setter Property="BorderThickness" Value="1"/>
-			<Setter Property="CornerRadius" Value="6"/>
-			<Setter Property="Padding" Value="15"/>
-			<Setter Property="Margin" Value="0 0 0 15"/>
-			<Setter Property="BoxShadow" Value="none"/>
+		<Style Selector="Window">
+			<Setter Property="FontFamily" Value="Segoe UI, Inter, 'Segoe UI Variable', Arial" />
+			<Setter Property="Background" Value="{DynamicResource AppBackgroundBrush}" />
 		</Style>
 
-		<!-- Använd Brush-resurserna för Background och Color-resursen för Foreground -->
+		<Style Selector="Border.card">
+			<Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
+			<Setter Property="BorderThickness" Value="1" />
+			<Setter Property="CornerRadius" Value="12" />
+			<Setter Property="Padding" Value="16" />
+			<Setter Property="Margin" Value="0 0 0 16" />
+			<Setter Property="BoxShadow" Value="0 20 32 0 #33000000, 0 6 14 0 #1A000000" />
+		</Style>
+
+		<Style Selector="TextBlock.secondary">
+			<Setter Property="FontWeight" Value="SemiBold" />
+			<Setter Property="Opacity" Value="0.82" />
+			<Setter Property="Foreground" Value="{DynamicResource TextSubtleBrush}" />
+			<Setter Property="TextWrapping" Value="Wrap" />
+			<Setter Property="FontSize" Value="14" />
+		</Style>
+
+		<Style Selector="Button">
+			<Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}" />
+			<Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundAltHighBrush}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource InputBorderBrush}" />
+			<Setter Property="BorderThickness" Value="1" />
+			<Setter Property="CornerRadius" Value="10" />
+			<Setter Property="Padding" Value="14 8" />
+			<Setter Property="Height" Value="40" />
+			<Setter Property="HorizontalAlignment" Value="Left" />
+			<Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+			<Setter Property="RenderTransform">
+				<Setter.Value>
+					<ScaleTransform ScaleX="1" ScaleY="1" />
+				</Setter.Value>
+			</Setter>
+			<Setter Property="Transitions">
+				<Setter.Value>
+					<Transitions>
+						<DoubleTransition Property="Opacity" Duration="0:0:0.1" />
+					</Transitions>
+				</Setter.Value>
+			</Setter>
+		</Style>
+
+		<Style Selector="Button:pointerover">
+			<Setter Property="Background" Value="{DynamicResource AccentMutedBrush}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+			<Setter Property="Opacity" Value="0.95" />
+			<Setter Property="RenderTransform">
+				<Setter.Value>
+					<ScaleTransform ScaleX="1.01" ScaleY="1.01" />
+				</Setter.Value>
+			</Setter>
+		</Style>
+
+		<Style Selector="Button:pressed">
+			<Setter Property="RenderTransform">
+				<Setter.Value>
+					<ScaleTransform ScaleX="0.99" ScaleY="0.99" />
+				</Setter.Value>
+			</Setter>
+		</Style>
+
 		<Style Selector="Button.primary">
-			<Setter Property="Background" Value="{DynamicResource SystemAccentColor}"/>
-			<Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundAltHighBrush}"/>
-			<Setter Property="FontWeight" Value="Bold"/>
-			<Setter Property="CornerRadius" Value="4"/>
-			<Setter Property="Width" Value="180"/>
-			<Setter Property="Height" Value="40"/>
+			<Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+			<Setter Property="Foreground" Value="{DynamicResource WhiteBrush}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource AccentGradientBrush}" />
+			<Setter Property="FontWeight" Value="SemiBold" />
 		</Style>
 
 		<Style Selector="Button.success">
-			<Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
-			<Setter Property="Foreground" Value="{DynamicResource WhiteColor}"/>
+			<Setter Property="Background" Value="{DynamicResource SuccessBrush}" />
+			<Setter Property="Foreground" Value="{DynamicResource WhiteBrush}" />
 		</Style>
 
 		<Style Selector="Button.danger">
-			<Setter Property="Background" Value="{DynamicResource DangerBrush}"/>
-			<Setter Property="Foreground" Value="{DynamicResource WhiteColor}"/>
+			<Setter Property="Background" Value="{DynamicResource DangerBrush}" />
+			<Setter Property="Foreground" Value="{DynamicResource WhiteBrush}" />
 		</Style>
 
-		<Style Selector="ItemsControl /template/ ContentPresenter">
-			<Setter Property="Background" Value="Transparent"/>
+		<Style Selector="TabControl">
+			<Setter Property="Background" Value="Transparent" />
+			<Setter Property="BorderThickness" Value="0" />
+			<Setter Property="Padding" Value="4" />
 		</Style>
 
-		<Style Selector="Panel">
-			<Setter Property="Background" Value="Transparent"/>
+		<Style Selector="TabItem">
+			<Setter Property="Padding" Value="12 6" />
+			<Setter Property="Margin" Value="0 0 10 0" />
+			<Setter Property="Background" Value="Transparent" />
+			<Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundAltHighBrush}" />
+			<Setter Property="BorderThickness" Value="0" />
+			<Setter Property="CornerRadius" Value="8" />
 		</Style>
 
-		<!-- Fixa potentiell vit bakgrund på ListBox/ItemsControl --><!--
+		<Style Selector="TabItem:pointerover">
+			<Setter Property="Background" Value="{DynamicResource CardBorderBrush}" />
+		</Style>
+
+		<Style Selector="TabItem:selected">
+			<Setter Property="Background" Value="{DynamicResource PanelOverlayBrush}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+			<Setter Property="BorderThickness" Value="0 0 0 2" />
+			<Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundAltHighBrush}" />
+		</Style>
+
+		<Style Selector="Menu">
+			<Setter Property="Background" Value="{DynamicResource MenuBackgroundBrush}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource MenuBorderBrush}" />
+			<Setter Property="BorderThickness" Value="1" />
+			<Setter Property="CornerRadius" Value="12" />
+			<Setter Property="Padding" Value="8 4" />
+		</Style>
+
+		<Style Selector="MenuItem">
+			<Setter Property="Padding" Value="12 8" />
+			<Setter Property="Foreground" Value="{DynamicResource MenuForegroundBrush}" />
+			<Setter Property="CornerRadius" Value="8" />
+		</Style>
+
+		<Style Selector="MenuItem:pointerover">
+			<Setter Property="Background" Value="{DynamicResource AccentMutedBrush}" />
+			<Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundAltHighBrush}" />
+		</Style>
+
+		<Style Selector="MenuItem:checked">
+			<Setter Property="Background" Value="{DynamicResource AccentGradientBrush}" />
+			<Setter Property="Foreground" Value="{DynamicResource WhiteBrush}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+		</Style>
+
 		<Style Selector="ListBox">
-			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="Background" Value="{DynamicResource PanelOverlayBrush}" />
+			<Setter Property="BorderThickness" Value="0" />
+			<Setter Property="CornerRadius" Value="10" />
+			<Setter Property="Padding" Value="8" />
 		</Style>
 
-		<Style Selector="ItemsControl">
-			<Setter Property="Background" Value="Transparent"/>
+		<Style Selector="ListBoxItem">
+			<Setter Property="Padding" Value="8 6" />
+			<Setter Property="CornerRadius" Value="8" />
+		</Style>
+
+		<Style Selector="ListBoxItem:pointerover">
+			<Setter Property="Background" Value="{DynamicResource CardBorderBrush}" />
+		</Style>
+
+		<Style Selector="ListBoxItem:selected">
+			<Setter Property="Background" Value="{DynamicResource AccentMutedBrush}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+			<Setter Property="BorderThickness" Value="1" />
+		</Style>
+
+		<Style Selector="TextBox">
+			<Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource InputBorderBrush}" />
+			<Setter Property="BorderThickness" Value="1" />
+			<Setter Property="CornerRadius" Value="8" />
+			<Setter Property="Padding" Value="10 8" />
+			<Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundAltHighBrush}" />
+		</Style>
+
+		<Style Selector="TextBox:focus">
+			<Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
 		</Style>
 
 		<Style Selector="ScrollViewer">
-			<Setter Property="Background" Value="Transparent"/>
-		</Style>-->
+			<Setter Property="Background" Value="Transparent" />
+		</Style>
 
-		<!-- Om korten är i en StackPanel eller Grid -->
 		<Style Selector="StackPanel">
-			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="Background" Value="Transparent" />
 		</Style>
 
 		<Style Selector="Grid">
-			<Setter Property="Background" Value="Transparent"/>
-		</Style>
-
-		<!-- Använd Color-resursen direkt -->
-		<Style Selector="ListBoxItem:pointerover">
-			<Setter Property="Background">
-				<Setter.Value>
-					<SolidColorBrush Color="{DynamicResource BorderColor}" Opacity="0.3"/>
-				</Setter.Value>
-			</Setter>
+			<Setter Property="Background" Value="Transparent" />
 		</Style>
 	</Application.Styles>
 </Application>

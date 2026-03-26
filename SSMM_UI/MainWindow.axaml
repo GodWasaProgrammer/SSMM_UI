@@ -5,62 +5,107 @@
 		xmlns:Views="clr-namespace:SSMM_UI.Views"
 		x:DataType="local:MainWindowViewModel"
 		Title="SSMM_UI" Width="1920" Height="1080"
+		Background="{DynamicResource AppBackgroundBrush}"
+		Padding="18"
 		Icon="avares://SSMM_UI/Assets/MainIcon.png">
 
-	<Grid RowDefinitions="Auto,*,Auto">
+	<Grid RowDefinitions="Auto,*">
 
-		<!-- Menyn högst upp -->
-		<Menu Grid.Row="0">
-			<MenuItem Header="Settings" Command="{Binding OpenSetting}" />
-			<MenuItem Header="Setup">
-				<MenuItem Header="Youtube" Command="{Binding SetupPuppetYT}" />
-				<MenuItem Header="Kick" Command="{Binding SetupPuppetKick}"/>
-				<MenuItem Header="Webhooks" Command="{Binding ShowSecretsAndKeys}"/>
-			</MenuItem>
-			<MenuItem Header="About" Command="{Binding OpenAbout}" />
-			<MenuItem Header="Theme" Command="{Binding ToggleThemes}" />
-			<MenuItem Header="Tokens">
-				<MenuItem Header="Purge All Auth Tokens" Command="{Binding DeleteAllTokens}"/>
-				<MenuItem Header="Purge Specific token" Command="{Binding DeleteSpecifiedTokenCmd}"/>
-			</MenuItem>
-					  <MenuItem/>
-		</Menu>
+		<Border Grid.Row="0"
+				Background="{DynamicResource MenuBackgroundBrush}"
+				BorderBrush="{DynamicResource MenuBorderBrush}"
+				BorderThickness="1"
+				CornerRadius="14"
+				Padding="10"
+				Margin="0 0 0 12"
+				BoxShadow="0 10 24 0 #20000000">
+			<Menu>
+				<MenuItem Header="Settings" Command="{Binding OpenSetting}" />
+				<MenuItem Header="Setup">
+					<MenuItem Header="Youtube" Command="{Binding SetupPuppetYT}" />
+					<MenuItem Header="Kick" Command="{Binding SetupPuppetKick}"/>
+					<MenuItem Header="Webhooks" Command="{Binding ShowSecretsAndKeys}"/>
+				</MenuItem>
+				<MenuItem Header="About" Command="{Binding OpenAbout}" />
+				<MenuItem Header="Themes">
+					<MenuItem Header="Cycle Theme" Command="{Binding ToggleThemes}" />
+					<MenuItem Header="Available" ItemsSource="{Binding Themes}">
+						<MenuItem.ItemTemplate>
+							<DataTemplate>
+								<MenuItem Header="{Binding Name}"
+										  ToggleType="CheckBox"
+										  IsChecked="{Binding IsSelected}"
+										  Command="{Binding $parent[Window].DataContext.ApplyThemeCommand}"
+										  CommandParameter="{Binding}" />
+							</DataTemplate>
+						</MenuItem.ItemTemplate>
+					</MenuItem>
+				</MenuItem>
+				<MenuItem Header="Tokens">
+					<MenuItem Header="Purge All Auth Tokens" Command="{Binding DeleteAllTokens}"/>
+					<MenuItem Header="Purge Specific token" Command="{Binding DeleteSpecifiedTokenCmd}"/>
+				</MenuItem>
+						  <MenuItem/>
+			</Menu>
+		</Border>
 
-		<!-- Huvudinnehåll: sidebar + main -->
-		<Grid Grid.Row="1" ColumnDefinitions="250,*,Auto">
+		<Border Grid.Row="1"
+				Background="{DynamicResource SurfaceOverlayBrush}"
+				CornerRadius="18"
+				Padding="12"
+				BorderBrush="{DynamicResource CardBorderBrush}"
+				BorderThickness="1"
+				BoxShadow="0 18 34 0 #22000000">
 
-			<!-- Sidebar till vänster -->
-			<Views:LeftSideBarView Grid.Column="0"
-								   x:Name="LeftSideBar"
-								   DataContext="{Binding LeftSideBarVM}" />
-
-			<!-- Main content -->
-			<TabControl Grid.Column="1"
-						Background="Transparent"
-						BorderThickness="0">
-
-				<TabItem Header="Stream">
-					<StackPanel>
-						<Views:StreamControlView DataContext="{Binding StreamControlVM}" />
-						<Views:LogView DataContext="{Binding LogVM}" />
+			<Grid RowDefinitions="Auto,*" RowSpacing="12">
+				<Border CornerRadius="12"
+						Padding="14"
+						Background="{DynamicResource PanelOverlayBrush}"
+						BorderBrush="{DynamicResource CardBorderBrush}"
+						BorderThickness="1">
+					<StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+						<TextBlock Text="Streaming Control Center" FontWeight="Bold" FontSize="18"/>
+						<Rectangle Width="1" Height="22" Fill="{DynamicResource CardBorderBrush}" />
+						<TextBlock Text="{Binding SelectedTheme.Name, FallbackValue='Midnight Neon'}"
+								   Foreground="{DynamicResource TextSubtleBrush}"
+								   VerticalAlignment="Center"/>
 					</StackPanel>
-				</TabItem>
+				</Border>
 
-				<TabItem Header="Stream Metadata">
-					<Views:MetaDataView DataContext="{Binding MetaDataVM}" />
-				</TabItem>
+				<Grid Grid.Row="1" ColumnDefinitions="260,*,320" ColumnSpacing="12">
 
-				<TabItem Header="Social Media AutoPoster">
-					<Views:SocialPosterView DataContext="{Binding SocialPosterVM}" />
-				</TabItem>
+					<Views:LeftSideBarView Grid.Column="0"
+										   x:Name="LeftSideBar"
+										   DataContext="{Binding LeftSideBarVM}" />
 
-			</TabControl>
-			<Grid Grid.Column="2" RowDefinitions="Auto,*,*">
-				<Views:LoginView Grid.Row="0" DataContext="{Binding LoginVM}" />
-				<Views:SocialPosterLoginView Grid.Row="1" DataContext="{Binding SocialPosterLoginVM}"/>
-				<Views:InspectionView Grid.Row="2" x:Name="Preview" DataContext="{Binding InspectionVM}"/>
+					<TabControl Grid.Column="1"
+								Background="Transparent"
+								BorderThickness="0">
+
+						<TabItem Header="Stream">
+							<StackPanel Spacing="12">
+								<Views:StreamControlView DataContext="{Binding StreamControlVM}" />
+								<Views:LogView DataContext="{Binding LogVM}" />
+							</StackPanel>
+						</TabItem>
+
+						<TabItem Header="Stream Metadata">
+							<Views:MetaDataView DataContext="{Binding MetaDataVM}" />
+						</TabItem>
+
+						<TabItem Header="Social Media AutoPoster">
+							<Views:SocialPosterView DataContext="{Binding SocialPosterVM}" />
+						</TabItem>
+
+					</TabControl>
+					<Grid Grid.Column="2" RowDefinitions="Auto,*,*" RowSpacing="10">
+						<Views:LoginView Grid.Row="0" DataContext="{Binding LoginVM}" />
+						<Views:SocialPosterLoginView Grid.Row="1" DataContext="{Binding SocialPosterLoginVM}"/>
+						<Views:InspectionView Grid.Row="2" x:Name="Preview" DataContext="{Binding InspectionVM}"/>
+					</Grid>
+
+				</Grid>
 			</Grid>
-
-		</Grid>
+		</Border>
 	</Grid>
 </Window>
