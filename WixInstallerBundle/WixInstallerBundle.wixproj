@@ -1,6 +1,7 @@
 ﻿<Project Sdk="WixToolset.Sdk/6.0.2">
 
 	<PropertyGroup>
+		<OutputName>MultistreamManagerInstaller</OutputName>
 		<OutputType>Bundle</OutputType>
 	</PropertyGroup>
 
