@@ -1,0 +1,123 @@
+name: Release Installer
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout SSMM_UI
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            9.0.x
+            10.0.x
+
+      - name: Install gdown (Google Drive downloader)
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install gdown
+
+      - name: Download dependency archive from Google Drive (.7z)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "_downloads" | Out-Null
+          $fileId = "1_dX7dwa2rFtydvvdkSm9ayNeexeNQDRP"
+          $outFile = "_downloads/dependency.7z"
+          gdown "https://drive.google.com/uc?id=$fileId" -O $outFile
+
+      - name: Extract archive outside project tree
+        shell: pwsh
+        run: |
+          $archive = "_downloads/dependency.7z"
+          $extractRoot = "$env:RUNNER_TEMP/ffmpeg_extract"
+
+          if (Test-Path $extractRoot) {
+            Remove-Item $extractRoot -Recurse -Force
+          }
+          New-Item -ItemType Directory -Force -Path $extractRoot | Out-Null
+
+          if (-not (Get-Command 7z -ErrorAction SilentlyContinue)) {
+            choco install 7zip -y
+          }
+
+          7z x $archive "-o$extractRoot" -y
+
+      - name: Copy only ffmpeg bin into project Dependencies
+        shell: pwsh
+        run: |
+          $extractRoot = "$env:RUNNER_TEMP/ffmpeg_extract"
+          $depsRoot = "SSMM_UI/Dependencies"
+
+          New-Item -ItemType Directory -Force -Path $depsRoot | Out-Null
+
+          $ffmpegExe = Get-ChildItem -Path $extractRoot -Filter "ffmpeg.exe" -Recurse -File | Select-Object -First 1
+          if (-not $ffmpegExe) {
+            Write-Error "Could not find ffmpeg.exe in extracted archive."
+            exit 1
+          }
+
+          $binDir = Split-Path $ffmpegExe.FullName -Parent
+          Copy-Item "$binDir\*" $depsRoot -Recurse -Force
+          Write-Host "Copied ffmpeg bin from: $binDir"
+
+      - name: Cleanup accidental extracted folder in project (safety)
+        shell: pwsh
+        run: |
+          if (Test-Path "SSMM_UI/Dependencies/_extracted") {
+            Remove-Item "SSMM_UI/Dependencies/_extracted" -Recurse -Force
+          }
+
+      - name: Verify Dependencies content
+        shell: pwsh
+        run: |
+          Get-ChildItem "SSMM_UI/Dependencies" | Select-Object Name, Length
+
+      - name: Restore WiX bundle
+        shell: pwsh
+        run: |
+          $solutionDir = (Resolve-Path ".").Path + "\"
+          msbuild "WixInstallerBundle/WixInstallerBundle.wixproj" `
+            /t:Restore `
+            /p:Configuration=Release `
+            /p:SolutionDir="$solutionDir"
+
+      - name: Build WiX bundle
+        shell: pwsh
+        run: |
+          $solutionDir = (Resolve-Path ".").Path + "\"
+          msbuild "WixInstallerBundle/WixInstallerBundle.wixproj" `
+            /p:Configuration=Release `
+            /p:SolutionDir="$solutionDir" `
+            /p:PlatformTarget=x64 `
+            /m
+
+      - name: Find installer
+        id: find_installer
+        shell: pwsh
+        run: |
+          $file = Get-ChildItem "WixInstallerBundle/bin/Release" -Recurse -File |
+            Where-Object { $_.Extension -in ".exe", ".msi" } |
+            Select-Object -First 1
+          if (-not $file) { throw "Installer not found." }
+          "path=$($file.FullName)" >> $env:GITHUB_OUTPUT
+
+      - name: Create GitHub Release + upload installer
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.find_installer.outputs.path }}
