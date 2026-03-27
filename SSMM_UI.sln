@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		SSMM_UI\Readme.md = SSMM_UI\Readme.md
+		.github\workflows\release-Installer.yml = .github\workflows\release-Installer.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSMM_UI.Tests", "SSMM_UI.Tests\SSMM_UI.Tests.csproj", "{8C8C7A1E-0B8F-5D14-DE9A-07ADD4FD8B5D}"
@@ -78,6 +79,7 @@ Global
 		{E6618DF9-E78B-4997-B174-E91D466533E0}.Release|ARM64.ActiveCfg = Release|ARM64
 		{E6618DF9-E78B-4997-B174-E91D466533E0}.Release|ARM64.Build.0 = Release|ARM64
 		{E6618DF9-E78B-4997-B174-E91D466533E0}.Release|x64.ActiveCfg = Release|x64
+		{E6618DF9-E78B-4997-B174-E91D466533E0}.Release|x64.Build.0 = Release|x64
 		{E6618DF9-E78B-4997-B174-E91D466533E0}.Release|x86.ActiveCfg = Release|x86
 		{E6618DF9-E78B-4997-B174-E91D466533E0}.Release|x86.Build.0 = Release|x86
 		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -92,7 +94,6 @@ Global
 		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Release|ARM64.ActiveCfg = Release|Any CPU
 		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Release|ARM64.Build.0 = Release|Any CPU
 		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Release|x64.ActiveCfg = Release|Any CPU
-		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Release|x64.Build.0 = Release|Any CPU
 		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Release|x86.ActiveCfg = Release|Any CPU
 		{6208CE4B-C0BA-021D-8777-951809FB6CB8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection

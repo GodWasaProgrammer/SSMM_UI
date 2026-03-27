@@ -1,8 +1,8 @@
 ﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal">
 
-  <Bundle Id="GWAP.StreamerSocialMediaManager.Bundle"
-          Name="Streamer Social Media Manager Installer"
+  <Bundle Id="GWAP.MultistreamManager.Bundle"
+          Name="Multistream Manager Installer"
           Manufacturer="GWAP Technologies"
           Version="1.0.0.0">
 
@@ -13,7 +13,7 @@
     </BootstrapperApplication>
 
     <Chain>
-      <MsiPackage Name="StreamerSocialMediaManager.msi">
+		<MsiPackage Name="MultiStreamManager.msi">
         <MsiProperty Name="INSTALLFOLDER" Value="[InstallFolder]" />
       </MsiPackage>
     </Chain>
