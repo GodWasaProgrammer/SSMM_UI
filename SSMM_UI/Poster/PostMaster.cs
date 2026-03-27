@@ -112,7 +112,7 @@ public class PostMaster
         UsernameAndService = [];
         if (_selectedServices != null)
         {
-            foreach (var srv in _selectedServices)
+            foreach (var srv in _selectedServices.Where(s => s.IsActive))
             {
                 selectedoutputs.Add(srv.DisplayName);
             }

@@ -155,9 +155,22 @@ public partial class StreamControlViewModel : ObservableObject
 
                 var ActiveServices = new ObservableCollection<SelectedService>(LeftSideBarViewModel.SelectedServicesToStream.Where(x => x.IsActive).ToList());
 
+                if (ActiveServices.Count == 0)
+                {
+                    _logService.Log("No active services selected to stream.");
+                    CanStartStream = true;
+                    CanStopStream = false;
+                    return;
+                }
+
                 await _streamService.StartStream(CurrentMetaData, ActiveServices /*TriggerSocialPosterAsync*/);
                 
                 _logService.Log("Started streaming...");
+
+                if (_settings.AutoPost)
+                {
+                    await TryAutoPostAsync();
+                }
             }
             catch (Exception ex)
             {
@@ -212,10 +225,36 @@ public partial class StreamControlViewModel : ObservableObject
                     _streamService?.ProcessInfos.Clear();
                 }
             }
+       }
+       catch (Exception ex)
+       {
+            _logService.Log(ex.ToString());
+        }
+    }
+
+    private async Task TryAutoPostAsync()
+    {
+        if (!_settings.PostToDiscord && !_settings.PostToFB && !_settings.PostToX)
+        {
+            _logService.Log("Auto-posting skipped: no destinations selected.");
+            return;
+        }
+        try
+        {
+            var result = await _socialPosterService.RunPoster(_settings.PostToDiscord, _settings.PostToFB, _settings.PostToX, _settings.CustomSocialMessage);
+            if (result.PostedAny && result.PostedTo.Count > 0)
+            {
+                _logService.Log($"Auto-posted to: {string.Join(", ", result.PostedTo)}.");
+            }
+            else
+            {
+                var reason = result.SkippedReasons.Count > 0 ? string.Join("; ", result.SkippedReasons) : "No destinations accepted the post.";
+                _logService.Log($"Auto-post triggered but nothing was sent. {reason}");
+            }
         }
         catch (Exception ex)
         {
-            _logService.Log(ex.ToString());
+            _logService.Log($"Social poster failed: {ex}");
         }
     }
 }

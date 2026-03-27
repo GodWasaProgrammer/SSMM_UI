@@ -1,0 +1,28 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SSMM_UI.ViewModel"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
+        x:Class="SSMM_UI.Views.SocialPostMessageWindow"
+        x:DataType="local:SocialPostMessageViewModel"
+        SizeToContent="WidthAndHeight"
+        Title="Custom Social Message">
+    <Border Classes="card" Margin="20">
+        <StackPanel Spacing="12">
+            <TextBlock Text="Custom social post message" FontSize="16" FontWeight="Bold"/>
+            <TextBlock Text="Set the message used when posting to social media. Leave blank to use the default live announcement."
+                       TextWrapping="Wrap"/>
+            <TextBox AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     Width="520"
+                     Height="220"
+                     Text="{Binding MessageText, UpdateSourceTrigger=PropertyChanged}"/>
+            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                <Button Content="Use default" Command="{Binding UseDefaultCommand}" />
+                <Button Content="Cancel" Command="{Binding CancelCommand}" Classes="danger" />
+                <Button Content="Save" Command="{Binding SaveCommand}" Classes="success" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

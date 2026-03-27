@@ -33,6 +33,17 @@ public class DialogService : IDialogService
         await WebhooksView.ShowDialog(GetMainWindow()!);
     }
 
+    public async Task<string?> EditSocialPostMessageAsync(string currentMessage)
+    {
+        var vm = new SocialPostMessageViewModel(currentMessage);
+        var view = new SocialPostMessageWindow
+        {
+            DataContext = vm
+        };
+        vm.SetHostWindow(view);
+        return await view.ShowDialog<string?>(GetMainWindow()!);
+    }
+
     public async Task InspectSelectedService(SelectedService selection)
     {
         if (selection == null)
