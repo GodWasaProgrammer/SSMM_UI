@@ -6,6 +6,7 @@
 		xmlns:local="clr-namespace:SSMM_UI.ViewModel"
         x:Class="SSMM_UI.Views.PurgeTokenView"
 		x:DataType="local:PurgeTokenViewModel"
+		Icon="avares://MultistreamManager/Assets/MainIcon.png"
 		SizeToContent="WidthAndHeight"
         Title="PurgeTokenView">
 	<Border Classes="card" Margin="20">

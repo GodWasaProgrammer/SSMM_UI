@@ -6,6 +6,7 @@
         x:Class="SSMM_UI.Views.AboutView"
 		xmlns:local="clr-namespace:SSMM_UI.ViewModel"
 		x:DataType="local:AboutViewModel"
+		Icon="avares://MultistreamManager/Assets/MainIcon.png"
         Title="About Multistream Manager"
 		SizeToContent="Manual"
         WindowStartupLocation="CenterOwner"
@@ -36,6 +37,22 @@
 			<iconPacks:PackIconBoxIcons Kind="LogosTwitch" Width="24" Height="24"/>
 		<HyperlinkButton HorizontalAlignment="Center" Content="{Binding TwitchLink}" NavigateUri="{Binding TwitchLink}"/>
 		</StackPanel>
+
+		<Border Background="{DynamicResource PanelOverlayBrush}"
+				BorderBrush="{DynamicResource CardBorderBrush}"
+				BorderThickness="1"
+				CornerRadius="12"
+				Padding="12"
+				Margin="0,8,0,0">
+			<StackPanel Spacing="8" HorizontalAlignment="Center">
+				<TextBlock Text="Support the Project" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+				<TextBlock Text="If you like this software, consider supporting development." Classes="secondary" HorizontalAlignment="Center"/>
+				<HyperlinkButton Content="Donate with PayPal"
+								 NavigateUri="{Binding DonationLink}"
+								 HorizontalAlignment="Center"
+								 Classes="primary"/>
+			</StackPanel>
+		</Border>
 		
 		<Button HorizontalAlignment="Center" VerticalAlignment="Bottom" Content="Close" Command="{Binding CloseWindow}"/>
 	</StackPanel>

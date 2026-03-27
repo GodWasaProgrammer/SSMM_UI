@@ -9,6 +9,7 @@
 		xmlns:local="clr-namespace:SSMM_UI.ViewModel"
 		xmlns:rtmp="clr-namespace:SSMM_UI.RTMP" 
 		x:DataType="local:SelectedServiceViewModel"
+		Icon="avares://MultistreamManager/Assets/MainIcon.png"
 		Title="{Binding ViewedService.DisplayName}">
 	<StackPanel Margin="10" Spacing="8">
 

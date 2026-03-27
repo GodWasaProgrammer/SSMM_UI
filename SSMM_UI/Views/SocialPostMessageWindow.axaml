@@ -6,6 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
         x:Class="SSMM_UI.Views.SocialPostMessageWindow"
         x:DataType="local:SocialPostMessageViewModel"
+        Icon="avares://MultistreamManager/Assets/MainIcon.png"
         SizeToContent="WidthAndHeight"
         Title="Custom Social Message">
     <Border Classes="card" Margin="20">

@@ -11,7 +11,7 @@ public partial class AboutViewModel : ObservableObject
 {
     public static string GitLink => "https://github.com/GodWasaProgrammer";
     public static string LinkedInLink => "https://www.linkedin.com/in/bnilssondev/";
-    public static string DonationLinks => "";
+    public static string DonationLink => "https://www.paypal.com/donate?hosted_button_id=S6K8Y36H5NYKQ";
     public static string YoutubeLink => "https://www.youtube.com/@Cybercolascorner";
     public static string TwitchLink => "https://www.twitch.tv/cybercolagaming";
     public static string KickLink => "https://kick.com/cybercola";
