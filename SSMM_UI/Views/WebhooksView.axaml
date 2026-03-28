@@ -11,16 +11,27 @@
 	<ScrollViewer>
 		<StackPanel Margin="20" Spacing="20">
 
-			<Button Content="New Webhook" Command="{Binding AddWebhook}"/>
+			<StackPanel Orientation="Horizontal" Spacing="10">
+				<Button Content="New Webhook" Command="{Binding AddWebhookCommand}"/>
+				<Button Content="{Binding ToggleWebhooksButtonText}"
+						Command="{Binding ToggleWebHooksCommand}"/>
+			</StackPanel>
+
+			<TextBlock Text="{Binding FeedbackMessage}"
+					   Classes="secondary"
+					   IsVisible="{Binding HasFeedbackMessage}"/>
+
 			<Border Classes="card" IsVisible="{Binding IsAddingNewWebHook}">
-				<StackPanel>
+				<StackPanel Spacing="8">
 					<TextBox Watermark="Name of webhook" Text="{Binding NameofWebHook}"/>
 					<TextBox  Watermark="Webhook link" Text="{Binding LinkOfWebhook}"/>
-					<Button Content="Add" Command="{Binding SaveNewWebHook}"/>
+					<StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+						<Button Content="Cancel" Classes="danger" Command="{Binding CancelNewWebHookCommand}"/>
+						<Button Content="Add" Classes="success" Command="{Binding SaveNewWebHookCommand}"/>
+					</StackPanel>
 				</StackPanel>
 			</Border>
-			<!-- Webhooks -->
-			<Button Content="Show Webhooks(Discord)" Command="{Binding ToggleWebHooks}"/>
+
 			<Border Classes="card">
 				<StackPanel>
 					<TextBlock Text="Webhooks" FontSize="16" FontWeight="Bold" Margin="0 0 0 10"/>
@@ -28,10 +39,25 @@
 					<StackPanel Spacing="10">
 						<ListBox ItemsSource="{Binding Webhooks}" Height="150" IsVisible="{Binding DisplayWebhooks}">
 							<ListBox.ItemTemplate>
-								<DataTemplate>
-									<StackPanel Spacing="10">
+								<DataTemplate x:DataType="local:KeyValueItem">
+									<StackPanel Spacing="8">
 										<TextBlock Text="{Binding Key}" FontWeight="Bold"/>
-										<TextBox Text="{Binding Value}" Classes="secondary"/>
+										<Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+											<TextBlock Grid.Column="0"
+													   Text="{Binding DisplayValue}"
+													   TextWrapping="Wrap"
+													   VerticalAlignment="Center"/>
+											<Button Grid.Column="1"
+													Content="{Binding RevealButtonText}"
+													Command="{ReflectionBinding DataContext.ToggleWebhookRevealCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+													CommandParameter="{Binding .}"
+													Classes="primary"/>
+											<Button Grid.Column="2"
+													Content="Remove"
+													Classes="danger"
+													Command="{ReflectionBinding DataContext.RemoveWebhookCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+													CommandParameter="{Binding .}"/>
+										</Grid>
 									</StackPanel>
 								</DataTemplate>
 							</ListBox.ItemTemplate>
