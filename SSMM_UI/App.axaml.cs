@@ -42,6 +42,7 @@ public partial class App : Application
                 .AddSingleton<MainWindowViewModel>()
                 .AddSingleton<CentralAuthService>()
                 .AddSingleton<MetaDataService>()
+                .AddSingleton<PauseInterjectService>()
                 .AddSingleton<StreamService>()
                 .AddSingleton<StateService>()
                 .AddSingleton<UserSettings>()
