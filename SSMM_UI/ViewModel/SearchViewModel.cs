@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text.Json;
-using System.Timers;
+using Timer = System.Timers.Timer;
 using SSMM_UI.Services;
-using Avalonia.Media.Imaging;
-using System.IO;
 using SSMM_UI.MetaData;
+using SSMM_UI.Interfaces;
+using SSMM_UI.Enums;
+using Avalonia.Threading;
+using System.Threading;
+using Avalonia.Media.Imaging;
 
 namespace SSMM_UI.ViewModel;
 
@@ -19,17 +19,35 @@ public partial class SearchViewModel : ObservableObject
     private readonly Timer _searchTimer;
     private string _accessToken;
     private readonly string _clientId;
-    private readonly CentralAuthService CentAuthService;
-    public SearchViewModel(CentralAuthService authsrv)
+    private readonly CentralAuthService _centralAuthService;
+    private readonly StateService _stateService;
+    private readonly ITwitchCategoryCacheService _cacheService;
+    private readonly ILogService _logger;
+    private CancellationTokenSource? _searchCts;
+    private int _searchVersion;
+
+    public SearchViewModel(
+        CentralAuthService authsrv,
+        StateService stateService,
+        ITwitchCategoryCacheService cacheService,
+        ILogService logger)
     {
-        CentAuthService = authsrv;
-        _accessToken = CentAuthService.TwitchService.GetAccessToken();
-        _clientId = CentAuthService.TwitchService.GetClientId();
-        CentAuthService.TwitchService.OnAccessTokenUpdated += OnTokenChange;
+        _centralAuthService = authsrv;
+        _stateService = stateService;
+        _cacheService = cacheService;
+        _logger = logger;
+
+        _accessToken = _centralAuthService.TwitchService.GetAccessToken();
+        _clientId = _centralAuthService.TwitchService.GetClientId();
+        _centralAuthService.TwitchService.OnAccessTokenUpdated += OnTokenChange;
+        _stateService.OnAuthObjectsUpdated += RefreshAuthState;
+
         // Sätt upp timer för debounce
         _searchTimer = new Timer(300);
         _searchTimer.Elapsed += async (s, e) => await PerformSearch();
         _searchTimer.AutoReset = false;
+
+        RefreshAuthState();
     }
 
     [ObservableProperty]
@@ -44,51 +62,122 @@ public partial class SearchViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<TwitchCategory> _searchResults = [];
 
+    [ObservableProperty]
+    private bool _canSearchTwitch;
+
+    [ObservableProperty]
+    private string _searchStatusText = "Log in with Twitch to search categories.";
+
+    [ObservableProperty]
+    private bool _isUsingCachedResults;
+
+    private void RefreshAuthState()
+    {
+        var hasValidToken =
+            _stateService.AuthObjects.TryGetValue(AuthProvider.Twitch, out var token)
+            && token is not null
+            && token.IsValid
+            && !string.IsNullOrWhiteSpace(token.AccessToken);
+
+        CanSearchTwitch = hasValidToken;
+        if (!CanSearchTwitch)
+        {
+            SearchStatusText = "Log in with Twitch to search categories.";
+            SearchResults.Clear();
+            SelectedItem = null;
+            IsUsingCachedResults = false;
+        }
+        else if (string.IsNullOrWhiteSpace(SearchQuery))
+        {
+            SearchStatusText = "Type at least 3 characters.";
+        }
+    }
 
     private void OnTokenChange(string accessTokenUpdated)
     {
         _accessToken = accessTokenUpdated;
+        RefreshAuthState();
     }
+
     partial void OnSearchQueryChanged(string value)
     {
         // Starta om timern när text ändras
         _searchTimer.Stop();
+        _searchCts?.Cancel();
 
-        if (!string.IsNullOrWhiteSpace(value) && value.Length > 2)
+        if (!CanSearchTwitch)
         {
+            SearchResults.Clear();
+            IsSearching = false;
+            IsUsingCachedResults = false;
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(value) && value.Length >= 3)
+        {
+            SearchStatusText = "Searching Twitch categories...";
             _searchTimer.Start();
         }
         else
         {
             SearchResults.Clear();
+            IsUsingCachedResults = false;
+            SearchStatusText = "Type at least 3 characters.";
         }
     }
 
     private async Task PerformSearch()
     {
-        if (string.IsNullOrWhiteSpace(SearchQuery) || SearchQuery.Length < 3)
+        if (!CanSearchTwitch)
+        {
             return;
+        }
 
+        if (string.IsNullOrWhiteSpace(SearchQuery) || SearchQuery.Length < 3)
+        {
+            return;
+        }
+
+        _searchCts?.Cancel();
+        _searchCts = new CancellationTokenSource();
+        var localToken = _searchCts.Token;
+        var currentVersion = ++_searchVersion;
         IsSearching = true;
 
         try
         {
-            var results = await SearchTwitchCategories(SearchQuery, _accessToken, _clientId);
-
-            // Uppdatera på UI-tråden
-            await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+            var (results, fromCache) = await _cacheService.SearchAsync(SearchQuery, _accessToken, _clientId, localToken);
+            if (localToken.IsCancellationRequested || currentVersion != _searchVersion)
             {
-                SearchResults.Clear();
-                foreach (var result in results)
-                {
-                    SearchResults.Add(result);
-                }
-            });
+                return;
+            }
+
+            await Dispatcher.UIThread.InvokeAsync(() =>
+           {
+               SearchResults.Clear();
+               foreach (var result in results)
+               {
+                   SearchResults.Add(result);
+               }
+           });
+
+            IsUsingCachedResults = fromCache;
+            SearchStatusText = results.Count == 0
+                ? "No categories found."
+                : fromCache
+                    ? $"Loaded {results.Count} cached result(s)."
+                    : $"Loaded {results.Count} result(s) from Twitch.";
+        }
+        catch (OperationCanceledException)
+        {
+            // ignored
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Search error: {ex.Message}");
+            _logger.Log($"Twitch category search failed: {ex.Message}");
             SearchResults.Clear();
+            IsUsingCachedResults = false;
+            SearchStatusText = "Search failed. Check Twitch login and try again.";
         }
         finally
         {
@@ -96,66 +185,13 @@ public partial class SearchViewModel : ObservableObject
         }
     }
 
-    //TODO: Cache boxart, load from disk if available, if not, load from interwebz
-    public static async Task<Bitmap> LoadBoxArtAsync(string BoxArtUrl)
+    public async Task EnsureCategoryBoxArtAsync(TwitchCategory category, CancellationToken cancellationToken = default)
     {
-        using var http = new HttpClient();
-        
-        await using var netStream = await http.GetStreamAsync(BoxArtUrl);
-        using var ms = new MemoryStream();
-        await netStream.CopyToAsync(ms);
-        ms.Position = 0;
-        return new Bitmap(ms);
-    }
-
-    // TODO: Implement caching, save to disk, if not on disk, load from web
-    public static async Task<List<TwitchCategory>> SearchTwitchCategories(string query, string accessToken, string clientId)
-    {
-        using var http = new HttpClient();
-        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        http.DefaultRequestHeaders.Add("Client-Id", clientId);
-
-        var url = $"https://api.twitch.tv/helix/search/categories?query={Uri.EscapeDataString(query)}&first=20";
-
-        var response = await http.GetAsync(url);
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsStringAsync();
-        using var doc = JsonDocument.Parse(content);
-
-        var results = new List<TwitchCategory>();
-
-        if (doc.RootElement.TryGetProperty("data", out var dataArr))
+        if (category is null || category.BoxArt is not null)
         {
-            foreach (var item in dataArr.EnumerateArray())
-            {
-                results.Add(new TwitchCategory
-                {
-                    Id = item.GetProperty("id").GetString(),
-                    Name = item.GetProperty("name").GetString(),
-                    BoxArtUrl = item.GetProperty("box_art_url").GetString(),
-                });
-            }
-        }
-        var newlist = new List<TwitchCategory>();
-
-        foreach (var item in results)
-        {
-            Bitmap? res = null;
-            if (item.BoxArtUrl != null)
-            {
-                var pic = await LoadBoxArtAsync(item.BoxArtUrl);
-                if (pic != null)
-                {
-                    res = pic;
-                }
-                var cloneitem = item;
-                if (res != null)
-                cloneitem.BoxArt = res;
-                newlist.Add(cloneitem);
-            }
+            return;
         }
 
-        return newlist;
+        category.BoxArt = await _cacheService.GetOrFetchBoxArtAsync(category.Id, category.BoxArtUrl, cancellationToken);
     }
 }

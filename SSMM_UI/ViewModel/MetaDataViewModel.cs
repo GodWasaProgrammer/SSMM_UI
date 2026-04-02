@@ -63,11 +63,9 @@ public partial class MetaDataViewModel : ObservableObject
                 {
                     SearchVM.SelectedItem = CurrentMetadata.TwitchCategory;
                 }
-                if (CurrentMetadata.TwitchCategory.BoxArtUrl != null)
+                if (SearchVM != null)
                 {
-                    var bla = await SearchViewModel.LoadBoxArtAsync(CurrentMetadata.TwitchCategory.BoxArtUrl);
-
-                    CurrentMetadata.TwitchCategory.BoxArt = bla;
+                    await SearchVM.EnsureCategoryBoxArtAsync(CurrentMetadata.TwitchCategory);
                 }
             }
         }
@@ -95,6 +93,11 @@ public partial class MetaDataViewModel : ObservableObject
     [ObservableProperty] private Bitmap? thumbnailImage;
     [ObservableProperty] private string? updateTitle;
     [ObservableProperty] private string? metadataStatus;
+    public bool HasThumbnail => ThumbnailImage is not null;
+    partial void OnThumbnailImageChanged(Bitmap? value)
+    {
+        OnPropertyChanged(nameof(HasThumbnail));
+    }
 
     private async Task UploadThumbnail()
     {

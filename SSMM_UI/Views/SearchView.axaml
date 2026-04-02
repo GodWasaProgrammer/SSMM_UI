@@ -32,27 +32,37 @@
 		<TextBox Text="{Binding SearchQuery, Mode=TwoWay}"
                  Watermark="Search for Twitch Categories..."
                  FontSize="14"
-                 Padding="10" />
+                 Padding="10"
+				 IsEnabled="{Binding CanSearchTwitch}" />
 		<!-- Meddelanden -->
 		<TextBlock Text="Minimum three letters to search"
-                   Foreground="Gray"
-                   FontStyle="Italic"
-                   IsVisible="{Binding SearchQuery, Converter={x:Static conv:StringConverters.IsNullOrEmpty}}" />
+                    Foreground="Gray"
+                    FontStyle="Italic"
+                    IsVisible="{Binding SearchQuery, Converter={x:Static conv:StringConverters.IsNullOrEmpty}}" />
+		<TextBlock Text="{Binding SearchStatusText}"
+				   Foreground="Gray"
+				   FontStyle="Italic"/>
+
+		<TextBlock Text="Results loaded from local cache"
+				   Foreground="Gray"
+				   FontStyle="Italic"
+				   IsVisible="{Binding IsUsingCachedResults}"/>
 
 		<TextBlock Text="No results found"
-                   Foreground="Gray"
-                   FontStyle="Italic"
-                   IsVisible="{Binding SearchResults.Count, Converter={x:Static conv:IntConverters.Equals}, ConverterParameter=0}" />
+                    Foreground="Gray"
+                    FontStyle="Italic"
+                    IsVisible="{Binding SearchResults.Count, Converter={x:Static conv:IntConverters.Equals}, ConverterParameter=0}" />
 		<!-- Laddningsindikator -->
 		<ProgressBar IsIndeterminate="True"
-                     Height="4"
-                     Margin="0,5,0,0"
-                     IsVisible="{Binding IsSearching}" />
+                      Height="4"
+                      Margin="0,5,0,0"
+                      IsVisible="{Binding IsSearching}" />
 
 		<!-- Sökresultat -->
 		<ListBox ItemsSource="{Binding SearchResults}"
 				 SelectedItem="{Binding SelectedItem}"
-         ScrollViewer.VerticalScrollBarVisibility="Visible" Height="250">
+         ScrollViewer.VerticalScrollBarVisibility="Visible" Height="250"
+			 IsEnabled="{Binding CanSearchTwitch}">
 			<ListBox.ItemTemplate>
 				<DataTemplate>
 					<Border CornerRadius="5"
