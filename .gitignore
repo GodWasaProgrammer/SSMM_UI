@@ -382,3 +382,6 @@ FodyWeavers.xsd
 /SSMM_UI/API_Key_Secrets_Loader/Consumer_Secrets.txt
 /SSMM_UI/API_Key_Secrets_Loader/Webhooks.txt
 /.github/agents/MSM_AGENT.agent.md
+/.github/copilot-instructions.md
+/docs/DESIGN_AND_ARCHITECTURE.md
+/plan/feature-issue-backlog-1.md
