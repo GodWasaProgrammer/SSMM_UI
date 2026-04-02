@@ -13,9 +13,11 @@
 					<TextBlock Text="STREAM CONTROLS" Classes="secondary"/>
 					<WrapPanel>
 						<Button Content="Start Stream" Classes="success" Margin="0 0 15 0"
-								Command="{Binding StartStreamCommand}" IsEnabled="{Binding CanStartStream}"/>
+								Command="{Binding StartStreamCommand}" IsEnabled="{Binding CanStartStream}"
+								ToolTip.Tip="Start forwarding your local RTMP ingest to all active destinations."/>
 						<Button Content="Stop Streams" Classes="danger" Margin="0 0 15 0"
-								Command="{Binding StopStreamsCommand}" IsEnabled="{Binding CanStopStream}"/>
+								Command="{Binding StopStreamsCommand}" IsEnabled="{Binding CanStopStream}"
+								ToolTip.Tip="Stop all active output stream processes."/>
 						<!--<Button Content="Start Receiving" Classes="danger" Margin="0 0 15 0"
 								Command="{Binding LeftSideBarViewModel.ToggleReceivingStreamCommand }"/>-->
 					</WrapPanel>

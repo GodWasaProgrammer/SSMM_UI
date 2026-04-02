@@ -13,6 +13,7 @@
 			<local2:MyVideoView x:Name="RtmpIncoming" Height="180" IsVisible="{Binding IsReceivingStream}"/>
 		</Border>
 		<Button Content="Start Receiving" Classes="danger" Margin="0 0 15 0"
-								Command="{Binding ToggleReceivingStreamCommand }"/>
+								Command="{Binding ToggleReceivingStreamCommand }"
+								ToolTip.Tip="Start or stop local ingest preview playback."/>
 	</StackPanel>
 </UserControl>

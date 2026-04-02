@@ -12,16 +12,18 @@
 			<Border Classes="card" Margin="0">
 				<StackPanel Spacing="10">
 					<TextBlock Text="Social Media AutoPoster" FontSize="16" FontWeight="Bold" />
-					<CheckBox Content="Auto post when streaming starts" IsChecked="{Binding AutoPost}"/>
+					<CheckBox Content="Auto post when streaming starts" IsChecked="{Binding AutoPost}"
+							  ToolTip.Tip="Automatically send social posts when a stream starts."/>
 					<Separator/>
 					<TextBlock Text="Post to" FontWeight="Medium"/>
-					<CheckBox Content="X (Twitter)" IsChecked="{Binding PostToX}"/>
-					<CheckBox Content="Facebook" IsChecked="{Binding PostToFB}"/>
-					<CheckBox Content="Discord" IsChecked="{Binding PostToDiscord}"/>
+					<CheckBox Content="X (Twitter)" IsChecked="{Binding PostToX}" ToolTip.Tip="Enable posting to X/Twitter."/>
+					<CheckBox Content="Facebook" IsChecked="{Binding PostToFB}" ToolTip.Tip="Enable posting to connected Facebook pages."/>
+					<CheckBox Content="Discord" IsChecked="{Binding PostToDiscord}" ToolTip.Tip="Enable posting to configured Discord webhooks."/>
 					<Separator/>
 					<TextBlock Text="Custom message" FontWeight="Medium"/>
 					<TextBlock Text="{Binding CustomMessagePreview}" TextWrapping="Wrap" />
-					<Button Command="{Binding EditMessageCommand}" Content="Edit message" Width="140"/>
+					<Button Command="{Binding EditMessageCommand}" Content="Edit message" Width="140"
+							ToolTip.Tip="Customize the social message template."/>
 				</StackPanel>
 			</Border>
 		</StackPanel>

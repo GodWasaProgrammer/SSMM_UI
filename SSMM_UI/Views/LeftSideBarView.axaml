@@ -28,6 +28,7 @@
 						<ListBox ItemsSource="{Binding RtmpServiceGroups}"
 								 SelectedItem="{Binding SelectedRtmpService, Mode=TwoWay}"
 								 Height="250"
+								 ToolTip.Tip="Select a streaming platform profile to add/configure."
 								 Background="Transparent">
 							<ListBox.ItemTemplate>
 								<DataTemplate x:DataType="rtmp:RtmpServiceGroup">

@@ -213,6 +213,14 @@
 		<Style Selector="CheckBox">
 			<Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundAltHighBrush}" />
 		</Style>
+		<Style Selector="ToolTip">
+			<Setter Property="Background" Value="{DynamicResource MenuBackgroundBrush}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource MenuBorderBrush}" />
+			<Setter Property="BorderThickness" Value="1" />
+			<Setter Property="Padding" Value="10 8" />
+			<Setter Property="CornerRadius" Value="8" />
+			<Setter Property="Foreground" Value="{DynamicResource MenuForegroundBrush}" />
+		</Style>
 
 		<Style Selector="ScrollViewer">
 			<Setter Property="Background" Value="Transparent" />

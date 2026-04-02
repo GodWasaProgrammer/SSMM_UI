@@ -24,19 +24,19 @@
 				Padding="10"
 				Margin="0 0 0 12"
 				BoxShadow="0 10 24 0 #20000000">
-			<Menu>
-				<MenuItem Header="Settings" Command="{Binding OpenSetting}" />
-				<MenuItem Header="Setup">
-					<MenuItem Header="Youtube" Command="{Binding SetupPuppetYT}" />
-					<MenuItem Header="Kick" Command="{Binding SetupPuppetKick}"/>
-					<MenuItem Header="Webhooks" Command="{Binding ShowSecretsAndKeys}"/>
-				</MenuItem>
-				<MenuItem Header="About" Command="{Binding OpenAbout}" />
-				<MenuItem Header="Tokens">
-					<MenuItem Header="Purge All Auth Tokens" Command="{Binding DeleteAllTokens}"/>
-					<MenuItem Header="Purge Specific token" Command="{Binding DeleteSpecifiedTokenCmd}"/>
-				</MenuItem>
-			</Menu>
+				<Menu>
+					<MenuItem Header="Settings" Command="{Binding OpenSetting}" ToolTip.Tip="Open application preferences." />
+					<MenuItem Header="Setup">
+						<MenuItem Header="Youtube" Command="{Binding SetupPuppetYT}" ToolTip.Tip="Prepare YouTube browser profile/session." />
+						<MenuItem Header="Kick" Command="{Binding SetupPuppetKick}" ToolTip.Tip="Prepare Kick browser profile/session."/>
+						<MenuItem Header="Webhooks" Command="{Binding ShowSecretsAndKeys}" ToolTip.Tip="Open webhook and secret management window."/>
+					</MenuItem>
+					<MenuItem Header="About" Command="{Binding OpenAbout}" ToolTip.Tip="Show application and author information." />
+					<MenuItem Header="Tokens">
+						<MenuItem Header="Purge All Auth Tokens" Command="{Binding DeleteAllTokens}" ToolTip.Tip="Delete all stored authentication tokens."/>
+						<MenuItem Header="Purge Specific token" Command="{Binding DeleteSpecifiedTokenCmd}" ToolTip.Tip="Delete one selected provider token."/>
+					</MenuItem>
+				</Menu>
 		</Border>
 
 		<Border Grid.Row="1"
@@ -62,7 +62,8 @@
 						<ComboBox Width="180"
 								  Height="34"
 								  ItemsSource="{Binding Themes}"
-								  SelectedItem="{Binding SelectedTheme, Mode=TwoWay}">
+								  SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"
+								  ToolTip.Tip="Switch the active UI theme.">
 							<ComboBox.ItemTemplate>
 								<DataTemplate x:DataType="settings:ThemeOption">
 									<TextBlock Text="{Binding Name}" />
