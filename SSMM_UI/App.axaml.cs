@@ -42,6 +42,7 @@ public partial class App : Application
                 .AddSingleton<MainWindowViewModel>()
                 .AddSingleton<CentralAuthService>()
                 .AddSingleton<MetaDataService>()
+                .AddSingleton<ITwitchCategoryCacheService, TwitchCategoryCacheService>()
                 .AddSingleton<StreamService>()
                 .AddSingleton<StateService>()
                 .AddSingleton<UserSettings>()

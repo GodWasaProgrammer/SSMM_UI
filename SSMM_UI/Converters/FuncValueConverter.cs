@@ -31,3 +31,9 @@ public static class StringConverters
     public static readonly IValueConverter IsNullOrEmpty =
         new FuncValueConverter<string, bool>((value, parameter) => string.IsNullOrEmpty(value));
 }
+
+public static class BooleanConverters
+{
+    public static readonly IValueConverter Not =
+        new FuncValueConverter<bool, bool>((value, parameter) => !value);
+}
