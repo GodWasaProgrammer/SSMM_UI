@@ -7,6 +7,8 @@
 						  Name="Multistream Manager"
 						  Description="Launch Multistream Manager"
 						  Target="[INSTALLFOLDER]MultistreamManager.exe"
+						  Icon="AppShortcutIcon"
+						  IconIndex="0"
 						  WorkingDirectory="INSTALLFOLDER" />
 				<RegistryValue Root="HKCU"
 							   Key="Software\GWAP Technologies\Multistream Manager"
@@ -23,6 +25,8 @@
 							  Name="Multistream Manager"
 							  Description="Launch Multistream Manager"
 							  Target="[INSTALLFOLDER]MultistreamManager.exe"
+							  Icon="AppShortcutIcon"
+							  IconIndex="0"
 							  WorkingDirectory="INSTALLFOLDER" />
 					<RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
 					<RegistryValue Root="HKCU"
@@ -34,6 +38,10 @@
 				</Component>
 			</Directory>
 		</StandardDirectory>
+	</Fragment>
+
+	<Fragment>
+		<Icon Id="AppShortcutIcon" SourceFile="$(var.SSMM_UI.PublishDir)\MultistreamManager.exe" />
 	</Fragment>
 
 	<Fragment>

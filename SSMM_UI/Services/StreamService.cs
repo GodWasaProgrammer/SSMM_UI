@@ -17,14 +17,17 @@ public class StreamService
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
 
     private readonly List<Process>? ffmpegProcess = [];
+    private readonly List<Process>? pauseProcesses = [];
     private readonly BroadCastService _broadCastService;
     private readonly ILogService _logger;
+    private readonly PauseInterjectService _pauseInterjectService;
     public List<StreamProcessInfo> ProcessInfos { get; private set; } = [];
-    public StreamService(ILogService logger, BroadCastService broadCastService)
+    public StreamService(ILogService logger, BroadCastService broadCastService, PauseInterjectService pauseInterjectService)
     {
         RTMPServer.StartSrv();
         _logger = logger;
         _broadCastService = broadCastService;
+        _pauseInterjectService = pauseInterjectService;
     }
 
     // TODO: needs to indicate success
@@ -320,6 +323,290 @@ public class StreamService
             {
                 process.Kill();
             }
+        }
+
+        // Also stop any pause processes
+        if (pauseProcesses != null)
+        {
+            foreach (var process in pauseProcesses)
+            {
+                if (!process.HasExited)
+                {
+                    process.Kill();
+                }
+            }
+            pauseProcesses.Clear();
+        }
+
+        // Reset pause states
+        foreach (var processInfo in ProcessInfos)
+        {
+            processInfo.IsPaused = false;
+            processInfo.PauseStartTime = null;
+        }
+    }
+
+    public async Task<bool> PauseStream(string? customMediaPath = null)
+    {
+        try
+        {
+            // Get the media path - either custom or default
+            var mediaPath = customMediaPath ?? _pauseInterjectService.GetDefaultPauseMedia();
+
+            if (string.IsNullOrEmpty(mediaPath))
+            {
+                _logger.Log("No pause media configured. Please set a default pause media or provide a custom one.");
+                return false;
+            }
+
+            if (!_pauseInterjectService.ValidateMediaFile(mediaPath))
+            {
+                _logger.Log($"Invalid pause media file: {mediaPath}");
+                return false;
+            }
+
+            _logger.Log($"Pausing all streams with media: {mediaPath}");
+
+            // Stop current live streams
+            if (ffmpegProcess != null)
+            {
+                foreach (var process in ffmpegProcess)
+                {
+                    if (!process.HasExited)
+                    {
+                        process.Kill();
+                    }
+                }
+            }
+
+            // Start pause streams for each service
+            pauseProcesses?.Clear();
+            foreach (var processInfo in ProcessInfos)
+            {
+                if (processInfo.Process != null)
+                {
+                    // Extract the service details from the process info
+                    var serviceName = processInfo.Header ?? "Unknown";
+
+                    // We need to rebuild the output URL from the original process
+                    // For now, we'll get it from the selected services
+                    // This is a limitation - in production, you'd want to store the output URL in ProcessInfo
+
+                    processInfo.IsPaused = true;
+                    processInfo.InterjectMediaPath = mediaPath;
+                    processInfo.PauseStartTime = DateTime.UtcNow;
+
+                    _logger.Log($"Marked {serviceName} as paused");
+                }
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.Log($"Error pausing streams: {ex.Message}");
+            return false;
+        }
+    }
+
+    public async Task<bool> PauseStreamToService(string serviceName, ObservableCollection<SelectedService> services, string? customMediaPath = null)
+    {
+        try
+        {
+            var mediaPath = customMediaPath ?? _pauseInterjectService.GetDefaultPauseMedia();
+
+            if (string.IsNullOrEmpty(mediaPath))
+            {
+                _logger.Log("No pause media configured.");
+                return false;
+            }
+
+            if (!_pauseInterjectService.ValidateMediaFile(mediaPath))
+            {
+                return false;
+            }
+
+            var processInfo = ProcessInfos.FirstOrDefault(p => p.Header == serviceName);
+            if (processInfo == null)
+            {
+                _logger.Log($"No active stream found for service: {serviceName}");
+                return false;
+            }
+
+            var service = services.FirstOrDefault(s => s.DisplayName == serviceName);
+            if (service?.SelectedServer == null)
+            {
+                _logger.Log($"No server configuration found for service: {serviceName}");
+                return false;
+            }
+
+            // Build output URL
+            string fullUrl;
+            if (service.SelectedServer.Url.StartsWith("rtmps://"))
+            {
+                fullUrl = $"{service.SelectedServer.Url}:443/app/{service.StreamKey}";
+            }
+            else
+            {
+                fullUrl = $"{service.SelectedServer.Url}/{service.StreamKey}";
+            }
+
+            // Kill the current live stream process
+            if (processInfo.Process != null && !processInfo.Process.HasExited)
+            {
+                processInfo.Process.Kill();
+            }
+
+            // Start pause stream
+            var pauseProcess = await _pauseInterjectService.StartPauseStream(
+                mediaPath,
+                fullUrl,
+                serviceName,
+                service.ServiceGroup?.RecommendedSettings?.MaxVideoBitRate,
+                service.ServiceGroup?.RecommendedSettings?.MaxAudioBitRate,
+                service.ServiceGroup?.RecommendedSettings?.KeyInt
+            );
+
+            if (pauseProcess != null)
+            {
+                pauseProcesses?.Add(pauseProcess);
+                processInfo.Process = pauseProcess;
+                processInfo.IsPaused = true;
+                processInfo.InterjectMediaPath = mediaPath;
+                processInfo.PauseStartTime = DateTime.UtcNow;
+
+                _logger.Log($"Paused stream for {serviceName} with media: {mediaPath}");
+                return true;
+            }
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.Log($"Error pausing stream for {serviceName}: {ex.Message}");
+            return false;
+        }
+    }
+
+    public async Task<bool> ResumeStream(ObservableCollection<SelectedService> services)
+    {
+        try
+        {
+            _logger.Log("Resuming all paused streams...");
+
+            // Stop pause processes
+            if (pauseProcesses != null)
+            {
+                foreach (var process in pauseProcesses)
+                {
+                    if (!process.HasExited)
+                    {
+                        try
+                        {
+                            process.StandardInput.WriteLine("q");
+                            process.StandardInput.Flush();
+                            if (!process.WaitForExit(2000))
+                            {
+                                process.Kill();
+                            }
+                        }
+                        catch
+                        {
+                            process.Kill();
+                        }
+                    }
+                }
+                pauseProcesses.Clear();
+            }
+
+            // Restart live streams
+            foreach (var processInfo in ProcessInfos.Where(p => p.IsPaused))
+            {
+                var service = services.FirstOrDefault(s => s.DisplayName == processInfo.Header);
+                if (service?.SelectedServer != null)
+                {
+                    await RestartLiveStream(processInfo, service);
+                    processInfo.IsPaused = false;
+                    processInfo.InterjectMediaPath = null;
+                    processInfo.PauseStartTime = null;
+                }
+            }
+
+            _logger.Log("All streams resumed");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.Log($"Error resuming streams: {ex.Message}");
+            return false;
+        }
+    }
+
+    private async Task RestartLiveStream(StreamProcessInfo processInfo, SelectedService service)
+    {
+        var path = "Dependencies/ffmpeg";
+        var input = RtmpAdress;
+
+        string fullUrl;
+        if (service.SelectedServer!.Url.StartsWith("rtmps://"))
+        {
+            fullUrl = $"{service.SelectedServer.Url}:443/app/{service.StreamKey}";
+        }
+        else
+        {
+            fullUrl = $"{service.SelectedServer.Url}/{service.StreamKey}";
+        }
+
+        var args = new StringBuilder($"-i \"{input}\" ");
+        args.Append("-c:v copy ");
+
+        if (service.ServiceGroup?.RecommendedSettings != null)
+        {
+            var recommended = service.ServiceGroup.RecommendedSettings;
+
+            if (recommended.MaxVideoBitRate != null)
+            {
+                args.Append($"-b:v {recommended.MaxVideoBitRate}k ");
+            }
+
+            if (recommended.KeyInt != null)
+            {
+                args.Append($"-g {recommended.KeyInt} ");
+            }
+
+            if (recommended.MaxAudioBitRate != null)
+            {
+                args.Append($"-b:a {recommended.MaxAudioBitRate}k ");
+            }
+        }
+
+        args.Append($"-f flv \"{fullUrl}\"");
+
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = path,
+            Arguments = args.ToString(),
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        try
+        {
+            var process = new Process { StartInfo = startInfo };
+            process.Start();
+
+            // Update the process info
+            processInfo.Process = process;
+
+            // Add to the live process list
+            ffmpegProcess?.Add(process);
+
+            _logger.Log($"Restarted live stream for {processInfo.Header}");
+        }
+        catch (Exception ex)
+        {
+            _logger.Log($"Failed to restart live stream for {processInfo.Header}: {ex.Message}");
         }
     }
 }

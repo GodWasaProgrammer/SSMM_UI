@@ -8,18 +8,22 @@
              x:Class="SSMM_UI.Views.SocialPosterView"
 			 x:DataType="local:SocialPosterViewModel">
 	<ScrollViewer>
-		<StackPanel Margin="15" Width="600">
+		<StackPanel Margin="15" Width="600" Spacing="12">
 			<Border Classes="card">
-				<StackPanel>
-					<CheckBox Content="X(Twitter)" IsChecked="{Binding PostToX}"/>
+				<StackPanel Spacing="10">
+					<TextBlock Text="Social Media AutoPoster" FontSize="16" FontWeight="Bold" />
+					<CheckBox Content="Auto post when streaming starts" IsChecked="{Binding AutoPost}"/>
+					<Separator/>
+					<TextBlock Text="Post to" FontWeight="Medium"/>
+					<CheckBox Content="X (Twitter)" IsChecked="{Binding PostToX}"/>
 					<CheckBox Content="Facebook" IsChecked="{Binding PostToFB}"/>
 					<CheckBox Content="Discord" IsChecked="{Binding PostToDiscord}"/>
-					<Button Command="{Binding TestClick}" Content="Test"/>
+					<Separator/>
+					<TextBlock Text="Custom message" FontWeight="Medium"/>
+					<TextBlock Text="{Binding CustomMessagePreview}" TextWrapping="Wrap" />
+					<Button Command="{Binding EditMessageCommand}" Content="Edit message" Width="140"/>
 				</StackPanel>
 			</Border>
-			<!--<StackPanel>
-				<views:SecretsAndKeysView DataContext="{Binding SecretsVM}"/>
-			</StackPanel>-->
 		</StackPanel>
 		
 	</ScrollViewer>

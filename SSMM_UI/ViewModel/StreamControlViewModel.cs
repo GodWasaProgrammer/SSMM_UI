@@ -23,7 +23,8 @@ public partial class StreamControlViewModel : ObservableObject
                                   BroadCastService broadCastService,
                                   PollService pollService,
                                   SocialPosterService socialposterservice,
-                                  LoginViewModel loginVM)
+                                  LoginViewModel loginVM,
+                                  PauseInterjectService pauseInterjectService)
     {
         // set Viewmodels
         LogVM = logVM;
@@ -38,6 +39,7 @@ public partial class StreamControlViewModel : ObservableObject
         _stateService = stateservice;
         _broadCastService = broadCastService;
         _socialPosterService = socialposterservice;
+        _pauseInterjectService = pauseInterjectService;
         // init our settings
         _settings = _stateService.UserSettingsObj;
         _pollService = pollService;
@@ -45,6 +47,9 @@ public partial class StreamControlViewModel : ObservableObject
         // ==== OutPut Streams ====
         StartStreamCommand = new AsyncRelayCommand(StartStream);
         StopStreamsCommand = new RelayCommand(OnStopStreams);
+        PauseStreamsCommand = new AsyncRelayCommand(PauseStreams);
+        ResumeStreamsCommand = new AsyncRelayCommand(ResumeStreams);
+        SetPauseMediaCommand = new AsyncRelayCommand(SetPauseMedia);
 
         // Fire and forget
         Initialize();
@@ -68,6 +73,7 @@ public partial class StreamControlViewModel : ObservableObject
     readonly BroadCastService _broadCastService;
     readonly PollService _pollService;
     readonly SocialPosterService _socialPosterService;
+    readonly PauseInterjectService _pauseInterjectService;
 
     // Settings
     readonly UserSettings _settings;
@@ -82,6 +88,9 @@ public partial class StreamControlViewModel : ObservableObject
     // == Output Controls ==
     public ICommand StartStreamCommand { get; }
     public ICommand StopStreamsCommand { get; }
+    public ICommand PauseStreamsCommand { get; }
+    public ICommand ResumeStreamsCommand { get; }
+    public ICommand SetPauseMediaCommand { get; }
 
 
     private void Initialize()
@@ -155,9 +164,22 @@ public partial class StreamControlViewModel : ObservableObject
 
                 var ActiveServices = new ObservableCollection<SelectedService>(LeftSideBarViewModel.SelectedServicesToStream.Where(x => x.IsActive).ToList());
 
+                if (ActiveServices.Count == 0)
+                {
+                    _logService.Log("No active services selected to stream.");
+                    CanStartStream = true;
+                    CanStopStream = false;
+                    return;
+                }
+
                 await _streamService.StartStream(CurrentMetaData, ActiveServices /*TriggerSocialPosterAsync*/);
                 
                 _logService.Log("Started streaming...");
+
+                if (_settings.AutoPost)
+                {
+                    await TryAutoPostAsync();
+                }
             }
             catch (Exception ex)
             {
@@ -212,10 +234,92 @@ public partial class StreamControlViewModel : ObservableObject
                     _streamService?.ProcessInfos.Clear();
                 }
             }
+       }
+       catch (Exception ex)
+       {
+            _logService.Log(ex.ToString());
+        }
+    }
+
+    private async Task TryAutoPostAsync()
+    {
+        if (!_settings.PostToDiscord && !_settings.PostToFB && !_settings.PostToX)
+        {
+            _logService.Log("Auto-posting skipped: no destinations selected.");
+            return;
+        }
+        try
+        {
+            var result = await _socialPosterService.RunPoster(_settings.PostToDiscord, _settings.PostToFB, _settings.PostToX, _settings.CustomSocialMessage);
+            if (result.PostedAny && result.PostedTo.Count > 0)
+            {
+                _logService.Log($"Auto-posted to: {string.Join(", ", result.PostedTo)}.");
+            }
+            else
+            {
+                var reason = result.SkippedReasons.Count > 0 ? string.Join("; ", result.SkippedReasons) : "No destinations accepted the post.";
+                _logService.Log($"Auto-post triggered but nothing was sent. {reason}");
+            }
         }
         catch (Exception ex)
         {
-            _logService.Log(ex.ToString());
+            _logService.Log($"Social poster failed: {ex}");
+        }
+    }
+
+    private async Task PauseStreams()
+    {
+        try
+        {
+            var activeServices = new ObservableCollection<SelectedService>(
+                LeftSideBarViewModel.SelectedServicesToStream.Where(x => x.IsActive).ToList());
+
+            foreach (var processInfo in _streamService.ProcessInfos)
+            {
+                var serviceName = processInfo.Header;
+                if (!string.IsNullOrEmpty(serviceName))
+                {
+                    await _streamService.PauseStreamToService(serviceName, activeServices);
+                }
+            }
+
+            _logService.Log("All active streams have been paused");
+        }
+        catch (Exception ex)
+        {
+            _logService.Log($"Error pausing streams: {ex.Message}");
+        }
+    }
+
+    private async Task ResumeStreams()
+    {
+        try
+        {
+            var activeServices = new ObservableCollection<SelectedService>(
+                LeftSideBarViewModel.SelectedServicesToStream.Where(x => x.IsActive).ToList());
+
+            await _streamService.ResumeStream(activeServices);
+
+            _logService.Log("All paused streams have been resumed");
+        }
+        catch (Exception ex)
+        {
+            _logService.Log($"Error resuming streams: {ex.Message}");
+        }
+    }
+
+    private async Task SetPauseMedia()
+    {
+        try
+        {
+            // This would typically open a file picker dialog
+            // For now, we'll just log that this functionality is available
+            _logService.Log("Use PauseInterjectService.SetDefaultPauseMedia(path) to configure pause media");
+            _logService.Log("Supported formats: .mp4, .mov, .avi, .mkv, .flv, .png, .jpg, .jpeg");
+        }
+        catch (Exception ex)
+        {
+            _logService.Log($"Error setting pause media: {ex.Message}");
         }
     }
 }

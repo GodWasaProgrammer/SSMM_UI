@@ -11,6 +11,7 @@ public class SocialPostTemplate
     private readonly string _userName = string.Empty;
     private string _suffix = string.Empty;
     private readonly List<string> _linksToStreams = [];
+    private readonly string? _customMessage;
     private const string _githubLink = "https://github.com/GodWasaProgrammer/SSMM_UI";
 
     public string Post { get; set; } = string.Empty;
@@ -31,14 +32,21 @@ public class SocialPostTemplate
             "\nA MultiStreaming Desktop Application Developed and maintained by cybercola!" +
             $"\n{_githubLink}";
 
-        Post = $"{_userName} is now LIVE on:\n{platformsText}{_suffix}";
+        var intro = string.IsNullOrWhiteSpace(_customMessage)
+            ? $"{_userName} is now LIVE on:"
+            : _customMessage;
+
+        Post = string.IsNullOrWhiteSpace(platformsText)
+            ? $"{intro}{_suffix}"
+            : $"{intro}\n{platformsText}{_suffix}";
     }
 
-    public SocialPostTemplate(string username, List<string> linkstostreams, List<string> platforms)
+    public SocialPostTemplate(string username, List<string> linkstostreams, List<string> platforms, string? customMessage = null)
     {
         _linksToStreams = linkstostreams;
         Platforms = platforms;
         _userName = username;
+        _customMessage = customMessage?.Trim();
         BuildPost();
     }
 }

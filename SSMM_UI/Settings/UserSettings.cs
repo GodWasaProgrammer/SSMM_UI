@@ -18,6 +18,7 @@ public class UserSettings
     public bool PostToX {  get; set; } = true;
     public bool PostToDiscord { get; set; } = true;
     public bool PostToFB { get; set; } = true;
+    public string CustomSocialMessage { get; set; } = string.Empty;
 
     // Theme
     public bool IsDarkMode { get; set; } = true;
