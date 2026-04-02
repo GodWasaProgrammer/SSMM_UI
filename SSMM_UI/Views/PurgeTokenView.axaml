@@ -16,9 +16,14 @@
 			<StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
 				<!-- Genererad lista -->
 				<ItemsControl ItemsSource="{Binding AuthProviders}">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<WrapPanel Orientation="Horizontal" />
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
-							<Border Classes="card" Margin="20">
+							<Border Classes="card" Margin="6">
 							<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
 							<TextBlock Text="{Binding}" Margin="20"/>
 								<Button Content="Purge"

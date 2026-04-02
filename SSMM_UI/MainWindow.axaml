@@ -5,10 +5,14 @@
 			xmlns:settings="clr-namespace:SSMM_UI.Settings"
 			xmlns:Views="clr-namespace:SSMM_UI.Views"
 			x:DataType="local:MainWindowViewModel"
-		Title="Multistream Manager" Width="1920" Height="1080"
-		Background="{DynamicResource AppBackgroundBrush}"
-		Padding="18"
-		Icon="avares://MultistreamManager/Assets/MainIcon.png">
+			Title="Multistream Manager"
+			Width="1920"
+			Height="1080"
+			MinWidth="1120"
+			MinHeight="700"
+			Background="{DynamicResource AppBackgroundBrush}"
+			Padding="18"
+			Icon="avares://MultistreamManager/Assets/MainIcon.png">
 
 	<Grid RowDefinitions="Auto,*">
 
@@ -68,13 +72,17 @@
 					</StackPanel>
 				</Border>
 
-				<Grid Grid.Row="1" ColumnDefinitions="260,*,320" ColumnSpacing="12">
+				<Grid Grid.Row="1" ColumnDefinitions="280,6,*,6,340" ColumnSpacing="0">
 
 					<Views:LeftSideBarView Grid.Column="0"
 										   x:Name="LeftSideBar"
 										   DataContext="{Binding LeftSideBarVM}" />
+					<GridSplitter Grid.Column="1"
+								  Width="6"
+								  ResizeDirection="Columns"
+								  Background="{DynamicResource CardBorderBrush}" />
 
-					<TabControl Grid.Column="1"
+					<TabControl Grid.Column="2"
 								Background="Transparent"
 								BorderThickness="0">
 
@@ -94,11 +102,19 @@
 						</TabItem>
 
 					</TabControl>
-					<Grid Grid.Column="2" RowDefinitions="Auto,*,*" RowSpacing="10">
-						<Views:LoginView Grid.Row="0" DataContext="{Binding LoginVM}" />
-						<Views:SocialPosterLoginView Grid.Row="1" DataContext="{Binding SocialPosterLoginVM}"/>
-						<Views:InspectionView Grid.Row="2" x:Name="Preview" DataContext="{Binding InspectionVM}"/>
-					</Grid>
+					<GridSplitter Grid.Column="3"
+								  Width="6"
+								  ResizeDirection="Columns"
+								  Background="{DynamicResource CardBorderBrush}" />
+					<ScrollViewer Grid.Column="4"
+								  HorizontalScrollBarVisibility="Disabled"
+								  VerticalScrollBarVisibility="Auto">
+						<Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="10">
+							<Views:LoginView Grid.Row="0" DataContext="{Binding LoginVM}" />
+							<Views:SocialPosterLoginView Grid.Row="1" DataContext="{Binding SocialPosterLoginVM}"/>
+							<Views:InspectionView Grid.Row="2" x:Name="Preview" DataContext="{Binding InspectionVM}"/>
+						</Grid>
+					</ScrollViewer>
 
 				</Grid>
 			</Grid>

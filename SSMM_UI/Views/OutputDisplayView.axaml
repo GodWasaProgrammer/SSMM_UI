@@ -8,20 +8,20 @@
              x:DataType="local:DisplayStreamOutputViewModel"
              x:Class="SSMM_UI.Views.OutputDisplayView"
              Background="{DynamicResource BackGroundColor}">
-	<ItemsControl ItemsSource="{Binding Outputs}">
-		<ItemsControl.ItemsPanel>
-			<ItemsPanelTemplate>
-				<!-- Välj layoutpanel här - StackPanel, WrapPanel, eller UniformGrid -->
-				<StackPanel Orientation="Horizontal" />
-			</ItemsPanelTemplate>
-		</ItemsControl.ItemsPanel>
+	<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+		<ItemsControl ItemsSource="{Binding Outputs}">
+			<ItemsControl.ItemsPanel>
+				<ItemsPanelTemplate>
+					<WrapPanel Orientation="Horizontal" />
+				</ItemsPanelTemplate>
+			</ItemsControl.ItemsPanel>
 
-		<ItemsControl.ItemTemplate>
-			<DataTemplate>
-				<!-- Här refererar vi till din OutPutView -->
-				<Views:OutPutView />
-			</DataTemplate>
-		</ItemsControl.ItemTemplate>
-	</ItemsControl>
+			<ItemsControl.ItemTemplate>
+				<DataTemplate>
+					<Views:OutPutView />
+				</DataTemplate>
+			</ItemsControl.ItemTemplate>
+		</ItemsControl>
+	</ScrollViewer>
 
 </UserControl>

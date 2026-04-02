@@ -6,7 +6,7 @@
 			 xmlns:local="clr-namespace:SSMM_UI.ViewModel"
 			 x:DataType="local:SettingsViewModel"
              x:Class="SSMM_UI.SettingsDialogView">
-    <Border Classes="card" Margin="20">
+    <Border Classes="card" Margin="20" MinWidth="420">
         <StackPanel Spacing="15">
             <!-- Header -->
             <TextBlock Text="Settings" FontSize="16" FontWeight="Bold"/>

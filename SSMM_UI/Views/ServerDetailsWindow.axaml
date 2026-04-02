@@ -8,16 +8,17 @@
         x:Class="SSMM_UI.Views.ServerDetailsWindow"
         x:DataType="local:ServerDetailsWindowViewModel"
         Icon="avares://MultistreamManager/Assets/MainIcon.png"
-        Title="RTMP Servers" Width="400" Height="450">
+        Title="RTMP Servers" Width="460" Height="560" MinWidth="380" MinHeight="420">
 
-	<StackPanel>
+	<Grid RowDefinitions="Auto,*,Auto" Margin="10" RowSpacing="10">
 		<TextBlock Text="{Binding ServiceGroup.ServiceName}"
-                  FontWeight="Bold" FontSize="18" Margin="10"/>
+                  FontWeight="Bold" FontSize="18"/>
 
 		<ListBox x:Name="RTMPServerList"
+				 Grid.Row="1"
                  ItemsSource="{Binding ServiceGroup.Servers}"
                  SelectedItem="{Binding SelectedServer, Mode=TwoWay}"
-                 Margin="10" Height="300">
+                 MinHeight="220">
 			<ListBox.ItemTemplate>
 				<DataTemplate x:DataType="rtmp:RtmpServerInfo">
 					<TextBlock Text="{Binding ServerName}"/>
@@ -25,9 +26,9 @@
 			</ListBox.ItemTemplate>
 		</ListBox>
 
-		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+		<StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
 			<Button Content="OK" Width="80" Margin="0,0,10,0" Command="{Binding OkCommand}"/>
 			<Button Content="Cancel" Width="80" Command="{Binding CancelCommand}"/>
 		</StackPanel>
-	</StackPanel>
+	</Grid>
 </Window>

@@ -3,11 +3,9 @@
              xmlns:vm="using:SSMM_UI.ViewModel"
              xmlns:conv="clr-namespace:SSMM_UI.Converters"
              x:Class="SSMM_UI.Views.SearchView"
-			 x:DataType="vm:SearchViewModel"
-             Width="400"
-             Height="400">
+			 x:DataType="vm:SearchViewModel">
 	
-	<StackPanel Margin="20" Spacing="10">
+	<StackPanel Margin="8" Spacing="10">
 		
 		
 		<!-- selected item-->
@@ -61,7 +59,8 @@
 		<!-- Sökresultat -->
 		<ListBox ItemsSource="{Binding SearchResults}"
 				 SelectedItem="{Binding SelectedItem}"
-         ScrollViewer.VerticalScrollBarVisibility="Visible" Height="250"
+         ScrollViewer.VerticalScrollBarVisibility="Visible"
+				 Height="260"
 			 IsEnabled="{Binding CanSearchTwitch}">
 			<ListBox.ItemTemplate>
 				<DataTemplate>

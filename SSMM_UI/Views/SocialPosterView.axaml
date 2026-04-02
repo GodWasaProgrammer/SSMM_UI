@@ -7,9 +7,9 @@
 			 xmlns:views="clr-namespace:SSMM_UI.Views"
              x:Class="SSMM_UI.Views.SocialPosterView"
 			 x:DataType="local:SocialPosterViewModel">
-	<ScrollViewer>
-		<StackPanel Margin="15" Width="600" Spacing="12">
-			<Border Classes="card">
+	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
+		<StackPanel Margin="15" Spacing="12">
+			<Border Classes="card" Margin="0">
 				<StackPanel Spacing="10">
 					<TextBlock Text="Social Media AutoPoster" FontSize="16" FontWeight="Bold" />
 					<CheckBox Content="Auto post when streaming starts" IsChecked="{Binding AutoPost}"/>

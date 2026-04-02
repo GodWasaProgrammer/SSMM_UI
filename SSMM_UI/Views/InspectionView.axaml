@@ -7,10 +7,10 @@
 			 xmlns:local2="clr-namespace:SSMM_UI"
 			 x:DataType="local:InspectionViewModel"
              x:Class="SSMM_UI.Views.InspectionView">
-	<StackPanel HorizontalAlignment="Center">
+	<StackPanel HorizontalAlignment="Stretch" Spacing="8">
 		<!-- Video Preview -->
-		<Border Classes="card">
-			<local2:MyVideoView x:Name="RtmpIncoming" Width="220" Height="124" IsVisible="{Binding IsReceivingStream}"/>
+		<Border Classes="card" Margin="0">
+			<local2:MyVideoView x:Name="RtmpIncoming" Height="180" IsVisible="{Binding IsReceivingStream}"/>
 		</Border>
 		<Button Content="Start Receiving" Classes="danger" Margin="0 0 15 0"
 								Command="{Binding ToggleReceivingStreamCommand }"/>

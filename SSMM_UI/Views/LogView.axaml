@@ -9,9 +9,9 @@
              x:Class="SSMM_UI.Views.LogView">
 
 	<Border Classes="card">
-		<StackPanel>
+		<StackPanel Spacing="8">
 			<TextBlock Text="LOGS" Classes="secondary"/>
-			<ListBox ItemsSource="{Binding LogMessages}" Height="300"
+			<ListBox ItemsSource="{Binding LogMessages}" MinHeight="220" MaxHeight="340"
                      SelectedItem="{Binding SelectedLogItem}"
                      FontFamily="Consolas, Courier New" BorderThickness="0"
                      Background="{DynamicResource SystemControlBackgroundAltHighBrush}"

@@ -37,7 +37,7 @@
 					<TextBlock Text="Webhooks" FontSize="16" FontWeight="Bold" Margin="0 0 0 10"/>
 
 					<StackPanel Spacing="10">
-						<ListBox ItemsSource="{Binding Webhooks}" Height="150" IsVisible="{Binding DisplayWebhooks}">
+						<ListBox ItemsSource="{Binding Webhooks}" MinHeight="150" MaxHeight="360" IsVisible="{Binding DisplayWebhooks}">
 							<ListBox.ItemTemplate>
 								<DataTemplate x:DataType="local:KeyValueItem">
 									<StackPanel Spacing="8">

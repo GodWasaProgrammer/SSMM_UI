@@ -14,7 +14,7 @@
 	<!-- Left Sidebar -->
 	<Border Grid.Column="0" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}" BorderThickness="0 0 1 0">
 		<ScrollViewer>
-			<StackPanel Margin="15">
+			<StackPanel Margin="12" Spacing="8">
 
 				<!-- Video Preview --><!--
 				<Border Classes="card">
@@ -22,12 +22,12 @@
 				</Border>-->
 
 				<!-- Services Section -->
-				<Border Classes="card">
+				<Border Classes="card" Margin="0 0 0 10">
 					<StackPanel>
 						<TextBlock Text="STREAM SERVICES" Classes="secondary" Margin="0 0 0 5"/>
 						<ListBox ItemsSource="{Binding RtmpServiceGroups}"
 								 SelectedItem="{Binding SelectedRtmpService, Mode=TwoWay}"
-								 Height="250" Width="220"
+								 Height="250"
 								 Background="Transparent">
 							<ListBox.ItemTemplate>
 								<DataTemplate x:DataType="rtmp:RtmpServiceGroup">
@@ -38,7 +38,7 @@
 					</StackPanel>
 				</Border>
 				<!-- Selected Services Section -->
-				<Border Classes="card">
+				<Border Classes="card" Margin="0">
 					<StackPanel>
 						<TextBlock Text="SELECTED SERVICES" Classes="secondary" Margin="0 0 0 5"/>
 						<Border BorderThickness="1" CornerRadius="4" Margin="0 0 0 5" Padding="1">
