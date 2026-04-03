@@ -27,7 +27,8 @@ public partial class MainWindowViewModel : ObservableObject
                                LoginViewModel loginVM,
                                InspectionViewModel inspectionVM,
                                PuppetMaster puppeteer,
-                               SocialPosterLoginViewModel socialposterLoginVM)
+                               SocialPosterLoginViewModel socialposterLoginVM,
+                               PollService pollService)
     {
         //Settings 
         _settings = settings;
@@ -59,6 +60,7 @@ public partial class MainWindowViewModel : ObservableObject
         // services
         _stateService = stateService;
         _puppeteer = puppeteer;
+        _pollService = pollService;
         // state
         _settings = _stateService.UserSettingsObj;
         //_puppeteer = new(log)
@@ -101,6 +103,7 @@ public partial class MainWindowViewModel : ObservableObject
     // ==== Services =====
     private readonly IDialogService _dialogService;
     private readonly StateService _stateService;
+    private readonly PollService _pollService;
 
     // ==== Commands ====
     public ICommand OpenSetting { get; }
@@ -145,6 +148,28 @@ public partial class MainWindowViewModel : ObservableObject
         var newSettings = await _dialogService.ShowSettingsDialogAsync(_settings);
         _settings = newSettings;
         _stateService.SettingsChanged(_settings);
+        ApplyPollingSettings(_settings);
+    }
+
+    private void ApplyPollingSettings(UserSettings settings)
+    {
+        if (settings.PollServer)
+        {
+            _pollService.StartServerPolling();
+        }
+        else
+        {
+            _pollService.StopServerPolling();
+        }
+
+        if (settings.PollStream)
+        {
+            _pollService.StartStreamPolling();
+        }
+        else
+        {
+            _pollService.StopStreamPolling();
+        }
     }
 
     private void DeleteAllToken()

@@ -8,16 +8,6 @@
 4. OBS Studio (or another RTMP encoder).
 5. OAuth/API credentials configured for providers you want to use.
 
-## Build and launch
-
-From repository root:
-
-```powershell
-dotnet restore .\SSMM_UI\SSMM_UI.csproj
-dotnet build .\SSMM_UI\SSMM_UI.csproj -nologo
-dotnet run --project .\SSMM_UI\SSMM_UI.csproj
-```
-
 ## First-run stream setup
 
 1. Open **Settings** and confirm save/polling options.

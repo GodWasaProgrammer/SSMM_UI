@@ -241,11 +241,16 @@ public class DialogService : IDialogService
             Height = 720,
             MinWidth = 720,
             MinHeight = 520,
-            Icon = new WindowIcon("avares://MultistreamManager/Assets/MainIcon.png"),
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
             Content = contentGrid
         };
 
-        await window.ShowDialog(GetMainWindow()!);
+        var owner = GetMainWindow()!;
+        if (owner.Icon is not null)
+        {
+            window.Icon = owner.Icon;
+        }
+
+        await window.ShowDialog(owner);
     }
 }

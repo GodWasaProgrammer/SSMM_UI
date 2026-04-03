@@ -2,6 +2,7 @@ using FFmpeg.AutoGen;
 using System;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Net.Security;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,34 +17,101 @@ public class PollService
 
     public event Action<bool>? ServerStatusChanged;
     public event Action<bool>? StreamStatusChanged;
-    private readonly CancellationTokenSource _cts = new();
+    private CancellationTokenSource? _streamPollingCts;
+    private CancellationTokenSource? _serverPollingCts;
+    private Task? _streamPollingTask;
+    private Task? _serverPollingTask;
 
     const string RtmpAdress = "rtmp://localhost:1935/live/demo";
 
     public void StartStreamPolling()
     {
-        _ = StartStreamStatusPolling();
+        if (_streamPollingTask is { IsCompleted: false })
+        {
+            return;
+        }
+
+        _streamPollingCts = new CancellationTokenSource();
+        _streamPollingTask = StartStreamStatusPolling(_streamPollingCts.Token);
     }
 
     public void StartServerPolling()
     {
-        _ = StartServerStatusPolling();
+        if (_serverPollingTask is { IsCompleted: false })
+        {
+            return;
+        }
+
+        _serverPollingCts = new CancellationTokenSource();
+        _serverPollingTask = StartServerStatusPolling(_serverPollingCts.Token);
     }
 
-    private async Task StartStreamStatusPolling()
+    public void StopStreamPolling()
     {
-        while (!_cts.IsCancellationRequested)
+        if (_streamPollingCts == null)
         {
-            var isAlive = await Task.Run(() => CheckStreamIsAlive(RtmpAdress));
-            StreamStatusChanged?.Invoke(isAlive);
+            return;
+        }
+
+        _streamPollingCts.Cancel();
+        _streamPollingCts.Dispose();
+        _streamPollingCts = null;
+        _streamPollingTask = null;
+    }
+
+    public void StopServerPolling()
+    {
+        if (_serverPollingCts == null)
+        {
+            return;
+        }
+
+        _serverPollingCts.Cancel();
+        _serverPollingCts.Dispose();
+        _serverPollingCts = null;
+        _serverPollingTask = null;
+    }
+
+    private async Task StartStreamStatusPolling(CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            try
+            {
+                var isAlive = await Task.Run(() => CheckStreamIsAlive(RtmpAdress), cancellationToken);
+                StreamStatusChanged?.Invoke(isAlive);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+            catch
+            {
+                StreamStatusChanged?.Invoke(false);
+            }
+
+            try
+            {
+                await Task.Delay(5000, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
         }
     }
     private static async Task<bool> IsRtmpApiResponding()
     {
         try
         {
-            using var client = new HttpClient();
-            client.Timeout = TimeSpan.FromSeconds(25); // Sänk timeout till 2 sekunder
+            using var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (request, _, _, errors) =>
+                    request?.RequestUri?.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) == true ||
+                    errors == SslPolicyErrors.None
+            };
+            using var client = new HttpClient(handler);
+            client.Timeout = TimeSpan.FromSeconds(5);
             var response = await client.GetAsync("https://localhost:7000/ui/");
             return response.IsSuccessStatusCode;
         }
@@ -101,15 +169,22 @@ public class PollService
         ffmpeg.avformat_close_input(&pFormatContext);
         return foundFrame;
     }
-    private async Task StartServerStatusPolling()
+    private async Task StartServerStatusPolling(CancellationToken cancellationToken)
     {
-        while (!_cts.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             bool isResponding = await IsRtmpApiResponding(); // Använd await istället för .Result
 
             ServerStatusChanged?.Invoke(isResponding);
 
-            await Task.Delay(5000); // 5 sekunders delay
+            try
+            {
+                await Task.Delay(5000, cancellationToken); // 5 sekunders delay
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
         }
     }
 }
