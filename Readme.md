@@ -13,6 +13,7 @@ It acts as a control center between:
 ## Table of Contents
 
 - [What the App Does](#what-the-app-does)
+- [Getting Started](#getting-started)
 - [High-Level Architecture](#high-level-architecture)
 - [Project Structure](#project-structure)
 - [Core Workflows (How It Works)](#core-workflows-how-it-works)
@@ -29,6 +30,13 @@ It acts as a control center between:
 - [Installer (WiX)](#installer-wix)
 - [Troubleshooting](#troubleshooting)
 - [Known Limitations / Notes](#known-limitations--notes)
+
+## Getting Started
+
+For a concise first-run guide, see:
+
+- `docs/GETTING_STARTED.md`
+- `docs/DESIGN_AND_ARCHITECTURE.md`
 
 
 ## What the App Does

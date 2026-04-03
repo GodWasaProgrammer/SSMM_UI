@@ -136,6 +136,10 @@
 		<None Update="services.json">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<None Update="..\docs\GETTING_STARTED.md">
+		  <Link>docs\GETTING_STARTED.md</Link>
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<None Update="win-x64\mpv-1.dll">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

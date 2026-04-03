@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Layout;
 using SSMM_UI.RTMP;
 using SSMM_UI.Settings;
 using SSMM_UI.ViewModel;
@@ -193,5 +194,58 @@ public class DialogService : IDialogService
             DataContext = vm
         };
         await dialog.ShowDialog(mw);
+    }
+
+    public async Task ShowGettingStartedAsync()
+    {
+        var path = System.IO.Path.Combine(AppContext.BaseDirectory, "docs", "GETTING_STARTED.md");
+        if (!System.IO.File.Exists(path))
+        {
+            await MessageBox.Show(GetMainWindow()!, "GETTING_STARTED.md not found in output folder.", "Getting Started");
+            return;
+        }
+
+        var content = await System.IO.File.ReadAllTextAsync(path);
+        var titleBlock = new TextBlock
+        {
+            Text = "Getting Started Guide",
+            FontSize = 18,
+            FontWeight = Avalonia.Media.FontWeight.Bold,
+            Margin = new Thickness(0, 0, 0, 8)
+        };
+
+        var scroll = new ScrollViewer
+        {
+            Content = new TextBlock
+            {
+                Text = content,
+                TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                FontFamily = "Consolas, Courier New"
+            }
+        };
+
+        var contentGrid = new Grid
+        {
+            RowDefinitions = new RowDefinitions("Auto,*"),
+            Margin = new Thickness(12)
+        };
+        Grid.SetRow(titleBlock, 0);
+        Grid.SetRow(scroll, 1);
+        contentGrid.Children.Add(titleBlock);
+        contentGrid.Children.Add(scroll);
+
+        var window = new Window
+        {
+            Title = "Getting Started",
+            Width = 920,
+            Height = 720,
+            MinWidth = 720,
+            MinHeight = 520,
+            Icon = new WindowIcon("avares://MultistreamManager/Assets/MainIcon.png"),
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = contentGrid
+        };
+
+        await window.ShowDialog(GetMainWindow()!);
     }
 }

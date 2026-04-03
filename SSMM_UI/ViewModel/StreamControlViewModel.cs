@@ -172,6 +172,18 @@ public partial class StreamControlViewModel : ObservableObject
                     return;
                 }
 
+                foreach (var service in ActiveServices)
+                {
+                    if (CurrentMetaData == null)
+                    {
+                        break;
+                    }
+
+                    var serviceName = service.ServiceGroup?.ServiceName ?? service.DisplayName;
+                    var metadataResult = await _broadCastService.ApplyMetadataForServiceAsync(serviceName, CurrentMetaData);
+                    _logService.Log(metadataResult);
+                }
+
                 await _streamService.StartStream(CurrentMetaData, ActiveServices /*TriggerSocialPosterAsync*/);
                 
                 _logService.Log("Started streaming...");

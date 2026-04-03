@@ -240,6 +240,50 @@ public class BroadCastService
             _logger.Log($"Failed to create Kick broadcast: {ex.Message}");
         }
     }
+
+    public async Task<string> ApplyMetadataForServiceAsync(string serviceName, StreamMetadata metadata)
+    {
+        var capability = ServiceMetadataCapabilities.Resolve(serviceName);
+        if (capability.SupportLevel == MetadataSupportLevel.EmbeddedStreamMetadata)
+        {
+            return $"{serviceName}: metadata will be embedded in ffmpeg output.";
+        }
+
+        if (capability.SupportLevel == MetadataSupportLevel.PartialPlatformIntegration)
+        {
+            return $"{serviceName}: partial metadata integration ({capability.Reason}).";
+        }
+
+        if (serviceName.Contains("Twitch", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!string.IsNullOrWhiteSpace(metadata.TwitchCategory?.Name))
+            {
+                await MDService.SetTwitchTitleAndCategory(metadata.Title, metadata.TwitchCategory.Name);
+                return $"{serviceName}: title/category applied through Twitch API.";
+            }
+
+            if (!string.IsNullOrWhiteSpace(metadata.Title))
+            {
+                await MDService.SetTwitchTitleAndCategory(metadata.Title);
+                return $"{serviceName}: title applied through Twitch API.";
+            }
+
+            return $"{serviceName}: no metadata to update.";
+        }
+
+        if (serviceName.Contains("Kick", StringComparison.OrdinalIgnoreCase))
+        {
+            await CreateKickBroadcastAsync(metadata);
+            return $"{serviceName}: title/category automation invoked.";
+        }
+
+        if (serviceName.Contains("YouTube", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"{serviceName}: metadata is managed during YouTube broadcast setup.";
+        }
+
+        return $"{serviceName}: metadata support evaluated ({capability.Reason}).";
+    }
     public async Task<(string rtmpUrl, string? streamKey)> CreateTrovoBroadcastAsync(StreamMetadata metadata)
     {
         try

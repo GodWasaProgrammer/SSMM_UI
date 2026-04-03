@@ -36,6 +36,7 @@ public partial class MainWindowViewModel : ObservableObject
         SetupPuppetYT = new AsyncRelayCommand(SetupPuppetMasterYoutube);
         SetupPuppetKick = new AsyncRelayCommand(SetupPuppetMasterKick);
         OpenAbout = new AsyncRelayCommand(OpenAboutWindow);
+        OpenGettingStarted = new AsyncRelayCommand(OpenGettingStartedDialog);
         ShowSecretsAndKeys = new AsyncRelayCommand(ShowSecretsAndKeysDialog);
         ToggleThemes = new RelayCommand(ToggleTheme);
         ApplyThemeCommand = new RelayCommand<ThemeOption?>(ApplyTheme);
@@ -104,6 +105,7 @@ public partial class MainWindowViewModel : ObservableObject
     // ==== Commands ====
     public ICommand OpenSetting { get; }
     public ICommand OpenAbout { get; }
+    public ICommand OpenGettingStarted { get; }
     public ICommand ToggleThemes { get; }
     public ICommand ApplyThemeCommand { get; }
     public ICommand ShowSecretsAndKeys { get; }
@@ -133,6 +135,10 @@ public partial class MainWindowViewModel : ObservableObject
     private async Task OpenAboutWindow()
     {
         await _dialogService.About();
+    }
+    private async Task OpenGettingStartedDialog()
+    {
+        await _dialogService.ShowGettingStartedAsync();
     }
     private async Task OpenSettings()
     {

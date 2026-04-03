@@ -31,7 +31,7 @@ public class StreamService
     }
 
     // TODO: needs to indicate success
-    public async Task StartStream(StreamMetadata metadata, ObservableCollection<SelectedService> SelectedServicesToStream, Action<bool>? onYouTubeStatusChanged = null)
+    public async Task StartStream(StreamMetadata? metadata, ObservableCollection<SelectedService> SelectedServicesToStream, Action<bool>? onYouTubeStatusChanged = null)
     {
         if (SelectedServicesToStream.Count == 0)
         {
@@ -130,6 +130,10 @@ public class StreamService
 
                 // create our stringbuilder
                 var args = new StringBuilder($"-i \"{input}\" ");
+                if (metadata != null)
+                {
+                    ApplyGenericMetadataArgs(args, metadata, service);
+                }
 
                 if (service.ServiceGroup != null)
                 {
@@ -608,5 +612,38 @@ public class StreamService
         {
             _logger.Log($"Failed to restart live stream for {processInfo.Header}: {ex.Message}");
         }
+    }
+
+    private void ApplyGenericMetadataArgs(StringBuilder args, StreamMetadata metadata, SelectedService service)
+    {
+        if (metadata == null)
+        {
+            return;
+        }
+
+        var capability = ServiceMetadataCapabilities.Resolve(service.ServiceGroup?.ServiceName);
+        if (capability.SupportLevel != MetadataSupportLevel.EmbeddedStreamMetadata)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(metadata.Title))
+        {
+            args.Append($"-metadata title=\"{EscapeMetadataValue(metadata.Title)}\" ");
+        }
+
+        if (metadata.Tags is { Count: > 0 })
+        {
+            var tagValue = string.Join(",", metadata.Tags.Where(t => !string.IsNullOrWhiteSpace(t)));
+            if (!string.IsNullOrWhiteSpace(tagValue))
+            {
+                args.Append($"-metadata comment=\"{EscapeMetadataValue(tagValue)}\" ");
+            }
+        }
+    }
+
+    private static string EscapeMetadataValue(string value)
+    {
+        return value.Replace("\"", "\\\"", StringComparison.Ordinal);
     }
 }

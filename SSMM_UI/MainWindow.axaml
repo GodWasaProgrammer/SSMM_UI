@@ -26,6 +26,7 @@
 				BoxShadow="0 10 24 0 #20000000">
 				<Menu>
 					<MenuItem Header="Settings" Command="{Binding OpenSetting}" ToolTip.Tip="Open application preferences." />
+					<MenuItem Header="Get Started" Command="{Binding OpenGettingStarted}" ToolTip.Tip="Open step-by-step onboarding guide." />
 					<MenuItem Header="Setup">
 						<MenuItem Header="Youtube" Command="{Binding SetupPuppetYT}" ToolTip.Tip="Prepare YouTube browser profile/session." />
 						<MenuItem Header="Kick" Command="{Binding SetupPuppetKick}" ToolTip.Tip="Prepare Kick browser profile/session."/>
