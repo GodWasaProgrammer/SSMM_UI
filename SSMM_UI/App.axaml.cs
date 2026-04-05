@@ -7,6 +7,7 @@ using LibVLCSharp.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using SSMM_UI.Interfaces;
 using SSMM_UI.MetaData;
+using SSMM_UI.Services.ChatProviders;
 using SSMM_UI.Poster;
 using SSMM_UI.Puppeteering;
 using SSMM_UI.Services;
@@ -57,11 +58,18 @@ public partial class App : Application
                 .AddSingleton<MetaDataViewModel>()
                 .AddSingleton<BroadCastService>()
                 .AddSingleton<PollService>()
+                .AddSingleton<ChatConcatenationPolicy>()
+                .AddSingleton<ChatAggregationService>()
+                .AddSingleton<IChatProvider, TwitchChatProvider>()
+                .AddSingleton<IChatProvider, KickChatProvider>()
+                .AddSingleton<IChatProvider, YouTubeChatProvider>()
+                .AddSingleton<ChatProviderRegistryService>()
                 .AddSingleton<SocialPosterService>()
                 .AddSingleton<WebhooksViewModel>()
                 .AddSingleton<IThemeService, ThemeService>()
                 .AddSingleton<LoginViewModel>()
                 .AddSingleton<InspectionViewModel>()
+                .AddSingleton<ChatOverlayViewModel>()
                 .AddSingleton<PuppetMaster>()
                 .AddSingleton<SocialPosterLoginViewModel>()
                 .AddSingleton<PurgeTokenViewModel>()

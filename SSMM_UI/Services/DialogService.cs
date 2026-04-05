@@ -11,6 +11,7 @@ using SSMM_UI.Views;
 using SSMM_UI.Interfaces;
 using SSMM_UI.Enums;
 using SSMM_UI.Dialogs;
+using System.ComponentModel;
 
 namespace SSMM_UI.Services;
 
@@ -23,6 +24,7 @@ public class DialogService : IDialogService
     }
     readonly ILogService _logService;
     readonly StateService _stateservice;
+    private Window? _chatOverlayWindow;
 
     public async Task WebhooksView()
     {
@@ -121,7 +123,16 @@ public class DialogService : IDialogService
             SaveServices = currentSettings.SaveServices,
             SaveMetaData = currentSettings.SaveMetaData,
             ServerPolling = currentSettings.PollServer,
-            StreamFeedPolling = currentSettings.PollStream
+            StreamFeedPolling = currentSettings.PollStream,
+            ChatOverlayEnabled = currentSettings.ChatOverlay.Enabled,
+            ChatAlwaysOnTop = currentSettings.ChatOverlay.IsAlwaysOnTop,
+            ChatClickThrough = currentSettings.ChatOverlay.IsClickThrough,
+            ChatEnableConcatenation = currentSettings.ChatOverlay.EnableConcatenation,
+            ChatConcatenationWindowSeconds = currentSettings.ChatOverlay.ConcatenationWindowSeconds,
+            ChatMaxMessages = currentSettings.ChatOverlay.MaxMessages,
+            ChatMaxConcatenatedLines = currentSettings.ChatOverlay.MaxConcatenatedLines,
+            ChatOverlayOpacity = currentSettings.ChatOverlay.Opacity,
+            ChatFontScale = currentSettings.ChatOverlay.FontScale
         };
 
         var dialog = new SettingsDialogView
@@ -142,7 +153,19 @@ public class DialogService : IDialogService
                 SaveServices = viewModel.SaveServices,
                 SaveMetaData = viewModel.SaveMetaData,
                 PollServer = viewModel.ServerPolling,
-                PollStream = viewModel.StreamFeedPolling
+                PollStream = viewModel.StreamFeedPolling,
+                ChatOverlay = new ChatOverlaySettings
+                {
+                    Enabled = viewModel.ChatOverlayEnabled,
+                    IsAlwaysOnTop = viewModel.ChatAlwaysOnTop,
+                    IsClickThrough = viewModel.ChatClickThrough,
+                    EnableConcatenation = viewModel.ChatEnableConcatenation,
+                    ConcatenationWindowSeconds = viewModel.ChatConcatenationWindowSeconds,
+                    MaxMessages = viewModel.ChatMaxMessages,
+                    MaxConcatenatedLines = viewModel.ChatMaxConcatenatedLines,
+                    Opacity = viewModel.ChatOverlayOpacity,
+                    FontScale = viewModel.ChatFontScale
+                }
             };
         }
         return currentSettings;
@@ -252,5 +275,69 @@ public class DialogService : IDialogService
         }
 
         await window.ShowDialog(owner);
+    }
+
+    public async Task ShowChatOverlayAsync()
+    {
+        var owner = GetMainWindow();
+        if (owner is null || owner.DataContext is not MainWindowViewModel mainVm)
+        {
+            return;
+        }
+
+        if (_chatOverlayWindow is not null)
+        {
+            _chatOverlayWindow.Activate();
+            return;
+        }
+
+        var overlayWindow = new ChatOverlayWindow
+        {
+            DataContext = mainVm.ChatOverlayVM,
+            WindowStartupLocation = WindowStartupLocation.CenterScreen
+        };
+
+        if (owner.Icon is not null)
+        {
+            overlayWindow.Icon = owner.Icon;
+        }
+
+        void OverlayClosed(object? sender, EventArgs args)
+        {
+            if (_chatOverlayWindow is ChatOverlayWindow activeWindow)
+            {
+                if (activeWindow.DataContext is ChatOverlayViewModel activeVm)
+                {
+                    activeVm.CloseOverlayRequested -= OnCloseOverlayRequested;
+                }
+
+                activeWindow.Closed -= OverlayClosed;
+                activeWindow.Closing -= OverlayClosing;
+            }
+
+            _chatOverlayWindow = null;
+        }
+
+        void OverlayClosing(object? sender, CancelEventArgs args)
+        {
+            // No-op: ensures window can always close and prevents focus-lock behavior.
+        }
+
+        void OnCloseOverlayRequested(object? sender, EventArgs args)
+        {
+            if (_chatOverlayWindow is Window window)
+            {
+                window.Close();
+            }
+        }
+
+        overlayWindow.Closing += OverlayClosing;
+        overlayWindow.Closed += OverlayClosed;
+        mainVm.ChatOverlayVM.CloseOverlayRequested += OnCloseOverlayRequested;
+
+        _chatOverlayWindow = overlayWindow;
+        await mainVm.ChatOverlayVM.RefreshConnectionsAsync();
+        overlayWindow.Show();
+        overlayWindow.Activate();
     }
 }

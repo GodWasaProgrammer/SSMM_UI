@@ -1,0 +1,63 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:dto="clr-namespace:SSMM_UI.DTO"
+             xmlns:conv="clr-namespace:SSMM_UI.Converters"
+             xmlns:vm="clr-namespace:SSMM_UI.ViewModel"
+             mc:Ignorable="d"
+             d:DesignWidth="600"
+             d:DesignHeight="520"
+             x:Class="SSMM_UI.Views.ChatOverlayView"
+             x:DataType="vm:ChatOverlayViewModel">
+    <Grid RowDefinitions="Auto,*">
+        <Border x:Name="OverlayDragHandle"
+                Height="10"
+                HorizontalAlignment="Stretch"
+                Background="#33000000"
+                BorderBrush="#66FFFFFF"
+                BorderThickness="0,1,0,1"
+                CornerRadius="4"
+                Margin="0,0,0,6"
+                Cursor="SizeAll"
+                IsHitTestVisible="{Binding IsClickThrough, Converter={x:Static conv:BooleanConverters.Not}}"
+                PointerPressed="OnDragHandlePointerPressed" />
+
+        <Grid Grid.Row="1">
+            <ListBox ItemsSource="{Binding Messages}"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     IsHitTestVisible="{Binding IsClickThrough, Converter={x:Static conv:BooleanConverters.Not}}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="dto:ChatMessageDto">
+                        <Border Background="#59000000"
+                                BorderBrush="#66FFFFFF"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="8"
+                                Margin="0,0,0,6">
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="{Binding Author}" FontWeight="Bold" Foreground="White"/>
+                                <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Foreground="White"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <Button Content="✕"
+                    Width="28"
+                    Height="28"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Margin="0,2,2,0"
+                    Command="{Binding CloseOverlayCommand}"
+                    Opacity="0.75"
+                    Background="#55000000"
+                    BorderBrush="#77FFFFFF"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    IsVisible="{Binding IsClickThrough, Converter={x:Static conv:BooleanConverters.Not}}" />
+        </Grid>
+    </Grid>
+</UserControl>

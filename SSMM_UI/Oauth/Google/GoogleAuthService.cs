@@ -45,18 +45,35 @@ public class GoogleAuthService : IOAuthService<GoogleToken>
         _oauthResult = _stateService.DeserializeToken<GoogleToken>(AuthProvider.YouTube);
         if (_oauthResult != null)
         {
-            var res = await RefreshTokenAsync(_oauthResult.AccessToken);
-            if (res is null)
+            if (_oauthResult.IsValid)
+            {
+                var existingUsername = await GetUsernameAsync(_oauthResult.AccessToken);
+                if (!string.IsNullOrWhiteSpace(existingUsername))
+                {
+                    _oauthResult.Username = existingUsername;
+                }
+                return _oauthResult;
+            }
+
+            if (string.IsNullOrWhiteSpace(_oauthResult.RefreshToken))
             {
                 return null;
             }
-            _oauthResult = res;
-            var username = await GetUsernameAsync(_oauthResult.AccessToken);
-            if (username != null)
+
+            var refreshed = await RefreshTokenAsync(_oauthResult.RefreshToken);
+            if (refreshed is null)
             {
-                _oauthResult.Username = username;
-                return _oauthResult;
+                return null;
             }
+
+            var username = await GetUsernameAsync(refreshed.AccessToken);
+            if (!string.IsNullOrWhiteSpace(username))
+            {
+                refreshed.Username = username;
+            }
+            _stateService.SerializeToken(AuthProvider.YouTube, refreshed);
+            _oauthResult = refreshed;
+            return _oauthResult;
         }
         return null;
     }

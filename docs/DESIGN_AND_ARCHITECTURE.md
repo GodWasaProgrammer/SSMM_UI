@@ -172,3 +172,54 @@ For any new feature:
 3. Inject service into ViewModel and expose command/state for UI.
 4. Add compiled bindings in view (`x:DataType` aware).
 5. Add/extend unit tests for service and converter logic.
+
+## Chat Overlay Subsystem
+
+The chat overlay subsystem is an MVVM-driven, non-modal operator surface that aggregates provider chat events while preserving main-window workflow.
+
+### Runtime architecture
+
+1. **Entry point**
+   - `MainWindowViewModel.OpenChatOverlay` delegates to `IDialogService.ShowChatOverlayAsync()`.
+2. **Window lifecycle orchestration**
+   - `Services/DialogService.ShowChatOverlayAsync()` maintains a single overlay window instance.
+   - Existing instance is activated instead of spawning duplicates.
+   - Overlay close requests are VM-driven through `ChatOverlayViewModel.CloseOverlayRequested`.
+3. **Overlay VM and view**
+   - `ViewModel/ChatOverlayViewModel.cs` exposes commands (`Refresh`, `Clear`, `Close`, synthetic injection) and bindable runtime state.
+   - `Views/ChatOverlayView.axaml` binds `ProviderStatuses` and `Messages`.
+   - `Views/ChatOverlayWindow.axaml(.cs)` applies window-level behavior (ESC close, click-through attempt).
+4. **Aggregation and provider layer**
+   - `Services/ChatAggregationService.cs` resolves target providers from active selected services + token presence in `StateService`.
+   - `Interfaces/IChatProvider.cs` defines provider connect/disconnect lifecycle and event contract.
+   - Current adapters:
+     - `TwitchChatProvider`: real IRC ingest and parsing.
+     - `KickChatProvider`: token-aware but currently reports `Unavailable`.
+     - `YouTubeChatProvider`: token-aware but currently reports `Unavailable`.
+
+### Runtime-state model
+
+`ChatAggregationService` owns and publishes runtime overlay state:
+
+- **Messages**: bounded `ReadOnlyObservableCollection<ChatMessageDto>` as UI feed source.
+- **Provider statuses**: `ReadOnlyObservableCollection<ChatProviderStatusDto>` and `ProviderStatusChanged` event for status chips and VM reactions.
+- **Connection set**: internal connected-provider tracking with per-provider cancellation tokens.
+- **Status map**: authoritative per-provider status (`Disconnected`, `Connecting`, `Connected`, `Unavailable`, `Faulted`).
+
+State transitions:
+
+1. `RefreshConnectionsAsync()` maps active services (`Twitch`, `Kick`, `YouTube`) to auth providers.
+2. Missing provider registration emits `Unavailable` status.
+3. Registered providers emit lifecycle states via `StatusChanged`.
+4. Messages are appended (or concatenated via `ChatConcatenationPolicy`) and trimmed to `MaxMessages`.
+
+Synthetic injection gating:
+
+- `TryInjectSyntheticMessage(...)` is intentionally blocked while provider state is `Connected` or `Connecting`.
+- Injection is allowed only when runtime transport is not currently available (for example `Unavailable`), preserving production/diagnostic separation.
+
+### Settings and transparency model
+
+- Overlay behavior is configured via `UserSettings.ChatOverlay` (`Settings/ChatOverlaySettings.cs`).
+- Key settings include enable flag, always-on-top, click-through flag, concatenation controls, max messages, opacity, and font scale.
+- Click-through is guarded as Windows-specific best-effort in `ChatOverlayWindow`; unsupported platforms and runtime failures fall back to normal interactive overlay behavior.

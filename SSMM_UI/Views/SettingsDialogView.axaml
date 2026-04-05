@@ -20,6 +20,32 @@
                       Foreground="{DynamicResource PrimaryTextColor}"/>
 			<CheckBox IsChecked="{Binding ServerPolling}" Content="Poll Server (turn this off to save CPU power )"/>
 			<CheckBox IsChecked="{Binding StreamFeedPolling}" Content="Poll Stream (turn this off to save CPU power )"/>
+            <Separator/>
+            <TextBlock Text="Chat Overlay" FontWeight="SemiBold"/>
+            <CheckBox IsChecked="{Binding ChatOverlayEnabled}" Content="Enable Chat Overlay"/>
+            <CheckBox IsChecked="{Binding ChatAlwaysOnTop}" Content="Always on top"/>
+            <CheckBox IsChecked="{Binding ChatClickThrough}" Content="Click-through (best effort, platform-dependent)"/>
+            <CheckBox IsChecked="{Binding ChatEnableConcatenation}" Content="Enable message concatenation"/>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Concat Window (s)" VerticalAlignment="Center" Width="140"/>
+                <NumericUpDown Value="{Binding ChatConcatenationWindowSeconds}" Minimum="1" Maximum="30" Width="100"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Max Messages" VerticalAlignment="Center" Width="140"/>
+                <NumericUpDown Value="{Binding ChatMaxMessages}" Minimum="20" Maximum="500" Width="100"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Max Concatenated Lines" VerticalAlignment="Center" Width="140"/>
+                <NumericUpDown Value="{Binding ChatMaxConcatenatedLines}" Minimum="1" Maximum="10" Width="100"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Overlay Opacity" VerticalAlignment="Center" Width="140"/>
+                <NumericUpDown Value="{Binding ChatOverlayOpacity}" Increment="0.05" Minimum="0.2" Maximum="1.0" Width="100"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Font Scale" VerticalAlignment="Center" Width="140"/>
+                <NumericUpDown Value="{Binding ChatFontScale}" Increment="0.1" Minimum="0.7" Maximum="2.0" Width="100"/>
+            </StackPanel>
             <!-- Action Buttons -->
             <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
                 <Button Command="{Binding SaveSettingsCommand}" Content="Save" Classes="success" Width="100"/>

@@ -26,9 +26,22 @@ public class CentralAuthService
 
     private void OnAuthServiceUpdated()
     {
-        this.GoogleAuthService?.ResetToken();
-        TwitchService?.ResetToken();
-        _kickOauthService?.ResetToken();
+        // Keep in-memory auth service state aligned with the shared token store without
+        // wiping valid sessions every time any provider updates.
+        if (!_stateService.AuthObjects.ContainsKey(AuthProvider.YouTube))
+        {
+            _ = GoogleAuthService?.ResetToken();
+        }
+
+        if (!_stateService.AuthObjects.ContainsKey(AuthProvider.Twitch))
+        {
+            _ = TwitchService?.ResetToken();
+        }
+
+        if (!_stateService.AuthObjects.ContainsKey(AuthProvider.Kick))
+        {
+            _ = _kickOauthService?.ResetToken();
+        }
     }
 
     public CentralAuthService(ILogService logger, StateService stateService)

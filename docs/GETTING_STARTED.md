@@ -41,6 +41,43 @@
 6. Monitor logs and per-output stream cards.
 7. Stop stream when done.
 
+## Chat Overlay (non-modal operator window)
+
+The overlay opens as a **non-modal** window, so you can keep operating the main app while chat is visible.
+
+### Provider support matrix (current build)
+
+| Provider | Runtime chat transport |
+|---|---|
+| Twitch | ✅ Real transport supported |
+| Kick | ❌ Unavailable (not implemented yet) |
+| YouTube | ❌ Unavailable (not implemented yet) |
+
+### Open and use
+
+1. Ensure the provider is logged in and the corresponding destination is active in **STREAM SERVICES**.
+2. Open **Settings** and configure chat overlay options:
+   - Enable overlay
+   - Enable/disable concatenation
+   - Concatenation window
+   - Max message retention
+   - Opacity and font scale
+3. Open **Menu -> Chat Overlay**.
+4. Click **Refresh** to sync connections for active providers.
+5. Click **Clear** to clear visible messages only.
+
+### Close behavior
+
+- Click **Close** in the overlay toolbar, press **Esc**, or close the overlay window from the title bar.
+- Closing the overlay does not block or close the main window.
+- Re-opening **Chat Overlay** focuses the existing overlay instance (if already open) rather than creating duplicate windows.
+
+### Transparency modes and click-through caveat
+
+- Overlay message panel opacity is controlled by the configured **Opacity** setting.
+- **Click-through** is a Windows-specific best-effort mode; on unsupported platforms it is ignored safely.
+- If click-through cannot be applied at runtime (for example, unavailable native handle timing), the overlay remains usable in normal interactive mode.
+
 ## Troubleshooting quick reference
 
 - **No incoming stream detected**

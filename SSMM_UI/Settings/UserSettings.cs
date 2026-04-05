@@ -23,4 +23,7 @@ public class UserSettings
     // Theme
     public bool IsDarkMode { get; set; } = true;
     public string ThemeKey { get; set; } = "midnight";
+
+    // Chat overlay
+    public ChatOverlaySettings ChatOverlay { get; set; } = new();
 }

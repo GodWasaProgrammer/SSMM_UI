@@ -19,4 +19,5 @@ public interface IDialogService
     Task PurgeSpecificToken();
     Task<string?> EditSocialPostMessageAsync(string currentMessage);
     Task ShowGettingStartedAsync();
+    Task ShowChatOverlayAsync();
 }

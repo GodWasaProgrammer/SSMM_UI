@@ -28,7 +28,8 @@ public partial class MainWindowViewModel : ObservableObject
                                InspectionViewModel inspectionVM,
                                PuppetMaster puppeteer,
                                SocialPosterLoginViewModel socialposterLoginVM,
-                               PollService pollService)
+                               PollService pollService,
+                               ChatOverlayViewModel chatOverlayVM)
     {
         //Settings 
         _settings = settings;
@@ -38,6 +39,7 @@ public partial class MainWindowViewModel : ObservableObject
         SetupPuppetKick = new AsyncRelayCommand(SetupPuppetMasterKick);
         OpenAbout = new AsyncRelayCommand(OpenAboutWindow);
         OpenGettingStarted = new AsyncRelayCommand(OpenGettingStartedDialog);
+        OpenChatOverlay = new AsyncRelayCommand(OpenChatOverlayDialog);
         ShowSecretsAndKeys = new AsyncRelayCommand(ShowSecretsAndKeysDialog);
         ToggleThemes = new RelayCommand(ToggleTheme);
         ApplyThemeCommand = new RelayCommand<ThemeOption?>(ApplyTheme);
@@ -51,6 +53,7 @@ public partial class MainWindowViewModel : ObservableObject
         LoginVM = loginVM;
         InspectionVM = inspectionVM;
         SocialPosterLoginVM = socialposterLoginVM;
+        ChatOverlayVM = chatOverlayVM;
 
         // theme
         _themeService = themeService;
@@ -98,6 +101,7 @@ public partial class MainWindowViewModel : ObservableObject
     public LoginViewModel LoginVM { get; }
     public InspectionViewModel InspectionVM { get; }
     public SocialPosterLoginViewModel SocialPosterLoginVM { get; }
+    public ChatOverlayViewModel ChatOverlayVM { get; }
 
 
     // ==== Services =====
@@ -109,6 +113,7 @@ public partial class MainWindowViewModel : ObservableObject
     public ICommand OpenSetting { get; }
     public ICommand OpenAbout { get; }
     public ICommand OpenGettingStarted { get; }
+    public ICommand OpenChatOverlay { get; }
     public ICommand ToggleThemes { get; }
     public ICommand ApplyThemeCommand { get; }
     public ICommand ShowSecretsAndKeys { get; }
@@ -143,12 +148,17 @@ public partial class MainWindowViewModel : ObservableObject
     {
         await _dialogService.ShowGettingStartedAsync();
     }
+    private async Task OpenChatOverlayDialog()
+    {
+        await _dialogService.ShowChatOverlayAsync();
+    }
     private async Task OpenSettings()
     {
         var newSettings = await _dialogService.ShowSettingsDialogAsync(_settings);
         _settings = newSettings;
         _stateService.SettingsChanged(_settings);
         ApplyPollingSettings(_settings);
+        ChatOverlayVM.ApplySettings();
     }
 
     private void ApplyPollingSettings(UserSettings settings)

@@ -48,7 +48,8 @@ public class TwitchDCAuthService : IOAuthService<TwitchToken>
         [
             TwitchScopes.UserReadEmail,
             TwitchScopes.ChannelManageBroadcast,
-            TwitchScopes.StreamKey
+            TwitchScopes.StreamKey,
+            TwitchScopes.ChatRead
         ];
 
     public string GetClientId()

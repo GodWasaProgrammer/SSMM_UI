@@ -18,6 +18,15 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool saveTokens;
     [ObservableProperty] private bool saveMetaData;
     [ObservableProperty] private bool saveServices;
+    [ObservableProperty] private bool chatOverlayEnabled;
+    [ObservableProperty] private bool chatAlwaysOnTop;
+    [ObservableProperty] private bool chatClickThrough;
+    [ObservableProperty] private bool chatEnableConcatenation;
+    [ObservableProperty] private int chatConcatenationWindowSeconds;
+    [ObservableProperty] private int chatMaxMessages;
+    [ObservableProperty] private int chatMaxConcatenatedLines;
+    [ObservableProperty] private double chatOverlayOpacity;
+    [ObservableProperty] private double chatFontScale;
 
     public ICommand SaveSettingsCommand { get; }
     public ICommand CancelCommand { get; }
