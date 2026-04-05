@@ -163,6 +163,12 @@ public partial class StreamControlViewModel : ObservableObject
                 // deduce which we should start
 
                 var ActiveServices = new ObservableCollection<SelectedService>(LeftSideBarViewModel.SelectedServicesToStream.Where(x => x.IsActive).ToList());
+                var hasYouTubeOutput = ActiveServices.Any(IsYouTubeService);
+                TaskCompletionSource<bool>? youtubeLiveSignal = null;
+                if (_settings.AutoPost && hasYouTubeOutput)
+                {
+                    youtubeLiveSignal = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                }
 
                 if (ActiveServices.Count == 0)
                 {
@@ -184,13 +190,16 @@ public partial class StreamControlViewModel : ObservableObject
                     _logService.Log(metadataResult);
                 }
 
-                await _streamService.StartStream(CurrentMetaData, ActiveServices /*TriggerSocialPosterAsync*/);
+                await _streamService.StartStream(
+                    CurrentMetaData,
+                    ActiveServices,
+                    youtubeLiveSignal is null ? null : isLive => youtubeLiveSignal.TrySetResult(isLive));
                 
                 _logService.Log("Started streaming...");
 
                 if (_settings.AutoPost)
                 {
-                    await TryAutoPostAsync();
+                    await TryAutoPostAsync(ActiveServices, youtubeLiveSignal?.Task);
                 }
             }
             catch (Exception ex)
@@ -253,24 +262,67 @@ public partial class StreamControlViewModel : ObservableObject
         }
     }
 
-    private async Task TryAutoPostAsync()
+    private static bool IsYouTubeService(SelectedService service)
+    {
+        var name = service.ServiceGroup?.ServiceName ?? service.DisplayName;
+        return name.Contains("youtube", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task TryAutoPostAsync(ObservableCollection<SelectedService> activeServices, Task<bool>? youtubeLiveSignalTask)
     {
         if (!_settings.PostToDiscord && !_settings.PostToFB && !_settings.PostToX)
         {
             _logService.Log("Auto-posting skipped: no destinations selected.");
             return;
         }
-        try
+
+        if (youtubeLiveSignalTask != null)
         {
-            var result = await _socialPosterService.RunPoster(_settings.PostToDiscord, _settings.PostToFB, _settings.PostToX, _settings.CustomSocialMessage);
-            if (result.PostedAny && result.PostedTo.Count > 0)
+            _logService.Log("Auto-post waiting for YouTube live transition...");
+            bool youtubeLive = false;
+            try
             {
-                _logService.Log($"Auto-posted to: {string.Join(", ", result.PostedTo)}.");
+                youtubeLive = await youtubeLiveSignalTask.WaitAsync(TimeSpan.FromMinutes(9));
+            }
+            catch (TimeoutException)
+            {
+                _logService.Log("Auto-post timed out waiting for YouTube transition signal.");
+            }
+
+            if (youtubeLive)
+            {
+                // Give APIs a short propagation window after lifecycle reaches live.
+                await Task.Delay(TimeSpan.FromSeconds(15));
             }
             else
             {
+                _logService.Log("YouTube did not confirm live state before auto-post checks; continuing with live-detection retries.");
+            }
+        }
+
+        const int maxAttempts = 6;
+        var attemptDelay = TimeSpan.FromSeconds(15);
+        try
+        {
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                var result = await _socialPosterService.RunPoster(_settings.PostToDiscord, _settings.PostToFB, _settings.PostToX, _settings.CustomSocialMessage);
+                if (result.PostedAny && result.PostedTo.Count > 0)
+                {
+                    _logService.Log($"Auto-posted to: {string.Join(", ", result.PostedTo)}.");
+                    return;
+                }
+
                 var reason = result.SkippedReasons.Count > 0 ? string.Join("; ", result.SkippedReasons) : "No destinations accepted the post.";
-                _logService.Log($"Auto-post triggered but nothing was sent. {reason}");
+                var noLiveDetected = result.SkippedReasons.Any(r => r.Contains("No live platforms detected.", StringComparison.OrdinalIgnoreCase));
+                if (!noLiveDetected || attempt == maxAttempts)
+                {
+                    _logService.Log($"Auto-post triggered but nothing was sent. {reason}");
+                    return;
+                }
+
+                _logService.Log($"Auto-post delayed (attempt {attempt}/{maxAttempts}): waiting for platform live detection.");
+                await Task.Delay(attemptDelay);
             }
         }
         catch (Exception ex)
