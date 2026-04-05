@@ -202,105 +202,172 @@ public class StreamService
                             {
                                 try
                                 {
+                                    if (_ytService is null || string.IsNullOrWhiteSpace(streamId) || string.IsNullOrWhiteSpace(YTbroadcastId))
+                                    {
+                                        _logger.Log($"[YouTube] Auto-live aborted: invalid state. ytServiceNull={_ytService is null}, streamId='{streamId}', broadcastId='{YTbroadcastId}'.");
+                                        onYouTubeStatusChanged?.Invoke(false);
+                                        return;
+                                    }
+
                                     bool streamActive = false;
-                                    bool broadcastReady = false;
+                                    int transitionAttempts = 0;
+                                    int pollIterations = 0;
+                                    string? lastStreamStatus = null;
+                                    string? lastLifecycleStatus = null;
 
                                     var startTime = DateTime.UtcNow;
-                                    var timeout = TimeSpan.FromMinutes(5.5);
+                                    var timeout = TimeSpan.FromMinutes(8);
                                     _logger.Log("Waiting one minute before polling youtube to go LIVE");
                                     await Task.Delay(TimeSpan.FromMinutes(1));
 
                                     while (DateTime.UtcNow - startTime < timeout)
                                     {
+                                        pollIterations++;
                                         await Task.Delay(TimeSpan.FromSeconds(15));
 
                                         // 🔹 1. Kolla stream status
                                         if (!streamActive)
                                         {
-                                            if (_ytService != null)
+                                            var streamListReq = _ytService.LiveStreams.List("status");
+                                            streamListReq.Id = streamId;
+                                            var streamListResp = await streamListReq.ExecuteAsync();
+
+                                            if (streamListResp.Items == null || streamListResp.Items.Count == 0)
                                             {
-                                                var streamListReq = _ytService.LiveStreams.List("status");
-                                                streamListReq.Id = streamId;
-                                                var streamListResp = await streamListReq.ExecuteAsync();
-                                                var streamStatus = streamListResp.Items.FirstOrDefault()?.Status?.StreamStatus;
-
-                                                _logger.Log($"[YouTube] Stream status: {streamStatus}");
-
-                                                if (streamStatus == "active")
+                                                if (pollIterations == 1 || pollIterations % 4 == 0)
                                                 {
-                                                    streamActive = true;
-                                                    _logger.Log("[YouTube] RTMP-stream is active!");
+                                                    _logger.Log($"[YouTube] Stream status unavailable (empty stream response) for streamId={streamId}. Poll={pollIterations}.");
                                                 }
-                                                else
-                                                {
-                                                    continue; // vänta vidare tills RTMP är aktiv
-                                                }
+                                                continue;
+                                            }
+
+                                            var streamStatus = streamListResp.Items.FirstOrDefault()?.Status?.StreamStatus;
+                                            if (!string.Equals(lastStreamStatus, streamStatus, StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                _logger.Log($"[YouTube] Stream status changed: '{lastStreamStatus ?? "<null>"}' -> '{streamStatus ?? "<null>"}'.");
+                                                lastStreamStatus = streamStatus;
+                                            }
+
+                                            if (string.Equals(streamStatus, "active", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                streamActive = true;
+                                                _logger.Log("[YouTube] RTMP-stream is active!");
+                                            }
+                                            else
+                                            {
+                                                continue; // vänta vidare tills RTMP är aktiv
                                             }
                                         }
 
-                                        // 🔹 2. Kolla broadcast lifecycle
-                                        if (!broadcastReady)
+                                        // 🔹 2. Kolla broadcast lifecycle (always use server state as source of truth)
+                                        var broadcastReq = _ytService.LiveBroadcasts.List("status,contentDetails");
+                                        broadcastReq.Id = YTbroadcastId;
+                                        var broadcastResp = await broadcastReq.ExecuteAsync();
+
+                                        if (broadcastResp.Items == null || broadcastResp.Items.Count == 0)
                                         {
-                                            if (_ytService != null)
+                                            if (pollIterations == 1 || pollIterations % 4 == 0)
                                             {
-                                                var broadcastReq = _ytService.LiveBroadcasts.List("status");
-                                                broadcastReq.Id = YTbroadcastId;
-                                                var broadcastResp = await broadcastReq.ExecuteAsync();
-                                                var lifecycle = broadcastResp.Items.FirstOrDefault()?.Status?.LifeCycleStatus;
-
-                                                _logger.Log($"[YouTube] Broadcast lifecycle: {lifecycle}");
-
-                                                if (lifecycle == "ready")
-                                                {
-                                                    broadcastReady = true;
-                                                    _logger.Log("[YouTube] Broadcast is ready for transition!");
-                                                }
-                                                else
-                                                {
-                                                    continue;
-                                                }
+                                                _logger.Log($"[YouTube] Broadcast lifecycle unavailable (empty broadcast response) for broadcastId={YTbroadcastId}. Poll={pollIterations}.");
                                             }
+                                            continue;
                                         }
 
-                                        // 🔹 3. Försök transitionera till LIVE
-                                        if (streamActive && broadcastReady)
+                                        var broadcast = broadcastResp.Items.FirstOrDefault();
+                                        var lifecycle = broadcast?.Status?.LifeCycleStatus;
+                                        var monitorEnabled = broadcast?.ContentDetails?.MonitorStream?.EnableMonitorStream;
+
+                                        if (!string.Equals(lastLifecycleStatus, lifecycle, StringComparison.OrdinalIgnoreCase))
                                         {
-                                            try
+                                            _logger.Log($"[YouTube] Broadcast lifecycle changed: '{lastLifecycleStatus ?? "<null>"}' -> '{lifecycle ?? "<null>"}', monitorEnabled={monitorEnabled}.");
+                                            lastLifecycleStatus = lifecycle;
+                                        }
+
+                                        if (string.Equals(lifecycle, "live", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            _logger.Log($"✅ YouTube broadcast is LIVE:");
+                                            onYouTubeStatusChanged?.Invoke(true);
+                                            return;
+                                        }
+
+                                        // Avoid transitions until ingest is active.
+                                        if (!streamActive)
+                                        {
+                                            continue;
+                                        }
+
+                                        // 🔹 3. Transition based on current lifecycle and monitor mode
+                                        LiveBroadcastsResource.TransitionRequest.BroadcastStatusEnum? targetStatus = null;
+                                        if (string.Equals(lifecycle, "testing", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            targetStatus = LiveBroadcastsResource.TransitionRequest.BroadcastStatusEnum.Live;
+                                        }
+                                        else if (string.Equals(lifecycle, "ready", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            // Testing is only valid when monitor stream is enabled.
+                                            targetStatus = monitorEnabled == true
+                                                ? LiveBroadcastsResource.TransitionRequest.BroadcastStatusEnum.Testing
+                                                : LiveBroadcastsResource.TransitionRequest.BroadcastStatusEnum.Live;
+                                        }
+                                        else if (string.Equals(lifecycle, "created", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (targetStatus is null)
+                                        {
+                                            continue;
+                                        }
+
+                                        try
+                                        {
+                                            _logger.Log($"[YouTube] Attempting transition to {targetStatus} from lifecycle '{lifecycle ?? "unknown"}'.");
+
+                                            var transitionReq = _ytService.LiveBroadcasts.Transition(
+                                                targetStatus.Value,
+                                                YTbroadcastId,
+                                                "snippet,status"
+                                            );
+                                            var resp = await transitionReq.ExecuteAsync();
+                                            var lifecycleAfterTransition = resp.Status?.LifeCycleStatus ?? "unknown";
+                                            _logger.Log($"[YouTube] Transition to {targetStatus} returned lifecycle: {lifecycleAfterTransition}");
+
+                                            if (string.Equals(lifecycleAfterTransition, "live", StringComparison.OrdinalIgnoreCase))
                                             {
-                                                _logger.Log("[YouTube] Attempting to transition broadcast to LIVE...");
-
-                                                if (_ytService != null)
-                                                {
-
-                                                    var transitionReq = _ytService.LiveBroadcasts.Transition(
-                                                        LiveBroadcastsResource.TransitionRequest.BroadcastStatusEnum.Live,
-                                                        YTbroadcastId,
-                                                        "snippet,status"
-                                                    );
-
-                                                    var resp = await transitionReq.ExecuteAsync();
-
-
-                                                    _logger.Log($"✅ YouTube broadcast transitioned to LIVE: {resp.Snippet.Title}");
-                                                    onYouTubeStatusChanged?.Invoke(true);
-
-                                                    return; // färdigt!
-                                                }
+                                                _logger.Log($"✅ YouTube broadcast transitioned to LIVE: {resp.Snippet?.Title ?? "unknown-title"}");
+                                                onYouTubeStatusChanged?.Invoke(true);
+                                                return;
                                             }
-                                            catch (Google.GoogleApiException gex)
-                                            {
-                                                var reason = gex.Error?.Errors?.FirstOrDefault()?.Reason ?? gex.Message;
-                                                _logger.Log($"⚠️ Transition failed ({reason}). Will retry...");
+                                        }
+                                        catch (Google.GoogleApiException gex)
+                                        {
+                                            transitionAttempts++;
+                                            var reason = gex.Error?.Errors?.FirstOrDefault()?.Reason ?? gex.Message;
+                                            var details = gex.Error?.Errors?.FirstOrDefault()?.Message ?? "no-details";
+                                            _logger.Log($"⚠️ Transition failed attempt {transitionAttempts} (reason={reason}, details={details}).");
 
-                                                // Vänta 10 sekunder och försök igen under timeoutperioden
-                                                await Task.Delay(TimeSpan.FromSeconds(10));
-                                            }
-                                            catch (Exception ex)
+                                            if (reason.Contains("invalidTransition", StringComparison.OrdinalIgnoreCase) ||
+                                                reason.Contains("redundantTransition", StringComparison.OrdinalIgnoreCase))
                                             {
-                                                _logger.Log($"❌ Unexpected error during transition: {ex.Message}");
-                                                await Task.Delay(TimeSpan.FromSeconds(10));
+                                                _logger.Log("[YouTube] Transition state changed on server side. Re-checking lifecycle on next poll.");
+                                                continue;
+                                            }
+
+                                            if (reason.Contains("notFound", StringComparison.OrdinalIgnoreCase) ||
+                                                reason.Contains("liveBroadcastNotFound", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                _logger.Log("[YouTube] Broadcast or stream not found during transition; stopping auto-live retries.");
                                                 onYouTubeStatusChanged?.Invoke(false);
+                                                return;
                                             }
+
+                                            await Task.Delay(TimeSpan.FromSeconds(Math.Min(30, 6 + transitionAttempts * 3)));
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            transitionAttempts++;
+                                            _logger.Log($"❌ Unexpected error during transition attempt {transitionAttempts}: {ex.Message}");
+                                            await Task.Delay(TimeSpan.FromSeconds(Math.Min(30, 6 + transitionAttempts * 3)));
                                         }
                                     }
 

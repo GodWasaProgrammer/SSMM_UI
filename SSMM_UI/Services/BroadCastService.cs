@@ -147,6 +147,7 @@ public class BroadCastService
 
                 // 5. Returnera RTMP-url + streamkey
                 var ingestionInfo = insertedStream.Cdn.IngestionInfo;
+                _logger.Log($"[YouTube] Created broadcastId={insertedBroadcast.Id}, streamId={insertedStream.Id}, ingestionAddress={ingestionInfo.IngestionAddress}");
                 return (ingestionInfo.IngestionAddress, ingestionInfo.StreamName, insertedBroadcast.Id, _youTubeService, insertedStream.Id);
             }
             catch (Google.GoogleApiException ex)
