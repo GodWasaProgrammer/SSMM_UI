@@ -34,7 +34,8 @@ public partial class SelectedServiceViewModel : ObservableObject
             StreamKey = selection.StreamKey;
             IsActive = selection.IsActive; 
 
-            _serviceGroup = selection.ServiceGroup?.Clone();
+            ServiceGroup = selection.ServiceGroup?.Clone();
+            SelectedServer = ResolveSelectedServer(selection);
         }
         SaveCMD = new RelayCommand(Save);
         ShowServers = new RelayCommand(() => ShowServerList = !ShowServerList);
@@ -50,7 +51,7 @@ public partial class SelectedServiceViewModel : ObservableObject
     {
         if(_original == null) return;
         _original.StreamKey = StreamKey;
-        _original.SelectedServer = SelectedServer;
+        _original.SelectedServer = SelectedServer ?? _original.SelectedServer;
         _original.IsActive = IsActive;
 
         // close when saving is done
@@ -58,6 +59,25 @@ public partial class SelectedServiceViewModel : ObservableObject
         {
             Sender = new WeakReference(this)
         });
+    }
+
+    private RtmpServerInfo? ResolveSelectedServer(SelectedService selection)
+    {
+        if (ServiceGroup?.Servers is null || ServiceGroup.Servers.Count == 0)
+        {
+            return selection.SelectedServer;
+        }
+
+        if (selection.SelectedServer is null)
+        {
+            return null;
+        }
+
+        var matchingServer = ServiceGroup.Servers.Find(server =>
+            string.Equals(server.Url, selection.SelectedServer.Url, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(server.ServerName, selection.SelectedServer.ServerName, StringComparison.OrdinalIgnoreCase));
+
+        return matchingServer ?? selection.SelectedServer;
     }
 
     public void Cancel()

@@ -141,7 +141,9 @@ public class BroadCastService
                     }
                 }
                 if (metadata?.TwitchCategory?.Name != null)
+                {
                     await _puppeteer.ChangeGameTitleYoutube(insertedBroadcast.Id, metadata.TwitchCategory.Name);
+                }
 
                 // 5. Returnera RTMP-url + streamkey
                 var ingestionInfo = insertedStream.Cdn.IngestionInfo;
