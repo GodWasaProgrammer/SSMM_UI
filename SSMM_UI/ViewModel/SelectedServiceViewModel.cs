@@ -18,6 +18,7 @@ public partial class SelectedServiceViewModel : ObservableObject
     [ObservableProperty] RtmpServiceGroup? _serviceGroup;
     [ObservableProperty] RtmpServerInfo? _selectedServer;
     [ObservableProperty] bool _showServerList = false;
+    [ObservableProperty] bool _isStreamKeyVisible = false;
     [ObservableProperty] bool isActive;
     readonly ILogService _logService;
     readonly StateService _stateservice;
@@ -47,6 +48,22 @@ public partial class SelectedServiceViewModel : ObservableObject
     public ICommand SaveCMD { get; }
     public ICommand ShowServers { get; }
     public ICommand CancelCMD {  get; }
+
+    public string StreamKeyVisibilityText => IsStreamKeyVisible ? "Hide" : "Show";
+    public bool IsStreamKeyHidden => !IsStreamKeyVisible;
+
+    partial void OnIsStreamKeyVisibleChanged(bool value)
+    {
+        OnPropertyChanged(nameof(StreamKeyVisibilityText));
+        OnPropertyChanged(nameof(IsStreamKeyHidden));
+    }
+
+    [RelayCommand]
+    private void ToggleStreamKeyVisibility()
+    {
+        IsStreamKeyVisible = !IsStreamKeyVisible;
+    }
+
     public void Save()
     {
         if(_original == null) return;

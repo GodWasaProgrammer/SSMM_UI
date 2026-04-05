@@ -28,9 +28,16 @@
 			<TextBlock Grid.Row="1" Grid.Column="0"
 					   Text="StreamKey:"
 					   VerticalAlignment="Center" Margin="0,0,8,0"/>
-			<TextBox Grid.Row="1" Grid.Column="1"
-					 Text="{Binding StreamKey}"
-					 MinWidth="220"/>
+			<Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+				<TextBox Grid.Column="0"
+						 Text="{Binding StreamKey}"
+						 MinWidth="220"
+						 PasswordChar="•"
+						 RevealPassword="{Binding IsStreamKeyVisible}"/>
+				<Button Grid.Column="1"
+						Content="{Binding StreamKeyVisibilityText}"
+						Command="{Binding ToggleStreamKeyVisibilityCommand}"/>
+			</Grid>
 			<CheckBox  Grid.Row="3" Content="Enabled" IsChecked="{Binding IsActive}"/>
 		</Grid>
 		<Button Command="{Binding ShowServers}" Content="Change Server"/>
