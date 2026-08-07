@@ -2,15 +2,16 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Styling;
 using LibVLCSharp.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using SSMM_UI.Interfaces;
 using SSMM_UI.MetaData;
-using SSMM_UI.Services.ChatProviders;
 using SSMM_UI.Poster;
 using SSMM_UI.Puppeteering;
 using SSMM_UI.Services;
+using SSMM_UI.Services.ChatProviders;
+using SSMM_UI.Services.ChatProviders.ChatClients;
+using SSMM_UI.Services.ChatProviders.Resolvers;
 using SSMM_UI.Settings;
 using SSMM_UI.ViewModel;
 using SSMM_UI.Views;
@@ -74,6 +75,8 @@ public partial class App : Application
                 .AddSingleton<SocialPosterLoginViewModel>()
                 .AddSingleton<PurgeTokenViewModel>()
                 .AddSingleton<SocialPoster>()
+                .AddSingleton<KickResolver>()
+                .AddSingleton<KickChatClient>()
                 .AddSingleton<PostMaster>()
                 .BuildServiceProvider();
 

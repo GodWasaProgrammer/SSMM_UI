@@ -17,6 +17,7 @@ namespace SSMM_UI.Services.ChatProviders;
 
 public class YouTubeChatProvider : IChatProvider
 {
+    private static readonly string[] PreferredLifeCycleStatuses = ["live", "testing", "ready", "created"];
     private readonly ILogService _logService;
     private readonly StateService _stateService;
     private YouTubeService? _youtubeService;
@@ -55,7 +56,7 @@ public class YouTubeChatProvider : IChatProvider
             }
         }
 
-        await DisconnectAsync(cancellationToken);
+        await ResetSessionAsync(cancellationToken);
 
         try
         {
@@ -73,7 +74,7 @@ public class YouTubeChatProvider : IChatProvider
             {
                 const string reason = "No active YouTube live broadcast with chat found.";
                 StatusChanged?.Invoke(new ChatProviderStatusDto(Provider, false, reason, ChatProviderRuntimeState.Unavailable));
-                await DisconnectAsync(cancellationToken);
+                await ResetSessionAsync(cancellationToken);
                 return;
             }
 
@@ -87,13 +88,20 @@ public class YouTubeChatProvider : IChatProvider
         }
         catch (Exception ex)
         {
-            _logService.Log($"YouTube chat provider unavailable: {ex.GetType().Name}");
+            _logService.Log($"YouTube chat provider unavailable: {ex.GetType().Name} - {ex.Message}");
             StatusChanged?.Invoke(new ChatProviderStatusDto(Provider, false, "Unable to connect to YouTube chat transport.", ChatProviderRuntimeState.Unavailable));
-            await DisconnectAsync(cancellationToken);
+            await ResetSessionAsync(cancellationToken);
         }
     }
 
     public async Task DisconnectAsync(CancellationToken cancellationToken)
+    {
+        await ResetSessionAsync(cancellationToken);
+        _logService.Log("YouTube chat provider disconnected.");
+        StatusChanged?.Invoke(new ChatProviderStatusDto(Provider, false, "Disconnected", ChatProviderRuntimeState.Disconnected));
+    }
+
+    private async Task ResetSessionAsync(CancellationToken cancellationToken)
     {
         try
         {
@@ -116,9 +124,6 @@ public class YouTubeChatProvider : IChatProvider
             _liveChatId = null;
             _youtubeService?.Dispose();
             _youtubeService = null;
-
-            _logService.Log("YouTube chat provider disconnected.");
-            StatusChanged?.Invoke(new ChatProviderStatusDto(Provider, false, "Disconnected", ChatProviderRuntimeState.Disconnected));
         }
     }
 
@@ -129,21 +134,59 @@ public class YouTubeChatProvider : IChatProvider
             return null;
         }
 
-        var request = _youtubeService.LiveBroadcasts.List("snippet");
+        var request = _youtubeService.LiveBroadcasts.List("snippet,status");
         request.Mine = true;
         request.BroadcastStatus = LiveBroadcastsResource.ListRequest.BroadcastStatusEnum.Active;
         request.MaxResults = 5;
         var response = await request.ExecuteAsync(cancellationToken);
 
-        foreach (var item in response.Items)
+        var activeMatch = SelectBestBroadcastChatId(response);
+        if (!string.IsNullOrWhiteSpace(activeMatch))
         {
-            if (!string.IsNullOrWhiteSpace(item.Snippet?.LiveChatId))
-            {
-                return item.Snippet.LiveChatId;
-            }
+            return activeMatch;
         }
 
+        var fallbackRequest = _youtubeService.LiveBroadcasts.List("snippet,status");
+        fallbackRequest.Mine = true;
+        fallbackRequest.BroadcastStatus = LiveBroadcastsResource.ListRequest.BroadcastStatusEnum.All;
+        fallbackRequest.MaxResults = 25;
+        var fallbackResponse = await fallbackRequest.ExecuteAsync(cancellationToken);
+        var fallbackMatch = SelectBestBroadcastChatId(fallbackResponse);
+        if (!string.IsNullOrWhiteSpace(fallbackMatch))
+        {
+            _logService.Log("YouTube chat provider: resolved live chat from non-active broadcast state.");
+            return fallbackMatch;
+        }
+
+        _logService.Log("YouTube chat provider: no broadcast with liveChatId was discovered for authenticated account.");
+
         return null;
+    }
+
+    private static string? SelectBestBroadcastChatId(Google.Apis.YouTube.v3.Data.LiveBroadcastListResponse response)
+    {
+        if (response.Items is null || response.Items.Count == 0)
+        {
+            return null;
+        }
+
+        var ranked = response.Items
+            .Where(item => !string.IsNullOrWhiteSpace(item.Snippet?.LiveChatId))
+            .Select(item => new
+            {
+                ChatId = item.Snippet!.LiveChatId,
+                LifeCycleStatus = item.Status?.LifeCycleStatus ?? string.Empty
+            })
+            .OrderBy(item =>
+            {
+                var index = Array.FindIndex(
+                    PreferredLifeCycleStatuses,
+                    value => value.Equals(item.LifeCycleStatus, StringComparison.OrdinalIgnoreCase));
+                return index < 0 ? int.MaxValue : index;
+            })
+            .FirstOrDefault();
+
+        return ranked?.ChatId;
     }
 
     private async Task PollLoopAsync(CancellationToken cancellationToken)
