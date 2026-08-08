@@ -1,6 +1,5 @@
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Requests;
 using Google;
+using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using SSMM_UI.DTO;
@@ -127,66 +126,34 @@ public class YouTubeChatProvider : IChatProvider
         }
     }
 
-    private async Task<string?> DiscoverActiveLiveChatIdAsync(CancellationToken cancellationToken)
+    private async Task<string?> DiscoverActiveLiveChatIdAsync(
+    CancellationToken cancellationToken)
     {
         if (_youtubeService is null)
-        {
             return null;
-        }
 
         var request = _youtubeService.LiveBroadcasts.List("snippet,status");
         request.Mine = true;
-        request.BroadcastStatus = LiveBroadcastsResource.ListRequest.BroadcastStatusEnum.Active;
-        request.MaxResults = 5;
+        request.MaxResults = 50;
+
         var response = await request.ExecuteAsync(cancellationToken);
 
-        var activeMatch = SelectBestBroadcastChatId(response);
-        if (!string.IsNullOrWhiteSpace(activeMatch))
-        {
-            return activeMatch;
-        }
-
-        var fallbackRequest = _youtubeService.LiveBroadcasts.List("snippet,status");
-        fallbackRequest.Mine = true;
-        fallbackRequest.BroadcastStatus = LiveBroadcastsResource.ListRequest.BroadcastStatusEnum.All;
-        fallbackRequest.MaxResults = 25;
-        var fallbackResponse = await fallbackRequest.ExecuteAsync(cancellationToken);
-        var fallbackMatch = SelectBestBroadcastChatId(fallbackResponse);
-        if (!string.IsNullOrWhiteSpace(fallbackMatch))
-        {
-            _logService.Log("YouTube chat provider: resolved live chat from non-active broadcast state.");
-            return fallbackMatch;
-        }
-
-        _logService.Log("YouTube chat provider: no broadcast with liveChatId was discovered for authenticated account.");
-
-        return null;
-    }
-
-    private static string? SelectBestBroadcastChatId(Google.Apis.YouTube.v3.Data.LiveBroadcastListResponse response)
-    {
-        if (response.Items is null || response.Items.Count == 0)
-        {
-            return null;
-        }
-
-        var ranked = response.Items
-            .Where(item => !string.IsNullOrWhiteSpace(item.Snippet?.LiveChatId))
-            .Select(item => new
-            {
-                ChatId = item.Snippet!.LiveChatId,
-                LifeCycleStatus = item.Status?.LifeCycleStatus ?? string.Empty
-            })
+        var activeMatch = response.Items?
+            .Where(item =>
+                !string.IsNullOrWhiteSpace(item.Snippet?.LiveChatId) &&
+                item.Status?.LifeCycleStatus is "live" or "testing" or "ready" or "created")
             .OrderBy(item =>
-            {
-                var index = Array.FindIndex(
-                    PreferredLifeCycleStatuses,
-                    value => value.Equals(item.LifeCycleStatus, StringComparison.OrdinalIgnoreCase));
-                return index < 0 ? int.MaxValue : index;
-            })
+                item.Status?.LifeCycleStatus == "live" ? 0 : 1)
+            .Select(item => item.Snippet!.LiveChatId)
             .FirstOrDefault();
 
-        return ranked?.ChatId;
+        if (!string.IsNullOrWhiteSpace(activeMatch))
+            return activeMatch;
+
+        _logService.Log(
+            "YouTube chat provider: no active broadcast with liveChatId found.");
+
+        return null;
     }
 
     private async Task PollLoopAsync(CancellationToken cancellationToken)
