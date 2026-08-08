@@ -12,7 +12,7 @@
 		<ItemsControl ItemsSource="{Binding Outputs}">
 			<ItemsControl.ItemsPanel>
 				<ItemsPanelTemplate>
-					<WrapPanel Orientation="Horizontal" />
+					<StackPanel Orientation="Horizontal" />
 				</ItemsPanelTemplate>
 			</ItemsControl.ItemsPanel>
 

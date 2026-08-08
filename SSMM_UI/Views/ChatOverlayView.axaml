@@ -9,7 +9,8 @@
              d:DesignWidth="600"
              d:DesignHeight="520"
              x:Class="SSMM_UI.Views.ChatOverlayView"
-             x:DataType="vm:ChatOverlayViewModel">
+             x:DataType="vm:ChatOverlayViewModel"
+			 xmlns:behaviors="using:SSMM_UI.Behaviors">
     <Grid RowDefinitions="Auto,*">
         <Border x:Name="OverlayDragHandle"
                 Height="10"
@@ -25,6 +26,7 @@
 
         <Grid Grid.Row="1">
             <ListBox ItemsSource="{Binding Messages}"
+					 behaviors:AutoScrollBehavior.IsEnabled="true"
                      Background="Transparent"
                      BorderThickness="0"
                      IsHitTestVisible="{Binding IsClickThrough, Converter={x:Static conv:BooleanConverters.Not}}">

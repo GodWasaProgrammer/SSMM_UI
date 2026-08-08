@@ -8,7 +8,7 @@
 			 x:DataType="local:OutputViewModel"
              x:Class="SSMM_UI.Views.OutPutView">
 
-	<Grid RowDefinitions="Auto,Auto">
+	<Grid RowDefinitions="Auto,Auto" MinHeight="0">
 
 		<Border Classes="card" Margin="0 0 12 0">
 			<StackPanel Spacing="8">
