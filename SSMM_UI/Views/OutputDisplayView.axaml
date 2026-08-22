@@ -1,27 +1,36 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="450"
-             xmlns:local="clr-namespace:SSMM_UI.ViewModel"
-             xmlns:Views="clr-namespace:SSMM_UI.Views"
-             x:DataType="local:DisplayStreamOutputViewModel"
+             xmlns:views="clr-namespace:SSMM_UI.Views"
+             xmlns:vm="clr-namespace:SSMM_UI.ViewModel"
              x:Class="SSMM_UI.Views.OutputDisplayView"
-             Background="{DynamicResource BackGroundColor}">
-	<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+             x:DataType="vm:DisplayStreamOutputViewModel"
+             MinHeight="0">
+
+	<ScrollViewer HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Disabled"
+                  MinHeight="0">
+
 		<ItemsControl ItemsSource="{Binding Outputs}">
+
 			<ItemsControl.ItemsPanel>
+
 				<ItemsPanelTemplate>
-					<StackPanel Orientation="Horizontal" />
+					<StackPanel Orientation="Horizontal"
+                                Spacing="8"/>
 				</ItemsPanelTemplate>
+
 			</ItemsControl.ItemsPanel>
 
 			<ItemsControl.ItemTemplate>
+
 				<DataTemplate>
-					<Views:OutPutView />
+					<views:OutPutView/>
 				</DataTemplate>
+
 			</ItemsControl.ItemTemplate>
+
 		</ItemsControl>
+
 	</ScrollViewer>
 
 </UserControl>

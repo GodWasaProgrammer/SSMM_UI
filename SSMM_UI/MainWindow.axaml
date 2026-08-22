@@ -1,126 +1,256 @@
-	<Window xmlns="https://github.com/avaloniaui"
-			xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-			x:Class="SSMM_UI.MainWindow"
-			xmlns:local="clr-namespace:SSMM_UI.ViewModel"
-			xmlns:settings="clr-namespace:SSMM_UI.Settings"
-			xmlns:Views="clr-namespace:SSMM_UI.Views"
-			x:DataType="local:MainWindowViewModel"
-			Title="Multistream Manager"
-			Width="1920"
-			Height="1080"
-			MinWidth="1120"
-			MinHeight="700"
-			Background="{DynamicResource AppBackgroundBrush}"
-			Padding="18"
-			Icon="avares://MultistreamManager/Assets/MainIcon.png">
+<Window xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	x:Class="SSMM_UI.MainWindow"
+	xmlns:local="clr-namespace:SSMM_UI.ViewModel"
+	xmlns:settings="clr-namespace:SSMM_UI.Settings"
+	xmlns:Views="clr-namespace:SSMM_UI.Views"
+	x:DataType="local:MainWindowViewModel"
+
+	Title="Multistream Manager"
+	Width="1920"
+	Height="1080"
+	MinWidth="1120"
+	MinHeight="700"
+
+	Background="{DynamicResource AppBackgroundBrush}"
+	Icon="avares://MultistreamManager/Assets/MainIcon.png">
+
 
 	<Grid RowDefinitions="Auto,*">
 
+
+		<!-- =====================================================
+             TOP BAR
+             ===================================================== -->
+
 		<Border Grid.Row="0"
-				Background="{DynamicResource MenuBackgroundBrush}"
-				BorderBrush="{DynamicResource MenuBorderBrush}"
-				BorderThickness="1"
-				CornerRadius="14"
-				Padding="10"
-				Margin="0 0 0 12"
-				BoxShadow="0 10 24 0 #20000000">
-				<Menu>
-					<MenuItem Header="Settings" Command="{Binding OpenSetting}" ToolTip.Tip="Open application preferences." />
-					<MenuItem Header="Get Started" Command="{Binding OpenGettingStarted}" ToolTip.Tip="Open step-by-step onboarding guide." />
-					<MenuItem Header="Chat Overlay" Command="{Binding OpenChatOverlay}" ToolTip.Tip="Open aggregated chat overlay window." />
+                Background="{DynamicResource MenuBackgroundBrush}"
+                BorderBrush="{DynamicResource MenuBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="7"
+                Padding="7 5"
+                Margin="0 0 0 8">
+
+			<Grid ColumnDefinitions="Auto,*,Auto">
+
+				<!-- Main menu -->
+
+				<Menu Grid.Column="1"
+                      HorizontalAlignment="Left"
+                      VerticalAlignment="Center">
+
+					<MenuItem Header="Settings"
+                              Command="{Binding OpenSetting}"
+                              ToolTip.Tip="Open application preferences."/>
+
+					<MenuItem Header="Get Started"
+                              Command="{Binding OpenGettingStarted}"
+                              ToolTip.Tip="Open step-by-step onboarding guide."/>
+
+					<MenuItem Header="Chat Overlay"
+                              Command="{Binding OpenChatOverlay}"
+                              ToolTip.Tip="Open aggregated chat overlay window."/>
+
 					<MenuItem Header="Setup">
-						<MenuItem Header="Youtube" Command="{Binding SetupPuppetYT}" ToolTip.Tip="Prepare YouTube browser profile/session." />
-						<MenuItem Header="Kick" Command="{Binding SetupPuppetKick}" ToolTip.Tip="Prepare Kick browser profile/session."/>
-						<MenuItem Header="Webhooks" Command="{Binding ShowSecretsAndKeys}" ToolTip.Tip="Open webhook and secret management window."/>
+
+						<MenuItem Header="YouTube"
+                                  Command="{Binding SetupPuppetYT}"
+                                  ToolTip.Tip="Prepare YouTube browser profile/session."/>
+
+						<MenuItem Header="Kick"
+                                  Command="{Binding SetupPuppetKick}"
+                                  ToolTip.Tip="Prepare Kick browser profile/session."/>
+
+						<MenuItem Header="Webhooks"
+                                  Command="{Binding ShowSecretsAndKeys}"
+                                  ToolTip.Tip="Open webhook and secret management window."/>
+
 					</MenuItem>
-					<MenuItem Header="About" Command="{Binding OpenAbout}" ToolTip.Tip="Show application and author information." />
+
+					<MenuItem Header="About"
+                              Command="{Binding OpenAbout}"
+                              ToolTip.Tip="Show application and author information."/>
+
 					<MenuItem Header="Tokens">
-						<MenuItem Header="Purge All Auth Tokens" Command="{Binding DeleteAllTokens}" ToolTip.Tip="Delete all stored authentication tokens."/>
-						<MenuItem Header="Purge Specific token" Command="{Binding DeleteSpecifiedTokenCmd}" ToolTip.Tip="Delete one selected provider token."/>
+
+						<MenuItem Header="Purge All Auth Tokens"
+                                  Command="{Binding DeleteAllTokens}"
+                                  ToolTip.Tip="Delete all stored authentication tokens."/>
+
+						<MenuItem Header="Purge Specific Token"
+                                  Command="{Binding DeleteSpecifiedTokenCmd}"
+                                  ToolTip.Tip="Delete one selected provider token."/>
+
 					</MenuItem>
+
 				</Menu>
-		</Border>
 
-		<Border Grid.Row="1"
-				Background="{DynamicResource SurfaceOverlayBrush}"
-				CornerRadius="18"
-				Padding="12"
-				BorderBrush="{DynamicResource CardBorderBrush}"
-				BorderThickness="1"
-				BoxShadow="0 18 34 0 #22000000">
 
-			<Grid RowDefinitions="Auto,*" RowSpacing="12">
-				<Border CornerRadius="12"
-						Padding="14"
-						Background="{DynamicResource PanelOverlayBrush}"
-						BorderBrush="{DynamicResource CardBorderBrush}"
-						BorderThickness="1">
-					<StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-						<TextBlock Text="Streaming Control Center" FontWeight="Bold" FontSize="18"/>
-						<Rectangle Width="1" Height="22" Fill="{DynamicResource CardBorderBrush}" />
-						<TextBlock Text="Theme"
-								   Foreground="{DynamicResource TextSubtleBrush}"
-								   VerticalAlignment="Center"/>
-						<ComboBox Width="180"
-								  Height="34"
-								  ItemsSource="{Binding Themes}"
-								  SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"
-								  ToolTip.Tip="Switch the active UI theme.">
-							<ComboBox.ItemTemplate>
-								<DataTemplate x:DataType="settings:ThemeOption">
-									<TextBlock Text="{Binding Name}" />
-								</DataTemplate>
-							</ComboBox.ItemTemplate>
-						</ComboBox>
-					</StackPanel>
-				</Border>
+				<!-- Theme -->
 
-				<Grid Grid.Row="1" ColumnDefinitions="280,6,*,6,340" ColumnSpacing="0">
+				<StackPanel Grid.Column="2"
+                            Orientation="Horizontal"
+                            Spacing="7"
+                            VerticalAlignment="Center">
 
-					<Views:LeftSideBarView Grid.Column="0"
-										   x:Name="LeftSideBar"
-										   DataContext="{Binding LeftSideBarVM}" />
-					<GridSplitter Grid.Column="1"
-								  Width="6"
-								  ResizeDirection="Columns"
-								  Background="{DynamicResource CardBorderBrush}" />
+					<TextBlock Text="Theme"
+                               FontSize="12"
+                               Foreground="{DynamicResource TextSubtleBrush}"
+                               VerticalAlignment="Center"/>
 
-					<TabControl Grid.Column="2"
-								Background="Transparent"
-								BorderThickness="0">
+					<ComboBox Width="150"
+                              Height="30"
+                              ItemsSource="{Binding Themes}"
+                              SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"
+                              ToolTip.Tip="Switch the active UI theme.">
 
-						<TabItem Header="Stream">
-							<StackPanel Spacing="12">
-								<Views:StreamControlView DataContext="{Binding StreamControlVM}" />
-								<Views:LogView DataContext="{Binding LogVM}" />
-							</StackPanel>
-						</TabItem>
+						<ComboBox.ItemTemplate>
 
-						<TabItem Header="Stream Metadata">
-							<Views:MetaDataView DataContext="{Binding MetaDataVM}" />
-						</TabItem>
+							<DataTemplate x:DataType="settings:ThemeOption">
 
-						<TabItem Header="Social Media AutoPoster">
-							<Views:SocialPosterView DataContext="{Binding SocialPosterVM}" />
-						</TabItem>
+								<TextBlock Text="{Binding Name}"/>
 
-					</TabControl>
-					<GridSplitter Grid.Column="3"
-								  Width="6"
-								  ResizeDirection="Columns"
-								  Background="{DynamicResource CardBorderBrush}" />
-					<ScrollViewer Grid.Column="4"
-								  HorizontalScrollBarVisibility="Disabled"
-								  VerticalScrollBarVisibility="Auto">
-						<Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="10">
-							<Views:LoginView Grid.Row="0" DataContext="{Binding LoginVM}" />
-							<Views:SocialPosterLoginView Grid.Row="1" DataContext="{Binding SocialPosterLoginVM}"/>
-							<Views:InspectionView Grid.Row="2" x:Name="Preview" DataContext="{Binding InspectionVM}"/>
-						</Grid>
-					</ScrollViewer>
+							</DataTemplate>
 
-				</Grid>
+						</ComboBox.ItemTemplate>
+
+					</ComboBox>
+
+				</StackPanel>
+
 			</Grid>
+
 		</Border>
+
+
+		<!-- =====================================================
+             MAIN WORKSPACE
+             ===================================================== -->
+
+		<Grid Grid.Row="1"
+              ColumnDefinitions="270,1,*,1,200">
+
+
+			<!-- =================================================
+                 LEFT SIDEBAR
+                 ================================================= -->
+
+			<Border Grid.Column="0"
+                    Background="{DynamicResource SurfaceOverlayBrush}"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="7"
+                    Padding="8">
+
+				<Views:LeftSideBarView x:Name="LeftSideBar"
+                                       DataContext="{Binding LeftSideBarVM}"/>
+
+			</Border>
+
+
+			<!-- LEFT SEPARATOR -->
+
+			<Border Grid.Column="1"
+                    Background="{DynamicResource CardBorderBrush}"
+                    Margin="4 8"/>
+
+
+			<!-- =================================================
+                 MAIN CONTENT
+                 ================================================= -->
+
+			<Grid Grid.Column="2"
+                  Margin="10 0">
+
+				<TabControl Background="Transparent"
+                            BorderThickness="0"
+                            Padding="0">
+
+					<!-- STREAM -->
+
+					<TabItem Header="Stream">
+
+						<Grid RowDefinitions="*,Auto"
+                              RowSpacing="8">
+
+							<Views:StreamControlView
+                                Grid.Row="0"
+                                DataContext="{Binding StreamControlVM}"/>
+
+							<Views:LogView
+                                Grid.Row="1"
+                                DataContext="{Binding LogVM}"/>
+
+						</Grid>
+
+					</TabItem>
+
+
+					<!-- METADATA -->
+
+					<TabItem Header="Stream Metadata">
+
+						<Views:MetaDataView
+                            DataContext="{Binding MetaDataVM}"/>
+
+					</TabItem>
+
+
+					<!-- SOCIAL -->
+
+					<TabItem Header="Social Media AutoPoster">
+
+						<Views:SocialPosterView
+                            DataContext="{Binding SocialPosterVM}"/>
+
+					</TabItem>
+
+				</TabControl>
+
+			</Grid>
+
+
+			<!-- RIGHT SEPARATOR -->
+
+			<Border Grid.Column="3"
+                    Background="{DynamicResource CardBorderBrush}"
+                    Margin="4 8"/>
+
+
+			<!-- =================================================
+                 RIGHT SIDEBAR
+                 ================================================= -->
+
+			<Border Grid.Column="4"
+                    Background="{DynamicResource SurfaceOverlayBrush}"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="7"
+                    Padding="8">
+
+				<ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto">
+
+					<StackPanel Spacing="8">
+
+						<Views:LoginView
+                            DataContext="{Binding LoginVM}"/>
+
+						<Views:SocialPosterLoginView
+                            DataContext="{Binding SocialPosterLoginVM}"/>
+
+						<Views:InspectionView
+                            x:Name="Preview"
+                            DataContext="{Binding InspectionVM}"/>
+
+					</StackPanel>
+
+				</ScrollViewer>
+
+			</Border>
+
+		</Grid>
+
 	</Grid>
+
 </Window>

@@ -1,25 +1,53 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:views="clr-namespace:SSMM_UI.Views"
              xmlns:vm="clr-namespace:SSMM_UI.ViewModel"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SSMM_UI.Views.LogView"
              x:DataType="vm:LogViewModel"
-             x:Class="SSMM_UI.Views.LogView">
+             MinHeight="0">
 
-	<Border Classes="card">
-		<StackPanel Spacing="8">
-			<TextBlock Text="LOGS" Classes="secondary"/>
-			<ListBox ItemsSource="{Binding LogMessages}" MinHeight="220" MaxHeight="340"
+	<Grid RowDefinitions="Auto,*,*"
+          RowSpacing="8"
+          MinHeight="0">
+
+		<!-- LOG HEADER -->
+
+		<TextBlock Grid.Row="0"
+                   Text="LOGS"
+                   FontSize="12"
+                   FontWeight="SemiBold"
+                   Foreground="{DynamicResource TextSubtleBrush}"/>
+
+
+		<!-- LOG -->
+
+		<Border Grid.Row="1"
+                MinHeight="0"
+                Background="{DynamicResource InputBackgroundBrush}"
+                BorderBrush="{DynamicResource CardBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="7"
+                ClipToBounds="True">
+
+			<ListBox ItemsSource="{Binding LogMessages}"
                      SelectedItem="{Binding SelectedLogItem}"
-                     FontFamily="Consolas, Courier New" BorderThickness="0"
-                     Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-                     Foreground="{DynamicResource AltHigh}" Padding="10"/>
+                     FontFamily="Consolas, 'Courier New'"
+                     FontSize="11"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     Padding="8"
+                     MinHeight="0"/>
 
-			<!-- OUTPUT DISPLAY - den hör hemma här! -->
-			<views:OutputDisplayView DataContext="{Binding StreamOutputVM}"
-                                   Margin="0,10,0,0"/>
-		</StackPanel>
-	</Border>
+		</Border>
+
+
+		<!-- OUTPUTS -->
+
+		<views:OutputDisplayView
+            Grid.Row="2"
+            DataContext="{Binding StreamOutputVM}"
+            MinHeight="0"/>
+
+	</Grid>
+
 </UserControl>
