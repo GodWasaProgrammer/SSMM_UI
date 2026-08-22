@@ -45,6 +45,7 @@
     <PackageReference Include="FFmpeg.AutoGen" Version="7.1.1" />
     <PackageReference Include="Google.Apis.Oauth2.v2" Version="1.68.0.1869" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.70.0.3847" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.83.0" />
     <PackageReference Include="IconPacks.Avalonia" Version="1.2.0" />
     <PackageReference Include="LibVLCSharp" Version="3.9.4" />
     <PackageReference Include="LiveStreamingServerNet" Version="0.33.1" />
@@ -56,7 +57,16 @@
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />
     <PackageReference Include="Websocket.Client" Version="5.5.0" />
     <PackageReference Include="WixToolset.Heat" Version="6.0.2" />
+	  
   </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Google.Protobuf" Version="3.33.0" />
+		<PackageReference Include="Grpc.Tools" Version="2.76.0" PrivateAssets="All" />
+
+		<Protobuf Include="Services\ChatProviders\ChatClients\Protos\youtube_live_chat.proto"
+              GrpcServices="Client" />
+	</ItemGroup>
 
   <ItemGroup>
     <Compile Update="Views\WebhooksView.axaml.cs">
